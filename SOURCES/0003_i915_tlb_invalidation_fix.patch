@@ -1,0 +1,43 @@
+Patch for Rocky 8 based on upstream kernel commits:
+  https://github.com/torvalds/linux/commit/04aa64375f48a5d430b5550d9271f8428883e550
+
+Solves CVE-2022-4139 , RH BZ #2147572
+
+Patch to fix TLB flush issue in Intel i915 display driver
+
+diff --git a/drivers/gpu/drm/i915/gt/intel_gt.c b/drivers/gpu/drm/i915/gt/intel_gt.c
+index ddcdb32..4d57883 100644
+--- a/drivers/gpu/drm/i915/gt/intel_gt.c
++++ b/drivers/gpu/drm/i915/gt/intel_gt.c
+@@ -793,6 +793,11 @@ void intel_gt_invalidate_tlbs(struct intel_gt *gt)
+ 		if (!i915_mmio_reg_offset(rb.reg))
+ 			continue;
+ 
++    if (GRAPHICS_VER(i915) == 12 && (engine->class == VIDEO_DECODE_CLASS ||
++		    engine->class == VIDEO_ENHANCEMENT_CLASS ||
++		    engine->class == COMPUTE_CLASS))
++			rb.bit = _MASKED_BIT_ENABLE(rb.bit);
++
+ 		intel_uncore_write_fw(uncore, rb.reg, rb.bit);
+ 		if (__intel_wait_for_register_fw(uncore,
+ 						 rb.reg, rb.bit, 0,
+diff --git a/drivers/gpu/drm/i915/gt/intel_engine_types.h b/drivers/gpu/drm/i915/gt/intel_engine_types.h
+index e113f93..3cfb1c6 100644
+--- a/drivers/gpu/drm/i915/gt/intel_engine_types.h
++++ b/drivers/gpu/drm/i915/gt/intel_engine_types.h
+@@ -39,12 +39,15 @@
+ #define VCS3_HW		7
+ #define VECS1_HW	12
+ 
++
++
+ /* Gen11+ HW Engine class + instance */
+ #define RENDER_CLASS		0
+ #define VIDEO_DECODE_CLASS	1
+ #define VIDEO_ENHANCEMENT_CLASS	2
+ #define COPY_ENGINE_CLASS	3
+ #define OTHER_CLASS		4
++#define COMPUTE_CLASS           5
+ #define MAX_ENGINE_CLASS	4
+ #define MAX_ENGINE_INSTANCE	3
+ 
