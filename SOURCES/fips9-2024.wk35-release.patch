@@ -1,0 +1,61 @@
+Commits in this patch:
+----------------------
+
+  728d4b7105f0ab513711e105d1b180896dfbe91e
+  net-memcg: avoid stalls when under memory pressure
+
+
+
+net-memcg: avoid stalls when under memory pressure
+
+jira LE-1603
+commit 720ca52bcef225b967a339e0fffb6d0c7e962240
+
+    As Shakeel explains the commit under Fixes had the unintended
+    side-effect of no longer pre-loading the cached memory allowance.
+    Even tho we previously dropped the first packet received when
+    over memory limit - the consecutive ones would get thru by using
+    the cache. The charging was happening in batches of 128kB, so
+    we'd let in 128kB (truesize) worth of packets per one drop.
+
+    After the change we no longer force charge, there will be no
+    cache filling side effects. This causes significant drops and
+    connection stalls for workloads which use a lot of page cache,
+    since we can't reclaim page cache under GFP_NOWAIT.
+
+    Some of the latency can be recovered by improving SACK reneg
+    handling but nowhere near enough to get back to the pre-5.15
+    performance (the application I'm experimenting with still
+    sees 5-10x worst latency).
+
+    Apply the suggested workaround of using GFP_ATOMIC. We will now
+    be more permissive than previously as we'll drop _no_ packets
+    in softirq when under pressure. But I can't think of any good
+    and simple way to address that within networking.
+
+    Link: https://lore.kernel.org/all/20221012163300.795e7b86@kernel.org/
+    Suggested-by: Shakeel Butt <shakeelb@google.com>
+    Fixes: 4b1327be9fe5 ("net-memcg: pass in gfp_t mask to mem_cgroup_charge_skmem()")
+    Acked-by: Shakeel Butt <shakeelb@google.com>
+    Acked-by: Roman Gushchin <roman.gushchin@linux.dev>
+    Link: https://lore.kernel.org/r/20221021160304.1362511-1-kuba@kernel.org
+    Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+    (cherry picked from commit 720ca52bcef225b967a339e0fffb6d0c7e962240)
+
+Signed-off-by: Greg Rose <g.v.rose@ciq.com>
+diff --git a/include/net/sock.h b/include/net/sock.h
+index c815c99b71db..a26f5684084d 100644
+--- a/include/net/sock.h
++++ b/include/net/sock.h
+@@ -2562,7 +2562,7 @@ static inline gfp_t gfp_any(void)
+ 
+ static inline gfp_t gfp_memcg_charge(void)
+ {
+-	return in_softirq() ? GFP_NOWAIT : GFP_KERNEL;
++	return in_softirq() ? GFP_ATOMIC : GFP_KERNEL;
+ }
+ 
+ static inline long sock_rcvtimeo(const struct sock *sk, bool noblock)
+-- 
+2.39.3
+
