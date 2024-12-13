@@ -1,0 +1,53 @@
+From db9d9922ffd1c265f6b80a903b796c7f074a65b2 Mon Sep 17 00:00:00 2001
+From: Ronnie Sahlberg <rsahlberg@ciq.com>
+Date: Fri, 12 Apr 2024 00:33:51 -0400
+Subject: [PATCH] drm/amdgpu: Fix potential fence use-after-free v2
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira SECO-48
+cve CVE-2023-51042
+commit 2e54154b9f27262efd0cb4f903cc7d5ad1fe9628
+
+fence Decrements the reference count before exiting.
+Avoid Race Vulnerabilities for fence use-after-free.
+
+v2 (chk): actually fix the use after free and not just move it.
+
+    Signed-off-by: shanzhulig <shanzhulig@gmail.com>
+    Signed-off-by: Christian König <christian.koenig@amd.com>
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+    (cherry picked from commit 2e54154b9f27262efd0cb4f903cc7d5ad1fe9628)
+Signed-off-by: Ronnie Sahlberg <rsahlberg@ciq.com>
+---
+ drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+index 7e350ea0368b..f6f97f6372c4 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+@@ -1522,15 +1522,15 @@ static int amdgpu_cs_wait_all_fences(struct amdgpu_device *adev,
+ 			continue;
+ 
+ 		r = dma_fence_wait_timeout(fence, true, timeout);
++		if (r > 0 && fence->error)
++			r = fence->error;
++
+ 		dma_fence_put(fence);
+ 		if (r < 0)
+ 			return r;
+ 
+ 		if (r == 0)
+ 			break;
+-
+-		if (fence->error)
+-			return fence->error;
+ 	}
+ 
+ 	memset(wait, 0, sizeof(*wait));
+-- 
+2.43.5
+

@@ -1,0 +1,87 @@
+From 22f5e85199f0c48fee9fa177b77f5ea47a212d57 Mon Sep 17 00:00:00 2001
+From: Ronnie Sahlberg <rsahlberg@ciq.com>
+Date: Fri, 12 Apr 2024 01:18:39 -0400
+Subject: [PATCH] tty: n_gsm: fix the UAF caused by race condition in
+ gsm_cleanup_mux
+
+jira SECO-49
+cve CVE-2023-6546
+commit 3c4f8333b582487a2d1e02171f1465531cde53e3
+upstream-diff we are missing several refactors of this file from
+upstream and while we do not have Fixes commits in this tree, the
+same bug that this addresses "grabbing the dlci pointer before taking
+the mutex" still exists before those two commits.
+In this case it is not that the pointer can be
+NULLed while the second thread waits for the mutex but that the pointer
+could be free()d in the call to gsm_dlci_release() and no longer be
+valid. This could cause memory corruption as we will write to the area
+pointed to.
+
+In commit 9b9c8195f3f0 ("tty: n_gsm: fix UAF in gsm_cleanup_mux"), the UAF
+problem is not completely fixed. There is a race condition in
+gsm_cleanup_mux(), which caused this UAF.
+
+The UAF problem is triggered by the following race:
+task[5046]                     task[5054]
+-----------------------        -----------------------
+gsm_cleanup_mux();
+dlci = gsm->dlci[0];
+mutex_lock(&gsm->mutex);
+                               gsm_cleanup_mux();
+                               dlci = gsm->dlci[0]; //Didn't take the
+lock
+gsm_dlci_release(gsm->dlci[i]);
+gsm->dlci[i] = NULL;
+mutex_unlock(&gsm->mutex);
+                               mutex_lock(&gsm->mutex);
+                               dlci->dead = true; //UAF
+
+Fix it by assigning values after mutex_lock().
+
+    Link: https://syzkaller.appspot.com/text?tag=CrashReport&x=176188b5a80000
+    Cc: stable <stable@kernel.org>
+    Fixes: 9b9c8195f3f0 ("tty: n_gsm: fix UAF in gsm_cleanup_mux")
+    Fixes: aa371e96f05d ("tty: n_gsm: fix restart handling via CLD command")
+    Signed-off-by: Yi Yang <yiyang13@huawei.com>
+    Co-developed-by: Qiumiao Zhang <zhangqiumiao1@huawei.com>
+    Signed-off-by: Qiumiao Zhang <zhangqiumiao1@huawei.com>
+    Link: https://lore.kernel.org/r/20230811031121.153237-1-yiyang13@huawei.com
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+Signed-off-by: Ronnie Sahlberg <rsahlberg@ciq.com>
+---
+ drivers/tty/n_gsm.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/tty/n_gsm.c b/drivers/tty/n_gsm.c
+index a3a47969dec0..6405f39a6da2 100644
+--- a/drivers/tty/n_gsm.c
++++ b/drivers/tty/n_gsm.c
+@@ -2061,7 +2061,7 @@ static int gsm_disconnect(struct gsm_mux *gsm)
+ static void gsm_cleanup_mux(struct gsm_mux *gsm)
+ {
+ 	int i;
+-	struct gsm_dlci *dlci = gsm->dlci[0];
++	struct gsm_dlci *dlci;
+ 	struct gsm_msg *txq, *ntxq;
+ 
+ 	gsm->dead = 1;
+@@ -2079,12 +2079,13 @@ static void gsm_cleanup_mux(struct gsm_mux *gsm)
+ 		return;
+ 
+ 	del_timer_sync(&gsm->t2_timer);
++	/* Free up any link layer users */
++	mutex_lock(&gsm->mutex);
++	dlci = gsm->dlci[0];
+ 	/* Now we are sure T2 has stopped */
+ 	if (dlci)
+ 		dlci->dead = 1;
+ 
+-	/* Free up any link layer users */
+-	mutex_lock(&gsm->mutex);
+ 	for (i = 0; i < NUM_DLCI; i++)
+ 		if (gsm->dlci[i])
+ 			gsm_dlci_release(gsm->dlci[i]);
+-- 
+2.43.5
+
