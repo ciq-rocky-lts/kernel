@@ -3,6 +3,11 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
+%define ciq_patch_version 3
+%define ciq_build_id 1
+%define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
+%define ciq_dist_tag el9_2.92ciq_lts
+
 # Disable LTO in userspace packages.
 %global _lto_cflags %{nil}
 
@@ -167,7 +172,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 284.30.1%{?buildid}%{?dist}.0.2
+%define specrelease 284.30.1%{?buildid}%{?dist}%{ciq_patch_build_str}
 # This defines the kabi tarball version
 %define kabiversion 5.14.0-284.30.1.el9_2
 
@@ -918,6 +923,9 @@ Patch999999: linux-kernel-test.patch
 Patch1000000: debrand-rh-main.patch
 Patch1000001: fips9-2024.wk35-release.patch
 Patch1000002: CVE-2024-1086.patch
+#CIQ Patch Version: 284.30.1%{?buildid}%{?dist}%{ciq_patch_build_str}
+Patch1000003: 0000-nvmet-tcp-Fix-a-possible-UAF-in-queue-intialization-.patch
+Patch1000004: 0001-bpf-Fix-incorrect-verifier-pruning-due-to-missing-re.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1584,6 +1592,8 @@ ApplyOptionalPatch debrand-rh-main.patch
 ApplyOptionalPatch linux-kernel-test.patch
 ApplyOptionalPatch fips9-2024.wk35-release.patch
 ApplyOptionalPatch CVE-2024-1086.patch
+ApplyOptionalPatch 0000-nvmet-tcp-Fix-a-possible-UAF-in-queue-intialization-.patch
+ApplyOptionalPatch 0001-bpf-Fix-incorrect-verifier-pruning-due-to-missing-re.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3463,6 +3473,11 @@ fi
 #
 #
 %changelog
+* Tue Dec 10 2024 Greg Rose <g.v.rose@ciq.com> - None-284.30.1%{?buildid}%{?dist}%{ciq_patch_build_str}
+- [CIQ SPEC] Correct Patch_Version.Build_ID ordering
+- bpf: Fix incorrect verifier pruning due to missing register precision taints (Greg Rose) [ciqres] {CVE-2023-2163}
+- nvmet-tcp: Fix a possible UAF in queue intialization setup (Greg Rose) [ciqres] {CVE-2023-5178}
+
 * Mon Aug 26 2024 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1.0.2
 - net-memcg: avoid stalls when under memory pressure (Greg Rose) [ciqres]
 - netfilter: nf_tables: reject QUEUE/DROP verdict parameters (Jonathan Maple) [ciqres] {CVE-2024-1086}
