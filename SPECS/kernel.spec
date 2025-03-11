@@ -41,7 +41,7 @@
 %define pkgrelease 477.27.1.el8_8
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 2
+%define ciq_patch_version 3
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_8.88ciq_lts
@@ -540,6 +540,17 @@ Patch1004: 0002-perf-Fix-perf_event_validate_size.patch
 Patch1005: 0003-perf-Fix-perf_event_validate_size-lockdep-splat.patch
 Patch1006: 0004-ext4-fix-kernel-BUG-in-ext4_write_inline_data_end.patch
 Patch1007: 0005-tty-n_gsm-fix-the-UAF-caused-by-race-condition-in-gs.patch
+#CIQ Patch Version: 477.27.1.el8_8.88ciq_lts.3.1
+Patch1008: 0000-bpf-Fix-incorrect-verifier-pruning-due-to-missing-re.patch
+Patch1009: 0001-selftests-bpf-Fix-pyperf180-compilation-failure-with.patch
+Patch1010: 0002-Bluetooth-L2CAP-Fix-l2cap_global_chan_by_psm.patch
+Patch1011: 0003-tap-add-missing-verification-for-short-frame.patch
+Patch1012: 0004-net-sched-sch_qfq-Fix-UAF-in-qfq_dequeue.patch
+Patch1013: 0005-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
+Patch1014: 0006-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.patch
+Patch1015: 0007-net-sched-sch_hfsc-Ensure-inner-classes-have-fsc-cur.patch
+Patch1016: 0008-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
+Patch1017: 0009-writeback-avoid-use-after-free-after-removing-device.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1114,6 +1125,16 @@ ApplyOptionalPatch 0002-perf-Fix-perf_event_validate_size.patch
 ApplyOptionalPatch 0003-perf-Fix-perf_event_validate_size-lockdep-splat.patch
 ApplyOptionalPatch 0004-ext4-fix-kernel-BUG-in-ext4_write_inline_data_end.patch
 ApplyOptionalPatch 0005-tty-n_gsm-fix-the-UAF-caused-by-race-condition-in-gs.patch
+ApplyOptionalPatch 0000-bpf-Fix-incorrect-verifier-pruning-due-to-missing-re.patch
+ApplyOptionalPatch 0001-selftests-bpf-Fix-pyperf180-compilation-failure-with.patch
+ApplyOptionalPatch 0002-Bluetooth-L2CAP-Fix-l2cap_global_chan_by_psm.patch
+ApplyOptionalPatch 0003-tap-add-missing-verification-for-short-frame.patch
+ApplyOptionalPatch 0004-net-sched-sch_qfq-Fix-UAF-in-qfq_dequeue.patch
+ApplyOptionalPatch 0005-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
+ApplyOptionalPatch 0006-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.patch
+ApplyOptionalPatch 0007-net-sched-sch_hfsc-Ensure-inner-classes-have-fsc-cur.patch
+ApplyOptionalPatch 0008-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
+ApplyOptionalPatch 0009-writeback-avoid-use-after-free-after-removing-device.patch
 
 
 # END OF PATCH APPLICATIONS
@@ -2720,6 +2741,18 @@ fi
 #
 #
 %changelog
+* Thu Mar 06 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-477.27.1.el8_8.88ciq_lts.3.1
+- writeback: avoid use-after-free after removing device (Pratham Patel) [ciqres] {CVE-2024-0562}
+- net/sched: sch_hfsc: upgrade 'rt' to 'sc' when it becomes a inner curve (Marcin Wcisło) [ciqres] {CVE-2023-4623}
+- net/sched: sch_hfsc: Ensure inner classes have fsc curve (Marcin Wcisło) [ciqres] {CVE-2023-4623}
+- tipc: Fix use-after-free of kernel socket in cleanup_bearer(). (David Gomez) [ciqres] {CVE-2024-56642}
+- media: uvcvideo: Skip parsing frames of type UVC_VS_UNDEFINED in uvc_parse_format (Greg Rose) [ciqres] {CVE-2024-53104}
+- net: sched: sch_qfq: Fix UAF in qfq_dequeue() (Marcin Wcisło) [ciqres] {CVE-2023-4921}
+- tap: add missing verification for short frame (Jeremy Allison) [ciqres] {CVE-2024-41090}
+- Bluetooth: L2CAP: Fix l2cap_global_chan_by_psm (Marcin Wcisło) [ciqres] {CVE-2022-42896}
+- selftests/bpf: Fix pyperf180 compilation failure with clang18 (Brett Mastbergen) [ciqres]
+- bpf: Fix incorrect verifier pruning due to missing register precision taints (Greg Rose) [ciqres] {CVE-2023-2163}
+
 * Tue Dec 10 2024 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-477.27.1.el8_8.88ciq_lts.2.1
 - tty: n_gsm: fix the UAF caused by race condition in gsm_cleanup_mux (Ronnie Sahlberg) [ciqres] {CVE-2023-6546}
 - ext4: fix kernel BUG in 'ext4_write_inline_data_end()' (Ronnie Sahlberg) [ciqres] {CVE-2021-33631}
