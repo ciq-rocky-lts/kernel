@@ -44,8 +44,14 @@
 %define rpmversion 4.18.0
 %define pkgrelease 372.32.1.el8_6
 
+# CIQ Versioning for the kernel
+%define ciq_patch_version 8
+%define ciq_build_id 1
+%define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
+%define ciq_dist_tag .el8_6.86ciq_lts
+
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 372.32.1%{?dist}.0.7
+%define specrelease 372.32.1%{?buildid}%{?dist}%{?ciq_patch_build_str}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -652,6 +658,15 @@ Patch0100: CVE-2023-2163.patch
 Patch0101: CVE-2023-3567.patch
 Patch0102: CVE-2023-3268.patch
 Patch0103: CVE-2024-42703.patch
+#CIQ Patch Version: 372.32.1.el8_6.86ciq_lts.8.1
+Patch0104: 0000-selftests-bpf-Fix-pyperf180-compilation-failure-with.patch
+Patch0105: 0001-selftests-bpf-Limit-unroll_count-for-pyperf600-test.patch
+Patch0106: 0002-Bluetooth-L2CAP-Fix-l2cap_global_chan_by_psm.patch
+Patch0107: 0003-tap-add-missing-verification-for-short-frame.patch
+Patch0108: 0004-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.patch
+Patch0109: 0005-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
+Patch0110: 0006-net-sched-sch_qfq-Fix-UAF-in-qfq_dequeue.patch
+Patch0111: 0007-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1313,6 +1328,14 @@ ApplyOptionalPatch CVE-2023-2163.patch
 ApplyOptionalPatch CVE-2023-3567.patch
 ApplyOptionalPatch CVE-2023-3268.patch
 ApplyOptionalPatch CVE-2024-42703.patch
+ApplyOptionalPatch 0000-selftests-bpf-Fix-pyperf180-compilation-failure-with.patch
+ApplyOptionalPatch 0001-selftests-bpf-Limit-unroll_count-for-pyperf600-test.patch
+ApplyOptionalPatch 0002-Bluetooth-L2CAP-Fix-l2cap_global_chan_by_psm.patch
+ApplyOptionalPatch 0003-tap-add-missing-verification-for-short-frame.patch
+ApplyOptionalPatch 0004-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.patch
+ApplyOptionalPatch 0005-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
+ApplyOptionalPatch 0006-net-sched-sch_qfq-Fix-UAF-in-qfq_dequeue.patch
+ApplyOptionalPatch 0007-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
 
 
 # CIQ LTS patches:
@@ -2866,6 +2889,19 @@ fi
 #
 #
 %changelog
+* Tue Mar 04 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.8.1
+- net/sched: sch_hfsc: upgrade 'rt' to 'sc' when it becomes a inner curve (Marcin Wcisło) [ciqres] {CVE-2023-4623}
+- net: sched: sch_qfq: Fix UAF in qfq_dequeue() (Marcin Wcisło) [ciqres] {CVE-2023-4921}
+- media: uvcvideo: Skip parsing frames of type UVC_VS_UNDEFINED in uvc_parse_format (Brett Mastbergen) [ciqres] {CVE-2024-53104}
+- tipc: Fix use-after-free of kernel socket in cleanup_bearer(). (David Gomez) [ciqres] {CVE-2024-56642}
+- tap: add missing verification for short frame (Jeremy Allison) [ciqres] {CVE-2024-41090}
+- Bluetooth: L2CAP: Fix l2cap_global_chan_by_psm (Luiz Augusto von Dentz) [ciqres] {CVE-2022-42896}
+- selftests/bpf: Limit unroll_count for pyperf600 test (Brett Mastbergen) [ciqres]
+- selftests/bpf: Fix pyperf180 compilation failure with clang18 (Brett Mastbergen) [ciqres]
+
+* Fri Feb 07 2025 David Gomez <dgomez@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.7.1
+- [CIQ SPEC] Add CIQ LTS versioning numbers
+
 * Wed Aug 21 2024 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1.0.7
 * REVERT: sctp: leave the err path free in sctp_stream_init to sctp_stream_free (David Gomez) [ciqres] {CVE-2023-2177} 
 
