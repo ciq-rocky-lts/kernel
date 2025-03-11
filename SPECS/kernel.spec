@@ -3,10 +3,10 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 3
+%define ciq_patch_version 4
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
-%define ciq_dist_tag el9_2.92ciq_lts
+%define ciq_dist_tag .el9_2.92ciq_lts
 
 # Disable LTO in userspace packages.
 %global _lto_cflags %{nil}
@@ -172,7 +172,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 284.30.1%{?buildid}%{?dist}%{ciq_patch_build_str}
+%define specrelease 284.30.1%{?buildid}%{?dist}%{?ciq_patch_build_str}
 # This defines the kabi tarball version
 %define kabiversion 5.14.0-284.30.1.el9_2
 
@@ -923,9 +923,19 @@ Patch999999: linux-kernel-test.patch
 Patch1000000: debrand-rh-main.patch
 Patch1000001: fips9-2024.wk35-release.patch
 Patch1000002: CVE-2024-1086.patch
-#CIQ Patch Version: 284.30.1%{?buildid}%{?dist}%{ciq_patch_build_str}
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.3.1
 Patch1000003: 0000-nvmet-tcp-Fix-a-possible-UAF-in-queue-intialization-.patch
 Patch1000004: 0001-bpf-Fix-incorrect-verifier-pruning-due-to-missing-re.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.4.1
+Patch1000005: 0000-selftests-bpf-Fix-pyperf180-compilation-failure-with.patch
+Patch1000006: 0001-bpf-Fix-partial-dynptr-stack-slot-reads-writes.patch
+Patch1000007: 0002-Bluetooth-L2CAP-Fix-l2cap_global_chan_by_psm.patch
+Patch1000008: 0003-netfilter-nft_set_pipapo-skip-inactive-elements-duri.patch
+Patch1000009: 0004-tap-add-missing-verification-for-short-frame.patch
+Patch1000010: 0005-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
+Patch1000011: 0006-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.patch
+Patch1000012: 0007-net-sched-sch_hfsc-Ensure-inner-classes-have-fsc-cur.patch
+Patch1000013: 0008-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1594,6 +1604,15 @@ ApplyOptionalPatch fips9-2024.wk35-release.patch
 ApplyOptionalPatch CVE-2024-1086.patch
 ApplyOptionalPatch 0000-nvmet-tcp-Fix-a-possible-UAF-in-queue-intialization-.patch
 ApplyOptionalPatch 0001-bpf-Fix-incorrect-verifier-pruning-due-to-missing-re.patch
+ApplyOptionalPatch 0000-selftests-bpf-Fix-pyperf180-compilation-failure-with.patch
+ApplyOptionalPatch 0001-bpf-Fix-partial-dynptr-stack-slot-reads-writes.patch
+ApplyOptionalPatch 0002-Bluetooth-L2CAP-Fix-l2cap_global_chan_by_psm.patch
+ApplyOptionalPatch 0003-netfilter-nft_set_pipapo-skip-inactive-elements-duri.patch
+ApplyOptionalPatch 0004-tap-add-missing-verification-for-short-frame.patch
+ApplyOptionalPatch 0005-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
+ApplyOptionalPatch 0006-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.patch
+ApplyOptionalPatch 0007-net-sched-sch_hfsc-Ensure-inner-classes-have-fsc-cur.patch
+ApplyOptionalPatch 0008-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3473,7 +3492,18 @@ fi
 #
 #
 %changelog
-* Tue Dec 10 2024 Greg Rose <g.v.rose@ciq.com> - None-284.30.1%{?buildid}%{?dist}%{ciq_patch_build_str}
+* Tue Mar 04 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.4.1
+- net/sched: sch_hfsc: upgrade 'rt' to 'sc' when it becomes a inner curve (Marcin Wcisło) [ciqres] {CVE-2023-4623}
+- net/sched: sch_hfsc: Ensure inner classes have fsc curve (Marcin Wcisło) [ciqres] {CVE-2023-4623}
+- tipc: Fix use-after-free of kernel socket in cleanup_bearer(). (David Gomez) [ciqres] {CVE-2024-56642}
+- media: uvcvideo: Skip parsing frames of type UVC_VS_UNDEFINED in uvc_parse_format (Brett Mastbergen) [ciqres] {CVE-2024-53104}
+- tap: add missing verification for short frame (Jeremy Allison) [ciqres] {CVE-2024-41090}
+- netfilter: nft_set_pipapo: skip inactive elements during set walk (Brett Mastbergen) [ciqres] {CVE-2023-6817}
+- Bluetooth: L2CAP: Fix l2cap_global_chan_by_psm (Marcin Wcisło) [ciqres] {CVE-2022-42896}
+- bpf: Fix partial dynptr stack slot reads/writes (Brett Mastbergen) [ciqres] {CVE-2023-39191}
+- selftests/bpf: Fix pyperf180 compilation failure with clang18 (Brett Mastbergen) [ciqres]
+
+* Tue Dec 10 2024 Greg Rose <g.v.rose@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.3.1
 - [CIQ SPEC] Correct Patch_Version.Build_ID ordering
 - bpf: Fix incorrect verifier pruning due to missing register precision taints (Greg Rose) [ciqres] {CVE-2023-2163}
 - nvmet-tcp: Fix a possible UAF in queue intialization setup (Greg Rose) [ciqres] {CVE-2023-5178}

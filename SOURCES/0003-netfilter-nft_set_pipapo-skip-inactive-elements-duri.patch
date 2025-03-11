@@ -1,0 +1,43 @@
+From 5d4bb57cb9e7703d390f48a0d8dc69cbd45a5804 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Mon, 3 Feb 2025 10:38:16 -0500
+Subject: [PATCH] netfilter: nft_set_pipapo: skip inactive elements during set
+ walk
+
+jira VULN-6810
+cve CVE-2023-6817
+commit-author Florian Westphal <fw@strlen.de>
+commit 317eb9685095678f2c9f5a8189de698c5354316a
+upstream-diff Additional newline because this kernel has not removed
+              the nft_set_elem_expired call yet
+
+Otherwise set elements can be deactivated twice which will cause a crash.
+
+	Reported-by: Xingyuan Mo <hdthky0@gmail.com>
+Fixes: 3c4287f62044 ("nf_tables: Add set type for arbitrary concatenation of ranges")
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 317eb9685095678f2c9f5a8189de698c5354316a)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/netfilter/nft_set_pipapo.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/net/netfilter/nft_set_pipapo.c b/net/netfilter/nft_set_pipapo.c
+index 4b79df6ecf6c..11e24f56bf80 100644
+--- a/net/netfilter/nft_set_pipapo.c
++++ b/net/netfilter/nft_set_pipapo.c
+@@ -1981,6 +1981,10 @@ static void nft_pipapo_walk(const struct nft_ctx *ctx, struct nft_set *set,
+ 			goto cont;
+ 
+ 		e = f->mt[r].e;
++
++		if (!nft_set_elem_active(&e->ext, iter->genmask))
++			goto cont;
++
+ 		if (nft_set_elem_expired(&e->ext))
+ 			goto cont;
+ 
+-- 
+2.43.5
+
