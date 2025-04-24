@@ -1,0 +1,54 @@
+From 5c2898933316009361cda4f6d1eb5133b9a1fe2a Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Sat, 22 Mar 2025 16:58:57 -0400
+Subject: [PATCH] mptcp: cope racing subflow creation in mptcp_rcv_space_adjust
+
+jira VULN-46443
+cve CVE-2024-53122
+commit-author Paolo Abeni <pabeni@redhat.com>
+commit ce7356ae35943cc6494cc692e62d51a734062b7d
+upstream-diff A recent change f410cbe introduced in v6.10-rc1
+              tcp annotate data-races around tp->window_clamp
+	      had some fuzz due to the WRITE_ONCE and keep the
+	      original code.  No conflicts in merged in code.
+
+Additional active subflows - i.e. created by the in kernel path
+manager - are included into the subflow list before starting the
+3whs.
+
+A racing recvmsg() spooling data received on an already established
+subflow would unconditionally call tcp_cleanup_rbuf() on all the
+current subflows, potentially hitting a divide by zero error on
+the newly created ones.
+
+Explicitly check that the subflow is in a suitable state before
+invoking tcp_cleanup_rbuf().
+
+Fixes: c76c6956566f ("mptcp: call tcp_cleanup_rbuf on subflows")
+	Signed-off-by: Paolo Abeni <pabeni@redhat.com>
+	Reviewed-by: Matthieu Baerts (NGI0) <matttbe@kernel.org>
+Link: https://patch.msgid.link/02374660836e1b52afc91966b7535c8c5f7bafb0.1731060874.git.pabeni@redhat.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit ce7356ae35943cc6494cc692e62d51a734062b7d)
+	Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ net/mptcp/protocol.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/net/mptcp/protocol.c b/net/mptcp/protocol.c
+index 1850045d790f..cf9b7fab4461 100644
+--- a/net/mptcp/protocol.c
++++ b/net/mptcp/protocol.c
+@@ -1980,7 +1980,8 @@ static void mptcp_rcv_space_adjust(struct mptcp_sock *msk, int copied)
+ 				slow = lock_sock_fast(ssk);
+ 				WRITE_ONCE(ssk->sk_rcvbuf, rcvbuf);
+ 				tcp_sk(ssk)->window_clamp = window_clamp;
+-				tcp_cleanup_rbuf(ssk, 1);
++				if (tcp_can_send_ack(ssk))
++					tcp_cleanup_rbuf(ssk, 1);
+ 				unlock_sock_fast(ssk, slow);
+ 			}
+ 		}
+-- 
+2.43.5
+

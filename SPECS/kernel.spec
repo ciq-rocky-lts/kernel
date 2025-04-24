@@ -3,8 +3,8 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 4
-%define ciq_build_id 1
+%define ciq_patch_version 5
+%define ciq_build_id 2
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2.92ciq_lts
 
@@ -910,7 +910,11 @@ Source8001: ciq_sb_kernel.crt
 Source8002: ciq_sb_ca.der
 Source8003: ciq_sb_kernel_driver.der
 Source8004: ciq_sb_kernel_kpatch.der
-
+Source8005: ciq_sb_kernel_aarch64.crt
+Source8006: ciq_sb_kernel_driver_aarch64.der
+Source8007: ciq_sb_kernel_kpatch_aarch64.der
+Source8008: ciq_sb_uki.crt
+Source8009: ciq_sb_uki_aarch64.crt
 ## Patches needed for building this package
 
 %if !%{nopatches}
@@ -936,18 +940,42 @@ Patch1000010: 0005-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
 Patch1000011: 0006-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.patch
 Patch1000012: 0007-net-sched-sch_hfsc-Ensure-inner-classes-have-fsc-cur.patch
 Patch1000013: 0008-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.5.1
+Patch1000014: 0000-can-bcm-Fix-UAF-in-bcm_proc_show.patch
+Patch1000015: 0001-net-sched-cls_fw-No-longer-copy-tcf_result-on-update.patch
+Patch1000016: 0002-net-sched-cls_u32-No-longer-copy-tcf_result-on-updat.patch
+Patch1000017: 0003-net-fix-__dst_negative_advice-race.patch
+Patch1000018: 0004-tun-add-missing-verification-for-short-frame.patch
+Patch1000019: 0005-mptcp-cope-racing-subflow-creation-in-mptcp_rcv_spac.patch
+Patch1000020: 0006-mptcp-fix-TCP-options-overflow.patch
+Patch1000021: 0007-mptcp-Fix-data-stream-corruption-in-the-address-anno.patch
 
 # END OF PATCH DEFINITIONS
 
 # CIQ SecureBoot definitions and macro includes:
 # (these may override definitions from the top of this spec)
+
+# CIQ kernel secureboot macros
 %include %{SOURCE8000}
+
 %define secureboot_ca_0  %{SOURCE8002}
-%define secureboot_key_0 %{SOURCE8001}
+
 %define pesign_name_0  ciq_sb_kernel
+%define secureboot_key_0 %{SOURCE8001}
 %define driver_cert %{SOURCE8003}
 %define kpatch_cert %{SOURCE8004}
+%define secureboot_key_uki_0 %{SOURCE8008}
+%define UKI_secureboot_name ciq_sb_uki
 
+
+%ifarch aarch64
+%define pesign_name_0 ciq_sb_kernel_aarch64
+%define secureboot_key_0 %{SOURCE8005}
+%define driver_cert %{SOURCE8006}
+%define kpatch_cert %{SOURCE8007}
+%define secureboot_key_uki_0 %{SOURCE8009}
+%define UKI_secureboot_name ciq_sb_uki_aarch64
+%endif
 
 %description
 The kernel meta package
@@ -1613,6 +1641,14 @@ ApplyOptionalPatch 0005-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.pat
 ApplyOptionalPatch 0006-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.patch
 ApplyOptionalPatch 0007-net-sched-sch_hfsc-Ensure-inner-classes-have-fsc-cur.patch
 ApplyOptionalPatch 0008-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
+ApplyOptionalPatch 0000-can-bcm-Fix-UAF-in-bcm_proc_show.patch
+ApplyOptionalPatch 0001-net-sched-cls_fw-No-longer-copy-tcf_result-on-update.patch
+ApplyOptionalPatch 0002-net-sched-cls_u32-No-longer-copy-tcf_result-on-updat.patch
+ApplyOptionalPatch 0003-net-fix-__dst_negative_advice-race.patch
+ApplyOptionalPatch 0004-tun-add-missing-verification-for-short-frame.patch
+ApplyOptionalPatch 0005-mptcp-cope-racing-subflow-creation-in-mptcp_rcv_spac.patch
+ApplyOptionalPatch 0006-mptcp-fix-TCP-options-overflow.patch
+ApplyOptionalPatch 0007-mptcp-Fix-data-stream-corruption-in-the-address-anno.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1689,9 +1725,9 @@ done
 %if %{signkernel}%{signmodules}
 openssl x509 -inform der -in %{SOURCE100} -out rheldup3.pem
 openssl x509 -inform der -in %{SOURCE101} -out rhelkpatch1.pem
-openssl x509 -inform der -in %{SOURCE8003} -out ciqdup1.pem
-openssl x509 -inform der -in %{SOURCE8004} -out ciqkpatch1.pem
-cat rheldup3.pem rhelkpatch1.pem ciqdup1.pem ciqkpatch1.pem > ../certs/rhel.pem
+openssl x509 -inform der -in %{driver_cert} -out ciqdup1.pem
+openssl x509 -inform der -in %{kpatch_cert} -out ciqkpatch1.pem
+cat ciqdup1.pem ciqkpatch1.pem rheldup3.pem rhelkpatch1.pem > ../certs/rhel.pem
 %if %{signkernel}
 %ifarch s390x ppc64le
 openssl x509 -inform der -in %{secureboot_ca_0} -out secureboot.pem
@@ -2342,8 +2378,12 @@ BuildKernel() {
 	   $KernelUnifiedImage
 
 %if %{signkernel}
-
+%if 0%{?pe_uki_signing_certkeyslot:1}
+    %pesign_uki -s -i $KernelUnifiedImage -o $KernelUnifiedImage.signed -a %{secureboot_ca_0} -c %{secureboot_key_uki_0} -n %{UKI_secureboot_name}
+%else
     %pesign -s -i $KernelUnifiedImage -o $KernelUnifiedImage.signed -a %{secureboot_ca_0} -c %{secureboot_key_0} -n %{pesign_name_0}
+%endif
+
     if [ ! -s $KernelUnifiedImage.signed ]; then
       echo "pesigning failed"
       exit 1
@@ -3492,6 +3532,19 @@ fi
 #
 #
 %changelog
+* Tue Apr 22 2025 Skip Grube <sgrube@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.5.2
+- Secureboot changes:  Signing for UKI and aarch64 architecture
+
+* Thu Apr 17 2025 CIQ Developer <dev@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.5.1
+- mptcp: Fix data stream corruption in the address announcement (Jonathan Maple) [ciqres]
+- mptcp: fix TCP options overflow. (Jonathan Maple) [ciqres] {CVE-2024-57882}
+- mptcp: cope racing subflow creation in mptcp_rcv_space_adjust (Jonathan Maple) [ciqres] {CVE-2024-53122}
+- tun: add missing verification for short frame (Jeremy Allison) [ciqres] {CVE-2024-41091}
+- net: fix __dst_negative_advice() race (Brett Mastbergen) [ciqres] {CVE-2024-36971}
+- net/sched: cls_u32: No longer copy tcf_result on update to avoid use-after-free (Marcin Wcisło) [ciqres] {CVE-2023-4208}
+- net/sched: cls_fw: No longer copy tcf_result on update to avoid use-after-free (Marcin Wcisło) [ciqres] {CVE-2023-4207}
+- can: bcm: Fix UAF in bcm_proc_show() (Pratham Patel) [ciqres] {CVE-2023-52922}
+
 * Tue Mar 04 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.4.1
 - net/sched: sch_hfsc: upgrade 'rt' to 'sc' when it becomes a inner curve (Marcin Wcisło) [ciqres] {CVE-2023-4623}
 - net/sched: sch_hfsc: Ensure inner classes have fsc curve (Marcin Wcisło) [ciqres] {CVE-2023-4623}
