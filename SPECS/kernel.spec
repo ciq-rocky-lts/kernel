@@ -41,7 +41,7 @@
 %define pkgrelease 477.27.1.el8_8
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 3
+%define ciq_patch_version 4
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_8.88ciq_lts
@@ -551,6 +551,14 @@ Patch1014: 0006-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.patch
 Patch1015: 0007-net-sched-sch_hfsc-Ensure-inner-classes-have-fsc-cur.patch
 Patch1016: 0008-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
 Patch1017: 0009-writeback-avoid-use-after-free-after-removing-device.patch
+#CIQ Patch Version: 477.27.1.el8_8.88ciq_lts.4.1
+Patch1018: 0000-net-sched-cls_route-No-longer-copy-tcf_result-on-upd.patch
+Patch1019: 0001-net-sched-cls_fw-No-longer-copy-tcf_result-on-update.patch
+Patch1020: 0002-net-sched-cls_u32-No-longer-copy-tcf_result-on-updat.patch
+Patch1021: 0003-net-fix-__dst_negative_advice-race.patch
+Patch1022: 0004-tun-add-missing-verification-for-short-frame.patch
+Patch1023: 0005-can-bcm-Fix-UAF-in-bcm_proc_show.patch
+Patch1024: 0006-netfilter-nft_set_pipapo-skip-inactive-elements-duri.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1135,6 +1143,13 @@ ApplyOptionalPatch 0006-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.pat
 ApplyOptionalPatch 0007-net-sched-sch_hfsc-Ensure-inner-classes-have-fsc-cur.patch
 ApplyOptionalPatch 0008-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
 ApplyOptionalPatch 0009-writeback-avoid-use-after-free-after-removing-device.patch
+ApplyOptionalPatch 0000-net-sched-cls_route-No-longer-copy-tcf_result-on-upd.patch
+ApplyOptionalPatch 0001-net-sched-cls_fw-No-longer-copy-tcf_result-on-update.patch
+ApplyOptionalPatch 0002-net-sched-cls_u32-No-longer-copy-tcf_result-on-updat.patch
+ApplyOptionalPatch 0003-net-fix-__dst_negative_advice-race.patch
+ApplyOptionalPatch 0004-tun-add-missing-verification-for-short-frame.patch
+ApplyOptionalPatch 0005-can-bcm-Fix-UAF-in-bcm_proc_show.patch
+ApplyOptionalPatch 0006-netfilter-nft_set_pipapo-skip-inactive-elements-duri.patch
 
 
 # END OF PATCH APPLICATIONS
@@ -2741,6 +2756,15 @@ fi
 #
 #
 %changelog
+* Wed Apr 16 2025 CIQ Developer <dev@ciq.com> - 4.18.0-477.27.1.el8_8.88ciq_lts.4.1
+- netfilter: nft_set_pipapo: skip inactive elements during set walk (Brett Mastbergen) [ciqres] {CVE-2023-6817}
+- can: bcm: Fix UAF in bcm_proc_show() (Pratham Patel) [ciqres] {CVE-2023-52922}
+- tun: add missing verification for short frame (Jeremy Allison) [ciqres] {CVE-2024-41091}
+- net: fix __dst_negative_advice() race (Brett Mastbergen) [ciqres] {CVE-2024-36971}
+- net/sched: cls_u32: No longer copy tcf_result on update to avoid use-after-free (Marcin Wcisło) [ciqres] {CVE-2023-4208}
+- net/sched: cls_fw: No longer copy tcf_result on update to avoid use-after-free (Marcin Wcisło) [ciqres] {CVE-2023-4207}
+- net/sched: cls_route: No longer copy tcf_result on update to avoid use-after-free (Marcin Wcisło) [ciqres] {CVE-2023-4206}
+
 * Thu Mar 06 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-477.27.1.el8_8.88ciq_lts.3.1
 - writeback: avoid use-after-free after removing device (Pratham Patel) [ciqres] {CVE-2024-0562}
 - net/sched: sch_hfsc: upgrade 'rt' to 'sc' when it becomes a inner curve (Marcin Wcisło) [ciqres] {CVE-2023-4623}
