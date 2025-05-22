@@ -45,8 +45,8 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 8
-%define ciq_build_id 1
+%define ciq_patch_version 9
+%define ciq_build_id 2
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6.86ciq_lts
 
@@ -549,6 +549,9 @@ Source8001: ciq_sb_kernel.crt
 Source8002: ciq_sb_ca.der
 Source8003: ciq_sb_kernel_driver.der
 Source8004: ciq_sb_kernel_kpatch.der
+Source8005: ciq_sb_kernel_aarch64.crt
+Source8006: ciq_sb_kernel_driver_aarch64.der
+Source8007: ciq_sb_kernel_kpatch_aarch64.der
 
 ## Patches needed for building this package
 
@@ -667,18 +670,36 @@ Patch0108: 0004-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.patch
 Patch0109: 0005-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
 Patch0110: 0006-net-sched-sch_qfq-Fix-UAF-in-qfq_dequeue.patch
 Patch0111: 0007-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
+#CIQ Patch Version: 372.32.1.el8_6.86ciq_lts.9.1
+Patch0112: 0000-writeback-avoid-use-after-free-after-removing-device.patch
+Patch0113: 0001-net-fix-__dst_negative_advice-race.patch
+Patch0114: 0002-tun-add-missing-verification-for-short-frame.patch
+Patch0115: 0003-can-bcm-Fix-UAF-in-bcm_proc_show.patch
+Patch0116: 0004-netfilter-nft_set_pipapo-skip-inactive-elements-duri.patch
+Patch0117: 0005-arm64-cacheinfo-Avoid-out-of-bounds-write-to-cachein.patch
 
 # END OF PATCH DEFINITIONS
 
-
 # CIQ SecureBoot definitions and macro includes:
+
+# CIQ kernel secureboot macros
 %include %{SOURCE8000}
-%define secureboot_ca_0  %{SOURCE8002}
+
+%define secureboot_ca_0 %{SOURCE8002}
+
+%ifarch x86_64
+%define pesign_name_0 ciq_sb_kernel
 %define secureboot_key_0 %{SOURCE8001}
-%define pesign_name_0  ciq_sb_kernel
 %define driver_cert %{SOURCE8003}
 %define kpatch_cert %{SOURCE8004}
+%endif
 
+%ifarch aarch64
+%define pesign_name_0 ciq_sb_kernel_aarch64
+%define secureboot_key_0 %{SOURCE8005}
+%define driver_cert %{SOURCE8006}
+%define kpatch_cert %{SOURCE8007}
+%endif
 
 BuildRoot:             %{_tmppath}/%{name}-%{KVERREL}-root
 
@@ -1336,6 +1357,12 @@ ApplyOptionalPatch 0004-tipc-Fix-use-after-free-of-kernel-socket-in-cleanup_.pat
 ApplyOptionalPatch 0005-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
 ApplyOptionalPatch 0006-net-sched-sch_qfq-Fix-UAF-in-qfq_dequeue.patch
 ApplyOptionalPatch 0007-net-sched-sch_hfsc-upgrade-rt-to-sc-when-it-becomes-.patch
+ApplyOptionalPatch 0000-writeback-avoid-use-after-free-after-removing-device.patch
+ApplyOptionalPatch 0001-net-fix-__dst_negative_advice-race.patch
+ApplyOptionalPatch 0002-tun-add-missing-verification-for-short-frame.patch
+ApplyOptionalPatch 0003-can-bcm-Fix-UAF-in-bcm_proc_show.patch
+ApplyOptionalPatch 0004-netfilter-nft_set_pipapo-skip-inactive-elements-duri.patch
+ApplyOptionalPatch 0005-arm64-cacheinfo-Avoid-out-of-bounds-write-to-cachein.patch
 
 
 # CIQ LTS patches:
@@ -1410,9 +1437,15 @@ done
 %if %{signkernel}%{signmodules}
 openssl x509 -inform der -in %{SOURCE90002} -out rockydup1.pem
 openssl x509 -inform der -in %{SOURCE90003} -out rockykpatch1.pem
-openssl x509 -inform der -in %{SOURCE8003} -out ciqdup1.pem
-openssl x509 -inform der -in %{SOURCE8004} -out ciqkpatch1.pem
+
+%if 0%{?driver_cert:1}
+openssl x509 -inform der -in %{driver_cert} -out ciqdup1.pem
+openssl x509 -inform der -in %{kpatch_cert} -out ciqkpatch1.pem
 cat rockydup1.pem rockykpatch1.pem ciqdup1.pem ciqkpatch1.pem > ../certs/rocky.pem
+%else
+cat rockydup1.pem rockykpatch1.pem > ../certs/rocky.pem
+%endif
+
 %ifarch ppc64le
 openssl x509 -inform der -in %{secureboot_ca_0} -out secureboot.pem
 cat secureboot.pem >> ../certs/rocky.pem
@@ -2889,6 +2922,17 @@ fi
 #
 #
 %changelog
+* Fri May 02 2025 Michael L. Young <myoung@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.9.2
+- [CIQ SPEC] Add secure boot signing certs for aarch64 builds
+
+* Tue Apr 29 2025 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.9.1
+- arm64: cacheinfo: Avoid out-of-bounds write to cacheinfo array (Marcin Wcisło) [ciqres] {CVE-2025-21785}
+- netfilter: nft_set_pipapo: skip inactive elements during set walk (Brett Mastbergen) [ciqres] {CVE-2023-6817}
+- can: bcm: Fix UAF in bcm_proc_show() (Pratham Patel) [ciqres] {CVE-2023-52922}
+- tun: add missing verification for short frame (Jeremy Allison) [ciqres] {CVE-2024-41091}
+- net: fix __dst_negative_advice() race (Brett Mastbergen) [ciqres] {CVE-2024-36971}
+- writeback: avoid use-after-free after removing device (Pratham Patel) [ciqres] {CVE-2024-0562}
+
 * Tue Mar 04 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.8.1
 - net/sched: sch_hfsc: upgrade 'rt' to 'sc' when it becomes a inner curve (Marcin Wcisło) [ciqres] {CVE-2023-4623}
 - net: sched: sch_qfq: Fix UAF in qfq_dequeue() (Marcin Wcisło) [ciqres] {CVE-2023-4921}
