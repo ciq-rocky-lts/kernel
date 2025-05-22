@@ -41,8 +41,8 @@
 %define pkgrelease 477.27.1.el8_8
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 4
-%define ciq_build_id 1
+%define ciq_patch_version 5
+%define ciq_build_id 2
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_8.88ciq_lts
 
@@ -526,6 +526,9 @@ Source8001: ciq_sb_kernel.crt
 Source8002: ciq_sb_ca.der
 Source8003: ciq_sb_kernel_driver.der
 Source8004: ciq_sb_kernel_kpatch.der
+Source8005: ciq_sb_kernel_aarch64.crt
+Source8006: ciq_sb_kernel_driver_aarch64.der
+Source8007: ciq_sb_kernel_kpatch_aarch64.der
 
 ## Patches needed for building this package
 
@@ -559,18 +562,36 @@ Patch1021: 0003-net-fix-__dst_negative_advice-race.patch
 Patch1022: 0004-tun-add-missing-verification-for-short-frame.patch
 Patch1023: 0005-can-bcm-Fix-UAF-in-bcm_proc_show.patch
 Patch1024: 0006-netfilter-nft_set_pipapo-skip-inactive-elements-duri.patch
+#CIQ Patch Version: 477.27.1.el8_8.88ciq_lts.5.1
+Patch1025: 0000-nvme-tcp-fix-potential-memory-corruption-in-nvme_tcp.patch
+Patch1026: 0001-vsock-Keep-the-binding-until-socket-destruction.patch
+Patch1027: 0002-vsock-Orphan-socket-after-transport-release.patch
+Patch1028: 0003-arm64-cacheinfo-Avoid-out-of-bounds-write-to-cachein.patch
+Patch1029: 0004-net-tun-fix-bugs-for-oversize-packet-when-napi-frags.patch
 
 # END OF PATCH DEFINITIONS
 
 
 # CIQ SecureBoot definitions and macro includes:
+
+# CIQ kernel secureboot macros
 %include %{SOURCE8000}
-%define secureboot_ca_0  %{SOURCE8002}
+
+%define secureboot_ca_0 %{SOURCE8002}
+
+%ifarch x86_64
+%define pesign_name_0 ciq_sb_kernel
 %define secureboot_key_0 %{SOURCE8001}
-%define pesign_name_0  ciq_sb_kernel
 %define driver_cert %{SOURCE8003}
 %define kpatch_cert %{SOURCE8004}
+%endif
 
+%ifarch aarch64
+%define pesign_name_0 ciq_sb_kernel_aarch64
+%define secureboot_key_0 %{SOURCE8005}
+%define driver_cert %{SOURCE8006}
+%define kpatch_cert %{SOURCE8007}
+%endif
 
 BuildRoot:             %{_tmppath}/%{name}-%{KVERREL}-root
 
@@ -1150,6 +1171,11 @@ ApplyOptionalPatch 0003-net-fix-__dst_negative_advice-race.patch
 ApplyOptionalPatch 0004-tun-add-missing-verification-for-short-frame.patch
 ApplyOptionalPatch 0005-can-bcm-Fix-UAF-in-bcm_proc_show.patch
 ApplyOptionalPatch 0006-netfilter-nft_set_pipapo-skip-inactive-elements-duri.patch
+ApplyOptionalPatch 0000-nvme-tcp-fix-potential-memory-corruption-in-nvme_tcp.patch
+ApplyOptionalPatch 0001-vsock-Keep-the-binding-until-socket-destruction.patch
+ApplyOptionalPatch 0002-vsock-Orphan-socket-after-transport-release.patch
+ApplyOptionalPatch 0003-arm64-cacheinfo-Avoid-out-of-bounds-write-to-cachein.patch
+ApplyOptionalPatch 0004-net-tun-fix-bugs-for-oversize-packet-when-napi-frags.patch
 
 
 # END OF PATCH APPLICATIONS
@@ -1220,17 +1246,23 @@ done
 # Add DUP and kpatch certificates to system trusted keys for RHEL
 # (Including CIQ kpatch / driver certs)
 %if %{signkernel}%{signmodules}
-openssl x509 -inform der -in %{SOURCE100} -out rheldup3.pem
-openssl x509 -inform der -in %{SOURCE101} -out rhelkpatch1.pem
+openssl x509 -inform der -in %{SOURCE100} -out rockydup1.pem
+openssl x509 -inform der -in %{SOURCE101} -out rockykpatch1.pem
+
+%if 0%{?driver_cert:1}
 openssl x509 -inform der -in %{SOURCE8003} -out ciqdup1.pem
 openssl x509 -inform der -in %{SOURCE8004} -out ciqkpatch1.pem
-cat rheldup3.pem rhelkpatch1.pem ciqdup1.pem ciqkpatch1.pem > ../certs/rhel.pem
+cat rockydup1.pem rockykpatch1.pem ciqdup1.pem ciqkpatch1.pem > ../certs/rocky.pem
+%else
+cat rockydup1.pem rockykpatch1.pem > ../certs/rocky.pem
+%endif
+
 %ifarch ppc64le
 openssl x509 -inform pem -in %{secureboot_ca_0} -out secureboot.pem
-cat secureboot.pem >> ../certs/rhel.pem
+cat secureboot.pem >> ../certs/rocky.pem
 %endif
 for i in *.config; do
-  sed -i 's@CONFIG_SYSTEM_TRUSTED_KEYS=""@CONFIG_SYSTEM_TRUSTED_KEYS="certs/rhel.pem"@' $i
+  sed -i 's@CONFIG_SYSTEM_TRUSTED_KEYS=""@CONFIG_SYSTEM_TRUSTED_KEYS="certs/rocky.pem"@' $i
 done
 %endif
 
@@ -2756,6 +2788,16 @@ fi
 #
 #
 %changelog
+* Fri May 16 2025 Michael L. Young <myoung@ciq.com> - 4.18.0-477.27.1.el8_8.88ciq_lts.5.2
+- [CIQ SPEC] Add CIQ secure boot signing certs for aarch64 builds
+
+* Fri May 16 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-477.27.1.el8_8.88ciq_lts.5.1
+- net: tun: fix bugs for oversize packet when napi frags enabled (Marcin Wcisło) [ciqres] {CVE-2023-3812}
+- arm64: cacheinfo: Avoid out-of-bounds write to cacheinfo array (Marcin Wcisło) [ciqres] {CVE-2025-21785}
+- vsock: Orphan socket after transport release (Brett Mastbergen) [ciqres] {CVE-2025-21756}
+- vsock: Keep the binding until socket destruction (Brett Mastbergen) [ciqres] {CVE-2025-21756}
+- nvme-tcp: fix potential memory corruption in nvme_tcp_recv_pdu() (Marcin Wcisło) [ciqres] {CVE-2025-21927}
+
 * Wed Apr 16 2025 CIQ Developer <dev@ciq.com> - 4.18.0-477.27.1.el8_8.88ciq_lts.4.1
 - netfilter: nft_set_pipapo: skip inactive elements during set walk (Brett Mastbergen) [ciqres] {CVE-2023-6817}
 - can: bcm: Fix UAF in bcm_proc_show() (Pratham Patel) [ciqres] {CVE-2023-52922}
