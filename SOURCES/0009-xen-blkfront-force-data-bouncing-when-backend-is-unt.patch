@@ -1,0 +1,196 @@
+From 59212ca9ca9168167dd4b7dc1c93c77e64aa2a3f Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Thu, 1 May 2025 16:40:08 -0400
+Subject: [PATCH] xen/blkfront: force data bouncing when backend is untrusted
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-1039
+cve CVE-2022-33742
+commit-author Roger Pau Monne <roger.pau@citrix.com>
+commit 2400617da7eebf9167d71a46122828bc479d64c9
+upstream-diff There were a lot of merge conflicts with this change
+              as the upstream version of this file has had a lot of
+              development.  Still there is pretty much a 1:1 mapping
+              of the changes against the upstream and the changes
+              against this kernel
+
+Split the current bounce buffering logic used with persistent grants
+into it's own option, and allow enabling it independently of
+persistent grants.  This allows to reuse the same code paths to
+perform the bounce buffering required to avoid leaking contiguous data
+in shared pages not part of the request fragments.
+
+Reporting whether the backend is to be trusted can be done using a
+module parameter, or from the xenstore frontend path as set by the
+toolstack when adding the device.
+
+This is CVE-2022-33742, part of XSA-403.
+
+	Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
+	Reviewed-by: Juergen Gross <jgross@suse.com>
+	Signed-off-by: Juergen Gross <jgross@suse.com>
+(cherry picked from commit 2400617da7eebf9167d71a46122828bc479d64c9)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ drivers/block/xen-blkfront.c | 41 ++++++++++++++++++++++++------------
+ 1 file changed, 27 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/block/xen-blkfront.c b/drivers/block/xen-blkfront.c
+index f1223dc30bd2..eb68946df5b1 100644
+--- a/drivers/block/xen-blkfront.c
++++ b/drivers/block/xen-blkfront.c
+@@ -98,6 +98,10 @@ static unsigned int xen_blkif_max_segments = 32;
+ module_param_named(max, xen_blkif_max_segments, int, S_IRUGO);
+ MODULE_PARM_DESC(max, "Maximum amount of segments in indirect requests (default is 32)");
+ 
++static bool __read_mostly xen_blkif_trusted = true;
++module_param_named(trusted, xen_blkif_trusted, bool, 0644);
++MODULE_PARM_DESC(trusted, "Is the backend trusted");
++
+ #define BLK_RING_SIZE __CONST_RING_SIZE(blkif, PAGE_SIZE)
+ 
+ /*
+@@ -131,6 +135,7 @@ struct blkfront_info
+ 	unsigned int discard_granularity;
+ 	unsigned int discard_alignment;
+ 	unsigned int feature_persistent:1;
++	unsigned int bounce:1;
+ 	unsigned int max_indirect_segments;
+ 	int is_ready;
+ };
+@@ -200,7 +205,7 @@ static int fill_grant_buffer(struct blkfront_info *info, int num)
+ 		if (!gnt_list_entry)
+ 			goto out_of_memory;
+ 
+-		if (info->feature_persistent) {
++		if (info->bounce) {
+ 			granted_page = alloc_page(GFP_NOIO | __GFP_ZERO);
+ 			if (!granted_page) {
+ 				kfree(gnt_list_entry);
+@@ -220,7 +225,7 @@ out_of_memory:
+ 	list_for_each_entry_safe(gnt_list_entry, n,
+ 	                         &info->grants, node) {
+ 		list_del(&gnt_list_entry->node);
+-		if (info->feature_persistent)
++		if (info->bounce)
+ 			__free_page(pfn_to_page(gnt_list_entry->pfn));
+ 		kfree(gnt_list_entry);
+ 		i--;
+@@ -249,7 +254,7 @@ static struct grant *get_grant(grant_ref_t *gref_head,
+ 	/* Assign a gref to this page */
+ 	gnt_list_entry->gref = gnttab_claim_grant_reference(gref_head);
+ 	BUG_ON(gnt_list_entry->gref == -ENOSPC);
+-	if (!info->feature_persistent) {
++	if (!info->bounce) {
+ 		BUG_ON(!pfn);
+ 		gnt_list_entry->pfn = pfn;
+ 	}
+@@ -506,7 +511,7 @@ static int blkif_queue_request(struct request *req)
+ 					kunmap_atomic(segments);
+ 
+ 				n = i / SEGS_PER_INDIRECT_FRAME;
+-				if (!info->feature_persistent) {
++				if (!info->bounce) {
+ 					struct page *indirect_page;
+ 
+ 					/* Fetch a pre-allocated page to use for indirect grefs */
+@@ -527,7 +532,7 @@ static int blkif_queue_request(struct request *req)
+ 
+ 			info->shadow[id].grants_used[i] = gnt_list_entry;
+ 
+-			if (rq_data_dir(req) && info->feature_persistent) {
++			if (rq_data_dir(req) && info->bounce) {
+ 				char *bvec_data;
+ 				void *shared_data;
+ 
+@@ -711,11 +716,12 @@ static const char *flush_info(unsigned int feature_flush)
+ static void xlvbd_flush(struct blkfront_info *info)
+ {
+ 	blk_queue_flush(info->rq, info->feature_flush);
+-	pr_info("blkfront: %s: %s %s %s %s %s\n",
++	pr_info("blkfront: %s: %s %s %s %s %s %s %s\n",
+ 		info->gd->disk_name, flush_info(info->feature_flush),
+ 		"persistent grants:", info->feature_persistent ?
+ 		"enabled;" : "disabled;", "indirect descriptors:",
+-		info->max_indirect_segments ? "enabled;" : "disabled;");
++		info->max_indirect_segments ? "enabled;" : "disabled;",
++		"bounce buffer:", info->bounce ? "enabled" : "disabled;");
+ }
+ 
+ static int xen_translate_vdev(int vdevice, int *minor, unsigned int *offset)
+@@ -962,7 +968,7 @@ static void blkif_free(struct blkfront_info *info, int suspend)
+ 				                          0, 0UL);
+ 				info->persistent_gnts_c--;
+ 			}
+-			if (info->feature_persistent)
++			if (info->bounce)
+ 				__free_page(pfn_to_page(persistent_gnt->pfn));
+ 			kfree(persistent_gnt);
+ 		}
+@@ -976,7 +982,7 @@ static void blkif_free(struct blkfront_info *info, int suspend)
+ 	if (!list_empty(&info->indirect_pages)) {
+ 		struct page *indirect_page, *n;
+ 
+-		BUG_ON(info->feature_persistent);
++		BUG_ON(info->bounce);
+ 		list_for_each_entry_safe(indirect_page, n, &info->indirect_pages, lru) {
+ 			list_del(&indirect_page->lru);
+ 			__free_page(indirect_page);
+@@ -997,7 +1003,7 @@ static void blkif_free(struct blkfront_info *info, int suspend)
+ 		for (j = 0; j < segs; j++) {
+ 			persistent_gnt = info->shadow[i].grants_used[j];
+ 			gnttab_end_foreign_access(persistent_gnt->gref, 0, 0UL);
+-			if (info->feature_persistent)
++			if (info->bounce)
+ 				__free_page(pfn_to_page(persistent_gnt->pfn));
+ 			kfree(persistent_gnt);
+ 		}
+@@ -1057,7 +1063,7 @@ static void blkif_completion(struct blk_shadow *s, struct blkfront_info *info,
+ 	nseg = s->req.operation == BLKIF_OP_INDIRECT ?
+ 		s->req.u.indirect.nr_segments : s->req.u.rw.nr_segments;
+ 
+-	if (bret->operation == BLKIF_OP_READ && info->feature_persistent) {
++	if (bret->operation == BLKIF_OP_READ && info->bounce) {
+ 		/*
+ 		 * Copy the data received from the backend into the bvec.
+ 		 * Since bv_offset can be different than 0, and bv_len different
+@@ -1293,6 +1299,10 @@ static int talk_to_blkback(struct xenbus_device *dev,
+ 	struct xenbus_transaction xbt;
+ 	int err;
+ 
++	/* Check if backend is trusted. */
++	info->bounce = !xen_blkif_trusted ||
++		       !xenbus_read_unsigned(dev->nodename, "trusted", 1);
++
+ 	/* Create shared ring, alloc event channel. */
+ 	err = setup_blkring(dev, info);
+ 	if (err)
+@@ -1697,10 +1707,10 @@ static int blkfront_setup_indirect(struct blkfront_info *info)
+ 	if (err)
+ 		goto out_of_memory;
+ 
+-	if (!info->feature_persistent && info->max_indirect_segments) {
++	if (!info->bounce && info->max_indirect_segments) {
+ 		/*
+-		 * We are using indirect descriptors but not persistent
+-		 * grants, we need to allocate a set of pages that can be
++		 * We are using indirect descriptors but don't have a bounce
++		 * buffer, we need to allocate a set of pages that can be
+ 		 * used for mapping indirect grefs
+ 		 */
+ 		int num = INDIRECT_GREFS(segs) * BLK_RING_SIZE;
+@@ -1864,6 +1874,9 @@ static void blkfront_connect(struct blkfront_info *info)
+ 	else
+ 		info->feature_persistent = persistent;
+ 
++	if (info->feature_persistent)
++		info->bounce = true;
++
+ 	err = blkfront_setup_indirect(info);
+ 	if (err) {
+ 		xenbus_dev_fatal(info->xbdev, err, "setup_indirect at %s",
+-- 
+2.43.5
+

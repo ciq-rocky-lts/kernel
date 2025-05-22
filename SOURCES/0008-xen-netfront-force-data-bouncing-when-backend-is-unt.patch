@@ -1,0 +1,144 @@
+From d7e67a8d6c5f4a7488fa4cb178b57c6bcd2f5c63 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Thu, 1 May 2025 16:02:10 -0400
+Subject: [PATCH] xen/netfront: force data bouncing when backend is untrusted
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-1439
+cve CVE-2022-33741
+commit-author Roger Pau Monne <roger.pau@citrix.com>
+commit 4491001c2e0fa69efbb748c96ec96b100a5cdb7e
+upstream-diff Some merge conflicts were fixed up mainly due
+              to the fact that this version of the driver does
+              not have xdp support.  The content of the added code
+              itself is identical to the upstream change with the
+              exception of PAGE_SIZE replacing XEN_PAGE_SIZE.  In
+              this kernel there is no difference between the two
+              where as in future kernels the ARM kernel page size
+              might be 64k while the xen page size stays 4k.
+
+Bounce all data on the skbs to be transmitted into zeroed pages if the
+backend is untrusted. This avoids leaking data present in the pages
+shared with the backend but not part of the skb fragments.  This
+requires introducing a new helper in order to allocate skbs with a
+size multiple of XEN_PAGE_SIZE so we don't leak contiguous data on the
+granted pages.
+
+Reporting whether the backend is to be trusted can be done using a
+module parameter, or from the xenstore frontend path as set by the
+toolstack when adding the device.
+
+This is CVE-2022-33741, part of XSA-403.
+
+	Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
+	Reviewed-by: Juergen Gross <jgross@suse.com>
+	Signed-off-by: Juergen Gross <jgross@suse.com>
+(cherry picked from commit 4491001c2e0fa69efbb748c96ec96b100a5cdb7e)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ drivers/net/xen-netfront.c | 51 ++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 49 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/xen-netfront.c b/drivers/net/xen-netfront.c
+index 99d690fbcf58..9b9296705d35 100644
+--- a/drivers/net/xen-netfront.c
++++ b/drivers/net/xen-netfront.c
+@@ -64,6 +64,10 @@ module_param_named(max_queues, xennet_max_queues, uint, 0644);
+ MODULE_PARM_DESC(max_queues,
+ 		 "Maximum number of queues per virtual interface");
+ 
++static bool __read_mostly xennet_trusted = true;
++module_param_named(trusted, xennet_trusted, bool, 0644);
++MODULE_PARM_DESC(trusted, "Is the backend trusted");
++
+ static const struct ethtool_ops xennet_ethtool_ops;
+ 
+ struct netfront_cb {
+@@ -160,6 +164,9 @@ struct netfront_info {
+ 	struct netfront_stats __percpu *rx_stats;
+ 	struct netfront_stats __percpu *tx_stats;
+ 
++	/* Should skbs be bounced into a zeroed buffer? */
++	bool bounce;
++
+ 	atomic_t rx_gso_checksum_fixup;
+ };
+ 
+@@ -516,6 +523,34 @@ static u16 xennet_select_queue(struct net_device *dev, struct sk_buff *skb,
+ 	return queue_idx;
+ }
+ 
++struct sk_buff *bounce_skb(const struct sk_buff *skb)
++{
++	unsigned int headerlen = skb_headroom(skb);
++	/* Align size to allocate full pages and avoid contiguous data leaks */
++	unsigned int size = ALIGN(skb_end_offset(skb) + skb->data_len,
++				  PAGE_SIZE);
++	struct sk_buff *n = alloc_skb(size, GFP_ATOMIC | __GFP_ZERO);
++
++	if (!n)
++		return NULL;
++
++	if (!IS_ALIGNED((uintptr_t)n->head, PAGE_SIZE)) {
++		WARN_ONCE(1, "misaligned skb allocated\n");
++		kfree_skb(n);
++		return NULL;
++	}
++
++	/* Set the data pointer */
++	skb_reserve(n, headerlen);
++	/* Set the tail pointer and length */
++	skb_put(n, skb->len);
++
++	BUG_ON(skb_copy_bits(skb, -headerlen, n->head, headerlen + skb->len));
++
++	skb_copy_header(n, skb);
++	return n;
++}
++
+ static int xennet_start_xmit(struct sk_buff *skb, struct net_device *dev)
+ {
+ 	struct netfront_info *np = netdev_priv(dev);
+@@ -563,9 +598,13 @@ static int xennet_start_xmit(struct sk_buff *skb, struct net_device *dev)
+ 
+ 	/* The first req should be at least ETH_HLEN size or the packet will be
+ 	 * dropped by netback.
++	 *
++	 * If the backend is not trusted bounce all data to zeroed pages to
++	 * avoid exposing contiguous data on the granted page not belonging to
++	 * the skb.
+ 	 */
+-	if (unlikely(PAGE_SIZE - offset < ETH_HLEN)) {
+-		nskb = skb_copy(skb, GFP_ATOMIC);
++	if (np->bounce || unlikely(PAGE_SIZE - offset < ETH_HLEN)) {
++		nskb = bounce_skb(skb);
+ 		if (!nskb)
+ 			goto drop;
+ 		dev_kfree_skb_any(skb);
+@@ -1774,6 +1813,10 @@ static int talk_to_netback(struct xenbus_device *dev,
+ 
+ 	info->netdev->irq = 0;
+ 
++	/* Check if backend is trusted. */
++	info->bounce = !xennet_trusted ||
++		       !xenbus_read_unsigned(dev->nodename, "trusted", 1);
++
+ 	/* Check if backend supports multiple queues */
+ 	err = xenbus_scanf(XBT_NIL, info->xbdev->otherend,
+ 			   "multi-queue-max-queues", "%u", &max_queues);
+@@ -1936,6 +1979,10 @@ static int xennet_connect(struct net_device *dev)
+ 	if (err)
+ 		return err;
+ 
++	if (np->bounce)
++		dev_info(&np->xbdev->dev,
++			 "bouncing transmitted data to zeroed pages\n");
++
+ 	/* talk_to_netback() sets the correct number of queues */
+ 	num_queues = dev->real_num_tx_queues;
+ 
+-- 
+2.43.5
+

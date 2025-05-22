@@ -1,0 +1,109 @@
+From 7957c90bd3c2f2bb2a962824d447faa46a0442de Mon Sep 17 00:00:00 2001
+From: Pratham Patel <ppatel@ciq.com>
+Date: Fri, 11 Apr 2025 19:40:58 +0530
+Subject: [PATCH] can: fix CAN BCM build with CONFIG_PROC_FS disabled
+
+jira VULN-36330
+cve-prereq CVE-2023-52922
+commit-author Oliver Hartkopp <socketcan@hartkopp.net>
+commit c2701b370e6b4d0022043691b5ac7adad015e4fc
+upstream-diff This commit also has a dependency on 384317ef4187
+("can: network namespace support for CAN_BCM protocol") but that does
+not affect the CVE-2023-52922 and is therefore not necessary.
+
+The introduced namespace support moved the BCM variables for procfs into a
+per-net data structure. This leads to a build failure with disabled procfs:
+
+on x86_64:
+
+when CONFIG_PROC_FS is not enabled:
+
+../net/can/bcm.c:1541:14: error: 'struct netns_can' has no member named 'bcmproc_dir'
+../net/can/bcm.c:1601:14: error: 'struct netns_can' has no member named 'bcmproc_dir'
+../net/can/bcm.c:1696:11: error: 'struct netns_can' has no member named 'bcmproc_dir'
+../net/can/bcm.c:1707:15: error: 'struct netns_can' has no member named 'bcmproc_dir'
+
+http://marc.info/?l=linux-can&m=149321842526524&w=2
+
+	Reported-by: Randy Dunlap <rdunlap@infradead.org>
+	Signed-off-by: Oliver Hartkopp <socketcan@hartkopp.net>
+	Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+(cherry picked from commit c2701b370e6b4d0022043691b5ac7adad015e4fc)
+	Signed-off-by: Pratham Patel <ppatel@ciq.com>
+---
+ net/can/bcm.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/net/can/bcm.c b/net/can/bcm.c
+index 41daac885939..97daa2eb55e2 100644
+--- a/net/can/bcm.c
++++ b/net/can/bcm.c
+@@ -140,6 +140,7 @@ static inline struct bcm_sock *bcm_sk(const struct sock *sk)
+ /*
+  * procfs functions
+  */
++#if IS_ENABLED(CONFIG_PROC_FS)
+ static char *bcm_proc_getifname(char *result, int ifindex)
+ {
+ 	struct net_device *dev;
+@@ -236,6 +237,7 @@ static const struct file_operations bcm_proc_fops = {
+ 	.llseek		= seq_lseek,
+ 	.release	= single_release,
+ };
++#endif /* CONFIG_PROC_FS */
+ 
+ /*
+  * bcm_can_tx - send the (next) CAN frame to the appropriate CAN interface
+@@ -1474,9 +1476,11 @@ static int bcm_release(struct socket *sock)
+ 		bcm_remove_op(op);
+ 	}
+ 
++#if IS_ENABLED(CONFIG_PROC_FS)
+ 	/* remove procfs entry */
+ 	if (proc_dir && bo->bcm_proc_read)
+ 		remove_proc_entry(bo->procname, proc_dir);
++#endif /* CONFIG_PROC_FS */
+ 
+ 	/* remove device reference */
+ 	if (bo->bound) {
+@@ -1534,6 +1538,7 @@ static int bcm_connect(struct socket *sock, struct sockaddr *uaddr, int len,
+ 		bo->ifindex = 0;
+ 	}
+ 
++#if IS_ENABLED(CONFIG_PROC_FS)
+ 	if (proc_dir) {
+ 		/* unique socket address as filename */
+ 		sprintf(bo->procname, "%lu", sock_i_ino(sk));
+@@ -1545,6 +1550,7 @@ static int bcm_connect(struct socket *sock, struct sockaddr *uaddr, int len,
+ 			goto fail;
+ 		}
+ 	}
++#endif /* CONFIG_PROC_FS */
+ 
+ 	bo->bound = 1;
+ 
+@@ -1636,8 +1642,10 @@ static int __init bcm_module_init(void)
+ 		return err;
+ 	}
+ 
++#if IS_ENABLED(CONFIG_PROC_FS)
+ 	/* create /proc/net/can-bcm directory */
+ 	proc_dir = proc_mkdir("can-bcm", init_net.proc_net);
++#endif /* CONFIG_PROC_FS */
+ 	return 0;
+ }
+ 
+@@ -1645,8 +1653,10 @@ static void __exit bcm_module_exit(void)
+ {
+ 	can_proto_unregister(&bcm_can_proto);
+ 
++#if IS_ENABLED(CONFIG_PROC_FS)
+ 	if (proc_dir)
+ 		remove_proc_entry("can-bcm", init_net.proc_net);
++#endif /* CONFIG_PROC_FS */
+ }
+ 
+ module_init(bcm_module_init);
+-- 
+2.43.5
+

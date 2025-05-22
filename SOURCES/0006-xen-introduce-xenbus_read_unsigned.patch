@@ -1,0 +1,67 @@
+From 01f325342a2a14642a2cc8e9ac04e339f97d3957 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Thu, 1 May 2025 15:52:39 -0400
+Subject: [PATCH] xen: introduce xenbus_read_unsigned()
+
+jira VULN-1439
+cve-prereq CVE-2022-33741
+commit-author Juergen Gross <jgross@suse.com>
+commit 9c53a1792a5e6c708897d0cb17f2a4509e499a52
+
+There are multiple instances of code reading an optional unsigned
+parameter from Xenstore via xenbus_scanf(). Instead of repeating the
+same code over and over add a service function doing the job.
+
+	Signed-off-by: Juergen Gross <jgross@suse.com>
+	Reviewed-by: David Vrabel <david.vrabel@citrix.com>
+(cherry picked from commit 9c53a1792a5e6c708897d0cb17f2a4509e499a52)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ drivers/xen/xenbus/xenbus_xs.c | 15 +++++++++++++++
+ include/xen/xenbus.h           |  4 ++++
+ 2 files changed, 19 insertions(+)
+
+diff --git a/drivers/xen/xenbus/xenbus_xs.c b/drivers/xen/xenbus/xenbus_xs.c
+index b6d5fff43d16..0971c8c70f91 100644
+--- a/drivers/xen/xenbus/xenbus_xs.c
++++ b/drivers/xen/xenbus/xenbus_xs.c
+@@ -526,6 +526,21 @@ int xenbus_scanf(struct xenbus_transaction t,
+ }
+ EXPORT_SYMBOL_GPL(xenbus_scanf);
+ 
++/* Read an (optional) unsigned value. */
++unsigned int xenbus_read_unsigned(const char *dir, const char *node,
++				  unsigned int default_val)
++{
++	unsigned int val;
++	int ret;
++
++	ret = xenbus_scanf(XBT_NIL, dir, node, "%u", &val);
++	if (ret <= 0)
++		val = default_val;
++
++	return val;
++}
++EXPORT_SYMBOL_GPL(xenbus_read_unsigned);
++
+ /* Single printf and write: returns -errno or 0. */
+ int xenbus_printf(struct xenbus_transaction t,
+ 		  const char *dir, const char *node, const char *fmt, ...)
+diff --git a/include/xen/xenbus.h b/include/xen/xenbus.h
+index 569c07f2e344..8f9d6607df8a 100644
+--- a/include/xen/xenbus.h
++++ b/include/xen/xenbus.h
+@@ -144,6 +144,10 @@ __scanf(4, 5)
+ int xenbus_scanf(struct xenbus_transaction t,
+ 		 const char *dir, const char *node, const char *fmt, ...);
+ 
++/* Read an (optional) unsigned value. */
++unsigned int xenbus_read_unsigned(const char *dir, const char *node,
++				  unsigned int default_val);
++
+ /* Single printf and write: returns -errno or 0. */
+ __printf(4, 5)
+ int xenbus_printf(struct xenbus_transaction t,
+-- 
+2.43.5
+

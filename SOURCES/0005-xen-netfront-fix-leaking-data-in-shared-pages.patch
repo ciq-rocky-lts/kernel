@@ -1,0 +1,48 @@
+From e360161af6fc320af2fe192f4f9b85c948fdac79 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Thu, 1 May 2025 15:43:37 -0400
+Subject: [PATCH] xen/netfront: fix leaking data in shared pages
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-1438
+cve CVE-2022-33740
+commit-author Roger Pau Monne <roger.pau@citrix.com>
+commit 307c8de2b02344805ebead3440d8feed28f2f010
+upstream-diff This kernel hasn't switched to page_pool_dev_alloc_pages
+              so we are simply adding __GFP_ZERO to the existing
+              alloc_page call.
+
+When allocating pages to be used for shared communication with the
+backend always zero them, this avoids leaking unintended data present
+on the pages.
+
+This is CVE-2022-33740, part of XSA-403.
+
+	Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
+	Reviewed-by: Jan Beulich <jbeulich@suse.com>
+	Reviewed-by: Juergen Gross <jgross@suse.com>
+	Signed-off-by: Juergen Gross <jgross@suse.com>
+(cherry picked from commit 307c8de2b02344805ebead3440d8feed28f2f010)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ drivers/net/xen-netfront.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/xen-netfront.c b/drivers/net/xen-netfront.c
+index 3a824e40a2d7..99d690fbcf58 100644
+--- a/drivers/net/xen-netfront.c
++++ b/drivers/net/xen-netfront.c
+@@ -266,7 +266,7 @@ static struct sk_buff *xennet_alloc_one_rx_buffer(struct netfront_queue *queue)
+ 	if (unlikely(!skb))
+ 		return NULL;
+ 
+-	page = alloc_page(GFP_ATOMIC | __GFP_NOWARN);
++	page = alloc_page(GFP_ATOMIC | __GFP_NOWARN | __GFP_ZERO);
+ 	if (!page) {
+ 		kfree_skb(skb);
+ 		return NULL;
+-- 
+2.43.5
+

@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 3
+%define ciq_patch_version 4
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -513,6 +513,17 @@ Patch1002: debrand-rh-i686-cpu.patch
 Patch1003: CVE-2024-41071.patch
 #CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.3.1
 Patch1004: 0000-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.4.1
+Patch1005: 0000-net-fix-__dst_negative_advice-race.patch
+Patch1006: 0001-can-bcm-fix-warning-in-bcm_connect-proc_register.patch
+Patch1007: 0002-can-fix-CAN-BCM-build-with-CONFIG_PROC_FS-disabled.patch
+Patch1008: 0003-can-bcm-Fix-UAF-in-bcm_proc_show.patch
+Patch1009: 0004-xen-blkfront-fix-leaking-data-in-shared-pages.patch
+Patch1010: 0005-xen-netfront-fix-leaking-data-in-shared-pages.patch
+Patch1011: 0006-xen-introduce-xenbus_read_unsigned.patch
+Patch1012: 0007-net-Rename-and-export-copy_skb_header.patch
+Patch1013: 0008-xen-netfront-force-data-bouncing-when-backend-is-unt.patch
+Patch1014: 0009-xen-blkfront-force-data-bouncing-when-backend-is-unt.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -860,6 +871,16 @@ ApplyOptionalPatch debrand-rh_taint.patch
 ApplyOptionalPatch debrand-rh-i686-cpu.patch
 ApplyOptionalPatch CVE-2024-41071.patch
 ApplyOptionalPatch 0000-media-uvcvideo-Skip-parsing-frames-of-type-UVC_VS_UN.patch
+ApplyOptionalPatch 0000-net-fix-__dst_negative_advice-race.patch
+ApplyOptionalPatch 0001-can-bcm-fix-warning-in-bcm_connect-proc_register.patch
+ApplyOptionalPatch 0002-can-fix-CAN-BCM-build-with-CONFIG_PROC_FS-disabled.patch
+ApplyOptionalPatch 0003-can-bcm-Fix-UAF-in-bcm_proc_show.patch
+ApplyOptionalPatch 0004-xen-blkfront-fix-leaking-data-in-shared-pages.patch
+ApplyOptionalPatch 0005-xen-netfront-fix-leaking-data-in-shared-pages.patch
+ApplyOptionalPatch 0006-xen-introduce-xenbus_read_unsigned.patch
+ApplyOptionalPatch 0007-net-Rename-and-export-copy_skb_header.patch
+ApplyOptionalPatch 0008-xen-netfront-force-data-bouncing-when-backend-is-unt.patch
+ApplyOptionalPatch 0009-xen-blkfront-force-data-bouncing-when-backend-is-unt.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -1863,6 +1884,18 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Fri May 09 2025 Jonathan Maple <jmaple@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.4.1
+- xen/blkfront: force data bouncing when backend is untrusted (Brett Mastbergen) [ciqres] {CVE-2022-33742}
+- xen/netfront: force data bouncing when backend is untrusted (Brett Mastbergen) [ciqres] {CVE-2022-33741}
+- net: Rename and export copy_skb_header (Brett Mastbergen) [ciqres] {CVE-2022-33741}
+- xen: introduce xenbus_read_unsigned() (Brett Mastbergen) [ciqres] {CVE-2022-33741}
+- xen/netfront: fix leaking data in shared pages (Brett Mastbergen) [ciqres] {CVE-2022-33740}
+- xen/blkfront: fix leaking data in shared pages (Brett Mastbergen) [ciqres] {CVE-2022-26365}
+- can: bcm: Fix UAF in bcm_proc_show() (Pratham Patel) [ciqres] {CVE-2023-52922}
+- can: fix CAN BCM build with CONFIG_PROC_FS disabled (Pratham Patel) [ciqres] {CVE-2023-52922}
+- can: bcm: fix warning in bcm_connect/proc_register (Pratham Patel) [ciqres] {CVE-2023-52922}
+- net: fix __dst_negative_advice() race (Brett Mastbergen) [ciqres] {CVE-2024-36971}
+
 * Fri Feb 14 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.3.1
 - media: uvcvideo: Skip parsing frames of type UVC_VS_UNDEFINED in uvc_parse_format (Brett Mastbergen) [ciqres] {CVE-2024-53104}
 
