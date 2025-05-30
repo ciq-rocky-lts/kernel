@@ -3,8 +3,8 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 5
-%define ciq_build_id 2
+%define ciq_patch_version 6
+%define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2.92ciq_lts
 
@@ -949,6 +949,14 @@ Patch1000018: 0004-tun-add-missing-verification-for-short-frame.patch
 Patch1000019: 0005-mptcp-cope-racing-subflow-creation-in-mptcp_rcv_spac.patch
 Patch1000020: 0006-mptcp-fix-TCP-options-overflow.patch
 Patch1000021: 0007-mptcp-Fix-data-stream-corruption-in-the-address-anno.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.6.1
+Patch1000022: 0000-arm64-cacheinfo-Avoid-out-of-bounds-write-to-cachein.patch
+Patch1000023: 0001-nvme-tcp-fix-potential-memory-corruption-in-nvme_tcp.patch
+Patch1000024: 0002-ALSA-usb-audio-Fix-out-of-bounds-reads-when-finding-.patch
+Patch1000025: 0003-veth-Fix-use-after-free-in-XDP_REDIRECT.patch
+Patch1000026: 0004-net-tun-fix-bugs-for-oversize-packet-when-napi-frags.patch
+Patch1000027: 0005-vsock-Keep-the-binding-until-socket-destruction.patch
+Patch1000028: 0006-vsock-Orphan-socket-after-transport-release.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1649,6 +1657,13 @@ ApplyOptionalPatch 0004-tun-add-missing-verification-for-short-frame.patch
 ApplyOptionalPatch 0005-mptcp-cope-racing-subflow-creation-in-mptcp_rcv_spac.patch
 ApplyOptionalPatch 0006-mptcp-fix-TCP-options-overflow.patch
 ApplyOptionalPatch 0007-mptcp-Fix-data-stream-corruption-in-the-address-anno.patch
+ApplyOptionalPatch 0000-arm64-cacheinfo-Avoid-out-of-bounds-write-to-cachein.patch
+ApplyOptionalPatch 0001-nvme-tcp-fix-potential-memory-corruption-in-nvme_tcp.patch
+ApplyOptionalPatch 0002-ALSA-usb-audio-Fix-out-of-bounds-reads-when-finding-.patch
+ApplyOptionalPatch 0003-veth-Fix-use-after-free-in-XDP_REDIRECT.patch
+ApplyOptionalPatch 0004-net-tun-fix-bugs-for-oversize-packet-when-napi-frags.patch
+ApplyOptionalPatch 0005-vsock-Keep-the-binding-until-socket-destruction.patch
+ApplyOptionalPatch 0006-vsock-Orphan-socket-after-transport-release.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3532,6 +3547,15 @@ fi
 #
 #
 %changelog
+* Fri May 16 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.6.1
+- vsock: Orphan socket after transport release (Brett Mastbergen) [ciqres] {CVE-2025-21756}
+- vsock: Keep the binding until socket destruction (Brett Mastbergen) [ciqres] {CVE-2025-21756}
+- net: tun: fix bugs for oversize packet when napi frags enabled (Marcin Wcisło) [ciqres] {CVE-2023-3812}
+- veth: Fix use after free in XDP_REDIRECT (David Gomez) [ciqres] {CVE-2023-53107}
+- ALSA: usb-audio: Fix out of bounds reads when finding clock sources (Anmol Jain) [ciqres] {CVE-2024-53150}
+- nvme-tcp: fix potential memory corruption in nvme_tcp_recv_pdu() (Marcin Wcisło) [ciqres] {CVE-2025-21927}
+- arm64: cacheinfo: Avoid out-of-bounds write to cacheinfo array (Marcin Wcisło) [ciqres] {CVE-2025-21785}
+
 * Tue Apr 22 2025 Skip Grube <sgrube@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.5.2
 - Secureboot changes:  Signing for UKI and aarch64 architecture
 
