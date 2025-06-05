@@ -1,0 +1,78 @@
+From 8e48e58d5ed4da205203094a4713695aa2a5bf88 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Mon, 5 May 2025 14:16:48 -0400
+Subject: [PATCH] vsock: Orphan socket after transport release
+
+jira VULN-53603
+cve CVE-2025-21756
+commit-author Michal Luczaj <mhal@rbox.co>
+commit 78dafe1cf3afa02ed71084b350713b07e72a18fb
+upstream-diff Indentation is different from upstream change because
+              this kernel lacks 135ffc7becc8 ("bpf, vsock: Invoke
+              proto::close on close()").  Otherwise the change
+              content is the same.
+
+During socket release, sock_orphan() is called without considering that it
+sets sk->sk_wq to NULL. Later, if SO_LINGER is enabled, this leads to a
+null pointer dereferenced in virtio_transport_wait_close().
+
+Orphan the socket only after transport release.
+
+Partially reverts the 'Fixes:' commit.
+
+KASAN: null-ptr-deref in range [0x0000000000000018-0x000000000000001f]
+ lock_acquire+0x19e/0x500
+ _raw_spin_lock_irqsave+0x47/0x70
+ add_wait_queue+0x46/0x230
+ virtio_transport_release+0x4e7/0x7f0
+ __vsock_release+0xfd/0x490
+ vsock_release+0x90/0x120
+ __sock_release+0xa3/0x250
+ sock_close+0x14/0x20
+ __fput+0x35e/0xa90
+ __x64_sys_close+0x78/0xd0
+ do_syscall_64+0x93/0x1b0
+ entry_SYSCALL_64_after_hwframe+0x76/0x7e
+
+	Reported-by: syzbot+9d55b199192a4be7d02c@syzkaller.appspotmail.com
+Closes: https://syzkaller.appspot.com/bug?extid=9d55b199192a4be7d02c
+Fixes: fcdd2242c023 ("vsock: Keep the binding until socket destruction")
+	Tested-by: Luigi Leonardi <leonardi@redhat.com>
+	Reviewed-by: Luigi Leonardi <leonardi@redhat.com>
+	Signed-off-by: Michal Luczaj <mhal@rbox.co>
+Link: https://patch.msgid.link/20250210-vsock-linger-nullderef-v3-1-ef6244d02b54@rbox.co
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 78dafe1cf3afa02ed71084b350713b07e72a18fb)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/vmw_vsock/af_vsock.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/net/vmw_vsock/af_vsock.c b/net/vmw_vsock/af_vsock.c
+index 7afcb8cfacb6..52350a578f05 100644
+--- a/net/vmw_vsock/af_vsock.c
++++ b/net/vmw_vsock/af_vsock.c
+@@ -787,13 +787,19 @@ static void __vsock_release(struct sock *sk, int level)
+ 		 */
+ 		lock_sock_nested(sk, level);
+ 
+-		sock_orphan(sk);
++		/* Indicate to vsock_remove_sock() that the socket is being released and
++		 * can be removed from the bound_table. Unlike transport reassignment
++		 * case, where the socket must remain bound despite vsock_remove_sock()
++		 * being called from the transport release() callback.
++		 */
++		sock_set_flag(sk, SOCK_DEAD);
+ 
+ 		if (vsk->transport)
+ 			vsk->transport->release(vsk);
+ 		else if (sk->sk_type == SOCK_STREAM)
+ 			vsock_remove_sock(vsk);
+ 
++		sock_orphan(sk);
+ 		sk->sk_shutdown = SHUTDOWN_MASK;
+ 
+ 		skb_queue_purge(&sk->sk_receive_queue);
+-- 
+2.43.5
+

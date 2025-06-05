@@ -45,8 +45,8 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 9
-%define ciq_build_id 2
+%define ciq_patch_version 10
+%define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6.86ciq_lts
 
@@ -677,6 +677,12 @@ Patch0114: 0002-tun-add-missing-verification-for-short-frame.patch
 Patch0115: 0003-can-bcm-Fix-UAF-in-bcm_proc_show.patch
 Patch0116: 0004-netfilter-nft_set_pipapo-skip-inactive-elements-duri.patch
 Patch0117: 0005-arm64-cacheinfo-Avoid-out-of-bounds-write-to-cachein.patch
+#CIQ Patch Version: 372.32.1.el8_6.86ciq_lts.10.1
+Patch0118: 0000-nvme-tcp-fix-potential-memory-corruption-in-nvme_tcp.patch
+Patch0119: 0001-vsock-Keep-the-binding-until-socket-destruction.patch
+Patch0120: 0002-vsock-Orphan-socket-after-transport-release.patch
+Patch0121: 0003-net-ulp-use-consistent-error-code-when-blocking-ULP.patch
+Patch0122: 0004-tipc-fix-UAF-in-error-path.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1363,6 +1369,11 @@ ApplyOptionalPatch 0002-tun-add-missing-verification-for-short-frame.patch
 ApplyOptionalPatch 0003-can-bcm-Fix-UAF-in-bcm_proc_show.patch
 ApplyOptionalPatch 0004-netfilter-nft_set_pipapo-skip-inactive-elements-duri.patch
 ApplyOptionalPatch 0005-arm64-cacheinfo-Avoid-out-of-bounds-write-to-cachein.patch
+ApplyOptionalPatch 0000-nvme-tcp-fix-potential-memory-corruption-in-nvme_tcp.patch
+ApplyOptionalPatch 0001-vsock-Keep-the-binding-until-socket-destruction.patch
+ApplyOptionalPatch 0002-vsock-Orphan-socket-after-transport-release.patch
+ApplyOptionalPatch 0003-net-ulp-use-consistent-error-code-when-blocking-ULP.patch
+ApplyOptionalPatch 0004-tipc-fix-UAF-in-error-path.patch
 
 
 # CIQ LTS patches:
@@ -2922,6 +2933,13 @@ fi
 #
 #
 %changelog
+* Thu May 29 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.10.1
+- tipc: fix UAF in error path (Marcin Wcisło) [ciqres] {CVE-2024-36886}
+- net/ulp: use consistent error code when blocking ULP (Marcin Wcisło) [ciqres] {CVE-2023-0461}
+- vsock: Orphan socket after transport release (Brett Mastbergen) [ciqres] {CVE-2025-21756}
+- vsock: Keep the binding until socket destruction (Brett Mastbergen) [ciqres] {CVE-2025-21756}
+- nvme-tcp: fix potential memory corruption in nvme_tcp_recv_pdu() (Marcin Wcisło) [ciqres] {CVE-2025-21927}
+
 * Fri May 02 2025 Michael L. Young <myoung@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.9.2
 - [CIQ SPEC] Add secure boot signing certs for aarch64 builds
 

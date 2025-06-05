@@ -1,0 +1,96 @@
+From fc9306dfcb8f6dd723b199a1908d06e5301718ca Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 21 May 2025 03:06:37 +0200
+Subject: [PATCH] net/ulp: use consistent error code when blocking ULP
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-3655
+cve-bf CVE-2023-0461
+commit-author Paolo Abeni <pabeni@redhat.com>
+commit 8ccc99362b60c6f27bb46f36fdaaccf4ef0303de
+upstream-diff This commit is the closure of
+              68e4adc4d6d174f95e96100f60d0fb57d343f3dc, solving two
+              issues:
+              1. The backported mainline fix
+                 2c02d41d71f90a5168391b6a5f2954112ba2307c had a
+                 follow-up in
+                 8ccc99362b60c6f27bb46f36fdaaccf4ef0303de, which was
+                 missing from `ciqlts8_6'. (The original intent of
+                 the cherry-picked commit)
+              2. The way changes to `inet_csk_listen_start' were
+                 applied from upstream left a potential branching
+                 path which would result in the returned `err'
+                 different than before the change, for the exact
+                 same inputs. While effectively ignoring the
+                 initialization of `err' to `-EADDRINUSE' was
+                 justified in upstream because of the inevitable
+                 assignment at line 1237, the same cannot be done in
+                 the versions prior to 9.2 as the initial
+                 `-EADDRINUSE' can survive in `err' up to its
+                 returning from function. (The piggy-backed
+                 correction included here for the lack of better
+                 place)
+
+The referenced commit changed the error code returned by the kernel
+when preventing a non-established socket from attaching the ktls
+ULP. Before to such a commit, the user-space got ENOTCONN instead
+of EINVAL.
+
+The existing self-tests depend on such error code, and the change
+caused a failure:
+
+  RUN           global.non_established ...
+ tls.c:1673:non_established:Expected errno (22) == ENOTCONN (107)
+ non_established: Test failed at step #3
+          FAIL  global.non_established
+
+In the unlikely event existing applications do the same, address
+the issue by restoring the prior error code in the above scenario.
+
+Note that the only other ULP performing similar checks at init
+time - smc_ulp_ops - also fails with ENOTCONN when trying to attach
+the ULP to a non-established socket.
+
+	Reported-by: Sabrina Dubroca <sd@queasysnail.net>
+Fixes: 2c02d41d71f9 ("net/ulp: prevent ULP without clone op from entering the LISTEN status")
+	Signed-off-by: Paolo Abeni <pabeni@redhat.com>
+	Reviewed-by: Sabrina Dubroca <sd@queasysnail.net>
+Link: https://lore.kernel.org/r/7bb199e7a93317fb6f8bf8b9b2dc71c18f337cde.1674042685.git.pabeni@redhat.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 8ccc99362b60c6f27bb46f36fdaaccf4ef0303de)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/ipv4/inet_connection_sock.c | 1 +
+ net/ipv4/tcp_ulp.c              | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/net/ipv4/inet_connection_sock.c b/net/ipv4/inet_connection_sock.c
+index c6a199e984fd..9ab1ffd97613 100644
+--- a/net/ipv4/inet_connection_sock.c
++++ b/net/ipv4/inet_connection_sock.c
+@@ -920,6 +920,7 @@ int inet_csk_listen_start(struct sock *sk, int backlog)
+ 	if (unlikely(err))
+ 		return err;
+ 
++	err = -EADDRINUSE;
+ 	reqsk_queue_alloc(&icsk->icsk_accept_queue);
+ 
+ 	sk->sk_ack_backlog = 0;
+diff --git a/net/ipv4/tcp_ulp.c b/net/ipv4/tcp_ulp.c
+index d3454b6e38fe..ab92c3fea050 100644
+--- a/net/ipv4/tcp_ulp.c
++++ b/net/ipv4/tcp_ulp.c
+@@ -131,7 +131,7 @@ static int __tcp_set_ulp(struct sock *sk, const struct tcp_ulp_ops *ulp_ops)
+ 	if (icsk->icsk_ulp_ops)
+ 		goto out_err;
+ 
+-	err = -EINVAL;
++	err = -ENOTCONN;
+ 	if (!ulp_ops->clone && sk->sk_state == TCP_LISTEN)
+ 		goto out_err;
+ 
+-- 
+2.43.5
+
