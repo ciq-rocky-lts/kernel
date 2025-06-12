@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 10
+%define ciq_patch_version 11
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6.86ciq_lts
@@ -683,6 +683,19 @@ Patch0119: 0001-vsock-Keep-the-binding-until-socket-destruction.patch
 Patch0120: 0002-vsock-Orphan-socket-after-transport-release.patch
 Patch0121: 0003-net-ulp-use-consistent-error-code-when-blocking-ULP.patch
 Patch0122: 0004-tipc-fix-UAF-in-error-path.patch
+#CIQ Patch Version: 372.32.1.el8_6.86ciq_lts.11.1
+Patch0123: 0000-ALSA-usb-audio-Fix-out-of-bounds-reads-when-finding-.patch
+Patch0124: 0001-netfilter-ipset-add-missing-range-check-in-bitmap_ip.patch
+Patch0125: 0002-mISDN-fix-use-after-free-bugs-in-l1oip-timer-handler.patch
+Patch0126: 0003-drm-qxl-fix-UAF-on-handle-creation.patch
+Patch0127: 0004-atm-Fix-Use-After-Free-in-do_vcc_ioctl.patch
+Patch0128: 0005-Bluetooth-af_bluetooth-Fix-Use-After-Free-in-bt_sock.patch
+Patch0129: 0006-Bluetooth-Fix-double-free-in-hci_conn_cleanup.patch
+Patch0130: 0007-netfilter-nf_tables-bail-out-on-mismatching-dynset-a.patch
+Patch0131: 0008-ipv4-igmp-fix-refcnt-uaf-issue-when-receiving-igmp-q.patch
+Patch0132: 0009-media-technisat-usb2-break-out-of-loop-at-end-of-buf.patch
+Patch0133: 0010-net-tls-update-curr-on-splice-as-well.patch
+Patch0134: 0011-net-sched-Fix-use-after-free-in-red_enqueue.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1374,6 +1387,18 @@ ApplyOptionalPatch 0001-vsock-Keep-the-binding-until-socket-destruction.patch
 ApplyOptionalPatch 0002-vsock-Orphan-socket-after-transport-release.patch
 ApplyOptionalPatch 0003-net-ulp-use-consistent-error-code-when-blocking-ULP.patch
 ApplyOptionalPatch 0004-tipc-fix-UAF-in-error-path.patch
+ApplyOptionalPatch 0000-ALSA-usb-audio-Fix-out-of-bounds-reads-when-finding-.patch
+ApplyOptionalPatch 0001-netfilter-ipset-add-missing-range-check-in-bitmap_ip.patch
+ApplyOptionalPatch 0002-mISDN-fix-use-after-free-bugs-in-l1oip-timer-handler.patch
+ApplyOptionalPatch 0003-drm-qxl-fix-UAF-on-handle-creation.patch
+ApplyOptionalPatch 0004-atm-Fix-Use-After-Free-in-do_vcc_ioctl.patch
+ApplyOptionalPatch 0005-Bluetooth-af_bluetooth-Fix-Use-After-Free-in-bt_sock.patch
+ApplyOptionalPatch 0006-Bluetooth-Fix-double-free-in-hci_conn_cleanup.patch
+ApplyOptionalPatch 0007-netfilter-nf_tables-bail-out-on-mismatching-dynset-a.patch
+ApplyOptionalPatch 0008-ipv4-igmp-fix-refcnt-uaf-issue-when-receiving-igmp-q.patch
+ApplyOptionalPatch 0009-media-technisat-usb2-break-out-of-loop-at-end-of-buf.patch
+ApplyOptionalPatch 0010-net-tls-update-curr-on-splice-as-well.patch
+ApplyOptionalPatch 0011-net-sched-Fix-use-after-free-in-red_enqueue.patch
 
 
 # CIQ LTS patches:
@@ -2933,6 +2958,20 @@ fi
 #
 #
 %changelog
+* Wed Jun 11 2025 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.11.1
+- net: sched: Fix use after free in red_enqueue() (Anmol Jain) [ciqres] {CVE-2022-49921}
+- net: tls, update curr on splice as well (Marcin Wcisło) [ciqres] {CVE-2024-0646}
+- media: technisat-usb2: break out of loop at end of buffer (Pratham Patel) [ciqres] {CVE-2019-15505}
+- ipv4: igmp: fix refcnt uaf issue when receiving igmp query packet (Pratham Patel) [ciqres] {CVE-2023-6932}
+- netfilter: nf_tables: bail out on mismatching dynset and set expressions (Pratham Patel) [ciqres] {CVE-2023-6622}
+- Bluetooth: Fix double free in hci_conn_cleanup (Pratham Patel) [ciqres] {CVE-2023-28464}
+- Bluetooth: af_bluetooth: Fix Use-After-Free in bt_sock_recvmsg (Pratham Patel) [ciqres] {CVE-2023-51779}
+- atm: Fix Use-After-Free in do_vcc_ioctl (Pratham Patel) [ciqres] {CVE-2023-51780}
+- drm/qxl: fix UAF on handle creation (Pratham Patel) [ciqres] {CVE-2023-39198}
+- mISDN: fix use-after-free bugs in l1oip timer handlers (Pratham Patel) [ciqres] {CVE-2022-3565}
+- netfilter: ipset: add missing range check in bitmap_ip_uadt (Anmol Jain) [ciqres] {CVE-2024-53141}
+- ALSA: usb-audio: Fix out of bounds reads when finding clock sources (Anmol Jain) [ciqres] {CVE-2024-53150}
+
 * Thu May 29 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.10.1
 - tipc: fix UAF in error path (Marcin Wcisło) [ciqres] {CVE-2024-36886}
 - net/ulp: use consistent error code when blocking ULP (Marcin Wcisło) [ciqres] {CVE-2023-0461}

@@ -1,0 +1,47 @@
+From d953370e99bad94aead292d438d4beab8dc2f050 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 30 May 2025 03:46:55 +0200
+Subject: [PATCH] net: tls, update curr on splice as well
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-4133
+cve CVE-2024-0646
+commit-author John Fastabend <john.fastabend@gmail.com>
+commit c5a595000e2677e865a39f249c056bc05d6e55fd
+upstream-diff used linux-stable LT-5.15 sha ba5efd8544fa62ae85daeb36077468bf2ce974ab
+
+commit c5a595000e2677e865a39f249c056bc05d6e55fd upstream.
+
+The curr pointer must also be updated on the splice similar to how
+we do this for other copy types.
+
+Fixes: d829e9c4112b ("tls: convert to generic sk_msg interface")
+	Signed-off-by: John Fastabend <john.fastabend@gmail.com>
+	Reported-by: Jann Horn <jannh@google.com>
+Link: https://lore.kernel.org/r/20231206232706.374377-2-john.fastabend@gmail.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+	Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+(cherry picked from commit ba5efd8544fa62ae85daeb36077468bf2ce974ab)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/tls/tls_sw.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/net/tls/tls_sw.c b/net/tls/tls_sw.c
+index 0894bc9478e1..daddfca4b832 100644
+--- a/net/tls/tls_sw.c
++++ b/net/tls/tls_sw.c
+@@ -1213,6 +1213,8 @@ static int tls_sw_do_sendpage(struct sock *sk, struct page *page,
+ 		}
+ 
+ 		sk_msg_page_add(msg_pl, page, copy, offset);
++		msg_pl->sg.copybreak = 0;
++		msg_pl->sg.curr = msg_pl->sg.end;
+ 		sk_mem_charge(sk, copy);
+ 
+ 		offset += copy;
+-- 
+2.47.1
+

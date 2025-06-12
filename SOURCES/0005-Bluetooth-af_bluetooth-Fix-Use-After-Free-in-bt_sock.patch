@@ -1,0 +1,66 @@
+From c08cec9c073672396d3c0fcf1a85ef6f47eeabaa Mon Sep 17 00:00:00 2001
+From: Pratham Patel <ppatel@ciq.com>
+Date: Fri, 30 May 2025 23:35:35 +0530
+Subject: [PATCH] Bluetooth: af_bluetooth: Fix Use-After-Free in
+ bt_sock_recvmsg
+
+jira VULN-465
+cve CVE-2023-51779
+commit-author Hyunwoo Kim <v4bel@theori.io>
+commit 2e07e8348ea454615e268222ae3fc240421be768
+upstream-diff We are missing f4b41f062c4 ("net: remove noblock
+              parameter from skb_recv_datagram()") commit. The
+              patch is clean otherwise.
+
+This can cause a race with bt_sock_ioctl() because
+bt_sock_recvmsg() gets the skb from sk->sk_receive_queue
+and then frees it without holding lock_sock.
+A use-after-free for a skb occurs with the following flow.
+```
+bt_sock_recvmsg() -> skb_recv_datagram() -> skb_free_datagram()
+bt_sock_ioctl() -> skb_peek()
+```
+Add lock_sock to bt_sock_recvmsg() to fix this issue.
+
+	Cc: stable@vger.kernel.org
+Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
+	Signed-off-by: Hyunwoo Kim <v4bel@theori.io>
+	Signed-off-by: Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+(cherry picked from commit 2e07e8348ea454615e268222ae3fc240421be768)
+	Signed-off-by: Pratham Patel <ppatel@ciq.com>
+---
+ net/bluetooth/af_bluetooth.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/net/bluetooth/af_bluetooth.c b/net/bluetooth/af_bluetooth.c
+index 5176c82a2104..6a7db70c41a2 100644
+--- a/net/bluetooth/af_bluetooth.c
++++ b/net/bluetooth/af_bluetooth.c
+@@ -263,11 +263,14 @@ int bt_sock_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
+ 	if (flags & MSG_OOB)
+ 		return -EOPNOTSUPP;
+ 
++	lock_sock(sk);
++
+ 	skb = skb_recv_datagram(sk, flags, noblock, &err);
+ 	if (!skb) {
+ 		if (sk->sk_shutdown & RCV_SHUTDOWN)
+-			return 0;
++			err = 0;
+ 
++		release_sock(sk);
+ 		return err;
+ 	}
+ 
+@@ -293,6 +296,8 @@ int bt_sock_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
+ 
+ 	skb_free_datagram(sk, skb);
+ 
++	release_sock(sk);
++
+ 	if (flags & MSG_TRUNC)
+ 		copied = skblen;
+ 
+-- 
+2.47.1
+
