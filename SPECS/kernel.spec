@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 6
+%define ciq_patch_version 7
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2.92ciq_lts
@@ -957,6 +957,14 @@ Patch1000025: 0003-veth-Fix-use-after-free-in-XDP_REDIRECT.patch
 Patch1000026: 0004-net-tun-fix-bugs-for-oversize-packet-when-napi-frags.patch
 Patch1000027: 0005-vsock-Keep-the-binding-until-socket-destruction.patch
 Patch1000028: 0006-vsock-Orphan-socket-after-transport-release.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.7.1
+Patch1000029: 0000-net-sched-cls_u32-Fix-reference-counter-leak-leading.patch
+Patch1000030: 0001-netfilter-ipset-add-missing-range-check-in-bitmap_ip.patch
+Patch1000031: 0002-tipc-fix-UAF-in-error-path.patch
+Patch1000032: 0003-igb-set-max-size-RX-buffer-when-store-bad-packet-is-.patch
+Patch1000033: 0004-net-sched-sch_qfq-prevent-slab-out-of-bounds-in-qfq_.patch
+Patch1000034: 0005-net-tls-update-curr-on-splice-as-well.patch
+Patch1000035: 0006-dmaengine-idxd-Fix-possible-Use-After-Free-in-irq_pr.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1664,6 +1672,13 @@ ApplyOptionalPatch 0003-veth-Fix-use-after-free-in-XDP_REDIRECT.patch
 ApplyOptionalPatch 0004-net-tun-fix-bugs-for-oversize-packet-when-napi-frags.patch
 ApplyOptionalPatch 0005-vsock-Keep-the-binding-until-socket-destruction.patch
 ApplyOptionalPatch 0006-vsock-Orphan-socket-after-transport-release.patch
+ApplyOptionalPatch 0000-net-sched-cls_u32-Fix-reference-counter-leak-leading.patch
+ApplyOptionalPatch 0001-netfilter-ipset-add-missing-range-check-in-bitmap_ip.patch
+ApplyOptionalPatch 0002-tipc-fix-UAF-in-error-path.patch
+ApplyOptionalPatch 0003-igb-set-max-size-RX-buffer-when-store-bad-packet-is-.patch
+ApplyOptionalPatch 0004-net-sched-sch_qfq-prevent-slab-out-of-bounds-in-qfq_.patch
+ApplyOptionalPatch 0005-net-tls-update-curr-on-splice-as-well.patch
+ApplyOptionalPatch 0006-dmaengine-idxd-Fix-possible-Use-After-Free-in-irq_pr.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3547,6 +3562,15 @@ fi
 #
 #
 %changelog
+* Mon Jun 16 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.7.1
+- dmaengine: idxd: Fix possible Use-After-Free in irq_process_work_list (David Gomez) [ciqres] {CVE-2024-40956}
+- net: tls, update curr on splice as well (Marcin Wcisło) [ciqres] {CVE-2024-0646}
+- net: sched: sch_qfq: prevent slab-out-of-bounds in qfq_activate_agg (Brett Mastbergen) [ciqres] {CVE-2023-31436}
+- igb: set max size RX buffer when store bad packet is enabled (Marcin Wcisło) [ciqres] {CVE-2023-45871}
+- tipc: fix UAF in error path (Marcin Wcisło) [ciqres] {CVE-2024-36886}
+- netfilter: ipset: add missing range check in bitmap_ip_uadt (Anmol Jain) [ciqres] {CVE-2024-53141}
+- net/sched: cls_u32: Fix reference counter leak leading to overflow (David Gomez) [ciqres] {CVE-2023-3609}
+
 * Fri May 16 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.6.1
 - vsock: Orphan socket after transport release (Brett Mastbergen) [ciqres] {CVE-2025-21756}
 - vsock: Keep the binding until socket destruction (Brett Mastbergen) [ciqres] {CVE-2025-21756}
