@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 4
+%define ciq_patch_version 5
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -524,6 +524,10 @@ Patch1011: 0006-xen-introduce-xenbus_read_unsigned.patch
 Patch1012: 0007-net-Rename-and-export-copy_skb_header.patch
 Patch1013: 0008-xen-netfront-force-data-bouncing-when-backend-is-unt.patch
 Patch1014: 0009-xen-blkfront-force-data-bouncing-when-backend-is-unt.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.5.1
+Patch1015: 0000-ALSA-usb-audio-Fix-out-of-bounds-reads-when-finding-.patch
+Patch1016: 0001-net-sched-Fix-use-after-free-in-red_enqueue.patch
+Patch1017: 0002-netfilter-ipset-add-missing-range-check-in-bitmap_ip.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -881,6 +885,9 @@ ApplyOptionalPatch 0006-xen-introduce-xenbus_read_unsigned.patch
 ApplyOptionalPatch 0007-net-Rename-and-export-copy_skb_header.patch
 ApplyOptionalPatch 0008-xen-netfront-force-data-bouncing-when-backend-is-unt.patch
 ApplyOptionalPatch 0009-xen-blkfront-force-data-bouncing-when-backend-is-unt.patch
+ApplyOptionalPatch 0000-ALSA-usb-audio-Fix-out-of-bounds-reads-when-finding-.patch
+ApplyOptionalPatch 0001-net-sched-Fix-use-after-free-in-red_enqueue.patch
+ApplyOptionalPatch 0002-netfilter-ipset-add-missing-range-check-in-bitmap_ip.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -1884,6 +1891,11 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Mon Jun 30 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.5.1
+- netfilter: ipset: add missing range check in bitmap_ip_uadt (Anmol Jain) [ciqres] {CVE-2024-53141}
+- net: sched: Fix use after free in red_enqueue() (Anmol Jain) [ciqres] {CVE-2022-49921}
+- ALSA: usb-audio: Fix out of bounds reads when finding clock sources (Brett Mastbergen) [ciqres] {CVE-2024-53150}
+
 * Fri May 09 2025 Jonathan Maple <jmaple@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.4.1
 - xen/blkfront: force data bouncing when backend is untrusted (Brett Mastbergen) [ciqres] {CVE-2022-33742}
 - xen/netfront: force data bouncing when backend is untrusted (Brett Mastbergen) [ciqres] {CVE-2022-33741}
