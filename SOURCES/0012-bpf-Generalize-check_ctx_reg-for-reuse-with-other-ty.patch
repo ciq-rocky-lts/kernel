@@ -1,0 +1,123 @@
+From 0621021d642ee771142fa6bde4797fd0b3c38eae Mon Sep 17 00:00:00 2001
+From: Pratham Patel <ppatel@ciq.com>
+Date: Tue, 17 Jun 2025 20:00:09 +0530
+Subject: [PATCH] bpf: Generalize check_ctx_reg for reuse with other types
+
+jira VULN-140
+pre-cve CVE-2022-23222
+commit-author Daniel Borkmann <daniel@iogearbox.net>
+commit be80a1d3f9dbe5aee79a325964f7037fe2d92f30
+upstream-diff A merge confict arised because 3363bd0cfbb8 ("bpf: Extend
+    kfunc with PTR_TO_CTX, PTR_TO_MEM argument support") does not exist
+    in our tree
+
+Generalize the check_ctx_reg() helper function into a more generic named one
+so that it can be reused for other register types as well to check whether
+their offset is non-zero. No functional change.
+
+	Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
+	Acked-by: John Fastabend <john.fastabend@gmail.com>
+	Acked-by: Alexei Starovoitov <ast@kernel.org>
+(cherry picked from commit be80a1d3f9dbe5aee79a325964f7037fe2d92f30)
+	Signed-off-by: Pratham Patel <ppatel@ciq.com>
+---
+ include/linux/bpf_verifier.h |  4 ++--
+ kernel/bpf/btf.c             |  2 +-
+ kernel/bpf/verifier.c        | 21 +++++++++++----------
+ 3 files changed, 14 insertions(+), 13 deletions(-)
+
+diff --git a/include/linux/bpf_verifier.h b/include/linux/bpf_verifier.h
+index cd5cc0689eb0..3e104a76e725 100644
+--- a/include/linux/bpf_verifier.h
++++ b/include/linux/bpf_verifier.h
+@@ -486,8 +486,8 @@ bpf_prog_offload_replace_insn(struct bpf_verifier_env *env, u32 off,
+ void
+ bpf_prog_offload_remove_insns(struct bpf_verifier_env *env, u32 off, u32 cnt);
+ 
+-int check_ctx_reg(struct bpf_verifier_env *env,
+-		  const struct bpf_reg_state *reg, int regno);
++int check_ptr_off_reg(struct bpf_verifier_env *env,
++		      const struct bpf_reg_state *reg, int regno);
+ int check_mem_reg(struct bpf_verifier_env *env, struct bpf_reg_state *reg,
+ 		   u32 regno, u32 mem_size);
+ 
+diff --git a/kernel/bpf/btf.c b/kernel/bpf/btf.c
+index 93372493d918..7933f8b8c8c0 100644
+--- a/kernel/bpf/btf.c
++++ b/kernel/bpf/btf.c
+@@ -5492,7 +5492,7 @@ static int btf_check_func_arg_match(struct bpf_verifier_env *env,
+ 					i, btf_type_str(t));
+ 				return -EINVAL;
+ 			}
+-			if (check_ctx_reg(env, reg, regno))
++			if (check_ptr_off_reg(env, reg, regno))
+ 				return -EINVAL;
+ 		} else if (ptr_to_mem_ok) {
+ 			const struct btf_type *resolve_ret;
+diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
+index f2a765836b63..f3bb3f20ee91 100644
+--- a/kernel/bpf/verifier.c
++++ b/kernel/bpf/verifier.c
+@@ -3659,16 +3659,16 @@ static int get_callee_stack_depth(struct bpf_verifier_env *env,
+ }
+ #endif
+ 
+-int check_ctx_reg(struct bpf_verifier_env *env,
+-		  const struct bpf_reg_state *reg, int regno)
++int check_ptr_off_reg(struct bpf_verifier_env *env,
++		      const struct bpf_reg_state *reg, int regno)
+ {
+-	/* Access to ctx or passing it to a helper is only allowed in
+-	 * its original, unmodified form.
++	/* Access to this pointer-typed register or passing it to a helper
++	 * is only allowed in its original, unmodified form.
+ 	 */
+ 
+ 	if (reg->off) {
+-		verbose(env, "dereference of modified ctx ptr R%d off=%d disallowed\n",
+-			regno, reg->off);
++		verbose(env, "dereference of modified %s ptr R%d off=%d disallowed\n",
++			reg_type_str(env, reg->type), regno, reg->off);
+ 		return -EACCES;
+ 	}
+ 
+@@ -3676,7 +3676,8 @@ int check_ctx_reg(struct bpf_verifier_env *env,
+ 		char tn_buf[48];
+ 
+ 		tnum_strn(tn_buf, sizeof(tn_buf), reg->var_off);
+-		verbose(env, "variable ctx access var_off=%s disallowed\n", tn_buf);
++		verbose(env, "variable %s access var_off=%s disallowed\n",
++			reg_type_str(env, reg->type), tn_buf);
+ 		return -EACCES;
+ 	}
+ 
+@@ -4112,7 +4113,7 @@ static int check_mem_access(struct bpf_verifier_env *env, int insn_idx, u32 regn
+ 			return -EACCES;
+ 		}
+ 
+-		err = check_ctx_reg(env, reg, regno);
++		err = check_ptr_off_reg(env, reg, regno);
+ 		if (err < 0)
+ 			return err;
+ 
+@@ -4914,7 +4915,7 @@ static int check_func_arg(struct bpf_verifier_env *env, u32 arg,
+ 		return err;
+ 
+ 	if (type == PTR_TO_CTX) {
+-		err = check_ctx_reg(env, reg, regno);
++		err = check_ptr_off_reg(env, reg, regno);
+ 		if (err < 0)
+ 			return err;
+ 	}
+@@ -9051,7 +9052,7 @@ static int check_ld_abs(struct bpf_verifier_env *env, struct bpf_insn *insn)
+ 			return err;
+ 	}
+ 
+-	err = check_ctx_reg(env, &regs[ctx_reg], ctx_reg);
++	err = check_ptr_off_reg(env, &regs[ctx_reg], ctx_reg);
+ 	if (err < 0)
+ 		return err;
+ 
+-- 
+2.47.1
+

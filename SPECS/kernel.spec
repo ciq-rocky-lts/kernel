@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 11
+%define ciq_patch_version 12
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6.86ciq_lts
@@ -696,6 +696,27 @@ Patch0131: 0008-ipv4-igmp-fix-refcnt-uaf-issue-when-receiving-igmp-q.patch
 Patch0132: 0009-media-technisat-usb2-break-out-of-loop-at-end-of-buf.patch
 Patch0133: 0010-net-tls-update-curr-on-splice-as-well.patch
 Patch0134: 0011-net-sched-Fix-use-after-free-in-red_enqueue.patch
+#CIQ Patch Version: 372.32.1.el8_6.86ciq_lts.12.1
+Patch0135: 0000-mptcp-fix-race-on-unaccepted-mptcp-sockets.patch
+Patch0136: 0001-netdevsim-Fix-memory-leak-of-nsim_dev-fa_cookie.patch
+Patch0137: 0002-selftests-breakpoints-Fix-a-typo-of-function-name.patch
+Patch0138: 0003-bpf-Introduce-composable-reg-ret-and-arg-types.patch
+Patch0139: 0004-bpf-Replace-ARG_XXX_OR_NULL-with-ARG_XXX-PTR_MAYBE_N.patch
+Patch0140: 0005-bpf-Replace-RET_XXX_OR_NULL-with-RET_XXX-PTR_MAYBE_N.patch
+Patch0141: 0006-bpf-Replace-PTR_TO_XXX_OR_NULL-with-PTR_TO_XXX-PTR_M.patch
+Patch0142: 0007-bpf-Introduce-MEM_RDONLY-flag.patch
+Patch0143: 0008-bpf-Convert-PTR_TO_MEM_OR_NULL-to-composable-types.patch
+Patch0144: 0009-bpf-Make-per_cpu_ptr-return-rdonly-PTR_TO_MEM.patch
+Patch0145: 0010-bpf-Add-MEM_RDONLY-for-helper-args-that-are-pointers.patch
+Patch0146: 0011-bpf-Fix-crash-due-to-out-of-bounds-access-into-reg2b.patch
+Patch0147: 0012-bpf-Generalize-check_ctx_reg-for-reuse-with-other-ty.patch
+Patch0148: 0013-bpf-Generally-fix-helper-register-offset-check.patch
+Patch0149: 0014-bpf-Fix-out-of-bounds-access-for-ringbuf-helpers.patch
+Patch0150: 0015-net-mdio-fix-undefined-behavior-in-bit-shift-for-__m.patch
+Patch0151: 0016-net-atlantic-fix-aq_vec-index-out-of-range-error.patch
+Patch0152: 0017-udf-Fix-a-slab-out-of-bounds-write-bug-in-udf_find_e.patch
+Patch0153: 0018-bpf-Fix-ringbuf-memory-type-confusion-when-passing-t.patch
+Patch0154: 0019-net-pktgen-fix-access-outside-of-user-given-buffer-i.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1399,6 +1420,26 @@ ApplyOptionalPatch 0008-ipv4-igmp-fix-refcnt-uaf-issue-when-receiving-igmp-q.pat
 ApplyOptionalPatch 0009-media-technisat-usb2-break-out-of-loop-at-end-of-buf.patch
 ApplyOptionalPatch 0010-net-tls-update-curr-on-splice-as-well.patch
 ApplyOptionalPatch 0011-net-sched-Fix-use-after-free-in-red_enqueue.patch
+ApplyOptionalPatch 0000-mptcp-fix-race-on-unaccepted-mptcp-sockets.patch
+ApplyOptionalPatch 0001-netdevsim-Fix-memory-leak-of-nsim_dev-fa_cookie.patch
+ApplyOptionalPatch 0002-selftests-breakpoints-Fix-a-typo-of-function-name.patch
+ApplyOptionalPatch 0003-bpf-Introduce-composable-reg-ret-and-arg-types.patch
+ApplyOptionalPatch 0004-bpf-Replace-ARG_XXX_OR_NULL-with-ARG_XXX-PTR_MAYBE_N.patch
+ApplyOptionalPatch 0005-bpf-Replace-RET_XXX_OR_NULL-with-RET_XXX-PTR_MAYBE_N.patch
+ApplyOptionalPatch 0006-bpf-Replace-PTR_TO_XXX_OR_NULL-with-PTR_TO_XXX-PTR_M.patch
+ApplyOptionalPatch 0007-bpf-Introduce-MEM_RDONLY-flag.patch
+ApplyOptionalPatch 0008-bpf-Convert-PTR_TO_MEM_OR_NULL-to-composable-types.patch
+ApplyOptionalPatch 0009-bpf-Make-per_cpu_ptr-return-rdonly-PTR_TO_MEM.patch
+ApplyOptionalPatch 0010-bpf-Add-MEM_RDONLY-for-helper-args-that-are-pointers.patch
+ApplyOptionalPatch 0011-bpf-Fix-crash-due-to-out-of-bounds-access-into-reg2b.patch
+ApplyOptionalPatch 0012-bpf-Generalize-check_ctx_reg-for-reuse-with-other-ty.patch
+ApplyOptionalPatch 0013-bpf-Generally-fix-helper-register-offset-check.patch
+ApplyOptionalPatch 0014-bpf-Fix-out-of-bounds-access-for-ringbuf-helpers.patch
+ApplyOptionalPatch 0015-net-mdio-fix-undefined-behavior-in-bit-shift-for-__m.patch
+ApplyOptionalPatch 0016-net-atlantic-fix-aq_vec-index-out-of-range-error.patch
+ApplyOptionalPatch 0017-udf-Fix-a-slab-out-of-bounds-write-bug-in-udf_find_e.patch
+ApplyOptionalPatch 0018-bpf-Fix-ringbuf-memory-type-confusion-when-passing-t.patch
+ApplyOptionalPatch 0019-net-pktgen-fix-access-outside-of-user-given-buffer-i.patch
 
 
 # CIQ LTS patches:
@@ -2958,6 +2999,28 @@ fi
 #
 #
 %changelog
+* Tue Jul 01 2025 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.12.1
+- net: pktgen: fix access outside of user given buffer in pktgen_thread_write() (Marcin Wcisło) [ciqres] {CVE-2025-38061}
+- bpf: Fix ringbuf memory type confusion when passing to helpers (Pratham Patel) [ciqres] {CVE-2021-4204}
+- udf: Fix a slab-out-of-bounds write bug in udf_find_entry() (Brett Mastbergen) [ciqres] {CVE-2022-49846}
+- net: atlantic: fix aq_vec index out of range error (Anmol Jain) [ciqres] {CVE-2022-50066}
+- net: mdio: fix undefined behavior in bit shift for __mdiobus_register (Marcin Wcisło) [ciqres] {CVE-2022-49907}
+- bpf: Fix out of bounds access for ringbuf helpers (Pratham Patel) [ciqres] {CVE-2022-23222}
+- bpf: Generally fix helper register offset check (Pratham Patel) [ciqres] {CVE-2022-23222}
+- bpf: Generalize check_ctx_reg for reuse with other types (Pratham Patel) [ciqres] {CVE-2022-23222}
+- bpf: Fix crash due to out of bounds access into reg2btf_ids. (Pratham Patel) [ciqres] {CVE-2022-48929}
+- bpf: Add MEM_RDONLY for helper args that are pointers to rdonly mem. (Pratham Patel) [ciqres] {CVE-2022-0500}
+- bpf: Make per_cpu_ptr return rdonly PTR_TO_MEM. (Pratham Patel) [ciqres] {CVE-2022-0500}
+- bpf: Convert PTR_TO_MEM_OR_NULL to composable types. (Pratham Patel) [ciqres] {CVE-2022-0500}
+- bpf: Introduce MEM_RDONLY flag (Pratham Patel) [ciqres] {CVE-2022-0500}
+- bpf: Replace PTR_TO_XXX_OR_NULL with PTR_TO_XXX | PTR_MAYBE_NULL (Pratham Patel) [ciqres] {CVE-2022-0500}
+- bpf: Replace RET_XXX_OR_NULL with RET_XXX | PTR_MAYBE_NULL (Pratham Patel) [ciqres] {CVE-2022-0500}
+- bpf: Replace ARG_XXX_OR_NULL with ARG_XXX | PTR_MAYBE_NULL (Pratham Patel) [ciqres] {CVE-2022-0500}
+- bpf: Introduce composable reg, ret and arg types. (Pratham Patel) [ciqres] {CVE-2022-0500}
+- selftests: breakpoints: Fix a typo of function name (Masami Hiramatsu) [ciqres]
+- netdevsim: Fix memory leak of nsim_dev->fa_cookie (Marcin Wcisło) [ciqres] {CVE-2022-49803}
+- mptcp: fix race on unaccepted mptcp sockets (Brett Mastbergen) [ciqres] {CVE-2022-49669}
+
 * Wed Jun 11 2025 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.11.1
 - net: sched: Fix use after free in red_enqueue() (Anmol Jain) [ciqres] {CVE-2022-49921}
 - net: tls, update curr on splice as well (Marcin Wcisło) [ciqres] {CVE-2024-0646}
