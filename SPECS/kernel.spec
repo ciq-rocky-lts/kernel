@@ -41,8 +41,8 @@
 %define pkgrelease 477.27.1.el8_8
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 5
-%define ciq_build_id 2
+%define ciq_patch_version 6
+%define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_8.88ciq_lts
 
@@ -568,6 +568,20 @@ Patch1026: 0001-vsock-Keep-the-binding-until-socket-destruction.patch
 Patch1027: 0002-vsock-Orphan-socket-after-transport-release.patch
 Patch1028: 0003-arm64-cacheinfo-Avoid-out-of-bounds-write-to-cachein.patch
 Patch1029: 0004-net-tun-fix-bugs-for-oversize-packet-when-napi-frags.patch
+#CIQ Patch Version: 477.27.1.el8_8.88ciq_lts.6.1
+Patch1030: 0000-net-sched-cls_u32-Fix-reference-counter-leak-leading.patch
+Patch1031: 0001-net-sched-sch_qfq-account-for-stab-overhead-in-qfq_e.patch
+Patch1032: 0002-tipc-fix-UAF-in-error-path.patch
+Patch1033: 0003-igb-set-max-size-RX-buffer-when-store-bad-packet-is-.patch
+Patch1034: 0004-ALSA-usb-audio-Fix-out-of-bounds-reads-when-finding-.patch
+Patch1035: 0005-netfilter-ipset-add-missing-range-check-in-bitmap_ip.patch
+Patch1036: 0006-net-sched-sch_qfq-prevent-slab-out-of-bounds-in-qfq_.patch
+Patch1037: 0007-net-tls-update-curr-on-splice-as-well.patch
+Patch1038: 0008-nvmet-tcp-Fix-a-possible-UAF-in-queue-intialization-.patch
+Patch1039: 0009-net-sched-Fix-use-after-free-in-red_enqueue.patch
+Patch1040: 0010-netfilter-ipset-add-the-missing-IP_SET_HASH_WITH_NET.patch
+Patch1041: 0011-netdevsim-Fix-memory-leak-of-nsim_dev-fa_cookie.patch
+Patch1042: 0012-selftests-breakpoints-Fix-a-typo-of-function-name.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1176,6 +1190,19 @@ ApplyOptionalPatch 0001-vsock-Keep-the-binding-until-socket-destruction.patch
 ApplyOptionalPatch 0002-vsock-Orphan-socket-after-transport-release.patch
 ApplyOptionalPatch 0003-arm64-cacheinfo-Avoid-out-of-bounds-write-to-cachein.patch
 ApplyOptionalPatch 0004-net-tun-fix-bugs-for-oversize-packet-when-napi-frags.patch
+ApplyOptionalPatch 0000-net-sched-cls_u32-Fix-reference-counter-leak-leading.patch
+ApplyOptionalPatch 0001-net-sched-sch_qfq-account-for-stab-overhead-in-qfq_e.patch
+ApplyOptionalPatch 0002-tipc-fix-UAF-in-error-path.patch
+ApplyOptionalPatch 0003-igb-set-max-size-RX-buffer-when-store-bad-packet-is-.patch
+ApplyOptionalPatch 0004-ALSA-usb-audio-Fix-out-of-bounds-reads-when-finding-.patch
+ApplyOptionalPatch 0005-netfilter-ipset-add-missing-range-check-in-bitmap_ip.patch
+ApplyOptionalPatch 0006-net-sched-sch_qfq-prevent-slab-out-of-bounds-in-qfq_.patch
+ApplyOptionalPatch 0007-net-tls-update-curr-on-splice-as-well.patch
+ApplyOptionalPatch 0008-nvmet-tcp-Fix-a-possible-UAF-in-queue-intialization-.patch
+ApplyOptionalPatch 0009-net-sched-Fix-use-after-free-in-red_enqueue.patch
+ApplyOptionalPatch 0010-netfilter-ipset-add-the-missing-IP_SET_HASH_WITH_NET.patch
+ApplyOptionalPatch 0011-netdevsim-Fix-memory-leak-of-nsim_dev-fa_cookie.patch
+ApplyOptionalPatch 0012-selftests-breakpoints-Fix-a-typo-of-function-name.patch
 
 
 # END OF PATCH APPLICATIONS
@@ -2788,6 +2815,21 @@ fi
 #
 #
 %changelog
+* Fri Jun 20 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-477.27.1.el8_8.88ciq_lts.6.1
+- selftests: breakpoints: Fix a typo of function name (Masami Hiramatsu) [ciqres]
+- netdevsim: Fix memory leak of nsim_dev->fa_cookie (Marcin Wcisło) [ciqres] {CVE-2022-49803}
+- netfilter: ipset: add the missing IP_SET_HASH_WITH_NET0 macro for ip_set_hash_netportnet.c (Marcin Wcisło) [ciqres] {CVE-2023-42753}
+- net: sched: Fix use after free in red_enqueue() (Anmol Jain) [ciqres] {CVE-2022-49921}
+- nvmet-tcp: Fix a possible UAF in queue intialization setup (Brett Mastbergen) [ciqres] {CVE-2023-5178}
+- net: tls, update curr on splice as well (Marcin Wcisło) [ciqres] {CVE-2024-0646}
+- net: sched: sch_qfq: prevent slab-out-of-bounds in qfq_activate_agg (Brett Mastbergen) [ciqres] {CVE-2023-31436}
+- netfilter: ipset: add missing range check in bitmap_ip_uadt (Anmol Jain) [ciqres] {CVE-2024-53141}
+- ALSA: usb-audio: Fix out of bounds reads when finding clock sources (Anmol Jain) [ciqres] {CVE-2024-53150}
+- igb: set max size RX buffer when store bad packet is enabled (Marcin Wcisło) [ciqres] {CVE-2023-45871}
+- tipc: fix UAF in error path (Marcin Wcisło) [ciqres] {CVE-2024-36886}
+- net/sched: sch_qfq: account for stab overhead in qfq_enqueue (Marcin Wcisło) [ciqres] {CVE-2023-3611}
+- net/sched: cls_u32: Fix reference counter leak leading to overflow (David Gomez) [ciqres] {CVE-2023-3609}
+
 * Fri May 16 2025 Michael L. Young <myoung@ciq.com> - 4.18.0-477.27.1.el8_8.88ciq_lts.5.2
 - [CIQ SPEC] Add CIQ secure boot signing certs for aarch64 builds
 
