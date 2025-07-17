@@ -1,0 +1,76 @@
+From faf3a26634d279a4843dc6fe29f22bd2c3cce094 Mon Sep 17 00:00:00 2001
+From: Shreeya Patel <spatel@ciq.com>
+Date: Tue, 8 Jul 2025 20:54:19 +0000
+Subject: [PATCH] sunrpc: handle SVC_GARBAGE during svc auth processing as auth
+ error
+
+jira VULN-71606
+cve CVE-2025-38089
+commit-author Jeff Layton <jlayton@kernel.org>
+commit 94d10a4dba0bc482f2b01e39f06d5513d0f75742
+upstream-diff The following commits cause merge conflicts since they are
+    not present in the ciqlts9_2 branch:
+    6d037b15e439 ("SUNRPC: Remove the rpc_stat variable in svc_process_common()")
+    ab42f4d9a26f ("sunrpc: don't change ->sv_stats if it doesn't exist")
+    649a692e0f2b ("SUNRPC: Convert RPC Reply header encoding to use xdr_stream")
+
+tianshuo han reported a remotely-triggerable crash if the client sends a
+kernel RPC server a specially crafted packet. If decoding the RPC reply
+fails in such a way that SVC_GARBAGE is returned without setting the
+rq_accept_statp pointer, then that pointer can be dereferenced and a
+value stored there.
+
+If it's the first time the thread has processed an RPC, then that
+pointer will be set to NULL and the kernel will crash. In other cases,
+it could create a memory scribble.
+
+The server sunrpc code treats a SVC_GARBAGE return from svc_authenticate
+or pg_authenticate as if it should send a GARBAGE_ARGS reply. RFC 5531
+says that if authentication fails that the RPC should be rejected
+instead with a status of AUTH_ERR.
+
+Handle a SVC_GARBAGE return as an AUTH_ERROR, with a reason of
+AUTH_BADCRED instead of returning GARBAGE_ARGS in that case. This
+sidesteps the whole problem of touching the rpc_accept_statp pointer in
+this situation and avoids the crash.
+
+	Cc: stable@kernel.org
+Fixes: 29cd2927fb91 ("SUNRPC: Fix encoding of accepted but unsuccessful RPC replies")
+	Reported-by: tianshuo han <hantianshuo233@gmail.com>
+	Reviewed-by: Chuck Lever <chuck.lever@oracle.com>
+	Signed-off-by: Jeff Layton <jlayton@kernel.org>
+	Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+(cherry picked from commit 94d10a4dba0bc482f2b01e39f06d5513d0f75742)
+	Signed-off-by: Shreeya Patel <spatel@ciq.com>
+---
+ net/sunrpc/svc.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/net/sunrpc/svc.c b/net/sunrpc/svc.c
+index 56bed0a57eea..8d7309bd4dba 100644
+--- a/net/sunrpc/svc.c
++++ b/net/sunrpc/svc.c
+@@ -1287,7 +1287,8 @@ svc_process_common(struct svc_rqst *rqstp, struct kvec *argv, struct kvec *resv)
+ 	case SVC_OK:
+ 		break;
+ 	case SVC_GARBAGE:
+-		goto err_garbage;
++		rqstp->rq_auth_stat = rpc_autherr_badcred;
++		goto err_bad_auth;
+ 	case SVC_SYSERR:
+ 		rpc_stat = rpc_system_err;
+ 		goto err_bad;
+@@ -1416,10 +1417,6 @@ svc_process_common(struct svc_rqst *rqstp, struct kvec *argv, struct kvec *resv)
+ 	svc_putnl(resv, RPC_PROC_UNAVAIL);
+ 	goto sendit;
+ 
+-err_garbage:
+-	svc_printk(rqstp, "failed to decode args\n");
+-
+-	rpc_stat = rpc_garbage_args;
+ err_bad:
+ 	serv->sv_stats->rpcbadfmt++;
+ 	svc_putnl(resv, ntohl(rpc_stat));
+-- 
+2.47.1
+

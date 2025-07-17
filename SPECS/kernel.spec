@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 7
+%define ciq_patch_version 8
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2.92ciq_lts
@@ -965,6 +965,16 @@ Patch1000032: 0003-igb-set-max-size-RX-buffer-when-store-bad-packet-is-.patch
 Patch1000033: 0004-net-sched-sch_qfq-prevent-slab-out-of-bounds-in-qfq_.patch
 Patch1000034: 0005-net-tls-update-curr-on-splice-as-well.patch
 Patch1000035: 0006-dmaengine-idxd-Fix-possible-Use-After-Free-in-irq_pr.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.8.1
+Patch1000036: 0000-netfilter-ipset-add-the-missing-IP_SET_HASH_WITH_NET.patch
+Patch1000037: 0001-netdevsim-Fix-memory-leak-of-nsim_dev-fa_cookie.patch
+Patch1000038: 0002-net-mdio-fix-undefined-behavior-in-bit-shift-for-__m.patch
+Patch1000039: 0003-net-atlantic-fix-aq_vec-index-out-of-range-error.patch
+Patch1000040: 0004-udf-Fix-a-slab-out-of-bounds-write-bug-in-udf_find_e.patch
+Patch1000041: 0005-net-pktgen-fix-access-outside-of-user-given-buffer-i.patch
+Patch1000042: 0006-selftests-reuseaddr_conflict-add-missing-new-line-at.patch
+Patch1000043: 0007-udmabuf-fix-a-buf-size-overflow-issue-during-udmabuf.patch
+Patch1000044: 0008-sunrpc-handle-SVC_GARBAGE-during-svc-auth-processing.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1679,6 +1689,15 @@ ApplyOptionalPatch 0003-igb-set-max-size-RX-buffer-when-store-bad-packet-is-.pat
 ApplyOptionalPatch 0004-net-sched-sch_qfq-prevent-slab-out-of-bounds-in-qfq_.patch
 ApplyOptionalPatch 0005-net-tls-update-curr-on-splice-as-well.patch
 ApplyOptionalPatch 0006-dmaengine-idxd-Fix-possible-Use-After-Free-in-irq_pr.patch
+ApplyOptionalPatch 0000-netfilter-ipset-add-the-missing-IP_SET_HASH_WITH_NET.patch
+ApplyOptionalPatch 0001-netdevsim-Fix-memory-leak-of-nsim_dev-fa_cookie.patch
+ApplyOptionalPatch 0002-net-mdio-fix-undefined-behavior-in-bit-shift-for-__m.patch
+ApplyOptionalPatch 0003-net-atlantic-fix-aq_vec-index-out-of-range-error.patch
+ApplyOptionalPatch 0004-udf-Fix-a-slab-out-of-bounds-write-bug-in-udf_find_e.patch
+ApplyOptionalPatch 0005-net-pktgen-fix-access-outside-of-user-given-buffer-i.patch
+ApplyOptionalPatch 0006-selftests-reuseaddr_conflict-add-missing-new-line-at.patch
+ApplyOptionalPatch 0007-udmabuf-fix-a-buf-size-overflow-issue-during-udmabuf.patch
+ApplyOptionalPatch 0008-sunrpc-handle-SVC_GARBAGE-during-svc-auth-processing.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3562,6 +3581,17 @@ fi
 #
 #
 %changelog
+* Tue Jul 15 2025 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.8.1
+- sunrpc: handle SVC_GARBAGE during svc auth processing as auth error (Shreeya Patel) [ciqres] {CVE-2025-38089}
+- udmabuf: fix a buf size overflow issue during udmabuf creation (Marcin Wcisło) [ciqres] {CVE-2025-37803}
+- selftests: reuseaddr_conflict: add missing new line at the end of the output (Jakub Kicinski) [ciqres]
+- net: pktgen: fix access outside of user given buffer in pktgen_thread_write() (Marcin Wcisło) [ciqres] {CVE-2025-38061}
+- udf: Fix a slab-out-of-bounds write bug in udf_find_entry() (Brett Mastbergen) [ciqres] {CVE-2022-49846}
+- net: atlantic: fix aq_vec index out of range error (Anmol Jain) [ciqres] {CVE-2022-50066}
+- net: mdio: fix undefined behavior in bit shift for __mdiobus_register (Marcin Wcisło) [ciqres] {CVE-2022-49907}
+- netdevsim: Fix memory leak of nsim_dev->fa_cookie (Marcin Wcisło) [ciqres] {CVE-2022-49803}
+- netfilter: ipset: add the missing IP_SET_HASH_WITH_NET0 macro for ip_set_hash_netportnet.c (Marcin Wcisło) [ciqres] {CVE-2023-42753}
+
 * Mon Jun 16 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.7.1
 - dmaengine: idxd: Fix possible Use-After-Free in irq_process_work_list (David Gomez) [ciqres] {CVE-2024-40956}
 - net: tls, update curr on splice as well (Marcin Wcisło) [ciqres] {CVE-2024-0646}
