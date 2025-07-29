@@ -1,0 +1,84 @@
+From 0b3fae68e05149515582be490431a52cf7e72fab Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 18 Jul 2025 02:56:55 +0200
+Subject: [PATCH] media: technisat-usb2: break out of loop at end of buffer
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-7734
+cve CVE-2019-15505
+commit-author Sean Young <sean@mess.org>
+commit 0c4df39e504bf925ab666132ac3c98d6cbbe380b
+upstream-diff Mainline fix 0c4df39e504bf925ab666132ac3c98d6cbbe380b is based on
+    changes introduced by 5d0f2df471f50c0ef1512d114ab5c711adfe2103 which
+    `ciqcbr7_9' lacks. Insteasd of operating on the `d->priv->buf' buffer as
+    in the original the logic is applied to the local array `buf[62]'.
+
+Ensure we do not access the buffer beyond the end if no 0xff byte
+is encountered.
+
+	Reported-by: syzbot+eaaaf38a95427be88f4b@syzkaller.appspotmail.com
+	Signed-off-by: Sean Young <sean@mess.org>
+	Reviewed-by: Kees Cook <keescook@chromium.org>
+	Signed-off-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+(cherry picked from commit 0c4df39e504bf925ab666132ac3c98d6cbbe380b)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ drivers/media/usb/dvb-usb/technisat-usb2.c | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/media/usb/dvb-usb/technisat-usb2.c b/drivers/media/usb/dvb-usb/technisat-usb2.c
+index 40832a1aef6c..d7dd9b558fd4 100644
+--- a/drivers/media/usb/dvb-usb/technisat-usb2.c
++++ b/drivers/media/usb/dvb-usb/technisat-usb2.c
+@@ -591,9 +591,10 @@ static int technisat_usb2_frontend_attach(struct dvb_usb_adapter *a)
+ 
+ static int technisat_usb2_get_ir(struct dvb_usb_device *d)
+ {
+-	u8 buf[62], *b;
++	u8 buf[62];
+ 	int ret;
+ 	struct ir_raw_event ev;
++	int i;
+ 
+ 	buf[0] = GET_IR_DATA_VENDOR_REQUEST;
+ 	buf[1] = 0x08;
+@@ -629,26 +630,25 @@ unlock:
+ 		return 0; /* no key pressed */
+ 
+ 	/* decoding */
+-	b = buf+1;
+ 
+ #if 0
+ 	deb_rc("RC: %d ", ret);
+-	debug_dump(b, ret, deb_rc);
++	debug_dump(buf + 1, ret, deb_rc);
+ #endif
+ 
+ 	ev.pulse = 0;
+-	while (1) {
+-		ev.pulse = !ev.pulse;
+-		ev.duration = (*b * FIRMWARE_CLOCK_DIVISOR * FIRMWARE_CLOCK_TICK) / 1000;
+-		ir_raw_event_store(d->rc_dev, &ev);
+-
+-		b++;
+-		if (*b == 0xff) {
++	for (i = 1; i < ARRAY_SIZE(buf); i++) {
++		if (buf[i] == 0xff) {
+ 			ev.pulse = 0;
+ 			ev.duration = 888888*2;
+ 			ir_raw_event_store(d->rc_dev, &ev);
+ 			break;
+ 		}
++
++		ev.pulse = !ev.pulse;
++		ev.duration = (buf[i] * FIRMWARE_CLOCK_DIVISOR *
++			       FIRMWARE_CLOCK_TICK) / 1000;
++		ir_raw_event_store(d->rc_dev, &ev);
+ 	}
+ 
+ 	ir_raw_event_handle(d->rc_dev);
+-- 
+2.47.3
+

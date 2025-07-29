@@ -1,0 +1,112 @@
+From 84b008ac41b006a70dcad2ca6a5c3e57415ae19d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 8 Jul 2025 02:12:40 +0200
+Subject: [PATCH] net/sched: tcindex: update imperfect hash filters respecting
+ rcu
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-7633
+cve CVE-2023-1281
+commit-author Pedro Tammela <pctammela@mojatatu.com>
+commit ee059170b1f7e94e55fa6cadee544e176a6e59c2
+
+The imperfect hash area can be updated while packets are traversing,
+which will cause a use-after-free when 'tcf_exts_exec()' is called
+with the destroyed tcf_ext.
+
+CPU 0:               CPU 1:
+tcindex_set_parms    tcindex_classify
+tcindex_lookup
+                     tcindex_lookup
+tcf_exts_change
+                     tcf_exts_exec [UAF]
+
+Stop operating on the shared area directly, by using a local copy,
+and update the filter with 'rcu_replace_pointer()'. Delete the old
+filter version only after a rcu grace period elapsed.
+
+Fixes: 9b0d4446b569 ("net: sched: avoid atomic swap in tcf_exts_change")
+	Reported-by: valis <sec@valis.email>
+	Suggested-by: valis <sec@valis.email>
+	Signed-off-by: Jamal Hadi Salim <jhs@mojatatu.com>
+	Signed-off-by: Pedro Tammela <pctammela@mojatatu.com>
+Link: https://lore.kernel.org/r/20230209143739.279867-1-pctammela@mojatatu.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit ee059170b1f7e94e55fa6cadee544e176a6e59c2)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/sched/cls_tcindex.c | 34 ++++++++++++++++++++++++++++++----
+ 1 file changed, 30 insertions(+), 4 deletions(-)
+
+diff --git a/net/sched/cls_tcindex.c b/net/sched/cls_tcindex.c
+index e95fc3fe5e4d..122d038a3ff5 100644
+--- a/net/sched/cls_tcindex.c
++++ b/net/sched/cls_tcindex.c
+@@ -10,6 +10,7 @@
+ #include <linux/skbuff.h>
+ #include <linux/errno.h>
+ #include <linux/slab.h>
++#include <linux/rcupdate.h>
+ #include <net/act_api.h>
+ #include <net/netlink.h>
+ #include <net/pkt_cls.h>
+@@ -313,6 +314,7 @@ tcindex_set_parms(struct net *net, struct tcf_proto *tp, unsigned long base,
+ 	struct tcindex_filter *f = NULL; /* make gcc behave */
+ 	int err, balloc = 0;
+ 	struct tcf_exts e;
++	bool update_h = false;
+ 
+ 	err = tcf_exts_init(&e, TCA_TCINDEX_ACT, TCA_TCINDEX_POLICE);
+ 	if (err < 0)
+@@ -427,10 +429,13 @@ tcindex_set_parms(struct net *net, struct tcf_proto *tp, unsigned long base,
+ 		}
+ 	}
+ 
+-	if (cp->perfect)
++	if (cp->perfect) {
+ 		r = cp->perfect + handle;
+-	else
+-		r = tcindex_lookup(cp, handle) ? : &new_filter_result;
++	} else {
++		/* imperfect area is updated in-place using rcu */
++		update_h = !!tcindex_lookup(cp, handle);
++		r = &new_filter_result;
++	}
+ 
+ 	if (r == &new_filter_result) {
+ 		f = kzalloc(sizeof(*f), GFP_KERNEL);
+@@ -464,7 +469,28 @@ tcindex_set_parms(struct net *net, struct tcf_proto *tp, unsigned long base,
+ 
+ 	rcu_assign_pointer(tp->root, cp);
+ 
+-	if (r == &new_filter_result) {
++	if (update_h) {
++		struct tcindex_filter __rcu **fp;
++		struct tcindex_filter *cf;
++
++		f->result.res = r->res;
++		tcf_exts_change(&f->result.exts, &r->exts);
++
++		/* imperfect area bucket */
++		fp = cp->h + (handle % cp->hash);
++
++		/* lookup the filter, guaranteed to exist */
++		for (cf = rcu_dereference_bh_rtnl(*fp); cf;
++		     fp = &cf->next, cf = rcu_dereference_bh_rtnl(*fp))
++			if (cf->key == handle)
++				break;
++
++		f->next = cf->next;
++
++		cf = rcu_replace_pointer(*fp, f, 1);
++		tcf_exts_get_net(&cf->result.exts);
++		tcf_queue_work(&cf->rwork, tcindex_destroy_fexts_work);
++	} else if (r == &new_filter_result) {
+ 		struct tcindex_filter *nfp;
+ 		struct tcindex_filter __rcu **fp;
+ 
+-- 
+2.47.3
+

@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 5
+%define ciq_patch_version 6
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -528,6 +528,15 @@ Patch1014: 0009-xen-blkfront-force-data-bouncing-when-backend-is-unt.patch
 Patch1015: 0000-ALSA-usb-audio-Fix-out-of-bounds-reads-when-finding-.patch
 Patch1016: 0001-net-sched-Fix-use-after-free-in-red_enqueue.patch
 Patch1017: 0002-netfilter-ipset-add-missing-range-check-in-bitmap_ip.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.6.1
+Patch1018: 0000-net-mdio-fix-undefined-behavior-in-bit-shift-for-__m.patch
+Patch1019: 0001-rcu-Upgrade-rcu_swap_protected-to-rcu_replace_pointe.patch
+Patch1020: 0002-net-sched-tcindex-update-imperfect-hash-filters-resp.patch
+Patch1021: 0003-net-sched-tcindex-search-key-must-be-16-bits.patch
+Patch1022: 0004-net-atlantic-fix-aq_vec-index-out-of-range-error.patch
+Patch1023: 0005-net-sched-Retire-tcindex-classifier.patch
+Patch1024: 0006-media-technisat-usb2-break-out-of-loop-at-end-of-buf.patch
+Patch1025: 0007-i2c-Fix-a-potential-use-after-free.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -888,6 +897,14 @@ ApplyOptionalPatch 0009-xen-blkfront-force-data-bouncing-when-backend-is-unt.pat
 ApplyOptionalPatch 0000-ALSA-usb-audio-Fix-out-of-bounds-reads-when-finding-.patch
 ApplyOptionalPatch 0001-net-sched-Fix-use-after-free-in-red_enqueue.patch
 ApplyOptionalPatch 0002-netfilter-ipset-add-missing-range-check-in-bitmap_ip.patch
+ApplyOptionalPatch 0000-net-mdio-fix-undefined-behavior-in-bit-shift-for-__m.patch
+ApplyOptionalPatch 0001-rcu-Upgrade-rcu_swap_protected-to-rcu_replace_pointe.patch
+ApplyOptionalPatch 0002-net-sched-tcindex-update-imperfect-hash-filters-resp.patch
+ApplyOptionalPatch 0003-net-sched-tcindex-search-key-must-be-16-bits.patch
+ApplyOptionalPatch 0004-net-atlantic-fix-aq_vec-index-out-of-range-error.patch
+ApplyOptionalPatch 0005-net-sched-Retire-tcindex-classifier.patch
+ApplyOptionalPatch 0006-media-technisat-usb2-break-out-of-loop-at-end-of-buf.patch
+ApplyOptionalPatch 0007-i2c-Fix-a-potential-use-after-free.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -1891,6 +1908,16 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Mon Jul 28 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.6.1
+- i2c: Fix a potential use after free (Pratham Patel) [ciqres] {CVE-2019-25162}
+- media: technisat-usb2: break out of loop at end of buffer (Marcin Wcisło) [ciqres] {CVE-2019-15505}
+- net/sched: Retire tcindex classifier (Marcin Wcisło) [ciqres] {CVE-2023-1829}
+- net: atlantic: fix aq_vec index out of range error (Anmol Jain) [ciqres] {CVE-2022-50066}
+- net/sched: tcindex: search key must be 16 bits (Marcin Wcisło) [ciqres] {CVE-2023-1281}
+- net/sched: tcindex: update imperfect hash filters respecting rcu (Marcin Wcisło) [ciqres] {CVE-2023-1281}
+- rcu: Upgrade rcu_swap_protected() to rcu_replace_pointer() (Marcin Wcisło) [ciqres] {CVE-2023-1281}
+- net: mdio: fix undefined behavior in bit shift for __mdiobus_register (Marcin Wcisło) [ciqres] {CVE-2022-49907}
+
 * Mon Jun 30 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.5.1
 - netfilter: ipset: add missing range check in bitmap_ip_uadt (Anmol Jain) [ciqres] {CVE-2024-53141}
 - net: sched: Fix use after free in red_enqueue() (Anmol Jain) [ciqres] {CVE-2022-49921}
