@@ -23,7 +23,7 @@ Summary: The Linux kernel
 
 #CIQ Versionsing for the kernel
 %define ciq_patch_version 6
-%define ciq_build_id 1
+%define ciq_build_id 2
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
 
@@ -1908,6 +1908,9 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Mon Aug 11 2025 Jonathan Dieter <jdieter@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.6.2
+- Rebuild for secureboot
+
 * Mon Jul 28 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.6.1
 - i2c: Fix a potential use after free (Pratham Patel) [ciqres] {CVE-2019-25162}
 - media: technisat-usb2: break out of loop at end of buffer (Marcin Wcisło) [ciqres] {CVE-2019-15505}
