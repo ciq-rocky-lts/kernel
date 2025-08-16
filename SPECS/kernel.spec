@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 8
+%define ciq_patch_version 9
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2.92ciq_lts
@@ -520,8 +520,8 @@ Summary: The Linux kernel
 %define all_arch_configs kernel-%{version}-aarch64*.config
 %define asmarch arm64
 %define hdrarch arm64
-%define make_target Image.gz
-%define kernel_image arch/arm64/boot/Image.gz
+%define make_target Image
+%define kernel_image arch/arm64/boot/Image
 %endif
 
 # Should make listnewconfig fail if there's config options
@@ -975,6 +975,20 @@ Patch1000041: 0005-net-pktgen-fix-access-outside-of-user-given-buffer-i.patch
 Patch1000042: 0006-selftests-reuseaddr_conflict-add-missing-new-line-at.patch
 Patch1000043: 0007-udmabuf-fix-a-buf-size-overflow-issue-during-udmabuf.patch
 Patch1000044: 0008-sunrpc-handle-SVC_GARBAGE-during-svc-auth-processing.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.9.1
+Patch1000045: 0000-ext4-fix-double-free-of-blocks-due-to-wrong-extents-.patch
+Patch1000046: 0001-smb-client-fix-OOBs-when-building-SMB2_IOCTL-request.patch
+Patch1000047: 0002-i2c-Fix-a-potential-use-after-free.patch
+Patch1000048: 0003-netfilter-nf_tables-Reject-tables-of-unsupported-fam.patch
+Patch1000049: 0004-netfilter-nf_tables-skip-bound-chain-on-rule-flush.patch
+Patch1000050: 0005-Bluetooth-Fix-double-free-in-hci_conn_cleanup.patch
+Patch1000051: 0006-perf-Disallow-mis-matched-inherited-group-reads.patch
+Patch1000052: 0007-perf-core-Fix-potential-NULL-deref.patch
+Patch1000053: 0008-net-tipc-fix-slab-use-after-free-Read-in-tipc_aead_e.patch
+Patch1000054: 0009-KVM-arm64-vgic-its-Avoid-potential-UAF-in-LPI-transl.patch
+Patch1000055: 0010-NFSD-fix-use-after-free-in-nfsd4_ssc_setup_dul.patch
+Patch1000056: 0011-net-inet-do-not-leave-a-dangling-sk-pointer-in-inet_.patch
+Patch1000057: 0012-can-j1939-j1939_netdev_start-fix-UAF-for-rx_kref-of-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1698,6 +1712,19 @@ ApplyOptionalPatch 0005-net-pktgen-fix-access-outside-of-user-given-buffer-i.pat
 ApplyOptionalPatch 0006-selftests-reuseaddr_conflict-add-missing-new-line-at.patch
 ApplyOptionalPatch 0007-udmabuf-fix-a-buf-size-overflow-issue-during-udmabuf.patch
 ApplyOptionalPatch 0008-sunrpc-handle-SVC_GARBAGE-during-svc-auth-processing.patch
+ApplyOptionalPatch 0000-ext4-fix-double-free-of-blocks-due-to-wrong-extents-.patch
+ApplyOptionalPatch 0001-smb-client-fix-OOBs-when-building-SMB2_IOCTL-request.patch
+ApplyOptionalPatch 0002-i2c-Fix-a-potential-use-after-free.patch
+ApplyOptionalPatch 0003-netfilter-nf_tables-Reject-tables-of-unsupported-fam.patch
+ApplyOptionalPatch 0004-netfilter-nf_tables-skip-bound-chain-on-rule-flush.patch
+ApplyOptionalPatch 0005-Bluetooth-Fix-double-free-in-hci_conn_cleanup.patch
+ApplyOptionalPatch 0006-perf-Disallow-mis-matched-inherited-group-reads.patch
+ApplyOptionalPatch 0007-perf-core-Fix-potential-NULL-deref.patch
+ApplyOptionalPatch 0008-net-tipc-fix-slab-use-after-free-Read-in-tipc_aead_e.patch
+ApplyOptionalPatch 0009-KVM-arm64-vgic-its-Avoid-potential-UAF-in-LPI-transl.patch
+ApplyOptionalPatch 0010-NFSD-fix-use-after-free-in-nfsd4_ssc_setup_dul.patch
+ApplyOptionalPatch 0011-net-inet-do-not-leave-a-dangling-sk-pointer-in-inet_.patch
+ApplyOptionalPatch 0012-can-j1939-j1939_netdev_start-fix-UAF-for-rx_kref-of-.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2003,9 +2030,9 @@ BuildKernel() {
         exit 1
     fi
     mv vmlinuz.signed $SignImage
-    if [ "$KernelExtension" == "gz" ]; then
-        gzip -f9 $SignImage
-    fi
+    #if [ "$KernelExtension" == "gz" ]; then
+    #    gzip -f9 $SignImage
+    #fi
     # signkernel
     %endif
 
@@ -3581,6 +3608,22 @@ fi
 #
 #
 %changelog
+* Tue Aug 12 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.9.1
+- [SPEC] Aarch64 vmlinuz no longer gzip-compressed.  Fixes secureboot signature issue. (Skip Grube) [ciqres]
+- can: j1939: j1939_netdev_start(): fix UAF for rx_kref of j1939_priv (Anmol Jain) [ciqres] {CVE-2021-47459}
+- net: inet: do not leave a dangling sk pointer in inet_create() (Anmol Jain) [ciqres] {CVE-2024-56601}
+- NFSD: fix use-after-free in nfsd4_ssc_setup_dul() (Anmol Jain) [ciqres] {CVE-2023-1652}
+- KVM: arm64: vgic-its: Avoid potential UAF in LPI translation cache (Marcin Wcisło) [ciqres] {CVE-2024-26598}
+- net/tipc: fix slab-use-after-free Read in tipc_aead_encrypt_done (Brett Mastbergen) [ciqres] {CVE-2025-38052}
+- perf/core: Fix potential NULL deref (Shreeya Patel) [ciqres] {CVE-2023-5717}
+- perf: Disallow mis-matched inherited group reads (Shreeya Patel) [ciqres] {CVE-2023-5717}
+- Bluetooth: Fix double free in hci_conn_cleanup (Anmol Jain) [ciqres] {CVE-2023-28464}
+- netfilter: nf_tables: skip bound chain on rule flush (Anmol Jain) [ciqres] {CVE-2023-3777}
+- netfilter: nf_tables: Reject tables of unsupported family (Marcin Wcisło) [ciqres] {CVE-2023-6040}
+- i2c: Fix a potential use after free (Pratham Patel) [ciqres] {CVE-2019-25162}
+- smb: client: fix OOBs when building SMB2_IOCTL request (Marcin Wcisło) [ciqres] {CVE-2024-50151}
+- ext4: fix double-free of blocks due to wrong extents moved_len (Anmol Jain) [ciqres] {CVE-2024-26704}
+
 * Tue Jul 15 2025 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.8.1
 - sunrpc: handle SVC_GARBAGE during svc auth processing as auth error (Shreeya Patel) [ciqres] {CVE-2025-38089}
 - udmabuf: fix a buf size overflow issue during udmabuf creation (Marcin Wcisło) [ciqres] {CVE-2025-37803}

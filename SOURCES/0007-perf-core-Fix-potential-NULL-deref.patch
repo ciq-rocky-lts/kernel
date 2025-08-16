@@ -1,0 +1,39 @@
+From aaf8ba2afa979e958981739ebc2f9897cf6ea267 Mon Sep 17 00:00:00 2001
+From: Shreeya Patel <spatel@ciq.com>
+Date: Thu, 31 Jul 2025 15:49:39 +0000
+Subject: [PATCH] perf/core: Fix potential NULL deref
+
+jira VULN-6760
+cve-bf CVE-2023-5717
+commit-author Peter Zijlstra <peterz@infradead.org>
+commit a71ef31485bb51b846e8db8b3a35e432cc15afb5
+
+Smatch is awesome.
+
+Fixes: 32671e3799ca ("perf: Disallow mis-matched inherited group reads")
+	Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+	Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+	Signed-off-by: Ingo Molnar <mingo@kernel.org>
+(cherry picked from commit a71ef31485bb51b846e8db8b3a35e432cc15afb5)
+	Signed-off-by: Shreeya Patel <spatel@ciq.com>
+---
+ kernel/events/core.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/kernel/events/core.c b/kernel/events/core.c
+index ab9a0a79128b..a273b8a17c0f 100644
+--- a/kernel/events/core.c
++++ b/kernel/events/core.c
+@@ -13143,7 +13143,8 @@ static int inherit_group(struct perf_event *parent_event,
+ 		    !perf_get_aux_event(child_ctr, leader))
+ 			return -EINVAL;
+ 	}
+-	leader->group_generation = parent_event->group_generation;
++	if (leader)
++		leader->group_generation = parent_event->group_generation;
+ 	return 0;
+ }
+ 
+-- 
+2.47.3
+
