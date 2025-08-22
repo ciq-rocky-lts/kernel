@@ -1,0 +1,42 @@
+From 83b75d72959c7b7e38c1d1bb33b1b9a1b019124d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Mon, 4 Aug 2025 22:54:45 +0200
+Subject: [PATCH] perf/core: Fix potential NULL deref
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-7623
+cve-bf CVE-2023-5717
+commit-author Peter Zijlstra <peterz@infradead.org>
+commit a71ef31485bb51b846e8db8b3a35e432cc15afb5
+
+Smatch is awesome.
+
+Fixes: 32671e3799ca ("perf: Disallow mis-matched inherited group reads")
+	Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+	Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+	Signed-off-by: Ingo Molnar <mingo@kernel.org>
+(cherry picked from commit a71ef31485bb51b846e8db8b3a35e432cc15afb5)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ kernel/events/core.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/kernel/events/core.c b/kernel/events/core.c
+index d3fbf948d811..2d0ed33406bf 100644
+--- a/kernel/events/core.c
++++ b/kernel/events/core.c
+@@ -11031,7 +11031,8 @@ static int inherit_group(struct perf_event *parent_event,
+ 		if (IS_ERR(child_ctr))
+ 			return PTR_ERR(child_ctr);
+ 	}
+-	leader->group_generation = parent_event->group_generation;
++	if (leader)
++		leader->group_generation = parent_event->group_generation;
+ 	return 0;
+ }
+ 
+-- 
+2.47.3
+

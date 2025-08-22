@@ -1,0 +1,79 @@
+From 8c46207b039c3a7c1a6f2d1e51488661a368243f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Mon, 28 Jul 2025 23:14:20 +0200
+Subject: [PATCH] netfilter: nf_tables: Reject tables of unsupported family
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-7622
+cve CVE-2023-6040
+commit-author Phil Sutter <phil@nwl.cc>
+commit f1082dd31fe461d482d69da2a8eccfeb7bf07ac2
+upstream-diff  |
+  1. The `CONFIG_NF_TABLES_NETDEV' case removed because that option is
+     not even available in the `ciqcbr7_9' yet.
+  2. All table type CONFIGs wrapped in `IS_ENABLED(...)' macro instead
+     of just `CONFIG_NF_TABLES_BRIDGE' because all of them are of type
+     "tristate" in `ciqcbr7_9', unlike in the newer kernels where they
+     are "bool" and a simple #ifdef is sufficient.
+
+An nftables family is merely a hollow container, its family just a
+number and such not reliant on compile-time options other than nftables
+support itself. Add an artificial check so attempts at using a family
+the kernel can't support fail as early as possible. This helps user
+space detect kernels which lack e.g. NFPROTO_INET.
+
+	Signed-off-by: Phil Sutter <phil@nwl.cc>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit f1082dd31fe461d482d69da2a8eccfeb7bf07ac2)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 347dd3291572..52d1c979f5a0 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -702,6 +702,27 @@ err:
+ 	return ret;
+ }
+ 
++static bool nft_supported_family(u8 family)
++{
++	return false
++#if IS_ENABLED(CONFIG_NF_TABLES_INET)
++		|| family == NFPROTO_INET
++#endif
++#if IS_ENABLED(CONFIG_NF_TABLES_IPV4)
++		|| family == NFPROTO_IPV4
++#endif
++#if IS_ENABLED(CONFIG_NF_TABLES_ARP)
++		|| family == NFPROTO_ARP
++#endif
++#if IS_ENABLED(CONFIG_NF_TABLES_BRIDGE)
++		|| family == NFPROTO_BRIDGE
++#endif
++#if IS_ENABLED(CONFIG_NF_TABLES_IPV6)
++		|| family == NFPROTO_IPV6
++#endif
++		;
++}
++
+ static int nf_tables_newtable(struct net *net, struct sock *nlsk,
+ 			      struct sk_buff *skb, const struct nlmsghdr *nlh,
+ 			      const struct nlattr * const nla[])
+@@ -715,6 +736,9 @@ static int nf_tables_newtable(struct net *net, struct sock *nlsk,
+ 	struct nft_ctx ctx;
+ 	int err;
+ 
++	if (!nft_supported_family(family))
++		return -EOPNOTSUPP;
++
+ 	afi = nf_tables_afinfo_lookup(net, family, true);
+ 	if (IS_ERR(afi))
+ 		return PTR_ERR(afi);
+-- 
+2.47.3
+

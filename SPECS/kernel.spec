@@ -22,8 +22,8 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 6
-%define ciq_build_id 2
+%define ciq_patch_version 7
+%define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
 
@@ -537,6 +537,12 @@ Patch1022: 0004-net-atlantic-fix-aq_vec-index-out-of-range-error.patch
 Patch1023: 0005-net-sched-Retire-tcindex-classifier.patch
 Patch1024: 0006-media-technisat-usb2-break-out-of-loop-at-end-of-buf.patch
 Patch1025: 0007-i2c-Fix-a-potential-use-after-free.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.7.1
+Patch1026: 0000-ceph-avoid-putting-the-realm-twice-when-decoding-sna.patch
+Patch1027: 0001-kbuild-fix-error-when-building-from-src-rpm.patch
+Patch1028: 0002-netfilter-nf_tables-Reject-tables-of-unsupported-fam.patch
+Patch1029: 0003-perf-Disallow-mis-matched-inherited-group-reads.patch
+Patch1030: 0004-perf-core-Fix-potential-NULL-deref.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -905,6 +911,11 @@ ApplyOptionalPatch 0004-net-atlantic-fix-aq_vec-index-out-of-range-error.patch
 ApplyOptionalPatch 0005-net-sched-Retire-tcindex-classifier.patch
 ApplyOptionalPatch 0006-media-technisat-usb2-break-out-of-loop-at-end-of-buf.patch
 ApplyOptionalPatch 0007-i2c-Fix-a-potential-use-after-free.patch
+ApplyOptionalPatch 0000-ceph-avoid-putting-the-realm-twice-when-decoding-sna.patch
+ApplyOptionalPatch 0001-kbuild-fix-error-when-building-from-src-rpm.patch
+ApplyOptionalPatch 0002-netfilter-nf_tables-Reject-tables-of-unsupported-fam.patch
+ApplyOptionalPatch 0003-perf-Disallow-mis-matched-inherited-group-reads.patch
+ApplyOptionalPatch 0004-perf-core-Fix-potential-NULL-deref.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -1908,6 +1919,13 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Wed Aug 20 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.7.1
+- perf/core: Fix potential NULL deref (Marcin Wcisło) [ciqres] {CVE-2023-5717}
+- perf: Disallow mis-matched inherited group reads (Marcin Wcisło) [ciqres] {CVE-2023-5717}
+- netfilter: nf_tables: Reject tables of unsupported family (Marcin Wcisło) [ciqres] {CVE-2023-6040}
+- kbuild: fix error when building from src rpm (Pratham Patel) [ciqres]
+- ceph: avoid putting the realm twice when decoding snaps fails (Pratham Patel) [ciqres] {CVE-2022-49770}
+
 * Mon Aug 11 2025 Jonathan Dieter <jdieter@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.6.2
 - Rebuild for secureboot
 

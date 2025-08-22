@@ -1,0 +1,90 @@
+From f94673022caba33b38da3c4a5e3651c1afa451b7 Mon Sep 17 00:00:00 2001
+From: Pratham Patel <ppatel@ciq.com>
+Date: Thu, 31 Jul 2025 23:06:16 +0530
+Subject: [PATCH] kbuild: fix error when building from src rpm
+
+commit-author Mike Marciniszyn <mike.marciniszyn@intel.com>
+commit c398ff00f55d56bec8eb116e9ad3d226998230fa
+
+The following issue can be reproduced with Linus' tree on
+an x86_64 server.
+
+>+ cp /home/user/rpmbuild-test/BUILDROOT/kernel-3.9.2.x86_64/boot/vmlinuz-3.9.2
+>cp: missing destination file operand after
+>/home/user/rpmbuild-test/BUILDROOT/kernel-3.9.2-1.x86_64/boot/vmlinuz-3.9.2'
+>Try `cp --help' for more information.
+>error: Bad exit status from /var/tmp/rpm-tmp.R4o0iI (%install)
+
+Here are the commands to reproduce:
+
+make defconfig
+make rpm-pkg
+
+Use the resulting src rpm to build as follows:
+
+mkdir ~/rpmbuild-test
+cd ~/rpmbuild-test
+rpmbuild --rebuild --define "_topdir `pwd`" -vv ~/rpmbuild/SRPMS/kernel-3.10.0_rc1+-1.src.rpm
+
+The issue is because the %install script uses $KBUILD_IMAGE and it hasn't
+been set since it is only available in the kbuild system and not in the
+%install script.
+
+This patch adds a Makefile target to emit the image_name that can be used
+and modifies the mkspec to use the dynamic name in %install.
+
+	Signed-off-by: Mike Marciniszyn <mike.marciniszyn@intel.com>
+	Signed-off-by: Michal Marek <mmarek@suse.cz>
+(cherry picked from commit c398ff00f55d56bec8eb116e9ad3d226998230fa)
+	Signed-off-by: Pratham Patel <ppatel@ciq.com>
+---
+ Makefile               | 6 +++++-
+ scripts/package/mkspec | 1 +
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 3942f35d427c..efaf19b57efc 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1208,6 +1208,7 @@ help:
+ 	@echo  '  gtags           - Generate GNU GLOBAL index'
+ 	@echo  '  kernelrelease	  - Output the release version string'
+ 	@echo  '  kernelversion	  - Output the version stored in Makefile'
++	@echo  '  image_name	  - Output the image name'
+ 	@echo  '  headers_install - Install sanitised kernel headers to INSTALL_HDR_PATH'; \
+ 	 echo  '                    (default: $(INSTALL_HDR_PATH))'; \
+ 	 echo  ''
+@@ -1402,7 +1403,7 @@ export_report:
+ endif #ifeq ($(config-targets),1)
+ endif #ifeq ($(mixed-targets),1)
+ 
+-PHONY += checkstack kernelrelease kernelversion
++PHONY += checkstack kernelrelease kernelversion image_name
+ 
+ # UML needs a little special treatment here.  It wants to use the host
+ # toolchain, so needs $(SUBARCH) passed to checkstack.pl.  Everyone
+@@ -1423,6 +1424,9 @@ kernelrelease:
+ kernelversion:
+ 	@echo $(KERNELVERSION)
+ 
++image_name:
++	@echo $(KBUILD_IMAGE)
++
+ # Clear a bunch of variables before executing the submake
+ tools/: FORCE
+ 	$(Q)mkdir -p $(objtree)/tools
+diff --git a/scripts/package/mkspec b/scripts/package/mkspec
+index fbbfd08853d3..fdd3fbf4d4a4 100755
+--- a/scripts/package/mkspec
++++ b/scripts/package/mkspec
+@@ -74,6 +74,7 @@ echo ""
+ fi
+ 
+ echo "%install"
++echo 'KBUILD_IMAGE=$(make image_name)'
+ echo "%ifarch ia64"
+ echo 'mkdir -p $RPM_BUILD_ROOT/boot/efi $RPM_BUILD_ROOT/lib/modules'
+ echo 'mkdir -p $RPM_BUILD_ROOT/lib/firmware'
+-- 
+2.47.3
+
