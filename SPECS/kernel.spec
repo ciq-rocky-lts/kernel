@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 12
+%define ciq_patch_version 14
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6.86ciq_lts
@@ -298,8 +298,8 @@
 %define all_arch_configs %{name}-%{version}-aarch64*.config
 %define asmarch arm64
 %define hdrarch arm64
-%define make_target Image.gz
-%define kernel_image arch/arm64/boot/Image.gz
+%define make_target Image
+%define kernel_image arch/arm64/boot/Image
 %endif
 
 # To temporarily exclude an architecture from being built, add it to
@@ -717,6 +717,44 @@ Patch0151: 0016-net-atlantic-fix-aq_vec-index-out-of-range-error.patch
 Patch0152: 0017-udf-Fix-a-slab-out-of-bounds-write-bug-in-udf_find_e.patch
 Patch0153: 0018-bpf-Fix-ringbuf-memory-type-confusion-when-passing-t.patch
 Patch0154: 0019-net-pktgen-fix-access-outside-of-user-given-buffer-i.patch
+#CIQ Patch Version: 372.32.1.el8_6.86ciq_lts.13.1
+Patch0155: 0000-selftests-reuseaddr_conflict-add-missing-new-line-at.patch
+Patch0156: 0001-ext4-fix-double-free-of-blocks-due-to-wrong-extents-.patch
+Patch0157: 0002-i2c-Fix-a-potential-use-after-free.patch
+Patch0158: 0003-netfilter-nf_tables-Reject-tables-of-unsupported-fam.patch
+Patch0159: 0004-tun-avoid-double-free-in-tun_free_netdev.patch
+#CIQ Patch Version: 372.32.1.el8_6.86ciq_lts.14.1
+Patch0160: 0005-KVM-arm64-vgic-its-Avoid-potential-UAF-in-LPI-transl.patch
+Patch0161: 0006-net-tipc-fix-slab-use-after-free-Read-in-tipc_aead_e.patch
+Patch0162: 0007-iommu-Fix-potential-use-after-free-during-probe.patch
+Patch0163: 0008-dm-ioctl-prevent-potential-spectre-v1-gadget.patch
+Patch0164: 0009-ext4-ignore-xattrs-past-end.patch
+Patch0165: 0010-tipc-fix-use-after-free-Read-in-tipc_named_reinit.patch
+Patch0166: 0011-net-atm-fix-use-after-free-in-lec_send.patch
+Patch0167: 0012-mt76-fix-use-after-free-by-removing-a-non-RCU-wcid-p.patch
+Patch0168: 0013-scsi-libfc-Fix-use-after-free-in-fc_exch_abts_resp.patch
+Patch0169: 0014-perf-Disallow-mis-matched-inherited-group-reads.patch
+Patch0170: 0015-perf-core-Fix-potential-NULL-deref.patch
+Patch0171: 0016-Bluetooth-Fix-use-after-free-in-hci_send_acl.patch
+Patch0172: 0017-cifs-potential-buffer-overflow-in-handling-symlinks.patch
+Patch0173: 0018-mptcp-pm-Fix-uaf-in-__timer_delete_sync.patch
+Patch0174: 0019-bnxt-prevent-skb-UAF-after-handing-over-to-PTP-worke.patch
+Patch0175: 0020-tcp-Use-refcount_inc_not_zero-in-tcp_twsk_unique.patch
+Patch0176: 0021-net-ipv6-avoid-possible-UAF-in-ip6_route_mpath_notif.patch
+Patch0177: 0022-userfaultfd-fix-a-race-between-writeprotect-and-exit.patch
+Patch0178: 0023-uio-Fix-use-after-free-in-uio_open.patch
+Patch0179: 0024-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-with.patch
+Patch0180: 0025-net_sched-hfsc-Address-reentrant-enqueue-adding-clas.patch
+Patch0181: 0026-x86-sev-Harden-VC-instruction-emulation-somewhat.patch
+Patch0182: 0027-x86-sev-Check-for-MWAITX-and-MONITORX-opcodes-in-the.patch
+Patch0183: 0028-ext4-fix-off-by-one-error-in-do_split.patch
+Patch0184: 0029-misc-vmw_vmci-fix-an-infoleak-in-vmci_host_do_receiv.patch
+Patch0185: 0030-i2c-designware-Fix-an-initialization-issue.patch
+Patch0186: 0031-net-ch9200-fix-uninitialised-access-during-mii_nway_.patch
+Patch0187: 0032-drivers-md-fix-a-potential-use-after-free-bug.patch
+Patch0188: 0033-ext4-avoid-resizing-to-a-partial-cluster-size.patch
+Patch0189: 0034-sched-fair-Fix-potential-memory-corruption-in-child_.patch
+Patch0190: 0035-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_sock_rea.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1440,6 +1478,42 @@ ApplyOptionalPatch 0016-net-atlantic-fix-aq_vec-index-out-of-range-error.patch
 ApplyOptionalPatch 0017-udf-Fix-a-slab-out-of-bounds-write-bug-in-udf_find_e.patch
 ApplyOptionalPatch 0018-bpf-Fix-ringbuf-memory-type-confusion-when-passing-t.patch
 ApplyOptionalPatch 0019-net-pktgen-fix-access-outside-of-user-given-buffer-i.patch
+ApplyOptionalPatch 0000-selftests-reuseaddr_conflict-add-missing-new-line-at.patch
+ApplyOptionalPatch 0001-ext4-fix-double-free-of-blocks-due-to-wrong-extents-.patch
+ApplyOptionalPatch 0002-i2c-Fix-a-potential-use-after-free.patch
+ApplyOptionalPatch 0003-netfilter-nf_tables-Reject-tables-of-unsupported-fam.patch
+ApplyOptionalPatch 0004-tun-avoid-double-free-in-tun_free_netdev.patch
+ApplyOptionalPatch 0005-KVM-arm64-vgic-its-Avoid-potential-UAF-in-LPI-transl.patch
+ApplyOptionalPatch 0006-net-tipc-fix-slab-use-after-free-Read-in-tipc_aead_e.patch
+ApplyOptionalPatch 0007-iommu-Fix-potential-use-after-free-during-probe.patch
+ApplyOptionalPatch 0008-dm-ioctl-prevent-potential-spectre-v1-gadget.patch
+ApplyOptionalPatch 0009-ext4-ignore-xattrs-past-end.patch
+ApplyOptionalPatch 0010-tipc-fix-use-after-free-Read-in-tipc_named_reinit.patch
+ApplyOptionalPatch 0011-net-atm-fix-use-after-free-in-lec_send.patch
+ApplyOptionalPatch 0012-mt76-fix-use-after-free-by-removing-a-non-RCU-wcid-p.patch
+ApplyOptionalPatch 0013-scsi-libfc-Fix-use-after-free-in-fc_exch_abts_resp.patch
+ApplyOptionalPatch 0014-perf-Disallow-mis-matched-inherited-group-reads.patch
+ApplyOptionalPatch 0015-perf-core-Fix-potential-NULL-deref.patch
+ApplyOptionalPatch 0016-Bluetooth-Fix-use-after-free-in-hci_send_acl.patch
+ApplyOptionalPatch 0017-cifs-potential-buffer-overflow-in-handling-symlinks.patch
+ApplyOptionalPatch 0018-mptcp-pm-Fix-uaf-in-__timer_delete_sync.patch
+ApplyOptionalPatch 0019-bnxt-prevent-skb-UAF-after-handing-over-to-PTP-worke.patch
+ApplyOptionalPatch 0020-tcp-Use-refcount_inc_not_zero-in-tcp_twsk_unique.patch
+ApplyOptionalPatch 0021-net-ipv6-avoid-possible-UAF-in-ip6_route_mpath_notif.patch
+ApplyOptionalPatch 0022-userfaultfd-fix-a-race-between-writeprotect-and-exit.patch
+ApplyOptionalPatch 0023-uio-Fix-use-after-free-in-uio_open.patch
+ApplyOptionalPatch 0024-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-with.patch
+ApplyOptionalPatch 0025-net_sched-hfsc-Address-reentrant-enqueue-adding-clas.patch
+ApplyOptionalPatch 0026-x86-sev-Harden-VC-instruction-emulation-somewhat.patch
+ApplyOptionalPatch 0027-x86-sev-Check-for-MWAITX-and-MONITORX-opcodes-in-the.patch
+ApplyOptionalPatch 0028-ext4-fix-off-by-one-error-in-do_split.patch
+ApplyOptionalPatch 0029-misc-vmw_vmci-fix-an-infoleak-in-vmci_host_do_receiv.patch
+ApplyOptionalPatch 0030-i2c-designware-Fix-an-initialization-issue.patch
+ApplyOptionalPatch 0031-net-ch9200-fix-uninitialised-access-during-mii_nway_.patch
+ApplyOptionalPatch 0032-drivers-md-fix-a-potential-use-after-free-bug.patch
+ApplyOptionalPatch 0033-ext4-avoid-resizing-to-a-partial-cluster-size.patch
+ApplyOptionalPatch 0034-sched-fair-Fix-potential-memory-corruption-in-child_.patch
+ApplyOptionalPatch 0035-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_sock_rea.patch
 
 
 # CIQ LTS patches:
@@ -1693,9 +1767,9 @@ BuildKernel() {
         exit 1
     fi
     mv vmlinuz.signed $SignImage
-    if [ "$KernelExtension" == "gz" ]; then
-        gzip -f9 $SignImage
-    fi
+    #if [ "$KernelExtension" == "gz" ]; then
+    #    gzip -f9 $SignImage
+    #fi
     # signkernel
     %endif
 
@@ -2999,6 +3073,47 @@ fi
 #
 #
 %changelog
+* Mon Aug 25 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.14.1
+- Bluetooth: L2CAP: Fix use-after-free in l2cap_sock_ready_cb (Shreeya Patel) [ciqres] {CVE-2023-40283}
+- sched/fair: Fix potential memory corruption in child_cfs_rq_on_list (Pratham Patel) [ciqres] {CVE-2025-21919}
+- ext4: avoid resizing to a partial cluster size (Pratham Patel) [ciqres] {CVE-2022-50020}
+- drivers:md:fix a potential use-after-free bug (Pratham Patel) [ciqres] {CVE-2022-50022}
+- net: ch9200: fix uninitialised access during mii_nway_restart (Pratham Patel) [ciqres] {CVE-2025-38086}
+- i2c/designware: Fix an initialization issue (Pratham Patel) [ciqres] {CVE-2025-38380}
+- misc/vmw_vmci: fix an infoleak in vmci_host_do_receive_datagram() (Pratham Patel) [ciqres] {CVE-2022-49788}
+- ext4: fix off-by-one error in do_split (Pratham Patel) [ciqres] {CVE-2025-23150}
+- x86/sev: Check for MWAITX and MONITORX opcodes in the #VC handler (Jonathan Maple) [ciqres] {CVE-2024-25742}
+- x86/sev: Harden #VC instruction emulation somewhat (Sultan Alsawaf) [ciqres] {CVE-2024-25742}
+- net_sched: hfsc: Address reentrant enqueue adding class to eltree twice (Marcin Wcisło) [ciqres] {CVE-2025-37890}
+- net_sched: hfsc: Fix a UAF vulnerability in class with netem as child qdisc (Marcin Wcisło) [ciqres] {CVE-2025-37890}
+- uio: Fix use-after-free in uio_open (Pratham Patel) [ciqres] {CVE-2023-52439}
+- userfaultfd: fix a race between writeprotect and exit_mmap() (Pratham Patel) [ciqres] {CVE-2021-47461}
+- net/ipv6: avoid possible UAF in ip6_route_mpath_notify() (Pratham Patel) [ciqres] {CVE-2024-26852}
+- tcp: Use refcount_inc_not_zero() in tcp_twsk_unique(). (Pratham Patel) [ciqres] {CVE-2024-36904}
+- bnxt: prevent skb UAF after handing over to PTP worker (Pratham Patel) [ciqres] {CVE-2022-48637}
+- mptcp: pm: Fix uaf in __timer_delete_sync (Pratham Patel) [ciqres] {CVE-2024-46858}
+- cifs: potential buffer overflow in handling symlinks (Pratham Patel) [ciqres] {CVE-2022-49058}
+- Bluetooth: Fix use after free in hci_send_acl (Pratham Patel) [ciqres] {CVE-2022-49111}
+- perf/core: Fix potential NULL deref (Marcin Wcisło) [ciqres] {CVE-2023-5717}
+- perf: Disallow mis-matched inherited group reads (Marcin Wcisło) [ciqres] {CVE-2023-5717}
+- scsi: libfc: Fix use after free in fc_exch_abts_resp() (Pratham Patel) [ciqres] {CVE-2022-49114}
+- mt76: fix use-after-free by removing a non-RCU wcid pointer (Pratham Patel) [ciqres] {CVE-2022-49328}
+- net: atm: fix use after free in lec_send() (Pratham Patel) [ciqres] {CVE-2025-22004}
+- tipc: fix use-after-free Read in tipc_named_reinit (Pratham Patel) [ciqres] {CVE-2022-49696}
+- ext4: ignore xattrs past end (Pratham Patel) [ciqres] {CVE-2025-37738}
+- dm ioctl: prevent potential spectre v1 gadget (Pratham Patel) [ciqres] {CVE-2022-49122}
+- iommu: Fix potential use-after-free during probe (Pratham Patel) [ciqres] {CVE-2022-48796}
+- net/tipc: fix slab-use-after-free Read in tipc_aead_encrypt_done (Brett Mastbergen) [ciqres] {CVE-2025-38052}
+- KVM: arm64: vgic-its: Avoid potential UAF in LPI translation cache (Marcin Wcisło) [ciqres] {CVE-2024-26598}
+
+* Mon Aug 04 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.13.1
+- [SPEC] Aarch64 vmlinuz no longer gzip-compressed.  Fixes secureboot signature issue. (Skip Grube) [ciqres]
+- tun: avoid double free in tun_free_netdev (Brett Mastbergen) [ciqres] {CVE-2022-4744}
+- netfilter: nf_tables: Reject tables of unsupported family (Marcin Wcisło) [ciqres] {CVE-2023-6040}
+- i2c: Fix a potential use after free (Pratham Patel) [ciqres] {CVE-2019-25162}
+- ext4: fix double-free of blocks due to wrong extents moved_len (Anmol Jain) [ciqres] {CVE-2024-26704}
+- selftests: reuseaddr_conflict: add missing new line at the end of the output (Jakub Kicinski) [ciqres]
+
 * Tue Jul 01 2025 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.12.1
 - net: pktgen: fix access outside of user given buffer in pktgen_thread_write() (Marcin Wcisło) [ciqres] {CVE-2025-38061}
 - bpf: Fix ringbuf memory type confusion when passing to helpers (Pratham Patel) [ciqres] {CVE-2021-4204}

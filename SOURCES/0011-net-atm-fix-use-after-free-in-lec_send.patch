@@ -1,0 +1,49 @@
+From 540dc76f975ba114ce560c954a3de16c721f2682 Mon Sep 17 00:00:00 2001
+From: Pratham Patel <ppatel@ciq.com>
+Date: Fri, 8 Aug 2025 14:39:47 +0530
+Subject: [PATCH] net: atm: fix use after free in lec_send()
+
+jira VULN-56262
+cve CVE-2025-22004
+commit-author Dan Carpenter <dan.carpenter@linaro.org>
+commit f3009d0d6ab78053117f8857b921a8237f4d17b3
+
+The ->send() operation frees skb so save the length before calling
+->send() to avoid a use after free.
+
+Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
+	Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+Link: https://patch.msgid.link/c751531d-4af4-42fe-affe-6104b34b791d@stanley.mountain
+	Signed-off-by: Paolo Abeni <pabeni@redhat.com>
+
+(cherry picked from commit f3009d0d6ab78053117f8857b921a8237f4d17b3)
+	Signed-off-by: Pratham Patel <ppatel@ciq.com>
+---
+ net/atm/lec.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/net/atm/lec.c b/net/atm/lec.c
+index 1e67398ab914..255b37a863c8 100644
+--- a/net/atm/lec.c
++++ b/net/atm/lec.c
+@@ -180,6 +180,7 @@ static void
+ lec_send(struct atm_vcc *vcc, struct sk_buff *skb)
+ {
+ 	struct net_device *dev = skb->dev;
++	unsigned int len = skb->len;
+ 
+ 	ATM_SKB(skb)->vcc = vcc;
+ 	atm_account_tx(vcc, skb);
+@@ -190,7 +191,7 @@ lec_send(struct atm_vcc *vcc, struct sk_buff *skb)
+ 	}
+ 
+ 	dev->stats.tx_packets++;
+-	dev->stats.tx_bytes += skb->len;
++	dev->stats.tx_bytes += len;
+ }
+ 
+ static void lec_tx_timeout(struct net_device *dev, unsigned int txqueue)
+-- 
+2.47.3
+

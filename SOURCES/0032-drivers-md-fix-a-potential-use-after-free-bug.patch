@@ -1,0 +1,46 @@
+From d426f1929f675a1de2966d85d056000af8656e41 Mon Sep 17 00:00:00 2001
+From: Pratham Patel <ppatel@ciq.com>
+Date: Mon, 18 Aug 2025 10:42:19 +0530
+Subject: [PATCH] drivers:md:fix a potential use-after-free bug
+
+jira VULN-69326
+cve CVE-2022-50022
+commit-author Wentao_Liang <Wentao_Liang_g@163.com>
+commit 104212471b1c1817b311771d817fb692af983173
+
+In line 2884, "raid5_release_stripe(sh);" drops the reference to sh and
+may cause sh to be released. However, sh is subsequently used in lines
+2886 "if (sh->batch_head && sh != sh->batch_head)". This may result in an
+use-after-free bug.
+
+It can be fixed by moving "raid5_release_stripe(sh);" to the bottom of
+the function.
+
+	Signed-off-by: Wentao_Liang <Wentao_Liang_g@163.com>
+	Signed-off-by: Song Liu <song@kernel.org>
+	Signed-off-by: Jens Axboe <axboe@kernel.dk>
+(cherry picked from commit 104212471b1c1817b311771d817fb692af983173)
+	Signed-off-by: Pratham Patel <ppatel@ciq.com>
+---
+ drivers/md/raid5.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/md/raid5.c b/drivers/md/raid5.c
+index ba49cd882d87..4017a3ece1bc 100644
+--- a/drivers/md/raid5.c
++++ b/drivers/md/raid5.c
+@@ -2871,10 +2871,10 @@ static void raid5_end_write_request(struct bio *bi)
+ 	if (!test_and_clear_bit(R5_DOUBLE_LOCKED, &sh->dev[i].flags))
+ 		clear_bit(R5_LOCKED, &sh->dev[i].flags);
+ 	set_bit(STRIPE_HANDLE, &sh->state);
+-	raid5_release_stripe(sh);
+ 
+ 	if (sh->batch_head && sh != sh->batch_head)
+ 		raid5_release_stripe(sh->batch_head);
++	raid5_release_stripe(sh);
+ }
+ 
+ static void raid5_error(struct mddev *mddev, struct md_rdev *rdev)
+-- 
+2.47.3
+
