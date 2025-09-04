@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 9
+%define ciq_patch_version 10
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2.92ciq_lts
@@ -989,6 +989,27 @@ Patch1000054: 0009-KVM-arm64-vgic-its-Avoid-potential-UAF-in-LPI-transl.patch
 Patch1000055: 0010-NFSD-fix-use-after-free-in-nfsd4_ssc_setup_dul.patch
 Patch1000056: 0011-net-inet-do-not-leave-a-dangling-sk-pointer-in-inet_.patch
 Patch1000057: 0012-can-j1939-j1939_netdev_start-fix-UAF-for-rx_kref-of-.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.10.1
+Patch1000058: 0013-drm-amdgpu-Fix-potential-fence-use-after-free-v2.patch
+Patch1000059: 0014-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_sock_rea.patch
+Patch1000060: 0015-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-with.patch
+Patch1000061: 0016-net_sched-hfsc-Address-reentrant-enqueue-adding-clas.patch
+Patch1000062: 0017-net-hns3-fix-use-after-free-bug-in-hclgevf_send_mbx_.patch
+Patch1000063: 0018-tipc-Return-non-zero-value-from-tipc_udp_addr2str-on.patch
+Patch1000064: 0019-ext4-ignore-xattrs-past-end.patch
+Patch1000065: 0020-ext4-fix-off-by-one-error-in-do_split.patch
+Patch1000066: 0021-misc-vmw_vmci-fix-an-infoleak-in-vmci_host_do_receiv.patch
+Patch1000067: 0022-ibmvnic-Use-kernel-helpers-for-hex-dumps.patch
+Patch1000068: 0023-Squashfs-fix-handling-and-sanity-checking-of-xattr_i.patch
+Patch1000069: 0024-drm-vmwgfx-Fix-invalid-reads-in-fence-signaled-event.patch
+Patch1000070: 0025-netfilter-validate-user-input-for-expected-length.patch
+Patch1000071: 0026-netfilter-complete-validation-of-user-input.patch
+Patch1000072: 0027-scsi-lpfc-Use-memcpy-for-BIOS-version.patch
+Patch1000073: 0028-net-ch9200-fix-uninitialised-access-during-mii_nway_.patch
+Patch1000074: 0029-selinux-Add-boundary-check-in-put_entry.patch
+Patch1000075: 0030-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-hand.patch
+Patch1000076: 0031-tee-amdtee-fix-race-condition-in-amdtee_open_session.patch
+Patch1000077: 0032-memstick-rtsx_usb_ms-Fix-slab-use-after-free-in-rtsx.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1725,6 +1746,26 @@ ApplyOptionalPatch 0009-KVM-arm64-vgic-its-Avoid-potential-UAF-in-LPI-transl.pat
 ApplyOptionalPatch 0010-NFSD-fix-use-after-free-in-nfsd4_ssc_setup_dul.patch
 ApplyOptionalPatch 0011-net-inet-do-not-leave-a-dangling-sk-pointer-in-inet_.patch
 ApplyOptionalPatch 0012-can-j1939-j1939_netdev_start-fix-UAF-for-rx_kref-of-.patch
+ApplyOptionalPatch 0013-drm-amdgpu-Fix-potential-fence-use-after-free-v2.patch
+ApplyOptionalPatch 0014-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_sock_rea.patch
+ApplyOptionalPatch 0015-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-with.patch
+ApplyOptionalPatch 0016-net_sched-hfsc-Address-reentrant-enqueue-adding-clas.patch
+ApplyOptionalPatch 0017-net-hns3-fix-use-after-free-bug-in-hclgevf_send_mbx_.patch
+ApplyOptionalPatch 0018-tipc-Return-non-zero-value-from-tipc_udp_addr2str-on.patch
+ApplyOptionalPatch 0019-ext4-ignore-xattrs-past-end.patch
+ApplyOptionalPatch 0020-ext4-fix-off-by-one-error-in-do_split.patch
+ApplyOptionalPatch 0021-misc-vmw_vmci-fix-an-infoleak-in-vmci_host_do_receiv.patch
+ApplyOptionalPatch 0022-ibmvnic-Use-kernel-helpers-for-hex-dumps.patch
+ApplyOptionalPatch 0023-Squashfs-fix-handling-and-sanity-checking-of-xattr_i.patch
+ApplyOptionalPatch 0024-drm-vmwgfx-Fix-invalid-reads-in-fence-signaled-event.patch
+ApplyOptionalPatch 0025-netfilter-validate-user-input-for-expected-length.patch
+ApplyOptionalPatch 0026-netfilter-complete-validation-of-user-input.patch
+ApplyOptionalPatch 0027-scsi-lpfc-Use-memcpy-for-BIOS-version.patch
+ApplyOptionalPatch 0028-net-ch9200-fix-uninitialised-access-during-mii_nway_.patch
+ApplyOptionalPatch 0029-selinux-Add-boundary-check-in-put_entry.patch
+ApplyOptionalPatch 0030-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-hand.patch
+ApplyOptionalPatch 0031-tee-amdtee-fix-race-condition-in-amdtee_open_session.patch
+ApplyOptionalPatch 0032-memstick-rtsx_usb_ms-Fix-slab-use-after-free-in-rtsx.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3608,6 +3649,28 @@ fi
 #
 #
 %changelog
+* Tue Sep 02 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.10.1
+- memstick: rtsx_usb_ms: Fix slab-use-after-free in rtsx_usb_ms_drv_remove (Brett Mastbergen) [ciqres] {CVE-2025-22020}
+- tee: amdtee: fix race condition in amdtee_open_session (Brett Mastbergen) [ciqres] {CVE-2023-53047}
+- net_sched: hfsc: Fix a UAF vulnerability in class handling (Brett Mastbergen) [ciqres] {CVE-2025-37797}
+- selinux: Add boundary check in put_entry() (Brett Mastbergen) [ciqres] {CVE-2022-50200}
+- net: ch9200: fix uninitialised access during mii_nway_restart (Brett Mastbergen) [ciqres] {CVE-2025-38086}
+- scsi: lpfc: Use memcpy() for BIOS version (Brett Mastbergen) [ciqres] {CVE-2025-38332}
+- netfilter: complete validation of user input (Brett Mastbergen) [ciqres] {CVE-2024-35962}
+- netfilter: validate user input for expected length (Brett Mastbergen) [ciqres] {CVE-2024-35896}
+- drm/vmwgfx: Fix invalid reads in fence signaled events (Brett Mastbergen) [ciqres] {CVE-2024-36960}
+- Squashfs: fix handling and sanity checking of xattr_ids count (Brett Mastbergen) [ciqres] {CVE-2023-52933}
+- ibmvnic: Use kernel helpers for hex dumps (Brett Mastbergen) [ciqres] {CVE-2025-22104}
+- misc/vmw_vmci: fix an infoleak in vmci_host_do_receive_datagram() (Brett Mastbergen) [ciqres] {CVE-2022-49788}
+- ext4: fix off-by-one error in do_split (Brett Mastbergen) [ciqres] {CVE-2025-23150}
+- ext4: ignore xattrs past end (Brett Mastbergen) [ciqres] {CVE-2025-37738}
+- tipc: Return non-zero value from tipc_udp_addr2str() on error (Brett Mastbergen) [ciqres] {CVE-2024-42284}
+- net: hns3: fix use-after-free bug in hclgevf_send_mbx_msg (Brett Mastbergen) [ciqres] {CVE-2021-47596}
+- net_sched: hfsc: Address reentrant enqueue adding class to eltree twice (Marcin Wcisło) [ciqres] {CVE-2025-37890}
+- net_sched: hfsc: Fix a UAF vulnerability in class with netem as child qdisc (Marcin Wcisło) [ciqres] {CVE-2025-37890}
+- Bluetooth: L2CAP: Fix use-after-free in l2cap_sock_ready_cb (Shreeya Patel) [ciqres] {CVE-2023-40283}
+- drm/amdgpu: Fix potential fence use-after-free v2 (Shreeya Patel) [ciqres] {CVE-2023-51042}
+
 * Tue Aug 12 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.9.1
 - [SPEC] Aarch64 vmlinuz no longer gzip-compressed.  Fixes secureboot signature issue. (Skip Grube) [ciqres]
 - can: j1939: j1939_netdev_start(): fix UAF for rx_kref of j1939_priv (Anmol Jain) [ciqres] {CVE-2021-47459}

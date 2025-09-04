@@ -1,0 +1,37 @@
+From 7f5249aa9277e4e4851b22ccf1207ad2b705e559 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Thu, 28 Aug 2025 09:40:10 -0400
+Subject: [PATCH] selinux: Add boundary check in put_entry()
+
+jira VULN-70689
+cve CVE-2022-50200
+commit-author Xiu Jianfeng <xiujianfeng@huawei.com>
+commit 15ec76fb29be31df2bccb30fc09875274cba2776
+
+Just like next_entry(), boundary check is necessary to prevent memory
+out-of-bound access.
+
+	Signed-off-by: Xiu Jianfeng <xiujianfeng@huawei.com>
+	Signed-off-by: Paul Moore <paul@paul-moore.com>
+(cherry picked from commit 15ec76fb29be31df2bccb30fc09875274cba2776)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ security/selinux/ss/policydb.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/security/selinux/ss/policydb.h b/security/selinux/ss/policydb.h
+index c24d4e1063ea..ffc4e7bad205 100644
+--- a/security/selinux/ss/policydb.h
++++ b/security/selinux/ss/policydb.h
+@@ -370,6 +370,8 @@ static inline int put_entry(const void *buf, size_t bytes, int num, struct polic
+ {
+ 	size_t len = bytes * num;
+ 
++	if (len > fp->len)
++		return -EINVAL;
+ 	memcpy(fp->data, buf, len);
+ 	fp->data += len;
+ 	fp->len -= len;
+-- 
+2.47.3
+
