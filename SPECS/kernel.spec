@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 14
+%define ciq_patch_version 15
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6.86ciq_lts
@@ -543,8 +543,7 @@ Source2001:            cpupower.config
 Source2002:            kvm_stat.logrotate
 
 
-# CIQ SecureBoot kernel certifcates, CA, and pesign macro override:
-Source8000: ciq_sbsign.macros
+# CIQ SecureBoot kernel certifcates, CA
 Source8001: ciq_sb_kernel.crt
 Source8002: ciq_sb_ca.der
 Source8003: ciq_sb_kernel_driver.der
@@ -755,13 +754,26 @@ Patch0187: 0032-drivers-md-fix-a-potential-use-after-free-bug.patch
 Patch0188: 0033-ext4-avoid-resizing-to-a-partial-cluster-size.patch
 Patch0189: 0034-sched-fair-Fix-potential-memory-corruption-in-child_.patch
 Patch0190: 0035-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_sock_rea.patch
+#CIQ Patch Version: 372.32.1.el8_6.86ciq_lts.15.1
+Patch0191: 0036-posix-cpu-timers-fix-race-between-handle_posix_cpu_t.patch
+Patch0192: 0037-devlink-Fix-use-after-free-after-a-failed-reload.patch
+Patch0193: 0038-KVM-x86-do-not-report-a-vCPU-as-preempted-outside-in.patch
+Patch0194: 0039-wifi-cfg80211-fix-u8-overflow-in-cfg80211_update_not.patch
+Patch0195: 0040-crypto-algif_hash-fix-double-free-in-hash_accept.patch
+Patch0196: 0041-ftrace-Fix-NULL-pointer-dereference-in-is_ftrace_tra.patch
+Patch0197: 0042-can-peak_usb-fix-use-after-free-bugs.patch
+Patch0198: 0043-ALSA-pcm-Fix-races-among-concurrent-hw_params-and-hw.patch
+Patch0199: 0044-psi-Fix-uaf-issue-when-psi-trigger-is-destroyed-whil.patch
+Patch0200: 0045-media-em28xx-initialize-refcount-before-kref_get.patch
+Patch0201: 0046-nfp-fix-use-after-free-in-area_cache_get.patch
+Patch0202: 0047-net-packet-fix-slab-out-of-bounds-access-in-packet_r.patch
+Patch0203: 0048-can-ems_usb-ems_usb_start_xmit-fix-double-dev_kfree_.patch
+Patch0204: 0049-net-sched-cls_u32-fix-netns-refcount-changes-in-u32_.patch
 
 # END OF PATCH DEFINITIONS
 
 # CIQ SecureBoot definitions and macro includes:
 
-# CIQ kernel secureboot macros
-%include %{SOURCE8000}
 
 %define secureboot_ca_0 %{SOURCE8002}
 
@@ -1514,6 +1526,20 @@ ApplyOptionalPatch 0032-drivers-md-fix-a-potential-use-after-free-bug.patch
 ApplyOptionalPatch 0033-ext4-avoid-resizing-to-a-partial-cluster-size.patch
 ApplyOptionalPatch 0034-sched-fair-Fix-potential-memory-corruption-in-child_.patch
 ApplyOptionalPatch 0035-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_sock_rea.patch
+ApplyOptionalPatch 0036-posix-cpu-timers-fix-race-between-handle_posix_cpu_t.patch
+ApplyOptionalPatch 0037-devlink-Fix-use-after-free-after-a-failed-reload.patch
+ApplyOptionalPatch 0038-KVM-x86-do-not-report-a-vCPU-as-preempted-outside-in.patch
+ApplyOptionalPatch 0039-wifi-cfg80211-fix-u8-overflow-in-cfg80211_update_not.patch
+ApplyOptionalPatch 0040-crypto-algif_hash-fix-double-free-in-hash_accept.patch
+ApplyOptionalPatch 0041-ftrace-Fix-NULL-pointer-dereference-in-is_ftrace_tra.patch
+ApplyOptionalPatch 0042-can-peak_usb-fix-use-after-free-bugs.patch
+ApplyOptionalPatch 0043-ALSA-pcm-Fix-races-among-concurrent-hw_params-and-hw.patch
+ApplyOptionalPatch 0044-psi-Fix-uaf-issue-when-psi-trigger-is-destroyed-whil.patch
+ApplyOptionalPatch 0045-media-em28xx-initialize-refcount-before-kref_get.patch
+ApplyOptionalPatch 0046-nfp-fix-use-after-free-in-area_cache_get.patch
+ApplyOptionalPatch 0047-net-packet-fix-slab-out-of-bounds-access-in-packet_r.patch
+ApplyOptionalPatch 0048-can-ems_usb-ems_usb_start_xmit-fix-double-dev_kfree_.patch
+ApplyOptionalPatch 0049-net-sched-cls_u32-fix-netns-refcount-changes-in-u32_.patch
 
 
 # CIQ LTS patches:
@@ -3073,6 +3099,22 @@ fi
 #
 #
 %changelog
+* Tue Sep 16 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.15.1
+- net/sched: cls_u32: fix netns refcount changes in u32_change() (Marcin Wcisło) [ciqres] {CVE-2022-29581}
+- can: ems_usb: ems_usb_start_xmit(): fix double dev_kfree_skb() in error path (Marcin Wcisło) [ciqres] {CVE-2022-28390}
+- net/packet: fix slab-out-of-bounds access in packet_recvmsg() (Marcin Wcisło) [ciqres] {CVE-2022-20368 CVE-2022-48839}
+- nfp: fix use-after-free in area_cache_get() (Marcin Wcisło) [ciqres] {CVE-2022-3545}
+- media: em28xx: initialize refcount before kref_get (Marcin Wcisło) [ciqres] {CVE-2022-3239}
+- psi: Fix uaf issue when psi trigger is destroyed while being polled (Marcin Wcisło) [ciqres] {CVE-2022-2938}
+- ALSA: pcm: Fix races among concurrent hw_params and hw_free calls (Marcin Wcisło) [ciqres] {CVE-2022-1048 CVE-2022-49291}
+- can: peak_usb: fix use after free bugs (Jonathan Maple) [ciqres] {CVE-2021-47670}
+- ftrace: Fix NULL pointer dereference in is_ftrace_trampoline when ftrace is dead (Jonathan Maple) [ciqres] {CVE-2022-49977}
+- crypto: algif_hash - fix double free in hash_accept (Jonathan Maple) [ciqres] {CVE-2025-38079}
+- wifi: cfg80211: fix u8 overflow in cfg80211_update_notlisted_nontrans() (Brett Mastbergen) [ciqres] {CVE-2022-41674}
+- KVM: x86: do not report a vCPU as preempted outside instruction boundaries (Brett Mastbergen) [ciqres] {CVE-2022-39189}
+- devlink: Fix use-after-free after a failed reload (Brett Mastbergen) [ciqres] {CVE-2022-3625}
+- posix-cpu-timers: fix race between handle_posix_cpu_timers() and posix_cpu_timer_del() (Brett Mastbergen) [ciqres] {CVE-2025-38352}
+
 * Mon Aug 25 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.14.1
 - Bluetooth: L2CAP: Fix use-after-free in l2cap_sock_ready_cb (Shreeya Patel) [ciqres] {CVE-2023-40283}
 - sched/fair: Fix potential memory corruption in child_cfs_rq_on_list (Pratham Patel) [ciqres] {CVE-2025-21919}
