@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 7
+%define ciq_patch_version 8
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -482,15 +482,13 @@ Source2000: cpupower.service
 Source2001: cpupower.config
 
 # CIQ signing macros (pesign override) and certs:
-Source8000: ciq_sbsign.macros
 Source8001: ciq_sb_kernel.crt
 Source8002: ciq_sb_ca.der
 Source8003: ciq_sb_kernel_driver.der
 Source8004: ciq_sb_kernel_kpatch.der
 
 
-# Secureboot macro include and definitions - overrides some of the CentOS-specific items above:
-%include %{SOURCE8000}
+# Secureboot definitions - overrides some of the CentOS-specific items above:
 %define secureboot_ca_0  %{SOURCE8002}
 %define secureboot_key_0 %{SOURCE8001}
 %define pesign_name_0  ciq_sb_kernel
@@ -543,6 +541,15 @@ Patch1027: 0001-kbuild-fix-error-when-building-from-src-rpm.patch
 Patch1028: 0002-netfilter-nf_tables-Reject-tables-of-unsupported-fam.patch
 Patch1029: 0003-perf-Disallow-mis-matched-inherited-group-reads.patch
 Patch1030: 0004-perf-core-Fix-potential-NULL-deref.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.8.1
+Patch1031: 0005-net-atm-fix-use-after-free-in-lec_send.patch
+Patch1032: 0006-HID-core-zero-initialize-the-report-buffer.patch
+Patch1033: 0007-fuse-fix-pipe-buffer-lifetime-for-direct_io.patch
+Patch1034: 0008-ALSA-usb-audio-Fix-potential-out-of-bound-accesses-f.patch
+Patch1035: 0009-ALSA-usb-audio-Fix-a-DMA-to-stack-memory-bug.patch
+Patch1036: 0010-posix-cpu-timers-fix-race-between-handle_posix_cpu_t.patch
+Patch1037: 0011-drivers-md-fix-a-potential-use-after-free-bug.patch
+Patch1038: 0012-crypto-algif_hash-fix-double-free-in-hash_accept.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -916,6 +923,14 @@ ApplyOptionalPatch 0001-kbuild-fix-error-when-building-from-src-rpm.patch
 ApplyOptionalPatch 0002-netfilter-nf_tables-Reject-tables-of-unsupported-fam.patch
 ApplyOptionalPatch 0003-perf-Disallow-mis-matched-inherited-group-reads.patch
 ApplyOptionalPatch 0004-perf-core-Fix-potential-NULL-deref.patch
+ApplyOptionalPatch 0005-net-atm-fix-use-after-free-in-lec_send.patch
+ApplyOptionalPatch 0006-HID-core-zero-initialize-the-report-buffer.patch
+ApplyOptionalPatch 0007-fuse-fix-pipe-buffer-lifetime-for-direct_io.patch
+ApplyOptionalPatch 0008-ALSA-usb-audio-Fix-potential-out-of-bound-accesses-f.patch
+ApplyOptionalPatch 0009-ALSA-usb-audio-Fix-a-DMA-to-stack-memory-bug.patch
+ApplyOptionalPatch 0010-posix-cpu-timers-fix-race-between-handle_posix_cpu_t.patch
+ApplyOptionalPatch 0011-drivers-md-fix-a-potential-use-after-free-bug.patch
+ApplyOptionalPatch 0012-crypto-algif_hash-fix-double-free-in-hash_accept.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -1919,6 +1934,16 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Wed Sep 17 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.8.1
+- crypto: algif_hash - fix double free in hash_accept (Brett Mastbergen) [ciqres] {CVE-2025-38079}
+- drivers:md:fix a potential use-after-free bug (Brett Mastbergen) [ciqres] {CVE-2022-50022}
+- posix-cpu-timers: fix race between handle_posix_cpu_timers() and posix_cpu_timer_del() (Brett Mastbergen) [ciqres] {CVE-2025-38352}
+- ALSA: usb-audio: Fix a DMA to stack memory bug (Brett Mastbergen) [ciqres] {CVE-2024-53197}
+- ALSA: usb-audio: Fix potential out-of-bound accesses for Extigy and Mbox devices (Brett Mastbergen) [ciqres] {CVE-2024-53197}
+- fuse: fix pipe buffer lifetime for direct_io (Brett Mastbergen) [ciqres] {CVE-2022-1011}
+- HID: core: zero-initialize the report buffer (Brett Mastbergen) [ciqres] {CVE-2024-50302}
+- net: atm: fix use after free in lec_send() (Brett Mastbergen) [ciqres] {CVE-2025-22004}
+
 * Wed Aug 20 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.7.1
 - perf/core: Fix potential NULL deref (Marcin Wcisło) [ciqres] {CVE-2023-5717}
 - perf: Disallow mis-matched inherited group reads (Marcin Wcisło) [ciqres] {CVE-2023-5717}
