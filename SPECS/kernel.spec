@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 10
+%define ciq_patch_version 11
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2.92ciq_lts
@@ -903,9 +903,8 @@ Source4000: README.rst
 Source4001: rpminspect.yaml
 Source4002: gating.yaml
 
-# CIQ SecureBoot kernel certifcates, CA, and pesign macro override:
+# CIQ SecureBoot kernel certifcates, CA:
 # (these may override definitions from the top of this spec)
-Source8000: ciq_sbsign.macros
 Source8001: ciq_sb_kernel.crt
 Source8002: ciq_sb_ca.der
 Source8003: ciq_sb_kernel_driver.der
@@ -1010,14 +1009,21 @@ Patch1000074: 0029-selinux-Add-boundary-check-in-put_entry.patch
 Patch1000075: 0030-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-hand.patch
 Patch1000076: 0031-tee-amdtee-fix-race-condition-in-amdtee_open_session.patch
 Patch1000077: 0032-memstick-rtsx_usb_ms-Fix-slab-use-after-free-in-rtsx.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.11.1
+Patch1000078: 0033-posix-cpu-timers-fix-race-between-handle_posix_cpu_t.patch
+Patch1000079: 0034-nfp-fix-use-after-free-in-area_cache_get.patch
+Patch1000080: 0035-drivers-net-slip-fix-NPD-bug-in-sl_tx_timeout.patch
+Patch1000081: 0036-bnxt-prevent-skb-UAF-after-handing-over-to-PTP-worke.patch
+Patch1000082: 0037-ftrace-Fix-NULL-pointer-dereference-in-is_ftrace_tra.patch
+Patch1000083: 0038-drm-atomic-Fix-potential-use-after-free-in-nonblocki.patch
+Patch1000084: 0039-Bluetooth-af_bluetooth-Fix-Use-After-Free-in-bt_sock.patch
+Patch1000085: 0040-Bluetooth-af_bluetooth-Fix-deadlock.patch
+Patch1000086: 0041-uio-Fix-use-after-free-in-uio_open.patch
 
 # END OF PATCH DEFINITIONS
 
 # CIQ SecureBoot definitions and macro includes:
 # (these may override definitions from the top of this spec)
-
-# CIQ kernel secureboot macros
-%include %{SOURCE8000}
 
 %define secureboot_ca_0  %{SOURCE8002}
 
@@ -1766,6 +1772,15 @@ ApplyOptionalPatch 0029-selinux-Add-boundary-check-in-put_entry.patch
 ApplyOptionalPatch 0030-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-hand.patch
 ApplyOptionalPatch 0031-tee-amdtee-fix-race-condition-in-amdtee_open_session.patch
 ApplyOptionalPatch 0032-memstick-rtsx_usb_ms-Fix-slab-use-after-free-in-rtsx.patch
+ApplyOptionalPatch 0033-posix-cpu-timers-fix-race-between-handle_posix_cpu_t.patch
+ApplyOptionalPatch 0034-nfp-fix-use-after-free-in-area_cache_get.patch
+ApplyOptionalPatch 0035-drivers-net-slip-fix-NPD-bug-in-sl_tx_timeout.patch
+ApplyOptionalPatch 0036-bnxt-prevent-skb-UAF-after-handing-over-to-PTP-worke.patch
+ApplyOptionalPatch 0037-ftrace-Fix-NULL-pointer-dereference-in-is_ftrace_tra.patch
+ApplyOptionalPatch 0038-drm-atomic-Fix-potential-use-after-free-in-nonblocki.patch
+ApplyOptionalPatch 0039-Bluetooth-af_bluetooth-Fix-Use-After-Free-in-bt_sock.patch
+ApplyOptionalPatch 0040-Bluetooth-af_bluetooth-Fix-deadlock.patch
+ApplyOptionalPatch 0041-uio-Fix-use-after-free-in-uio_open.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3649,6 +3664,17 @@ fi
 #
 #
 %changelog
+* Wed Sep 17 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.11.1
+- uio: Fix use-after-free in uio_open (Brett Mastbergen) [ciqres] {CVE-2023-52439}
+- Bluetooth: af_bluetooth: Fix deadlock (Brett Mastbergen) [ciqres] {CVE-2024-26886}
+- Bluetooth: af_bluetooth: Fix Use-After-Free in bt_sock_recvmsg (Brett Mastbergen) [ciqres] {CVE-2023-51779}
+- drm/atomic: Fix potential use-after-free in nonblocking commits (Brett Mastbergen) [ciqres] {CVE-2023-51043}
+- ftrace: Fix NULL pointer dereference in is_ftrace_trampoline when ftrace is dead (Brett Mastbergen) [ciqres] {CVE-2022-49977}
+- bnxt: prevent skb UAF after handing over to PTP worker (Brett Mastbergen) [ciqres] {CVE-2022-48637}
+- drivers: net: slip: fix NPD bug in sl_tx_timeout() (Brett Mastbergen) [ciqres] {CVE-2022-41858}
+- nfp: fix use-after-free in area_cache_get() (Brett Mastbergen) [ciqres] {CVE-2022-3545}
+- posix-cpu-timers: fix race between handle_posix_cpu_timers() and posix_cpu_timer_del() (Brett Mastbergen) [ciqres] {CVE-2025-38352}
+
 * Tue Sep 02 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.10.1
 - memstick: rtsx_usb_ms: Fix slab-use-after-free in rtsx_usb_ms_drv_remove (Brett Mastbergen) [ciqres] {CVE-2025-22020}
 - tee: amdtee: fix race condition in amdtee_open_session (Brett Mastbergen) [ciqres] {CVE-2023-53047}
