@@ -1,0 +1,47 @@
+From 733cca6931bf9277a493e085d6c6c4e4a19b2e2b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 26 Sep 2025 00:32:28 +0200
+Subject: [PATCH] vc_screen: modify vcs_size() handling in vcs_read()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-358
+jira VULN-55184
+cve-bf CVE-2023-3567
+cve-bf CVE-2023-52973
+commit-author George Kennedy <george.kennedy@oracle.com>
+commit 46d733d0efc79bc8430d63b57ab88011806d5180
+
+Restore the vcs_size() handling in vcs_read() to what
+it had been in previous version.
+
+Fixes: 226fae124b2d ("vc_screen: move load of struct vc_data pointer in vcs_read() to avoid UAF")
+	Suggested-by: Jiri Slaby <jirislaby@kernel.org>
+	Signed-off-by: George Kennedy <george.kennedy@oracle.com>
+	Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+(cherry picked from commit 46d733d0efc79bc8430d63b57ab88011806d5180)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ drivers/tty/vt/vc_screen.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/drivers/tty/vt/vc_screen.c b/drivers/tty/vt/vc_screen.c
+index f566eb1839dc..c0a2273bb998 100644
+--- a/drivers/tty/vt/vc_screen.c
++++ b/drivers/tty/vt/vc_screen.c
+@@ -414,10 +414,8 @@ vcs_read(struct file *file, char __user *buf, size_t count, loff_t *ppos)
+ 		 */
+ 		size = vcs_size(vc, attr, uni_mode);
+ 		if (size < 0) {
+-			if (read)
+-				break;
+ 			ret = size;
+-			goto unlock_out;
++			break;
+ 		}
+ 		if (pos >= size)
+ 			break;
+-- 
+2.47.3
+

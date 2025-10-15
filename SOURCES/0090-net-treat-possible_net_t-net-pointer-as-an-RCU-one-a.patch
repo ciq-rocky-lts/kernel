@@ -1,0 +1,66 @@
+From 0cf6837b49842691316b261738f6996544f39d1f Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Tue, 30 Sep 2025 17:53:37 +0000
+Subject: [PATCH] net: treat possible_net_t net pointer as an RCU one and add
+ read_pnet_rcu()
+
+jira VULN-54026
+cve-pre CVE-2025-21764
+commit-author Jiri Pirko <jiri@nvidia.com>
+commit 2034d90ae41ae93e30d492ebcf1f06f97a9cfba6
+
+Make the net pointer stored in possible_net_t structure annotated as
+an RCU pointer. Change the access helpers to treat it as such.
+Introduce read_pnet_rcu() helper to allow caller to dereference
+the net pointer under RCU read lock.
+
+	Signed-off-by: Jiri Pirko <jiri@nvidia.com>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit 2034d90ae41ae93e30d492ebcf1f06f97a9cfba6)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ include/net/net_namespace.h | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/include/net/net_namespace.h b/include/net/net_namespace.h
+index 170b43a3f04f..36d353df01a9 100644
+--- a/include/net/net_namespace.h
++++ b/include/net/net_namespace.h
+@@ -348,21 +348,30 @@ static inline void put_net_track(struct net *net, netns_tracker *tracker)
+ 
+ typedef struct {
+ #ifdef CONFIG_NET_NS
+-	struct net *net;
++	struct net __rcu *net;
+ #endif
+ } possible_net_t;
+ 
+ static inline void write_pnet(possible_net_t *pnet, struct net *net)
+ {
+ #ifdef CONFIG_NET_NS
+-	pnet->net = net;
++	rcu_assign_pointer(pnet->net, net);
+ #endif
+ }
+ 
+ static inline struct net *read_pnet(const possible_net_t *pnet)
+ {
+ #ifdef CONFIG_NET_NS
+-	return pnet->net;
++	return rcu_dereference_protected(pnet->net, true);
++#else
++	return &init_net;
++#endif
++}
++
++static inline struct net *read_pnet_rcu(possible_net_t *pnet)
++{
++#ifdef CONFIG_NET_NS
++	return rcu_dereference(pnet->net);
+ #else
+ 	return &init_net;
+ #endif
+-- 
+2.47.3
+

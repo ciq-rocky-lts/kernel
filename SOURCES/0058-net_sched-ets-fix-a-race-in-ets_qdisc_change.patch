@@ -1,0 +1,60 @@
+From 122721ed6bfd0dd55c3fd692ebb36bdaf79d4871 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Fri, 19 Sep 2025 10:21:39 -0400
+Subject: [PATCH] net_sched: ets: fix a race in ets_qdisc_change()
+
+jira VULN-71728
+cve CVE-2025-38107
+commit-author Eric Dumazet <edumazet@google.com>
+commit d92adacdd8c2960be856e0b82acc5b7c5395fddb
+
+Gerrard Tai reported a race condition in ETS, whenever SFQ perturb timer
+fires at the wrong time.
+
+The race is as follows:
+
+CPU 0                                 CPU 1
+[1]: lock root
+[2]: qdisc_tree_flush_backlog()
+[3]: unlock root
+ |
+ |                                    [5]: lock root
+ |                                    [6]: rehash
+ |                                    [7]: qdisc_tree_reduce_backlog()
+ |
+[4]: qdisc_put()
+
+This can be abused to underflow a parent's qlen.
+
+Calling qdisc_purge_queue() instead of qdisc_tree_flush_backlog()
+should fix the race, because all packets will be purged from the qdisc
+before releasing the lock.
+
+Fixes: b05972f01e7d ("net: sched: tbf: don't call qdisc_put() while holding tree lock")
+	Reported-by: Gerrard Tai <gerrard.tai@starlabs.sg>
+	Suggested-by: Gerrard Tai <gerrard.tai@starlabs.sg>
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+Link: https://patch.msgid.link/20250611111515.1983366-5-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit d92adacdd8c2960be856e0b82acc5b7c5395fddb)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/sched/sch_ets.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/sched/sch_ets.c b/net/sched/sch_ets.c
+index 6a6f5fb8c362..2a3cc3579f8a 100644
+--- a/net/sched/sch_ets.c
++++ b/net/sched/sch_ets.c
+@@ -668,7 +668,7 @@ static int ets_qdisc_change(struct Qdisc *sch, struct nlattr *opt,
+ 	for (i = q->nbands; i < oldbands; i++) {
+ 		if (i >= q->nstrict && q->classes[i].qdisc->q.qlen)
+ 			list_del_init(&q->classes[i].alist);
+-		qdisc_tree_flush_backlog(q->classes[i].qdisc);
++		qdisc_purge_queue(q->classes[i].qdisc);
+ 	}
+ 	q->nstrict = nstrict;
+ 	memcpy(q->prio2band, priomap, sizeof(priomap));
+-- 
+2.47.3
+

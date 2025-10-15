@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 11
+%define ciq_patch_version 12
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2.92ciq_lts
@@ -1019,6 +1019,66 @@ Patch1000083: 0038-drm-atomic-Fix-potential-use-after-free-in-nonblocki.patch
 Patch1000084: 0039-Bluetooth-af_bluetooth-Fix-Use-After-Free-in-bt_sock.patch
 Patch1000085: 0040-Bluetooth-af_bluetooth-Fix-deadlock.patch
 Patch1000086: 0041-uio-Fix-use-after-free-in-uio_open.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.12.1
+Patch1000087: 0042-netfilter-nftables-exthdr-fix-4-byte-stack-OOB-write.patch
+Patch1000088: 0043-net-ipv6-avoid-possible-UAF-in-ip6_route_mpath_notif.patch
+Patch1000089: 0044-net-fix-out-of-bounds-access-in-ops_init.patch
+Patch1000090: 0045-tcp-Use-refcount_inc_not_zero-in-tcp_twsk_unique.patch
+Patch1000091: 0046-net-sched-sch_multiq-fix-possible-OOB-write-in-multi.patch
+Patch1000092: 0047-locks-fix-KASAN-use-after-free-in-trace_event_raw_ev.patch
+Patch1000093: 0048-filelock-fix-potential-use-after-free-in-posix_lock_.patch
+Patch1000094: 0049-mptcp-pm-Fix-uaf-in-__timer_delete_sync.patch
+Patch1000095: 0050-padata-fix-UAF-in-padata_reorder.patch
+Patch1000096: 0051-crypto-algif_hash-fix-double-free-in-hash_accept.patch
+Patch1000097: 0052-wifi-rtw88-fix-the-para-buffer-size-to-avoid-reading.patch
+Patch1000098: 0053-sch_hfsc-make-hfsc_qlen_notify-idempotent.patch
+Patch1000099: 0054-tipc-Fix-use-after-free-in-tipc_conn_close.patch
+Patch1000100: 0055-sch_hfsc-Fix-qlen-accounting-bug-when-using-peek-in-.patch
+Patch1000101: 0056-net-sched-Always-pass-notifications-when-child-class.patch
+Patch1000102: 0057-sch_ets-make-est_qlen_notify-idempotent.patch
+Patch1000103: 0058-net_sched-ets-fix-a-race-in-ets_qdisc_change.patch
+Patch1000104: 0059-net_sched-sch_ets-implement-lockless-ets_dump.patch
+Patch1000105: 0060-net-sched-ets-use-old-nbands-while-purging-unused-cl.patch
+Patch1000106: 0061-bpf-test_run-Fix-alignment-problem-in-bpf_prog_test_.patch
+Patch1000107: 0062-bpf-test_run-Fix-use-after-free-issue-in-eth_skb_pkt.patch
+Patch1000108: 0063-RDMA-iwcm-Fix-a-use-after-free-related-to-destroying.patch
+Patch1000109: 0064-RDMA-iwcm-Fix-use-after-free-of-work-objects-after-c.patch
+Patch1000110: 0065-RDMA-iwcm-Fix-WARNING-at_kernel-workqueue.c-check_fl.patch
+Patch1000111: 0066-net-forward_alloc_get-depends-on-CONFIG_MPTCP.patch
+Patch1000112: 0067-net-annotate-data-races-around-sk-sk_forward_alloc.patch
+Patch1000113: 0068-udp-Fix-memory-accounting-leak.patch
+Patch1000114: 0069-ext4-move-where-set-the-MAY_INLINE_DATA-flag-is-set.patch
+Patch1000115: 0070-ext4-fix-WARNING-in-ext4_update_inline_data.patch
+Patch1000116: 0071-ext4-improve-xattr-consistency-checking-and-error-re.patch
+Patch1000117: 0072-ext4-introduce-ITAIL-helper.patch
+Patch1000118: 0073-ext4-fix-out-of-bound-read-in-ext4_xattr_inode_dec_r.patch
+Patch1000119: 0074-ext4-rename-s_error_work-to-s_sb_upd_work.patch
+Patch1000120: 0075-ext4-define-ext4_journal_destroy-wrapper.patch
+Patch1000121: 0076-ext4-avoid-journaling-sb-update-on-error-if-journal-.patch
+Patch1000122: 0077-smb-client-fix-potential-OOB-in-smb2_dump_detail.patch
+Patch1000123: 0078-smb-client-fix-OOB-in-smbCalcSize.patch
+Patch1000124: 0079-RDMA-core-Refactor-rdma_bind_addr.patch
+Patch1000125: 0080-RDMA-core-Update-CMA-destination-address-on-rdma_res.patch
+Patch1000126: 0081-ipv4-igmp-fix-refcnt-uaf-issue-when-receiving-igmp-q.patch
+Patch1000127: 0082-perf-Fix-perf_event_validate_size.patch
+Patch1000128: 0083-perf-Fix-perf_event_validate_size-lockdep-splat.patch
+Patch1000129: 0084-vc_screen-move-load-of-struct-vc_data-pointer-in-vcs.patch
+Patch1000130: 0085-vc_screen-modify-vcs_size-handling-in-vcs_read.patch
+Patch1000131: 0086-vc_screen-don-t-clobber-return-value-in-vcs_read.patch
+Patch1000132: 0087-ovl-fix-use-after-free-in-struct-ovl_aio_req.patch
+Patch1000133: 0088-skbuff-skb_segment-Call-zero-copy-functions-before-u.patch
+Patch1000134: 0089-net-bridge-xmit-make-sure-we-have-at-least-eth-heade.patch
+Patch1000135: 0090-net-treat-possible_net_t-net-pointer-as-an-RCU-one-a.patch
+Patch1000136: 0091-net-add-dev_net_rcu-helper.patch
+Patch1000137: 0092-ndisc-use-RCU-protection-in-ndisc_alloc_skb.patch
+Patch1000138: 0093-i2c-designware-Fix-an-initialization-issue.patch
+Patch1000139: 0094-tls-always-refresh-the-queue-when-reading-sock.patch
+Patch1000140: 0095-wait-add-wake_up_pollfree.patch
+Patch1000141: 0096-binder-use-wake_up_pollfree.patch
+Patch1000142: 0097-signalfd-use-wake_up_pollfree.patch
+Patch1000143: 0098-aio-keep-poll-requests-on-waitqueue-until-completed.patch
+Patch1000144: 0099-aio-fix-use-after-free-due-to-missing-POLLFREE-handl.patch
+Patch1000145: 0100-sched-psi-Fix-use-after-free-in-ep_remove_wait_queue.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1781,6 +1841,65 @@ ApplyOptionalPatch 0038-drm-atomic-Fix-potential-use-after-free-in-nonblocki.pat
 ApplyOptionalPatch 0039-Bluetooth-af_bluetooth-Fix-Use-After-Free-in-bt_sock.patch
 ApplyOptionalPatch 0040-Bluetooth-af_bluetooth-Fix-deadlock.patch
 ApplyOptionalPatch 0041-uio-Fix-use-after-free-in-uio_open.patch
+ApplyOptionalPatch 0042-netfilter-nftables-exthdr-fix-4-byte-stack-OOB-write.patch
+ApplyOptionalPatch 0043-net-ipv6-avoid-possible-UAF-in-ip6_route_mpath_notif.patch
+ApplyOptionalPatch 0044-net-fix-out-of-bounds-access-in-ops_init.patch
+ApplyOptionalPatch 0045-tcp-Use-refcount_inc_not_zero-in-tcp_twsk_unique.patch
+ApplyOptionalPatch 0046-net-sched-sch_multiq-fix-possible-OOB-write-in-multi.patch
+ApplyOptionalPatch 0047-locks-fix-KASAN-use-after-free-in-trace_event_raw_ev.patch
+ApplyOptionalPatch 0048-filelock-fix-potential-use-after-free-in-posix_lock_.patch
+ApplyOptionalPatch 0049-mptcp-pm-Fix-uaf-in-__timer_delete_sync.patch
+ApplyOptionalPatch 0050-padata-fix-UAF-in-padata_reorder.patch
+ApplyOptionalPatch 0051-crypto-algif_hash-fix-double-free-in-hash_accept.patch
+ApplyOptionalPatch 0052-wifi-rtw88-fix-the-para-buffer-size-to-avoid-reading.patch
+ApplyOptionalPatch 0053-sch_hfsc-make-hfsc_qlen_notify-idempotent.patch
+ApplyOptionalPatch 0054-tipc-Fix-use-after-free-in-tipc_conn_close.patch
+ApplyOptionalPatch 0055-sch_hfsc-Fix-qlen-accounting-bug-when-using-peek-in-.patch
+ApplyOptionalPatch 0056-net-sched-Always-pass-notifications-when-child-class.patch
+ApplyOptionalPatch 0057-sch_ets-make-est_qlen_notify-idempotent.patch
+ApplyOptionalPatch 0058-net_sched-ets-fix-a-race-in-ets_qdisc_change.patch
+ApplyOptionalPatch 0059-net_sched-sch_ets-implement-lockless-ets_dump.patch
+ApplyOptionalPatch 0060-net-sched-ets-use-old-nbands-while-purging-unused-cl.patch
+ApplyOptionalPatch 0061-bpf-test_run-Fix-alignment-problem-in-bpf_prog_test_.patch
+ApplyOptionalPatch 0062-bpf-test_run-Fix-use-after-free-issue-in-eth_skb_pkt.patch
+ApplyOptionalPatch 0063-RDMA-iwcm-Fix-a-use-after-free-related-to-destroying.patch
+ApplyOptionalPatch 0064-RDMA-iwcm-Fix-use-after-free-of-work-objects-after-c.patch
+ApplyOptionalPatch 0065-RDMA-iwcm-Fix-WARNING-at_kernel-workqueue.c-check_fl.patch
+ApplyOptionalPatch 0066-net-forward_alloc_get-depends-on-CONFIG_MPTCP.patch
+ApplyOptionalPatch 0067-net-annotate-data-races-around-sk-sk_forward_alloc.patch
+ApplyOptionalPatch 0068-udp-Fix-memory-accounting-leak.patch
+ApplyOptionalPatch 0069-ext4-move-where-set-the-MAY_INLINE_DATA-flag-is-set.patch
+ApplyOptionalPatch 0070-ext4-fix-WARNING-in-ext4_update_inline_data.patch
+ApplyOptionalPatch 0071-ext4-improve-xattr-consistency-checking-and-error-re.patch
+ApplyOptionalPatch 0072-ext4-introduce-ITAIL-helper.patch
+ApplyOptionalPatch 0073-ext4-fix-out-of-bound-read-in-ext4_xattr_inode_dec_r.patch
+ApplyOptionalPatch 0074-ext4-rename-s_error_work-to-s_sb_upd_work.patch
+ApplyOptionalPatch 0075-ext4-define-ext4_journal_destroy-wrapper.patch
+ApplyOptionalPatch 0076-ext4-avoid-journaling-sb-update-on-error-if-journal-.patch
+ApplyOptionalPatch 0077-smb-client-fix-potential-OOB-in-smb2_dump_detail.patch
+ApplyOptionalPatch 0078-smb-client-fix-OOB-in-smbCalcSize.patch
+ApplyOptionalPatch 0079-RDMA-core-Refactor-rdma_bind_addr.patch
+ApplyOptionalPatch 0080-RDMA-core-Update-CMA-destination-address-on-rdma_res.patch
+ApplyOptionalPatch 0081-ipv4-igmp-fix-refcnt-uaf-issue-when-receiving-igmp-q.patch
+ApplyOptionalPatch 0082-perf-Fix-perf_event_validate_size.patch
+ApplyOptionalPatch 0083-perf-Fix-perf_event_validate_size-lockdep-splat.patch
+ApplyOptionalPatch 0084-vc_screen-move-load-of-struct-vc_data-pointer-in-vcs.patch
+ApplyOptionalPatch 0085-vc_screen-modify-vcs_size-handling-in-vcs_read.patch
+ApplyOptionalPatch 0086-vc_screen-don-t-clobber-return-value-in-vcs_read.patch
+ApplyOptionalPatch 0087-ovl-fix-use-after-free-in-struct-ovl_aio_req.patch
+ApplyOptionalPatch 0088-skbuff-skb_segment-Call-zero-copy-functions-before-u.patch
+ApplyOptionalPatch 0089-net-bridge-xmit-make-sure-we-have-at-least-eth-heade.patch
+ApplyOptionalPatch 0090-net-treat-possible_net_t-net-pointer-as-an-RCU-one-a.patch
+ApplyOptionalPatch 0091-net-add-dev_net_rcu-helper.patch
+ApplyOptionalPatch 0092-ndisc-use-RCU-protection-in-ndisc_alloc_skb.patch
+ApplyOptionalPatch 0093-i2c-designware-Fix-an-initialization-issue.patch
+ApplyOptionalPatch 0094-tls-always-refresh-the-queue-when-reading-sock.patch
+ApplyOptionalPatch 0095-wait-add-wake_up_pollfree.patch
+ApplyOptionalPatch 0096-binder-use-wake_up_pollfree.patch
+ApplyOptionalPatch 0097-signalfd-use-wake_up_pollfree.patch
+ApplyOptionalPatch 0098-aio-keep-poll-requests-on-waitqueue-until-completed.patch
+ApplyOptionalPatch 0099-aio-fix-use-after-free-due-to-missing-POLLFREE-handl.patch
+ApplyOptionalPatch 0100-sched-psi-Fix-use-after-free-in-ep_remove_wait_queue.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3664,6 +3783,67 @@ fi
 #
 #
 %changelog
+* Mon Oct 06 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.12.1
+- sched/psi: Fix use-after-free in ep_remove_wait_queue() (Brett Mastbergen) [ciqres] {CVE-2023-52707}
+- aio: fix use-after-free due to missing POLLFREE handling (Brett Mastbergen) [ciqres] {CVE-2021-47505}
+- aio: keep poll requests on waitqueue until completed (Brett Mastbergen) [ciqres] {CVE-2021-47505}
+- signalfd: use wake_up_pollfree() (Brett Mastbergen) [ciqres] {CVE-2021-47505}
+- binder: use wake_up_pollfree() (Brett Mastbergen) [ciqres] {CVE-2021-47505}
+- wait: add wake_up_pollfree() (Brett Mastbergen) [ciqres] {CVE-2021-47505}
+- tls: always refresh the queue when reading sock (Brett Mastbergen) [ciqres] {CVE-2025-38471}
+- i2c/designware: Fix an initialization issue (Brett Mastbergen) [ciqres] {CVE-2025-38380}
+- ndisc: use RCU protection in ndisc_alloc_skb() (Brett Mastbergen) [ciqres] {CVE-2025-21764}
+- net: add dev_net_rcu() helper (Brett Mastbergen) [ciqres] {CVE-2025-21764}
+- net: treat possible_net_t net pointer as an RCU one and add read_pnet_rcu() (Brett Mastbergen) [ciqres] {CVE-2025-21764}
+- net: bridge: xmit: make sure we have at least eth header len bytes (Brett Mastbergen) [ciqres] {CVE-2024-38538}
+- skbuff: skb_segment, Call zero copy functions before using skbuff frags (Brett Mastbergen) [ciqres] {CVE-2023-53354}
+- ovl: fix use after free in struct ovl_aio_req (Marcin Wcisło) [ciqres] {CVE-2023-1252}
+- vc_screen: don't clobber return value in vcs_read (Marcin Wcisło) [ciqres] {CVE-2023-3567 CVE-2023-52973}
+- vc_screen: modify vcs_size() handling in vcs_read() (Marcin Wcisło) [ciqres] {CVE-2023-3567 CVE-2023-52973}
+- vc_screen: move load of struct vc_data pointer in vcs_read() to avoid UAF (Marcin Wcisło) [ciqres] {CVE-2023-3567 CVE-2023-52973}
+- perf: Fix perf_event_validate_size() lockdep splat (Marcin Wcisło) [ciqres] {CVE-2023-6931}
+- perf: Fix perf_event_validate_size() (Marcin Wcisło) [ciqres] {CVE-2023-6931}
+- ipv4: igmp: fix refcnt uaf issue when receiving igmp query packet (Marcin Wcisło) [ciqres] {CVE-2023-6932}
+- RDMA/core: Update CMA destination address on rdma_resolve_addr (Marcin Wcisło) [ciqres] {CVE-2023-2176}
+- RDMA/core: Refactor rdma_bind_addr (Marcin Wcisło) [ciqres] {CVE-2023-2176}
+- smb: client: fix OOB in smbCalcSize() (Marcin Wcisło) [ciqres] {CVE-2023-6606}
+- smb: client: fix potential OOB in smb2_dump_detail() (Marcin Wcisło) [ciqres] {CVE-2023-6610}
+- ext4: avoid journaling sb update on error if journal is destroying (Brett Mastbergen) [ciqres] {CVE-2025-22113}
+- ext4: define ext4_journal_destroy wrapper (Brett Mastbergen) [ciqres] {CVE-2025-22113}
+- ext4: rename s_error_work to s_sb_upd_work (Brett Mastbergen) [ciqres] {CVE-2025-22113}
+- ext4: fix out-of-bound read in ext4_xattr_inode_dec_ref_all() (Brett Mastbergen) [ciqres] {CVE-2025-22121}
+- ext4: introduce ITAIL helper (Brett Mastbergen) [ciqres] {CVE-2025-22121}
+- ext4: improve xattr consistency checking and error reporting (Brett Mastbergen) [ciqres] {CVE-2025-22121}
+- ext4: fix WARNING in ext4_update_inline_data (Brett Mastbergen) [ciqres] {CVE-2023-53100}
+- ext4: move where set the MAY_INLINE_DATA flag is set (Brett Mastbergen) [ciqres] {CVE-2023-53100}
+- udp: Fix memory accounting leak. (Brett Mastbergen) [ciqres] {CVE-2025-22058}
+- net: annotate data-races around sk->sk_forward_alloc (Brett Mastbergen) [ciqres] {CVE-2025-22058}
+- net: forward_alloc_get depends on CONFIG_MPTCP (Brett Mastbergen) [ciqres] {CVE-2025-22058}
+- RDMA/iwcm: Fix WARNING:at_kernel/workqueue.c:#check_flush_dependency (Brett Mastbergen) [ciqres] {CVE-2024-47696}
+- RDMA/iwcm: Fix use-after-free of work objects after cm_id destruction (Brett Mastbergen) [ciqres] {CVE-2025-38211}
+- RDMA/iwcm: Fix a use-after-free related to destroying CM IDs (Brett Mastbergen) [ciqres] {CVE-2024-42285}
+- bpf, test_run: Fix use-after-free issue in eth_skb_pkt_type() (Brett Mastbergen) [ciqres] {CVE-2025-21867}
+- bpf, test_run: Fix alignment problem in bpf_prog_test_run_skb() (Brett Mastbergen) [ciqres] {CVE-2022-49840}
+- net/sched: ets: use old 'nbands' while purging unused classes (Brett Mastbergen) [ciqres] {CVE-2025-38684}
+- net_sched: sch_ets: implement lockless ets_dump() (Brett Mastbergen) [ciqres] {CVE-2025-38684}
+- net_sched: ets: fix a race in ets_qdisc_change() (Brett Mastbergen) [ciqres] {CVE-2025-38107}
+- sch_ets: make est_qlen_notify() idempotent (Brett Mastbergen) [ciqres] {CVE-2025-38107}
+- net/sched: Always pass notifications when child class becomes empty (Brett Mastbergen) [ciqres] {CVE-2025-38350}
+- sch_hfsc: Fix qlen accounting bug when using peek in hfsc_enqueue() (Brett Mastbergen) [ciqres] {CVE-2025-38000}
+- tipc: Fix use-after-free in tipc_conn_close(). (Brett Mastbergen) [ciqres] {CVE-2025-38464}
+- sch_hfsc: make hfsc_qlen_notify() idempotent (Brett Mastbergen) [ciqres] {CVE-2025-38177}
+- wifi: rtw88: fix the 'para' buffer size to avoid reading out of bounds (Brett Mastbergen) [ciqres] {CVE-2025-38159}
+- crypto: algif_hash - fix double free in hash_accept (Brett Mastbergen) [ciqres] {CVE-2025-38079}
+- padata: fix UAF in padata_reorder (Brett Mastbergen) [ciqres] {CVE-2025-21727}
+- mptcp: pm: Fix uaf in __timer_delete_sync (Brett Mastbergen) [ciqres] {CVE-2024-46858}
+- filelock: fix potential use-after-free in posix_lock_inode (Brett Mastbergen) [ciqres] {CVE-2024-41049}
+- locks: fix KASAN: use-after-free in trace_event_raw_event_filelock_lock (Brett Mastbergen) [ciqres] {CVE-2024-41049}
+- net: sched: sch_multiq: fix possible OOB write in multiq_tune() (Brett Mastbergen) [ciqres] {CVE-2024-36978}
+- tcp: Use refcount_inc_not_zero() in tcp_twsk_unique(). (Brett Mastbergen) [ciqres] {CVE-2024-36904}
+- net: fix out-of-bounds access in ops_init (Brett Mastbergen) [ciqres] {CVE-2024-36883}
+- net/ipv6: avoid possible UAF in ip6_route_mpath_notify() (Brett Mastbergen) [ciqres] {CVE-2024-26852}
+- netfilter: nftables: exthdr: fix 4-byte stack OOB write (Brett Mastbergen) [ciqres] {CVE-2023-52628}
+
 * Wed Sep 17 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.11.1
 - uio: Fix use-after-free in uio_open (Brett Mastbergen) [ciqres] {CVE-2023-52439}
 - Bluetooth: af_bluetooth: Fix deadlock (Brett Mastbergen) [ciqres] {CVE-2024-26886}

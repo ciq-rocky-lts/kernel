@@ -1,0 +1,115 @@
+From 44b2cceeff7af9c0984f16bf5fc77c77e6f2c14a Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Mon, 22 Sep 2025 16:01:52 -0400
+Subject: [PATCH] ext4: define ext4_journal_destroy wrapper
+
+jira VULN-65357
+cve-pre CVE-2025-22113
+commit-author Ojaswin Mujoo <ojaswin@linux.ibm.com>
+commit 5a02a6204ca37e7c22fbb55a789c503f05e8e89a
+
+Define an ext4 wrapper over jbd2_journal_destroy to make sure we
+have consistent behavior during journal destruction. This will also
+come useful in the next patch where we add some ext4 specific logic
+in the destroy path.
+
+	Reviewed-by: Jan Kara <jack@suse.cz>
+	Reviewed-by: Baokun Li <libaokun1@huawei.com>
+	Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Link: https://patch.msgid.link/c3ba78c5c419757e6d5f2d8ebb4a8ce9d21da86a.1742279837.git.ojaswin@linux.ibm.com
+	Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+(cherry picked from commit 5a02a6204ca37e7c22fbb55a789c503f05e8e89a)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ fs/ext4/ext4_jbd2.h | 14 ++++++++++++++
+ fs/ext4/super.c     | 16 ++++++----------
+ 2 files changed, 20 insertions(+), 10 deletions(-)
+
+diff --git a/fs/ext4/ext4_jbd2.h b/fs/ext4/ext4_jbd2.h
+index db2ae4a2b38d..660b49da934e 100644
+--- a/fs/ext4/ext4_jbd2.h
++++ b/fs/ext4/ext4_jbd2.h
+@@ -513,4 +513,18 @@ static inline int ext4_should_dioread_nolock(struct inode *inode)
+ 	return 1;
+ }
+ 
++/*
++ * Pass journal explicitly as it may not be cached in the sbi->s_journal in some
++ * cases
++ */
++static inline int ext4_journal_destroy(struct ext4_sb_info *sbi, journal_t *journal)
++{
++	int err = 0;
++
++	err = jbd2_journal_destroy(journal);
++	sbi->s_journal = NULL;
++
++	return err;
++}
++
+ #endif	/* _EXT4_JBD2_H */
+diff --git a/fs/ext4/super.c b/fs/ext4/super.c
+index 222224c9d51c..4c593a8c6761 100644
+--- a/fs/ext4/super.c
++++ b/fs/ext4/super.c
+@@ -1209,8 +1209,7 @@ static void ext4_put_super(struct super_block *sb)
+ 
+ 	if (sbi->s_journal) {
+ 		aborted = is_journal_aborted(sbi->s_journal);
+-		err = jbd2_journal_destroy(sbi->s_journal);
+-		sbi->s_journal = NULL;
++		err = ext4_journal_destroy(sbi, sbi->s_journal);
+ 		if ((err < 0) && !aborted) {
+ 			ext4_abort(sb, -err, "Couldn't clean up the journal");
+ 		}
+@@ -4894,8 +4893,7 @@ static int ext4_load_and_init_journal(struct super_block *sb,
+ out:
+ 	/* flush s_sb_upd_work before destroying the journal. */
+ 	flush_work(&sbi->s_sb_upd_work);
+-	jbd2_journal_destroy(sbi->s_journal);
+-	sbi->s_journal = NULL;
++	ext4_journal_destroy(sbi, sbi->s_journal);
+ 	return -EINVAL;
+ }
+ 
+@@ -5603,8 +5601,7 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+ 	if (sbi->s_journal) {
+ 		/* flush s_sb_upd_work before journal destroy. */
+ 		flush_work(&sbi->s_sb_upd_work);
+-		jbd2_journal_destroy(sbi->s_journal);
+-		sbi->s_journal = NULL;
++		ext4_journal_destroy(sbi, sbi->s_journal);
+ 	}
+ failed_mount3a:
+ 	ext4_es_unregister_shrinker(sbi);
+@@ -5858,7 +5855,7 @@ static journal_t *ext4_get_dev_journal(struct super_block *sb,
+ 	return journal;
+ 
+ out_journal:
+-	jbd2_journal_destroy(journal);
++	ext4_journal_destroy(EXT4_SB(sb), journal);
+ out_bdev:
+ 	ext4_blkdev_put(bdev);
+ 	return NULL;
+@@ -5958,8 +5955,7 @@ static int ext4_load_journal(struct super_block *sb,
+ 	EXT4_SB(sb)->s_journal = journal;
+ 	err = ext4_clear_journal_err(sb, es);
+ 	if (err) {
+-		EXT4_SB(sb)->s_journal = NULL;
+-		jbd2_journal_destroy(journal);
++		ext4_journal_destroy(EXT4_SB(sb), journal);
+ 		return err;
+ 	}
+ 
+@@ -5974,7 +5970,7 @@ static int ext4_load_journal(struct super_block *sb,
+ 	return 0;
+ 
+ err_out:
+-	jbd2_journal_destroy(journal);
++	ext4_journal_destroy(EXT4_SB(sb), journal);
+ 	return err;
+ }
+ 
+-- 
+2.47.3
+

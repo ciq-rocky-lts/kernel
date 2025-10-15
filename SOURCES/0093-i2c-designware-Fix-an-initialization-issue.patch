@@ -1,0 +1,46 @@
+From 5ba273f569fdb8beedab558e83a9ce303ade4dca Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Mon, 29 Sep 2025 14:46:00 -0400
+Subject: [PATCH] i2c/designware: Fix an initialization issue
+
+jira VULN-79509
+cve CVE-2025-38380
+commit-author Michael J. Ruhl <michael.j.ruhl@intel.com>
+commit 3d30048958e0d43425f6d4e76565e6249fa71050
+
+The i2c_dw_xfer_init() function requires msgs and msg_write_idx from the
+dev context to be initialized.
+
+amd_i2c_dw_xfer_quirk() inits msgs and msgs_num, but not msg_write_idx.
+
+This could allow an out of bounds access (of msgs).
+
+Initialize msg_write_idx before calling i2c_dw_xfer_init().
+
+	Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Fixes: 17631e8ca2d3 ("i2c: designware: Add driver support for AMD NAVI GPU")
+	Cc: <stable@vger.kernel.org> # v5.13+
+	Signed-off-by: Michael J. Ruhl <michael.j.ruhl@intel.com>
+	Signed-off-by: Andi Shyti <andi.shyti@kernel.org>
+Link: https://lore.kernel.org/r/20250627143511.489570-1-michael.j.ruhl@intel.com
+(cherry picked from commit 3d30048958e0d43425f6d4e76565e6249fa71050)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ drivers/i2c/busses/i2c-designware-master.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/i2c/busses/i2c-designware-master.c b/drivers/i2c/busses/i2c-designware-master.c
+index 9b08bb5df38d..bde50d53f0b8 100644
+--- a/drivers/i2c/busses/i2c-designware-master.c
++++ b/drivers/i2c/busses/i2c-designware-master.c
+@@ -298,6 +298,7 @@ static int amd_i2c_dw_xfer_quirk(struct i2c_adapter *adap, struct i2c_msg *msgs,
+ 
+ 	dev->msgs = msgs;
+ 	dev->msgs_num = num_msgs;
++	dev->msg_write_idx = 0;
+ 	i2c_dw_xfer_init(dev);
+ 	i2c_dw_disable_int(dev);
+ 
+-- 
+2.47.3
+
