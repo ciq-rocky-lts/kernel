@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 15
+%define ciq_patch_version 16
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6.86ciq_lts
@@ -769,6 +769,20 @@ Patch0201: 0046-nfp-fix-use-after-free-in-area_cache_get.patch
 Patch0202: 0047-net-packet-fix-slab-out-of-bounds-access-in-packet_r.patch
 Patch0203: 0048-can-ems_usb-ems_usb_start_xmit-fix-double-dev_kfree_.patch
 Patch0204: 0049-net-sched-cls_u32-fix-netns-refcount-changes-in-u32_.patch
+#CIQ Patch Version: 372.32.1.el8_6.86ciq_lts.16.1
+Patch0205: 0050-net-sched-fix-use-after-free-in-tc_new_tfilter.patch
+Patch0206: 0051-Bluetooth-btsdio-fix-use-after-free-bug-in-btsdio_re.patch
+Patch0207: 0052-ovl-fix-use-after-free-in-struct-ovl_aio_req.patch
+Patch0208: 0053-media-rc-Fix-use-after-free-bugs-caused-by-ene_tx_ir.patch
+Patch0209: 0054-Bluetooth-L2CAP-fix-use-after-free-in-l2cap_conn_del.patch
+Patch0210: 0055-cfg80211-hold-bss_lock-while-updating-nontrans_list.patch
+Patch0211: 0056-wifi-cfg80211-fix-BSS-refcounting-bugs.patch
+Patch0212: 0057-x86-pti-32-Calculate-the-various-PTI-cpu_entry_area-.patch
+Patch0213: 0058-x86-kasan-Map-shadow-for-percpu-pages-on-demand.patch
+Patch0214: 0059-x86-mm-Randomize-per-cpu-entry-area.patch
+Patch0215: 0060-x86-mm-Recompute-physical-address-for-every-page-of-.patch
+Patch0216: 0061-x86-mm-Populate-KASAN-shadow-for-entire-per-CPU-rang.patch
+Patch0217: 0062-x86-mm-Do-not-shuffle-CPU-entry-areas-without-KASLR.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1540,6 +1554,19 @@ ApplyOptionalPatch 0046-nfp-fix-use-after-free-in-area_cache_get.patch
 ApplyOptionalPatch 0047-net-packet-fix-slab-out-of-bounds-access-in-packet_r.patch
 ApplyOptionalPatch 0048-can-ems_usb-ems_usb_start_xmit-fix-double-dev_kfree_.patch
 ApplyOptionalPatch 0049-net-sched-cls_u32-fix-netns-refcount-changes-in-u32_.patch
+ApplyOptionalPatch 0050-net-sched-fix-use-after-free-in-tc_new_tfilter.patch
+ApplyOptionalPatch 0051-Bluetooth-btsdio-fix-use-after-free-bug-in-btsdio_re.patch
+ApplyOptionalPatch 0052-ovl-fix-use-after-free-in-struct-ovl_aio_req.patch
+ApplyOptionalPatch 0053-media-rc-Fix-use-after-free-bugs-caused-by-ene_tx_ir.patch
+ApplyOptionalPatch 0054-Bluetooth-L2CAP-fix-use-after-free-in-l2cap_conn_del.patch
+ApplyOptionalPatch 0055-cfg80211-hold-bss_lock-while-updating-nontrans_list.patch
+ApplyOptionalPatch 0056-wifi-cfg80211-fix-BSS-refcounting-bugs.patch
+ApplyOptionalPatch 0057-x86-pti-32-Calculate-the-various-PTI-cpu_entry_area-.patch
+ApplyOptionalPatch 0058-x86-kasan-Map-shadow-for-percpu-pages-on-demand.patch
+ApplyOptionalPatch 0059-x86-mm-Randomize-per-cpu-entry-area.patch
+ApplyOptionalPatch 0060-x86-mm-Recompute-physical-address-for-every-page-of-.patch
+ApplyOptionalPatch 0061-x86-mm-Populate-KASAN-shadow-for-entire-per-CPU-rang.patch
+ApplyOptionalPatch 0062-x86-mm-Do-not-shuffle-CPU-entry-areas-without-KASLR.patch
 
 
 # CIQ LTS patches:
@@ -3099,6 +3126,21 @@ fi
 #
 #
 %changelog
+* Tue Oct 14 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.16.1
+- x86/mm: Do not shuffle CPU entry areas without KASLR (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- x86/mm: Populate KASAN shadow for entire per-CPU range of CPU entry area (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- x86/mm: Recompute physical address for every page of per-CPU CEA mapping (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- x86/mm: Randomize per-cpu entry area (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- x86/kasan: Map shadow for percpu pages on demand (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- x86/pti/32: Calculate the various PTI cpu_entry_area sizes correctly, make the CPU_ENTRY_AREA_PAGES assert precise (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- wifi: cfg80211: fix BSS refcounting bugs (Marcin Wcisło) [ciqres] {CVE-2022-42720}
+- cfg80211: hold bss_lock while updating nontrans_list (Marcin Wcisło) [ciqres] {CVE-2022-42720}
+- Bluetooth: L2CAP: fix use-after-free in l2cap_conn_del() (Marcin Wcisło) [ciqres] {CVE-2022-3640}
+- media: rc: Fix use-after-free bugs caused by ene_tx_irqsim() (Marcin Wcisło) [ciqres] {CVE-2023-1118}
+- ovl: fix use after free in struct ovl_aio_req (Marcin Wcisło) [ciqres] {CVE-2023-1252}
+- Bluetooth: btsdio: fix use after free bug in btsdio_remove due to race condition (Marcin Wcisło) [ciqres] {CVE-2023-1989 CVE-2023-53145}
+- net: sched: fix use-after-free in tc_new_tfilter() (Marcin Wcisło) [ciqres] {CVE-2022-1055}
+
 * Tue Sep 16 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.15.1
 - net/sched: cls_u32: fix netns refcount changes in u32_change() (Marcin Wcisło) [ciqres] {CVE-2022-29581}
 - can: ems_usb: ems_usb_start_xmit(): fix double dev_kfree_skb() in error path (Marcin Wcisło) [ciqres] {CVE-2022-28390}
