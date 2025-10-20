@@ -1,0 +1,64 @@
+From 32c89d9fdf6cec63997c5317db1a44a088a3b53c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 2 Sep 2025 22:28:12 +0200
+Subject: [PATCH] ndisc: use RCU protection in ndisc_alloc_skb()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-54027
+cve CVE-2025-21764
+commit-author Eric Dumazet <edumazet@google.com>
+commit 628e6d18930bbd21f2d4562228afe27694f66da9
+
+ndisc_alloc_skb() can be called without RTNL or RCU being held.
+
+Add RCU protection to avoid possible UAF.
+
+Fixes: de09334b9326 ("ndisc: Introduce ndisc_alloc_skb() helper.")
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+	Reviewed-by: David Ahern <dsahern@kernel.org>
+	Reviewed-by: Kuniyuki Iwashima <kuniyu@amazon.com>
+Link: https://patch.msgid.link/20250207135841.1948589-3-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 628e6d18930bbd21f2d4562228afe27694f66da9)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/ipv6/ndisc.c | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/net/ipv6/ndisc.c b/net/ipv6/ndisc.c
+index 2ab784484ca2..c9f12ddc5a3b 100644
+--- a/net/ipv6/ndisc.c
++++ b/net/ipv6/ndisc.c
+@@ -414,15 +414,11 @@ static struct sk_buff *ndisc_alloc_skb(struct net_device *dev,
+ {
+ 	int hlen = LL_RESERVED_SPACE(dev);
+ 	int tlen = dev->needed_tailroom;
+-	struct sock *sk = dev_net(dev)->ipv6.ndisc_sk;
+ 	struct sk_buff *skb;
+ 
+ 	skb = alloc_skb(hlen + sizeof(struct ipv6hdr) + len + tlen, GFP_ATOMIC);
+-	if (!skb) {
+-		ND_PRINTK(0, err, "ndisc: %s failed to allocate an skb\n",
+-			  __func__);
++	if (!skb)
+ 		return NULL;
+-	}
+ 
+ 	skb->protocol = htons(ETH_P_IPV6);
+ 	skb->dev = dev;
+@@ -433,7 +429,9 @@ static struct sk_buff *ndisc_alloc_skb(struct net_device *dev,
+ 	/* Manually assign socket ownership as we avoid calling
+ 	 * sock_alloc_send_pskb() to bypass wmem buffer limits
+ 	 */
+-	skb_set_owner_w(skb, sk);
++	rcu_read_lock();
++	skb_set_owner_w(skb, dev_net_rcu(dev)->ipv6.ndisc_sk);
++	rcu_read_unlock();
+ 
+ 	return skb;
+ }
+-- 
+2.47.3
+

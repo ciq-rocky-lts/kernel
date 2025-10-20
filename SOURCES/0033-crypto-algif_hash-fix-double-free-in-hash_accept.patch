@@ -1,0 +1,46 @@
+From d8ca36e712ead9d287f890787b0003ac2668a398 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Thu, 4 Sep 2025 18:05:49 +0200
+Subject: [PATCH] crypto: algif_hash - fix double free in hash_accept
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-70980
+cve CVE-2025-38079
+commit-author Ivan Pravdin <ipravdin.official@gmail.com>
+commit b2df03ed4052e97126267e8c13ad4204ea6ba9b6
+
+If accept(2) is called on socket type algif_hash with
+MSG_MORE flag set and crypto_ahash_import fails,
+sk2 is freed. However, it is also freed in af_alg_release,
+leading to slab-use-after-free error.
+
+Fixes: fe869cdb89c9 ("crypto: algif_hash - User-space interface for hash operations")
+	Cc: <stable@vger.kernel.org>
+	Signed-off-by: Ivan Pravdin <ipravdin.official@gmail.com>
+	Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+(cherry picked from commit b2df03ed4052e97126267e8c13ad4204ea6ba9b6)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ crypto/algif_hash.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/crypto/algif_hash.c b/crypto/algif_hash.c
+index 1d017ec5c63c..84f4e9c2b5d9 100644
+--- a/crypto/algif_hash.c
++++ b/crypto/algif_hash.c
+@@ -263,10 +263,6 @@ static int hash_accept(struct socket *sock, struct socket *newsock, int flags,
+ 		return err;
+ 
+ 	err = crypto_ahash_import(&ctx2->req, state);
+-	if (err) {
+-		sock_orphan(sk2);
+-		sock_put(sk2);
+-	}
+ 
+ 	return err;
+ }
+-- 
+2.47.3
+

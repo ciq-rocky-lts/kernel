@@ -1,0 +1,69 @@
+From 03a02a0e98f399ea8c0e9ea95b40f73cc82eaf0e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 2 Sep 2025 22:27:16 +0200
+Subject: [PATCH] net: treat possible_net_t net pointer as an RCU one and add
+ read_pnet_rcu()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-54027
+cve-pre CVE-2025-21764
+commit-author Jiri Pirko <jiri@nvidia.com>
+commit 2034d90ae41ae93e30d492ebcf1f06f97a9cfba6
+
+Make the net pointer stored in possible_net_t structure annotated as
+an RCU pointer. Change the access helpers to treat it as such.
+Introduce read_pnet_rcu() helper to allow caller to dereference
+the net pointer under RCU read lock.
+
+	Signed-off-by: Jiri Pirko <jiri@nvidia.com>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit 2034d90ae41ae93e30d492ebcf1f06f97a9cfba6)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/net/net_namespace.h | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/include/net/net_namespace.h b/include/net/net_namespace.h
+index d8ddfd69d0b3..926e766a0ac7 100644
+--- a/include/net/net_namespace.h
++++ b/include/net/net_namespace.h
+@@ -350,21 +350,30 @@ static inline void put_net_track(struct net *net, netns_tracker *tracker)
+ 
+ typedef struct {
+ #ifdef CONFIG_NET_NS
+-	struct net *net;
++	struct net __rcu *net;
+ #endif
+ } possible_net_t;
+ 
+ static inline void write_pnet(possible_net_t *pnet, struct net *net)
+ {
+ #ifdef CONFIG_NET_NS
+-	pnet->net = net;
++	rcu_assign_pointer(pnet->net, net);
+ #endif
+ }
+ 
+ static inline struct net *read_pnet(const possible_net_t *pnet)
+ {
+ #ifdef CONFIG_NET_NS
+-	return pnet->net;
++	return rcu_dereference_protected(pnet->net, true);
++#else
++	return &init_net;
++#endif
++}
++
++static inline struct net *read_pnet_rcu(possible_net_t *pnet)
++{
++#ifdef CONFIG_NET_NS
++	return rcu_dereference(pnet->net);
+ #else
+ 	return &init_net;
+ #endif
+-- 
+2.47.3
+

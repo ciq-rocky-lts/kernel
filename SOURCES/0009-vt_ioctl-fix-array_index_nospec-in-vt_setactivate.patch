@@ -1,0 +1,51 @@
+From 4c0fe8076c6b1e5d38e9b48c709963cdd1c183c8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 22 Aug 2025 19:04:57 +0200
+Subject: [PATCH] vt_ioctl: fix array_index_nospec in vt_setactivate
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-8027
+cve CVE-2022-48804
+commit-author Jakob Koschel <jakobkoschel@gmail.com>
+commit 61cc70d9e8ef5b042d4ed87994d20100ec8896d9
+
+array_index_nospec ensures that an out-of-bounds value is set to zero
+on the transient path. Decreasing the value by one afterwards causes
+a transient integer underflow. vsa.console should be decreased first
+and then sanitized with array_index_nospec.
+
+Kasper Acknowledgements: Jakob Koschel, Brian Johannesmeyer, Kaveh
+Razavi, Herbert Bos, Cristiano Giuffrida from the VUSec group at VU
+Amsterdam.
+
+Co-developed-by: Brian Johannesmeyer <bjohannesmeyer@gmail.com>
+	Signed-off-by: Brian Johannesmeyer <bjohannesmeyer@gmail.com>
+	Signed-off-by: Jakob Koschel <jakobkoschel@gmail.com>
+Link: https://lore.kernel.org/r/20220127144406.3589293-1-jakobkoschel@gmail.com
+	Cc: stable <stable@vger.kernel.org>
+	Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+(cherry picked from commit 61cc70d9e8ef5b042d4ed87994d20100ec8896d9)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ drivers/tty/vt/vt_ioctl.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/tty/vt/vt_ioctl.c b/drivers/tty/vt/vt_ioctl.c
+index 3639bb6dc372..e0714a9c9fd7 100644
+--- a/drivers/tty/vt/vt_ioctl.c
++++ b/drivers/tty/vt/vt_ioctl.c
+@@ -599,8 +599,8 @@ static int vt_setactivate(struct vt_setactivate __user *sa)
+ 	if (vsa.console == 0 || vsa.console > MAX_NR_CONSOLES)
+ 		return -ENXIO;
+ 
+-	vsa.console = array_index_nospec(vsa.console, MAX_NR_CONSOLES + 1);
+ 	vsa.console--;
++	vsa.console = array_index_nospec(vsa.console, MAX_NR_CONSOLES);
+ 	console_lock();
+ 	ret = vc_allocate(vsa.console);
+ 	if (ret) {
+-- 
+2.47.3
+

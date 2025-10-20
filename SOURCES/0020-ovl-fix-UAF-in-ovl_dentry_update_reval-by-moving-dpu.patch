@@ -1,0 +1,76 @@
+From 72caef5909197071573183338db0b5e94224311c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 26 Aug 2025 01:03:11 +0200
+Subject: [PATCH] ovl: fix UAF in ovl_dentry_update_reval by moving dput() in
+ ovl_link_up
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-55376
+cve CVE-2025-21887
+commit-author Vasiliy Kovalev <kovalev@altlinux.org>
+commit c84e125fff2615b4d9c259e762596134eddd2f27
+
+The issue was caused by dput(upper) being called before
+ovl_dentry_update_reval(), while upper->d_flags was still
+accessed in ovl_dentry_remote().
+
+Move dput(upper) after its last use to prevent use-after-free.
+
+BUG: KASAN: slab-use-after-free in ovl_dentry_remote fs/overlayfs/util.c:162 [inline]
+BUG: KASAN: slab-use-after-free in ovl_dentry_update_reval+0xd2/0xf0 fs/overlayfs/util.c:167
+
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:88 [inline]
+ dump_stack_lvl+0x116/0x1f0 lib/dump_stack.c:114
+ print_address_description mm/kasan/report.c:377 [inline]
+ print_report+0xc3/0x620 mm/kasan/report.c:488
+ kasan_report+0xd9/0x110 mm/kasan/report.c:601
+ ovl_dentry_remote fs/overlayfs/util.c:162 [inline]
+ ovl_dentry_update_reval+0xd2/0xf0 fs/overlayfs/util.c:167
+ ovl_link_up fs/overlayfs/copy_up.c:610 [inline]
+ ovl_copy_up_one+0x2105/0x3490 fs/overlayfs/copy_up.c:1170
+ ovl_copy_up_flags+0x18d/0x200 fs/overlayfs/copy_up.c:1223
+ ovl_rename+0x39e/0x18c0 fs/overlayfs/dir.c:1136
+ vfs_rename+0xf84/0x20a0 fs/namei.c:4893
+...
+ </TASK>
+
+Fixes: b07d5cc93e1b ("ovl: update of dentry revalidate flags after copy up")
+	Reported-by: syzbot+316db8a1191938280eb6@syzkaller.appspotmail.com
+Closes: https://syzkaller.appspot.com/bug?extid=316db8a1191938280eb6
+	Signed-off-by: Vasiliy Kovalev <kovalev@altlinux.org>
+Link: https://lore.kernel.org/r/20250214215148.761147-1-kovalev@altlinux.org
+	Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+	Signed-off-by: Christian Brauner <brauner@kernel.org>
+(cherry picked from commit c84e125fff2615b4d9c259e762596134eddd2f27)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/overlayfs/copy_up.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/overlayfs/copy_up.c b/fs/overlayfs/copy_up.c
+index 4d68a91f5554..886371677ec1 100644
+--- a/fs/overlayfs/copy_up.c
++++ b/fs/overlayfs/copy_up.c
+@@ -532,7 +532,6 @@ static int ovl_link_up(struct ovl_copy_up_ctx *c)
+ 	err = PTR_ERR(upper);
+ 	if (!IS_ERR(upper)) {
+ 		err = ovl_do_link(ofs, ovl_dentry_upper(c->dentry), udir, upper);
+-		dput(upper);
+ 
+ 		if (!err) {
+ 			/* Restore timestamps on parent (best effort) */
+@@ -540,6 +539,7 @@ static int ovl_link_up(struct ovl_copy_up_ctx *c)
+ 			ovl_dentry_set_upper_alias(c->dentry);
+ 			ovl_dentry_update_reval(c->dentry, upper);
+ 		}
++		dput(upper);
+ 	}
+ 	inode_unlock(udir);
+ 	if (err)
+-- 
+2.47.3
+

@@ -1,0 +1,171 @@
+From 97e9c3ed3ac81f9707178d1c0b53f00b5d8c76d1 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Thu, 9 Oct 2025 20:42:01 +0000
+Subject: [PATCH] mm: always compile in pte markers
+
+jira LE-4335
+commit-author Peter Xu <peterx@redhat.com>
+commit ca92ea3dc5a2b01f98e9f02b7a6bc03be06fe124
+
+Patch series "mm: Use pte marker for swapin errors".
+
+This series uses the pte marker to replace the swapin error swap entry,
+then we save one more swap entry slot for swap devices.  A new pte marker
+bit is defined.
+
+This patch (of 2):
+
+The PTE markers code is tiny and now it's enabled for most of the
+distributions.  It's fine to keep it as-is, but to make a broader use of
+it (e.g.  replacing read error swap entry) it needs to be there always
+otherwise we need special code path to take care of !PTE_MARKER case.
+
+It'll be easier just make pte marker always exist.  Use this chance to
+extend its usage to anonymous too by simply touching up some of the old
+comments, because it'll be used for anonymous pages in the follow up
+patches.
+
+Link: https://lkml.kernel.org/r/20221030214151.402274-1-peterx@redhat.com
+Link: https://lkml.kernel.org/r/20221030214151.402274-2-peterx@redhat.com
+	Signed-off-by: Peter Xu <peterx@redhat.com>
+	Reviewed-by: Huang Ying <ying.huang@intel.com>
+	Reviewed-by: Miaohe Lin <linmiaohe@huawei.com>
+	Acked-by: David Hildenbrand <david@redhat.com>
+	Cc: Andrea Arcangeli <aarcange@redhat.com>
+	Cc: Naoya Horiguchi <naoya.horiguchi@nec.com>
+	Cc: Peter Xu <peterx@redhat.com>
+	Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+(cherry picked from commit ca92ea3dc5a2b01f98e9f02b7a6bc03be06fe124)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ include/linux/swap.h    | 10 +++-------
+ include/linux/swapops.h | 31 -------------------------------
+ mm/Kconfig              |  7 -------
+ mm/memory.c             |  7 +++----
+ 4 files changed, 6 insertions(+), 49 deletions(-)
+
+diff --git a/include/linux/swap.h b/include/linux/swap.h
+index a45c9e1a53ff..618027334f0a 100644
+--- a/include/linux/swap.h
++++ b/include/linux/swap.h
+@@ -56,17 +56,13 @@ static inline int current_is_kswapd(void)
+  */
+ 
+ /*
+- * PTE markers are used to persist information onto PTEs that are mapped with
+- * file-backed memories.  As its name "PTE" hints, it should only be applied to
+- * the leaves of pgtables.
++ * PTE markers are used to persist information onto PTEs that otherwise
++ * should be a none pte.  As its name "PTE" hints, it should only be
++ * applied to the leaves of pgtables.
+  */
+-#ifdef CONFIG_PTE_MARKER
+ #define SWP_PTE_MARKER_NUM 1
+ #define SWP_PTE_MARKER     (MAX_SWAPFILES + SWP_HWPOISON_NUM + \
+ 			    SWP_MIGRATION_NUM + SWP_DEVICE_NUM)
+-#else
+-#define SWP_PTE_MARKER_NUM 0
+-#endif
+ 
+ /*
+  * Unaddressable device memory support. See include/linux/hmm.h and
+diff --git a/include/linux/swapops.h b/include/linux/swapops.h
+index 68f6a117905a..5b1b759d040e 100644
+--- a/include/linux/swapops.h
++++ b/include/linux/swapops.h
+@@ -396,8 +396,6 @@ typedef unsigned long pte_marker;
+ #define  PTE_MARKER_SWAPIN_ERROR		BIT(1)
+ #define  PTE_MARKER_MASK			(BIT(2) - 1)
+ 
+-#ifdef CONFIG_PTE_MARKER
+-
+ static inline swp_entry_t make_pte_marker_entry(pte_marker marker)
+ {
+ 	return swp_entry(SWP_PTE_MARKER, marker);
+@@ -418,32 +416,6 @@ static inline bool is_pte_marker(pte_t pte)
+ 	return is_swap_pte(pte) && is_pte_marker_entry(pte_to_swp_entry(pte));
+ }
+ 
+-#else /* CONFIG_PTE_MARKER */
+-
+-static inline swp_entry_t make_pte_marker_entry(pte_marker marker)
+-{
+-	/* This should never be called if !CONFIG_PTE_MARKER */
+-	WARN_ON_ONCE(1);
+-	return swp_entry(0, 0);
+-}
+-
+-static inline bool is_pte_marker_entry(swp_entry_t entry)
+-{
+-	return false;
+-}
+-
+-static inline pte_marker pte_marker_get(swp_entry_t entry)
+-{
+-	return 0;
+-}
+-
+-static inline bool is_pte_marker(pte_t pte)
+-{
+-	return false;
+-}
+-
+-#endif /* CONFIG_PTE_MARKER */
+-
+ static inline pte_t make_pte_marker(pte_marker marker)
+ {
+ 	return swp_entry_to_pte(make_pte_marker_entry(marker));
+@@ -472,9 +444,6 @@ static inline int is_swapin_error_entry(swp_entry_t entry)
+  * memory, kernel-only memory (including when the system is during-boot),
+  * non-ram based generic file-system.  It's fine to be used even there, but the
+  * extra pte marker check will be pure overhead.
+- *
+- * For systems configured with !CONFIG_PTE_MARKER this will be automatically
+- * optimized to pte_none().
+  */
+ static inline int pte_none_mostly(pte_t pte)
+ {
+diff --git a/mm/Kconfig b/mm/Kconfig
+index 91e7bd5be17e..e20ed522e0ce 100644
+--- a/mm/Kconfig
++++ b/mm/Kconfig
+@@ -1123,17 +1123,10 @@ config HAVE_ARCH_USERFAULTFD_MINOR
+ 	help
+ 	  Arch has userfaultfd minor fault support
+ 
+-config PTE_MARKER
+-	bool
+-
+-	help
+-	  Allows to create marker PTEs for file-backed memory.
+-
+ config PTE_MARKER_UFFD_WP
+ 	bool "Userfaultfd write protection support for shmem/hugetlbfs"
+ 	default y
+ 	depends on HAVE_ARCH_USERFAULTFD_WP
+-	select PTE_MARKER
+ 
+ 	help
+ 	  Allows to create marker PTEs for userfaultfd write protection
+diff --git a/mm/memory.c b/mm/memory.c
+index 283eba632f28..77f728ad36ee 100644
+--- a/mm/memory.c
++++ b/mm/memory.c
+@@ -3704,11 +3704,10 @@ static vm_fault_t handle_pte_marker(struct vm_fault *vmf)
+ 	unsigned long marker = pte_marker_get(entry);
+ 
+ 	/*
+-	 * PTE markers should always be with file-backed memories, and the
+-	 * marker should never be empty.  If anything weird happened, the best
+-	 * thing to do is to kill the process along with its mm.
++	 * PTE markers should never be empty.  If anything weird happened,
++	 * the best thing to do is to kill the process along with its mm.
+ 	 */
+-	if (WARN_ON_ONCE(vma_is_anonymous(vmf->vma) || !marker))
++	if (WARN_ON_ONCE(!marker))
+ 		return VM_FAULT_SIGBUS;
+ 
+ 	/* Higher priority than uffd-wp when data corrupted */
+-- 
+2.47.3
+
