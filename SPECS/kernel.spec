@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 8
+%define ciq_patch_version 9
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -550,6 +550,18 @@ Patch1035: 0009-ALSA-usb-audio-Fix-a-DMA-to-stack-memory-bug.patch
 Patch1036: 0010-posix-cpu-timers-fix-race-between-handle_posix_cpu_t.patch
 Patch1037: 0011-drivers-md-fix-a-potential-use-after-free-bug.patch
 Patch1038: 0012-crypto-algif_hash-fix-double-free-in-hash_accept.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.9.1
+Patch1039: 0013-misc-vmw_vmci-fix-an-infoleak-in-vmci_host_do_receiv.patch
+Patch1040: 0014-ext4-fix-off-by-one-error-in-do_split.patch
+Patch1041: 0015-sch_hfsc-make-hfsc_qlen_notify-idempotent.patch
+Patch1042: 0016-scsi-lpfc-Use-memcpy-for-BIOS-version.patch
+Patch1043: 0017-md-raid10-fix-KASAN-warning.patch
+Patch1044: 0018-ALSA-bcd2000-Fix-a-UAF-bug-on-the-error-path-of-prob.patch
+Patch1045: 0019-net-usb-smsc75xx-Limit-packet-length-to-skb-len.patch
+Patch1046: 0020-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
+Patch1047: 0021-i40e-fix-MMIO-write-access-to-an-invalid-page-in-i40.patch
+Patch1048: 0022-net-sched-sch_qfq-Fix-race-condition-on-qfq_aggregat.patch
+Patch1049: 0023-net-sched-sch_qfq-Avoid-triggering-might_sleep-in-at.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -931,6 +943,17 @@ ApplyOptionalPatch 0009-ALSA-usb-audio-Fix-a-DMA-to-stack-memory-bug.patch
 ApplyOptionalPatch 0010-posix-cpu-timers-fix-race-between-handle_posix_cpu_t.patch
 ApplyOptionalPatch 0011-drivers-md-fix-a-potential-use-after-free-bug.patch
 ApplyOptionalPatch 0012-crypto-algif_hash-fix-double-free-in-hash_accept.patch
+ApplyOptionalPatch 0013-misc-vmw_vmci-fix-an-infoleak-in-vmci_host_do_receiv.patch
+ApplyOptionalPatch 0014-ext4-fix-off-by-one-error-in-do_split.patch
+ApplyOptionalPatch 0015-sch_hfsc-make-hfsc_qlen_notify-idempotent.patch
+ApplyOptionalPatch 0016-scsi-lpfc-Use-memcpy-for-BIOS-version.patch
+ApplyOptionalPatch 0017-md-raid10-fix-KASAN-warning.patch
+ApplyOptionalPatch 0018-ALSA-bcd2000-Fix-a-UAF-bug-on-the-error-path-of-prob.patch
+ApplyOptionalPatch 0019-net-usb-smsc75xx-Limit-packet-length-to-skb-len.patch
+ApplyOptionalPatch 0020-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
+ApplyOptionalPatch 0021-i40e-fix-MMIO-write-access-to-an-invalid-page-in-i40.patch
+ApplyOptionalPatch 0022-net-sched-sch_qfq-Fix-race-condition-on-qfq_aggregat.patch
+ApplyOptionalPatch 0023-net-sched-sch_qfq-Avoid-triggering-might_sleep-in-at.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -1934,6 +1957,19 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Mon Oct 20 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.9.1
+- net/sched: sch_qfq: Avoid triggering might_sleep in atomic context in qfq_delete_class (Brett Mastbergen) [ciqres] {CVE-2025-38477}
+- net/sched: sch_qfq: Fix race condition on qfq_aggregate (Brett Mastbergen) [ciqres] {CVE-2025-38477}
+- i40e: fix MMIO write access to an invalid page in i40e_clear_hw (Brett Mastbergen) [ciqres] {CVE-2025-38200}
+- net: usb: smsc75xx: Move packet length check to prevent kernel panic in skb_pull (Brett Mastbergen) [ciqres] {CVE-2023-53125}
+- net: usb: smsc75xx: Limit packet length to skb->len (Brett Mastbergen) [ciqres] {CVE-2023-53125}
+- ALSA: bcd2000: Fix a UAF bug on the error path of probing (Brett Mastbergen) [ciqres] {CVE-2022-50229}
+- md-raid10: fix KASAN warning (Brett Mastbergen) [ciqres] {CVE-2022-50211}
+- scsi: lpfc: Use memcpy() for BIOS version (Brett Mastbergen) [ciqres] {CVE-2025-38332}
+- sch_hfsc: make hfsc_qlen_notify() idempotent (Brett Mastbergen) [ciqres] {CVE-2025-38177}
+- ext4: fix off-by-one error in do_split (Brett Mastbergen) [ciqres] {CVE-2025-23150}
+- misc/vmw_vmci: fix an infoleak in vmci_host_do_receive_datagram() (Brett Mastbergen) [ciqres] {CVE-2022-49788}
+
 * Wed Sep 17 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.8.1
 - crypto: algif_hash - fix double free in hash_accept (Brett Mastbergen) [ciqres] {CVE-2025-38079}
 - drivers:md:fix a potential use-after-free bug (Brett Mastbergen) [ciqres] {CVE-2022-50022}
