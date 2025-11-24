@@ -170,8 +170,8 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 10
-%define ciq_build_id 1
+%define ciq_patch_version 11
+%define ciq_build_id 2
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4.94ciq_lts
 
@@ -1072,6 +1072,20 @@ Patch1000072: 0052-scsi-lpfc-Use-memcpy-for-BIOS-version.patch
 Patch1000073: 0053-vsock-Fix-transport_-TOCTOU.patch
 Patch1000074: 0054-tipc-Fix-use-after-free-in-tipc_conn_close.patch
 Patch1000075: 0055-mm-always-compile-in-pte-markers.patch
+#CIQ Patch Version: 427.42.1.el9_4.94ciq_lts.11.1
+Patch1000076: 0056-firmware-arm_scpi-Ensure-scpi_info-is-not-assigned-i.patch
+Patch1000077: 0057-net-usb-smsc75xx-Limit-packet-length-to-skb-len.patch
+Patch1000078: 0058-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
+Patch1000079: 0059-net_sched-hfsc-Fix-a-potential-UAF-in-hfsc_dequeue-t.patch
+Patch1000080: 0060-i40e-fix-MMIO-write-access-to-an-invalid-page-in-i40.patch
+Patch1000081: 0061-idpf-convert-control-queue-mutex-to-a-spinlock.patch
+Patch1000082: 0062-netfilter-nf_conntrack-fix-crash-due-to-removal-of-u.patch
+Patch1000083: 0063-do_change_type-refuse-to-operate-on-unmounted-not-ou.patch
+Patch1000084: 0064-move_mount-allow-to-add-a-mount-into-an-existing-gro.patch
+Patch1000085: 0065-fix-propagation-graph-breakage-by-MOVE_MOUNT_SET_GRO.patch
+Patch1000086: 0066-use-uniform-permission-checks-for-all-mount-propagat.patch
+Patch1000087: 0067-drm-gem-Acquire-references-on-GEM-handles-for-frameb.patch
+Patch1000088: 0068-drm-framebuffer-Acquire-internal-references-on-GEM-h.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1900,6 +1914,19 @@ ApplyOptionalPatch 0052-scsi-lpfc-Use-memcpy-for-BIOS-version.patch
 ApplyOptionalPatch 0053-vsock-Fix-transport_-TOCTOU.patch
 ApplyOptionalPatch 0054-tipc-Fix-use-after-free-in-tipc_conn_close.patch
 ApplyOptionalPatch 0055-mm-always-compile-in-pte-markers.patch
+ApplyOptionalPatch 0056-firmware-arm_scpi-Ensure-scpi_info-is-not-assigned-i.patch
+ApplyOptionalPatch 0057-net-usb-smsc75xx-Limit-packet-length-to-skb-len.patch
+ApplyOptionalPatch 0058-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
+ApplyOptionalPatch 0059-net_sched-hfsc-Fix-a-potential-UAF-in-hfsc_dequeue-t.patch
+ApplyOptionalPatch 0060-i40e-fix-MMIO-write-access-to-an-invalid-page-in-i40.patch
+ApplyOptionalPatch 0061-idpf-convert-control-queue-mutex-to-a-spinlock.patch
+ApplyOptionalPatch 0062-netfilter-nf_conntrack-fix-crash-due-to-removal-of-u.patch
+ApplyOptionalPatch 0063-do_change_type-refuse-to-operate-on-unmounted-not-ou.patch
+ApplyOptionalPatch 0064-move_mount-allow-to-add-a-mount-into-an-existing-gro.patch
+ApplyOptionalPatch 0065-fix-propagation-graph-breakage-by-MOVE_MOUNT_SET_GRO.patch
+ApplyOptionalPatch 0066-use-uniform-permission-checks-for-all-mount-propagat.patch
+ApplyOptionalPatch 0067-drm-gem-Acquire-references-on-GEM-handles-for-frameb.patch
+ApplyOptionalPatch 0068-drm-framebuffer-Acquire-internal-references-on-GEM-h.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3977,6 +4004,24 @@ fi
 #
 #
 %changelog
+* Mon Nov 17 2025 Michael L. Young <myoung@ciq.com> - 5.14.0-427.42.1.el9_4.94ciq_lts.11.2
+- Update the signer information used to create the kernel module signing key when building (Michael L. Young)
+
+* Thu Nov 06 2025 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-427.42.1.el9_4.94ciq_lts.11.1
+- drm/framebuffer: Acquire internal references on GEM handles (Roxana Nicolescu) [ciqres] {CVE-2025-38449}
+- drm/gem: Acquire references on GEM handles for framebuffers (Roxana Nicolescu) [ciqres] {CVE-2025-38449}
+- use uniform permission checks for all mount propagation changes (Roxana Nicolescu) [ciqres] {CVE-2025-38498}
+- fix propagation graph breakage by MOVE_MOUNT_SET_GROUP move_mount(2) (Roxana Nicolescu) [ciqres] {CVE-2025-38498}
+- move_mount: allow to add a mount into an existing group (Roxana Nicolescu) [ciqres] {CVE-2025-38498}
+- do_change_type(): refuse to operate on unmounted/not ours mounts (Roxana Nicolescu) [ciqres] {CVE-2025-38498}
+- netfilter: nf_conntrack: fix crash due to removal of uninitialised entry (Roxana Nicolescu) [ciqres] {CVE-2025-38472}
+- idpf: convert control queue mutex to a spinlock (Roxana Nicolescu) [ciqres] {CVE-2025-38392}
+- i40e: fix MMIO write access to an invalid page in i40e_clear_hw (Roxana Nicolescu) [ciqres] {CVE-2025-38200}
+- net_sched: hfsc: Fix a potential UAF in hfsc_dequeue() too (Roxana Nicolescu) [ciqres] {CVE-2025-37823}
+- net: usb: smsc75xx: Move packet length check to prevent kernel panic in skb_pull (Roxana Nicolescu) [ciqres] {CVE-2023-53125}
+- net: usb: smsc75xx: Limit packet length to skb->len (Roxana Nicolescu) [ciqres] {CVE-2023-53125}
+- firmware: arm_scpi: Ensure scpi_info is not assigned if the probe fails (Roxana Nicolescu) [ciqres] {CVE-2022-50087}
+
 * Tue Oct 14 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1.el9_4.94ciq_lts.10.1
 - mm: always compile in pte markers (Brett Mastbergen) [ciqres]
 - tipc: Fix use-after-free in tipc_conn_close(). (Shreeya Patel) [ciqres] {CVE-2025-38464}
