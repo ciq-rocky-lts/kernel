@@ -1,0 +1,77 @@
+From 5e22ae45f1734328c4f9e698860b596e0b0304b3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Mon, 13 Oct 2025 23:30:48 +0200
+Subject: [PATCH] tls: fix race between tx work scheduling and socket close
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-8187
+cve CVE-2024-26585
+commit-author Jakub Kicinski <kuba@kernel.org>
+commit e01e3934a1b2d122919f73bc6ddbe1cdafc4bbdb
+upstream-diff No actual difference from the upstream patch, but required
+  manual conflicts resolution due to differences in neighbouring code
+
+Similarly to previous commit, the submitting thread (recvmsg/sendmsg)
+may exit as soon as the async crypto handler calls complete().
+Reorder scheduling the work before calling complete().
+This seems more logical in the first place, as it's
+the inverse order of what the submitting thread will do.
+
+	Reported-by: valis <sec@valis.email>
+Fixes: a42055e8d2c3 ("net/tls: Add support for async encryption of records for performance")
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+	Reviewed-by: Sabrina Dubroca <sd@queasysnail.net>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit e01e3934a1b2d122919f73bc6ddbe1cdafc4bbdb)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/tls/tls_sw.c | 16 ++++++----------
+ 1 file changed, 6 insertions(+), 10 deletions(-)
+
+diff --git a/net/tls/tls_sw.c b/net/tls/tls_sw.c
+index 35cd4f112462..0374d86302bb 100644
+--- a/net/tls/tls_sw.c
++++ b/net/tls/tls_sw.c
+@@ -427,7 +427,6 @@ static void tls_encrypt_done(struct crypto_async_request *req, int err)
+ 	struct scatterlist *sge;
+ 	struct sk_msg *msg_en;
+ 	struct tls_rec *rec;
+-	bool ready = false;
+ 	int pending;
+ 
+ 	rec = container_of(aead_req, struct tls_rec, aead_req);
+@@ -459,8 +458,12 @@ static void tls_encrypt_done(struct crypto_async_request *req, int err)
+ 		/* If received record is at head of tx_list, schedule tx */
+ 		first_rec = list_first_entry(&ctx->tx_list,
+ 					     struct tls_rec, list);
+-		if (rec == first_rec)
+-			ready = true;
++		if (rec == first_rec) {
++			/* Schedule the transmission */
++			if (!test_and_set_bit(BIT_TX_SCHEDULED,
++					      &ctx->tx_bitmask))
++				schedule_delayed_work(&ctx->tx_work.work, 1);
++		}
+ 	}
+ 
+ 	spin_lock_bh(&ctx->encrypt_compl_lock);
+@@ -469,13 +472,6 @@ static void tls_encrypt_done(struct crypto_async_request *req, int err)
+ 	if (!pending && ctx->async_notify)
+ 		complete(&ctx->async_wait.completion);
+ 	spin_unlock_bh(&ctx->encrypt_compl_lock);
+-
+-	if (!ready)
+-		return;
+-
+-	/* Schedule the transmission */
+-	if (!test_and_set_bit(BIT_TX_SCHEDULED, &ctx->tx_bitmask))
+-		schedule_delayed_work(&ctx->tx_work.work, 1);
+ }
+ 
+ static int tls_do_encryption(struct sock *sk,
+-- 
+2.47.3
+

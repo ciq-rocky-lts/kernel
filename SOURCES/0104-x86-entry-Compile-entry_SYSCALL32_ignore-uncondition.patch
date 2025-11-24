@@ -1,0 +1,57 @@
+From 6bbbcead8bb16ceee21261e00dd5322f7f6eec10 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 3 Oct 2025 00:58:55 +0200
+Subject: [PATCH] x86/entry: Compile entry_SYSCALL32_ignore() unconditionally
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-772
+cve-pre CVE-2024-25744
+commit-author Nikolay Borisov <nik.borisov@suse.com>
+commit 370dcd58548a360bbf8a65b89b410d09f56bf0c6
+
+To limit the IA32 exposure on 64bit kernels while keeping the
+flexibility for the user to enable it when required, the compile time
+enable/disable via CONFIG_IA32_EMULATION is not good enough and will
+be complemented with a kernel command line option.
+
+Right now entry_SYSCALL32_ignore() is only compiled when
+CONFIG_IA32_EMULATION=n, but boot-time enable- / disablement obviously
+requires it to be unconditionally available.
+
+Remove the #ifndef CONFIG_IA32_EMULATION guard.
+
+	Signed-off-by: Nikolay Borisov <nik.borisov@suse.com>
+	Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+Link: https://lore.kernel.org/r/20230623111409.3047467-4-nik.borisov@suse.com
+
+(cherry picked from commit 370dcd58548a360bbf8a65b89b410d09f56bf0c6)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ arch/x86/entry/entry_64.S | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/x86/entry/entry_64.S b/arch/x86/entry/entry_64.S
+index 79dae74f2eb4..e4ecbc5fdf70 100644
+--- a/arch/x86/entry/entry_64.S
++++ b/arch/x86/entry/entry_64.S
+@@ -1498,7 +1498,6 @@ nmi_restore:
+ 	iretq
+ SYM_CODE_END(asm_exc_nmi)
+ 
+-#ifndef CONFIG_IA32_EMULATION
+ /*
+  * This handles SYSCALL from 32-bit code.  There is no way to program
+  * MSRs to fully disable 32-bit SYSCALL.
+@@ -1509,7 +1508,6 @@ SYM_CODE_START(entry_SYSCALL32_ignore)
+ 	mov	$-ENOSYS, %eax
+ 	sysretl
+ SYM_CODE_END(entry_SYSCALL32_ignore)
+-#endif
+ 
+ .pushsection .text, "ax"
+ SYM_CODE_START(rewind_stack_and_make_dead)
+-- 
+2.47.3
+

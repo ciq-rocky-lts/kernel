@@ -1,0 +1,43 @@
+From 03192eb073e011b75dd44c6c350ea97c892e0cca Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Wed, 15 Oct 2025 15:53:52 -0400
+Subject: [PATCH] do_change_type(): refuse to operate on unmounted/not ours
+ mounts
+
+jira VULN-98609
+cve CVE-2025-38498
+commit-author Al Viro <viro@zeniv.linux.org.uk>
+commit 12f147ddd6de7382dad54812e65f3f08d05809fc
+
+Ensure that propagation settings can only be changed for mounts located
+in the caller's mount namespace. This change aligns permission checking
+with the rest of mount(2).
+
+	Reviewed-by: Christian Brauner <brauner@kernel.org>
+Fixes: 07b20889e305 ("beginning of the shared-subtree proper")
+	Reported-by: "Orlando, Noah" <Noah.Orlando@deshaw.com>
+	Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+(cherry picked from commit 12f147ddd6de7382dad54812e65f3f08d05809fc)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ fs/namespace.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/fs/namespace.c b/fs/namespace.c
+index 58659bf9d0d7..41028c3eca30 100644
+--- a/fs/namespace.c
++++ b/fs/namespace.c
+@@ -2323,6 +2323,10 @@ static int do_change_type(struct path *path, int ms_flags)
+ 		return -EINVAL;
+ 
+ 	namespace_lock();
++	if (!check_mnt(mnt)) {
++		err = -EINVAL;
++		goto out_unlock;
++	}
+ 	if (type == MS_SHARED) {
+ 		err = invent_group_ids(mnt, recurse);
+ 		if (err)
+-- 
+2.47.3
+

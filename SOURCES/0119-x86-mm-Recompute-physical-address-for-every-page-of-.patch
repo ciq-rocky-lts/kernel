@@ -1,0 +1,45 @@
+From 0b46eef891ba44f192d8618972d14bad71e05466 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 7 Oct 2025 23:12:09 +0200
+Subject: [PATCH] x86/mm: Recompute physical address for every page of per-CPU
+ CEA mapping
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-8044
+cve-bf CVE-2023-0597
+commit-author Sean Christopherson <seanjc@google.com>
+commit 80d72a8f76e8f3f0b5a70b8c7022578e17bde8e7
+
+Recompute the physical address for each per-CPU page in the CPU entry
+area, a recent commit inadvertantly modified cea_map_percpu_pages() such
+that every PTE is mapped to the physical address of the first page.
+
+Fixes: 9fd429c28073 ("x86/kasan: Map shadow for percpu pages on demand")
+	Signed-off-by: Sean Christopherson <seanjc@google.com>
+	Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+	Reviewed-by: Andrey Ryabinin <ryabinin.a.a@gmail.com>
+Link: https://lkml.kernel.org/r/20221110203504.1985010-2-seanjc@google.com
+(cherry picked from commit 80d72a8f76e8f3f0b5a70b8c7022578e17bde8e7)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ arch/x86/mm/cpu_entry_area.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/mm/cpu_entry_area.c b/arch/x86/mm/cpu_entry_area.c
+index a88cadeb86eb..84c5a9f7e142 100644
+--- a/arch/x86/mm/cpu_entry_area.c
++++ b/arch/x86/mm/cpu_entry_area.c
+@@ -98,7 +98,7 @@ cea_map_percpu_pages(void *cea_vaddr, void *ptr, int pages, pgprot_t prot)
+ 					early_pfn_to_nid(PFN_DOWN(pa)));
+ 
+ 	for ( ; pages; pages--, cea_vaddr+= PAGE_SIZE, ptr += PAGE_SIZE)
+-		cea_set_pte(cea_vaddr, pa, prot);
++		cea_set_pte(cea_vaddr, per_cpu_ptr_to_phys(ptr), prot);
+ }
+ 
+ static void __init percpu_setup_debug_store(unsigned int cpu)
+-- 
+2.47.3
+

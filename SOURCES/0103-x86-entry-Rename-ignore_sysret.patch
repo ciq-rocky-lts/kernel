@@ -1,0 +1,80 @@
+From c432a027f5f84940b977e7ad5669f19b0eeb1cf1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 3 Oct 2025 00:44:38 +0200
+Subject: [PATCH] x86/entry: Rename ignore_sysret()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-772
+cve-pre CVE-2024-25744
+commit-author Nikolay Borisov <nik.borisov@suse.com>
+commit f71e1d2ff8e6a183bd4004bc97c453ba527b7dc6
+
+The SYSCALL instruction cannot really be disabled in compatibility mode.
+The best that can be done is to configure the CSTAR msr to point to a
+minimal handler. Currently this handler has a rather misleading name -
+ignore_sysret() as it's not really doing anything with sysret.
+
+Give it a more descriptive name.
+
+	Signed-off-by: Nikolay Borisov <nik.borisov@suse.com>
+	Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+Link: https://lore.kernel.org/r/20230623111409.3047467-3-nik.borisov@suse.com
+
+(cherry picked from commit f71e1d2ff8e6a183bd4004bc97c453ba527b7dc6)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ arch/x86/entry/entry_64.S        | 4 ++--
+ arch/x86/include/asm/processor.h | 2 +-
+ arch/x86/kernel/cpu/common.c     | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/x86/entry/entry_64.S b/arch/x86/entry/entry_64.S
+index f314ae35f026..79dae74f2eb4 100644
+--- a/arch/x86/entry/entry_64.S
++++ b/arch/x86/entry/entry_64.S
+@@ -1503,12 +1503,12 @@ SYM_CODE_END(asm_exc_nmi)
+  * This handles SYSCALL from 32-bit code.  There is no way to program
+  * MSRs to fully disable 32-bit SYSCALL.
+  */
+-SYM_CODE_START(ignore_sysret)
++SYM_CODE_START(entry_SYSCALL32_ignore)
+ 	UNWIND_HINT_EMPTY
+ 	ENDBR
+ 	mov	$-ENOSYS, %eax
+ 	sysretl
+-SYM_CODE_END(ignore_sysret)
++SYM_CODE_END(entry_SYSCALL32_ignore)
+ #endif
+ 
+ .pushsection .text, "ax"
+diff --git a/arch/x86/include/asm/processor.h b/arch/x86/include/asm/processor.h
+index 3016e147f253..ff290c94ad06 100644
+--- a/arch/x86/include/asm/processor.h
++++ b/arch/x86/include/asm/processor.h
+@@ -461,7 +461,7 @@ static inline unsigned long cpu_kernelmode_gs_base(int cpu)
+ 
+ DECLARE_PER_CPU(void *, hardirq_stack_ptr);
+ DECLARE_PER_CPU(bool, hardirq_stack_inuse);
+-extern asmlinkage void ignore_sysret(void);
++extern asmlinkage void entry_SYSCALL32_ignore(void);
+ 
+ /* Save actual FS/GS selectors and bases to current->thread */
+ void current_save_fsgs(void);
+diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+index c4483102aaff..c475e702e61f 100644
+--- a/arch/x86/kernel/cpu/common.c
++++ b/arch/x86/kernel/cpu/common.c
+@@ -2025,7 +2025,7 @@ void syscall_init(void)
+ 		    (unsigned long)(cpu_entry_stack(smp_processor_id()) + 1));
+ 	wrmsrl_safe(MSR_IA32_SYSENTER_EIP, (u64)entry_SYSENTER_compat);
+ #else
+-	wrmsrl(MSR_CSTAR, (unsigned long)ignore_sysret);
++	wrmsrl(MSR_CSTAR, (unsigned long)entry_SYSCALL32_ignore);
+ 	wrmsrl_safe(MSR_IA32_SYSENTER_CS, (u64)GDT_ENTRY_INVALID_SEG);
+ 	wrmsrl_safe(MSR_IA32_SYSENTER_ESP, 0ULL);
+ 	wrmsrl_safe(MSR_IA32_SYSENTER_EIP, 0ULL);
+-- 
+2.47.3
+

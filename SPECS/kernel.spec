@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 12
+%define ciq_patch_version 13
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2.92ciq_lts
@@ -1079,6 +1079,44 @@ Patch1000142: 0097-signalfd-use-wake_up_pollfree.patch
 Patch1000143: 0098-aio-keep-poll-requests-on-waitqueue-until-completed.patch
 Patch1000144: 0099-aio-fix-use-after-free-due-to-missing-POLLFREE-handl.patch
 Patch1000145: 0100-sched-psi-Fix-use-after-free-in-ep_remove_wait_queue.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.13.1
+Patch1000146: 0101-x86-Fix-misspelled-Kconfig-symbols.patch
+Patch1000147: 0102-x86-Introduce-ia32_enabled.patch
+Patch1000148: 0103-x86-entry-Rename-ignore_sysret.patch
+Patch1000149: 0104-x86-entry-Compile-entry_SYSCALL32_ignore-uncondition.patch
+Patch1000150: 0105-x86-entry-Make-IA32-syscalls-availability-depend-on-.patch
+Patch1000151: 0106-x86-Make-IA32_EMULATION-boot-time-configurable.patch
+Patch1000152: 0107-x86-entry-Add-__init-to-ia32_emulation_override_cmdl.patch
+Patch1000153: 0108-x86-coco-Disable-32-bit-emulation-by-default-on-TDX-.patch
+Patch1000154: 0109-x86-entry-Convert-INT-0x80-emulation-to-IDTENTRY.patch
+Patch1000155: 0110-x86-entry-Do-not-allow-external-0x80-interrupts.patch
+Patch1000156: 0111-x86-tdx-Allow-32-bit-emulation-by-default.patch
+Patch1000157: 0112-x86-sev-Harden-VC-instruction-emulation-somewhat.patch
+Patch1000158: 0113-x86-sev-Check-for-MWAITX-and-MONITORX-opcodes-in-the.patch
+Patch1000159: 0114-x86-sev-Disable-MMIO-emulation-from-user-mode.patch
+Patch1000160: 0115-x86-sev-Check-IOBM-for-IOIO-exceptions-from-user-spa.patch
+Patch1000161: 0116-x86-sev-Check-for-user-space-IOIO-pointing-to-kernel.patch
+Patch1000162: 0117-x86-kasan-Map-shadow-for-percpu-pages-on-demand.patch
+Patch1000163: 0118-x86-mm-Randomize-per-cpu-entry-area.patch
+Patch1000164: 0119-x86-mm-Recompute-physical-address-for-every-page-of-.patch
+Patch1000165: 0120-x86-mm-Populate-KASAN-shadow-for-entire-per-CPU-rang.patch
+Patch1000166: 0121-x86-mm-Do-not-shuffle-CPU-entry-areas-without-KASLR.patch
+Patch1000167: 0122-tls-fix-race-between-tx-work-scheduling-and-socket-c.patch
+Patch1000168: 0123-netfilter-nft_limit-reject-configurations-that-cause.patch
+Patch1000169: 0124-firmware-arm_scpi-Ensure-scpi_info-is-not-assigned-i.patch
+Patch1000170: 0125-skbuff-Fix-a-race-between-coalescing-and-releasing-S.patch
+Patch1000171: 0126-usb-dwc3-gadget-check-that-event-count-does-not-exce.patch
+Patch1000172: 0127-net_sched-ets-Fix-double-list-add-in-class-with-nete.patch
+Patch1000173: 0128-i40e-fix-MMIO-write-access-to-an-invalid-page-in-i40.patch
+Patch1000174: 0129-vsock-Fix-transport_-TOCTOU.patch
+Patch1000175: 0130-netfilter-nf_conntrack-fix-crash-due-to-removal-of-u.patch
+Patch1000176: 0131-do_change_type-refuse-to-operate-on-unmounted-not-ou.patch
+Patch1000177: 0132-move_mount-allow-to-add-a-mount-into-an-existing-gro.patch
+Patch1000178: 0133-use-uniform-permission-checks-for-all-mount-propagat.patch
+Patch1000179: 0134-fix-propagation-graph-breakage-by-MOVE_MOUNT_SET_GRO.patch
+Patch1000180: 0135-drm-gem-shmem-When-drm_gem_object_init-failed-should.patch
+Patch1000181: 0136-drm-gem-Acquire-references-on-GEM-handles-for-frameb.patch
+Patch1000182: 0137-drm-framebuffer-Acquire-internal-references-on-GEM-h.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1900,6 +1938,43 @@ ApplyOptionalPatch 0097-signalfd-use-wake_up_pollfree.patch
 ApplyOptionalPatch 0098-aio-keep-poll-requests-on-waitqueue-until-completed.patch
 ApplyOptionalPatch 0099-aio-fix-use-after-free-due-to-missing-POLLFREE-handl.patch
 ApplyOptionalPatch 0100-sched-psi-Fix-use-after-free-in-ep_remove_wait_queue.patch
+ApplyOptionalPatch 0101-x86-Fix-misspelled-Kconfig-symbols.patch
+ApplyOptionalPatch 0102-x86-Introduce-ia32_enabled.patch
+ApplyOptionalPatch 0103-x86-entry-Rename-ignore_sysret.patch
+ApplyOptionalPatch 0104-x86-entry-Compile-entry_SYSCALL32_ignore-uncondition.patch
+ApplyOptionalPatch 0105-x86-entry-Make-IA32-syscalls-availability-depend-on-.patch
+ApplyOptionalPatch 0106-x86-Make-IA32_EMULATION-boot-time-configurable.patch
+ApplyOptionalPatch 0107-x86-entry-Add-__init-to-ia32_emulation_override_cmdl.patch
+ApplyOptionalPatch 0108-x86-coco-Disable-32-bit-emulation-by-default-on-TDX-.patch
+ApplyOptionalPatch 0109-x86-entry-Convert-INT-0x80-emulation-to-IDTENTRY.patch
+ApplyOptionalPatch 0110-x86-entry-Do-not-allow-external-0x80-interrupts.patch
+ApplyOptionalPatch 0111-x86-tdx-Allow-32-bit-emulation-by-default.patch
+ApplyOptionalPatch 0112-x86-sev-Harden-VC-instruction-emulation-somewhat.patch
+ApplyOptionalPatch 0113-x86-sev-Check-for-MWAITX-and-MONITORX-opcodes-in-the.patch
+ApplyOptionalPatch 0114-x86-sev-Disable-MMIO-emulation-from-user-mode.patch
+ApplyOptionalPatch 0115-x86-sev-Check-IOBM-for-IOIO-exceptions-from-user-spa.patch
+ApplyOptionalPatch 0116-x86-sev-Check-for-user-space-IOIO-pointing-to-kernel.patch
+ApplyOptionalPatch 0117-x86-kasan-Map-shadow-for-percpu-pages-on-demand.patch
+ApplyOptionalPatch 0118-x86-mm-Randomize-per-cpu-entry-area.patch
+ApplyOptionalPatch 0119-x86-mm-Recompute-physical-address-for-every-page-of-.patch
+ApplyOptionalPatch 0120-x86-mm-Populate-KASAN-shadow-for-entire-per-CPU-rang.patch
+ApplyOptionalPatch 0121-x86-mm-Do-not-shuffle-CPU-entry-areas-without-KASLR.patch
+ApplyOptionalPatch 0122-tls-fix-race-between-tx-work-scheduling-and-socket-c.patch
+ApplyOptionalPatch 0123-netfilter-nft_limit-reject-configurations-that-cause.patch
+ApplyOptionalPatch 0124-firmware-arm_scpi-Ensure-scpi_info-is-not-assigned-i.patch
+ApplyOptionalPatch 0125-skbuff-Fix-a-race-between-coalescing-and-releasing-S.patch
+ApplyOptionalPatch 0126-usb-dwc3-gadget-check-that-event-count-does-not-exce.patch
+ApplyOptionalPatch 0127-net_sched-ets-Fix-double-list-add-in-class-with-nete.patch
+ApplyOptionalPatch 0128-i40e-fix-MMIO-write-access-to-an-invalid-page-in-i40.patch
+ApplyOptionalPatch 0129-vsock-Fix-transport_-TOCTOU.patch
+ApplyOptionalPatch 0130-netfilter-nf_conntrack-fix-crash-due-to-removal-of-u.patch
+ApplyOptionalPatch 0131-do_change_type-refuse-to-operate-on-unmounted-not-ou.patch
+ApplyOptionalPatch 0132-move_mount-allow-to-add-a-mount-into-an-existing-gro.patch
+ApplyOptionalPatch 0133-use-uniform-permission-checks-for-all-mount-propagat.patch
+ApplyOptionalPatch 0134-fix-propagation-graph-breakage-by-MOVE_MOUNT_SET_GRO.patch
+ApplyOptionalPatch 0135-drm-gem-shmem-When-drm_gem_object_init-failed-should.patch
+ApplyOptionalPatch 0136-drm-gem-Acquire-references-on-GEM-handles-for-frameb.patch
+ApplyOptionalPatch 0137-drm-framebuffer-Acquire-internal-references-on-GEM-h.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3783,6 +3858,45 @@ fi
 #
 #
 %changelog
+* Tue Oct 28 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.13.1
+- drm/framebuffer: Acquire internal references on GEM handles (Brett Mastbergen) [ciqres] {CVE-2025-38449}
+- drm/gem: Acquire references on GEM handles for framebuffers (Brett Mastbergen) [ciqres] {CVE-2025-38449}
+- drm/gem-shmem: When drm_gem_object_init failed, should release object (Brett Mastbergen) [ciqres] {CVE-2025-38449}
+- fix propagation graph breakage by MOVE_MOUNT_SET_GROUP move_mount(2) (Brett Mastbergen) [ciqres] {CVE-2025-38498}
+- use uniform permission checks for all mount propagation changes (Brett Mastbergen) [ciqres] {CVE-2025-38498}
+- move_mount: allow to add a mount into an existing group (Brett Mastbergen) [ciqres] {CVE-2025-38498}
+- do_change_type(): refuse to operate on unmounted/not ours mounts (Brett Mastbergen) [ciqres] {CVE-2025-38498}
+- netfilter: nf_conntrack: fix crash due to removal of uninitialised entry (Brett Mastbergen) [ciqres] {CVE-2025-38472}
+- vsock: Fix transport_* TOCTOU (Brett Mastbergen) [ciqres] {CVE-2025-38461}
+- i40e: fix MMIO write access to an invalid page in i40e_clear_hw (Brett Mastbergen) [ciqres] {CVE-2025-38200}
+- net_sched: ets: Fix double list add in class with netem as child qdisc (Brett Mastbergen) [ciqres] {CVE-2025-37914}
+- usb: dwc3: gadget: check that event count does not exceed event buffer length (Brett Mastbergen) [ciqres] {CVE-2025-37810}
+- skbuff: Fix a race between coalescing and releasing SKBs (Brett Mastbergen) [ciqres] {CVE-2023-53186}
+- firmware: arm_scpi: Ensure scpi_info is not assigned if the probe fails (Brett Mastbergen) [ciqres] {CVE-2022-50087}
+- netfilter: nft_limit: reject configurations that cause integer overflow (Marcin Wcisło) [ciqres] {CVE-2024-26668}
+- tls: fix race between tx work scheduling and socket close (Marcin Wcisło) [ciqres] {CVE-2024-26585}
+- x86/mm: Do not shuffle CPU entry areas without KASLR (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- x86/mm: Populate KASAN shadow for entire per-CPU range of CPU entry area (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- x86/mm: Recompute physical address for every page of per-CPU CEA mapping (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- x86/mm: Randomize per-cpu entry area (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- x86/kasan: Map shadow for percpu pages on demand (Marcin Wcisło) [ciqres] {CVE-2023-0597}
+- x86/sev: Check for user-space IOIO pointing to kernel space (Marcin Wcisło) [ciqres] {CVE-2023-46813}
+- x86/sev: Check IOBM for IOIO exceptions from user-space (Marcin Wcisło) [ciqres] {CVE-2023-46813}
+- x86/sev: Disable MMIO emulation from user mode (Marcin Wcisło) [ciqres] {CVE-2023-46813}
+- x86/sev: Check for MWAITX and MONITORX opcodes in the #VC handler (Marcin Wcisło) [ciqres] {CVE-2024-25742}
+- x86/sev: Harden #VC instruction emulation somewhat (Borislav Petkov (AMD)) [ciqres] {CVE-2024-25742}
+- x86/tdx: Allow 32-bit emulation by default (Marcin Wcisło) [ciqres] {CVE-2024-25744}
+- x86/entry: Do not allow external 0x80 interrupts (Marcin Wcisło) [ciqres] {CVE-2024-25744}
+- x86/entry: Convert INT 0x80 emulation to IDTENTRY (Marcin Wcisło) [ciqres] {CVE-2024-25744}
+- x86/coco: Disable 32-bit emulation by default on TDX and SEV (Kirill A. Shutemov) [ciqres] {CVE-2024-25744}
+- x86/entry: Add __init to ia32_emulation_override_cmdline() (Marcin Wcisło) [ciqres] {CVE-2024-25744}
+- x86: Make IA32_EMULATION boot time configurable (Marcin Wcisło) [ciqres] {CVE-2024-25744}
+- x86/entry: Make IA32 syscalls' availability depend on ia32_enabled() (Marcin Wcisło) [ciqres] {CVE-2024-25744}
+- x86/entry: Compile entry_SYSCALL32_ignore() unconditionally (Marcin Wcisło) [ciqres] {CVE-2024-25744}
+- x86/entry: Rename ignore_sysret() (Marcin Wcisło) [ciqres] {CVE-2024-25744}
+- x86: Introduce ia32_enabled() (Marcin Wcisło) [ciqres] {CVE-2024-25744}
+- x86: Fix misspelled Kconfig symbols (Marcin Wcisło) [ciqres] {CVE-2024-25744}
+
 * Mon Oct 06 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.12.1
 - sched/psi: Fix use-after-free in ep_remove_wait_queue() (Brett Mastbergen) [ciqres] {CVE-2023-52707}
 - aio: fix use-after-free due to missing POLLFREE handling (Brett Mastbergen) [ciqres] {CVE-2021-47505}

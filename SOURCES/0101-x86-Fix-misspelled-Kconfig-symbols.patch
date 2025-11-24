@@ -1,0 +1,84 @@
+From a61efbb2c7b1b6c328d0a0883c1a25a80a41a441 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Thu, 2 Oct 2025 23:35:51 +0200
+Subject: [PATCH] x86: Fix misspelled Kconfig symbols
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-772
+cve-pre CVE-2024-25744
+commit-author Lukas Bulwahn <lukas.bulwahn@gmail.com>
+commit 6bf8a55d8344df1f61a29b18c398bcdf3539e163
+
+Fix misspelled Kconfig symbols as detected by
+scripts/checkkconfigsymbols.py.
+
+ [ bp: Combine into a single patch. ]
+
+	Signed-off-by: Lukas Bulwahn <lukas.bulwahn@gmail.com>
+	Signed-off-by: Borislav Petkov <bp@suse.de>
+Link: https://lkml.kernel.org/r/20210803113531.30720-7-lukas.bulwahn@gmail.com
+(cherry picked from commit 6bf8a55d8344df1f61a29b18c398bcdf3539e163)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ arch/x86/include/asm/ia32.h      | 2 +-
+ arch/x86/include/asm/irq_stack.h | 2 +-
+ arch/x86/include/asm/page_32.h   | 2 +-
+ arch/x86/include/asm/uaccess.h   | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/x86/include/asm/ia32.h b/arch/x86/include/asm/ia32.h
+index 2c5f7861d373..fada857f0a1e 100644
+--- a/arch/x86/include/asm/ia32.h
++++ b/arch/x86/include/asm/ia32.h
+@@ -68,6 +68,6 @@ extern void ia32_pick_mmap_layout(struct mm_struct *mm);
+ 
+ #endif
+ 
+-#endif /* !CONFIG_IA32_SUPPORT */
++#endif /* CONFIG_IA32_EMULATION */
+ 
+ #endif /* _ASM_X86_IA32_H */
+diff --git a/arch/x86/include/asm/irq_stack.h b/arch/x86/include/asm/irq_stack.h
+index f8958fcb695e..63f818aedf77 100644
+--- a/arch/x86/include/asm/irq_stack.h
++++ b/arch/x86/include/asm/irq_stack.h
+@@ -59,7 +59,7 @@
+  *     the output constraints to make the compiler aware that R11 cannot be
+  *     reused after the asm() statement.
+  *
+- *     For builds with CONFIG_UNWIND_FRAME_POINTER ASM_CALL_CONSTRAINT is
++ *     For builds with CONFIG_UNWINDER_FRAME_POINTER, ASM_CALL_CONSTRAINT is
+  *     required as well as this prevents certain creative GCC variants from
+  *     misplacing the ASM code.
+  *
+diff --git a/arch/x86/include/asm/page_32.h b/arch/x86/include/asm/page_32.h
+index 94dbd51df58f..b13f8488ac85 100644
+--- a/arch/x86/include/asm/page_32.h
++++ b/arch/x86/include/asm/page_32.h
+@@ -43,7 +43,7 @@ static inline void copy_page(void *to, void *from)
+ {
+ 	memcpy(to, from, PAGE_SIZE);
+ }
+-#endif	/* CONFIG_X86_3DNOW */
++#endif	/* CONFIG_X86_USE_3DNOW */
+ #endif	/* !__ASSEMBLY__ */
+ 
+ #endif /* _ASM_X86_PAGE_32_H */
+diff --git a/arch/x86/include/asm/uaccess.h b/arch/x86/include/asm/uaccess.h
+index 538646ec8027..bbd2bb0d3bee 100644
+--- a/arch/x86/include/asm/uaccess.h
++++ b/arch/x86/include/asm/uaccess.h
+@@ -379,7 +379,7 @@ do {									\
+ 		     : [umem] "m" (__m(addr)),				\
+ 		       "0" (err))
+ 
+-#endif // CONFIG_CC_ASM_GOTO_OUTPUT
++#endif // CONFIG_CC_HAS_ASM_GOTO_OUTPUT
+ 
+ #ifdef CONFIG_CC_HAS_ASM_GOTO_TIED_OUTPUT
+ #define __try_cmpxchg_user_asm(itype, ltype, _ptr, _pold, _new, label)	({ \
+-- 
+2.47.3
+

@@ -1,0 +1,52 @@
+From e8809b4a67dfdfc8dce5ae341f7b3b902df1cd7f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 3 Oct 2025 00:07:26 +0200
+Subject: [PATCH] x86/sev: Check for MWAITX and MONITORX opcodes in the #VC
+ handler
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-756
+cve-bf CVE-2024-25742
+commit-author Tom Lendacky <thomas.lendacky@amd.com>
+commit e70316d17f6ab49a6038ffd115397fd68f8c7be8
+
+The MWAITX and MONITORX instructions generate the same #VC error code as
+the MWAIT and MONITOR instructions, respectively. Update the #VC handler
+opcode checking to also support the MWAITX and MONITORX opcodes.
+
+Fixes: e3ef461af35a ("x86/sev: Harden #VC instruction emulation somewhat")
+	Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+	Signed-off-by: Borislav Petkov (AMD) <bp@alien8.de>
+Link: https://lore.kernel.org/r/453d5a7cfb4b9fe818b6fb67f93ae25468bc9e23.1713793161.git.thomas.lendacky@amd.com
+(cherry picked from commit e70316d17f6ab49a6038ffd115397fd68f8c7be8)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ arch/x86/kernel/sev-shared.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
+index 6d9d984f1309..cc1d91393192 100644
+--- a/arch/x86/kernel/sev-shared.c
++++ b/arch/x86/kernel/sev-shared.c
+@@ -1026,12 +1026,14 @@ static enum es_result vc_check_opcode_bytes(struct es_em_ctxt *ctxt,
+ 		break;
+ 
+ 	case SVM_EXIT_MONITOR:
+-		if (opcode == 0x010f && modrm == 0xc8)
++		/* MONITOR and MONITORX instructions generate the same error code */
++		if (opcode == 0x010f && (modrm == 0xc8 || modrm == 0xfa))
+ 			return ES_OK;
+ 		break;
+ 
+ 	case SVM_EXIT_MWAIT:
+-		if (opcode == 0x010f && modrm == 0xc9)
++		/* MWAIT and MWAITX instructions generate the same error code */
++		if (opcode == 0x010f && (modrm == 0xc9 || modrm == 0xfb))
+ 			return ES_OK;
+ 		break;
+ 
+-- 
+2.47.3
+

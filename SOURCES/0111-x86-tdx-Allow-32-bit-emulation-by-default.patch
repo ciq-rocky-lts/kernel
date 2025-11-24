@@ -1,0 +1,62 @@
+From f074cbcce3be6cfc2e3c0605468311d3ccaf36a4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 3 Oct 2025 02:00:37 +0200
+Subject: [PATCH] x86/tdx: Allow 32-bit emulation by default
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-772
+cve CVE-2024-25744
+commit-author Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+commit f4116bfc44621882556bbf70f5284fbf429a5cf6
+
+32-bit emulation was disabled on TDX to prevent a possible attack by
+a VMM injecting an interrupt on vector 0x80.
+
+Now that int80_emulation() has a check for external interrupts the
+limitation can be lifted.
+
+To distinguish software interrupts from external ones, int80_emulation()
+checks the APIC ISR bit relevant to the 0x80 vector. For
+software interrupts, this bit will be 0.
+
+On TDX, the VAPIC state (including ISR) is protected and cannot be
+manipulated by the VMM. The ISR bit is set by the microcode flow during
+the handling of posted interrupts.
+
+[ dhansen: more changelog tweaks ]
+
+	Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+	Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
+	Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
+	Reviewed-by: Borislav Petkov (AMD) <bp@alien8.de>
+	Cc: <stable@vger.kernel.org> # v6.0+
+(cherry picked from commit f4116bfc44621882556bbf70f5284fbf429a5cf6)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ arch/x86/coco/tdx/tdx.c | 9 ---------
+ 1 file changed, 9 deletions(-)
+
+diff --git a/arch/x86/coco/tdx/tdx.c b/arch/x86/coco/tdx/tdx.c
+index 56b058531d89..2743d5690680 100644
+--- a/arch/x86/coco/tdx/tdx.c
++++ b/arch/x86/coco/tdx/tdx.c
+@@ -825,14 +825,5 @@ void __init tdx_early_init(void)
+ 	x86_platform.guest.enc_tlb_flush_required   = tdx_tlb_flush_required;
+ 	x86_platform.guest.enc_status_change_finish = tdx_enc_status_changed;
+ 
+-	/*
+-	 * The VMM is capable of injecting interrupt 0x80 and triggering the
+-	 * compatibility syscall path.
+-	 *
+-	 * By default, the 32-bit emulation is disabled in order to ensure
+-	 * the safety of the VM.
+-	 */
+-	ia32_disable();
+-
+ 	pr_info("Guest detected\n");
+ }
+-- 
+2.47.3
+
