@@ -1,0 +1,52 @@
+From 50fda57c8c4747b5ffc71d90b94d38ea0d800379 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Thu, 23 Oct 2025 13:46:42 -0400
+Subject: [PATCH] ext4: avoid resizing to a partial cluster size
+
+jira VULN-135014
+cve CVE-2022-50020
+commit-author Kiselev, Oleg <okiselev@amazon.com>
+commit 69cb8e9d8cd97cdf5e293b26d70a9dee3e35e6bd
+upstream-diff This kernel doesn't have the ext4_feature_has_bigalloc
+              helper, so this commit uses the EXT4_HAS_RO_COMPAT_FEATURE
+              macro which does the same thing
+
+This patch avoids an attempt to resize the filesystem to an
+unaligned cluster boundary.  An online resize to a size that is not
+integral to cluster size results in the last iteration attempting to
+grow the fs by a negative amount, which trips a BUG_ON and leaves the fs
+with a corrupted in-memory superblock.
+
+	Signed-off-by: Oleg Kiselev <okiselev@amazon.com>
+Link: https://lore.kernel.org/r/0E92A0AB-4F16-4F1A-94B7-702CC6504FDE@amazon.com
+	Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+(cherry picked from commit 69cb8e9d8cd97cdf5e293b26d70a9dee3e35e6bd)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ fs/ext4/resize.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/fs/ext4/resize.c b/fs/ext4/resize.c
+index a71393426e1d..a8031b61626a 100644
+--- a/fs/ext4/resize.c
++++ b/fs/ext4/resize.c
+@@ -1900,6 +1900,16 @@ int ext4_resize_fs(struct super_block *sb, ext4_fsblk_t n_blocks_count)
+ 	}
+ 	brelse(bh);
+ 
++	/*
++	 * For bigalloc, trim the requested size to the nearest cluster
++	 * boundary to avoid creating an unusable filesystem. We do this
++	 * silently, instead of returning an error, to avoid breaking
++	 * callers that blindly resize the filesystem to the full size of
++	 * the underlying block device.
++	 */
++	if (EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_BIGALLOC))
++		n_blocks_count &= ~((1 << EXT4_CLUSTER_BITS(sb)) - 1);
++
+ retry:
+ 	o_blocks_count = ext4_blocks_count(es);
+ 
+-- 
+2.47.3
+

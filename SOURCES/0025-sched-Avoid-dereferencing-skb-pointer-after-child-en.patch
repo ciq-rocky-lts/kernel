@@ -1,0 +1,229 @@
+From 24ea458866512d331e95f85ec97c5393d6a19b8d Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Fri, 24 Oct 2025 11:37:46 -0400
+Subject: [PATCH] sched: Avoid dereferencing skb pointer after child enqueue
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-68349
+cve-pre CVE-2025-38000
+commit-author Toke Høiland-Jørgensen <toke@redhat.com>
+commit f6bab199315b70fd83fe3ee0947bc84c7a35f3d4
+upstream-diff No changes were made to sch_cbs.c because it doesn't
+              support child qdiscs in this kernel because it lacks
+              "990e35ecba1c cbs: Add support for graft function"
+
+Parent qdiscs may dereference the pointer to the enqueued skb after
+enqueue. However, both CAKE and TBF call consume_skb() on the original skb
+when splitting GSO packets, leading to a potential use-after-free in the
+parent. Fix this by avoiding dereferencing the skb pointer after enqueueing
+to the child.
+
+	Signed-off-by: Toke Høiland-Jørgensen <toke@redhat.com>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit f6bab199315b70fd83fe3ee0947bc84c7a35f3d4)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/sched/sch_drr.c    |  3 ++-
+ net/sched/sch_dsmark.c |  3 ++-
+ net/sched/sch_hfsc.c   |  5 ++---
+ net/sched/sch_htb.c    |  3 ++-
+ net/sched/sch_prio.c   |  3 ++-
+ net/sched/sch_qfq.c    | 16 +++++++++-------
+ net/sched/sch_tbf.c    |  3 ++-
+ 7 files changed, 21 insertions(+), 15 deletions(-)
+
+diff --git a/net/sched/sch_drr.c b/net/sched/sch_drr.c
+index 9bfe7b50115f..8a172f6ab311 100644
+--- a/net/sched/sch_drr.c
++++ b/net/sched/sch_drr.c
+@@ -336,6 +336,7 @@ static struct drr_class *drr_classify(struct sk_buff *skb, struct Qdisc *sch,
+ static int drr_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 		       struct sk_buff **to_free)
+ {
++	unsigned int len = qdisc_pkt_len(skb);
+ 	struct drr_sched *q = qdisc_priv(sch);
+ 	struct drr_class *cl;
+ 	int err = 0;
+@@ -362,7 +363,7 @@ static int drr_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 		cl->deficit = cl->quantum;
+ 	}
+ 
+-	qdisc_qstats_backlog_inc(sch, skb);
++	sch->qstats.backlog += len;
+ 	sch->q.qlen++;
+ 	return err;
+ }
+diff --git a/net/sched/sch_dsmark.c b/net/sched/sch_dsmark.c
+index df08e15e6f19..c72627cab286 100644
+--- a/net/sched/sch_dsmark.c
++++ b/net/sched/sch_dsmark.c
+@@ -196,6 +196,7 @@ static struct tcf_block *dsmark_tcf_block(struct Qdisc *sch, unsigned long cl)
+ static int dsmark_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 			  struct sk_buff **to_free)
+ {
++	unsigned int len = qdisc_pkt_len(skb);
+ 	struct dsmark_qdisc_data *p = qdisc_priv(sch);
+ 	int err;
+ 
+@@ -268,7 +269,7 @@ static int dsmark_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 		return err;
+ 	}
+ 
+-	qdisc_qstats_backlog_inc(sch, skb);
++	sch->qstats.backlog += len;
+ 	sch->q.qlen++;
+ 
+ 	return NET_XMIT_SUCCESS;
+diff --git a/net/sched/sch_hfsc.c b/net/sched/sch_hfsc.c
+index 6f20411d1ed6..1a5a8f9ce5f0 100644
+--- a/net/sched/sch_hfsc.c
++++ b/net/sched/sch_hfsc.c
+@@ -1552,6 +1552,7 @@ hfsc_dump_qdisc(struct Qdisc *sch, struct sk_buff *skb)
+ static int
+ hfsc_enqueue(struct sk_buff *skb, struct Qdisc *sch, struct sk_buff **to_free)
+ {
++	unsigned int len = qdisc_pkt_len(skb);
+ 	struct hfsc_class *cl;
+ 	int uninitialized_var(err);
+ 
+@@ -1573,8 +1574,6 @@ hfsc_enqueue(struct sk_buff *skb, struct Qdisc *sch, struct sk_buff **to_free)
+ 	}
+ 
+ 	if (cl->qdisc->q.qlen == 1) {
+-		unsigned int len = qdisc_pkt_len(skb);
+-
+ 		if (cl->cl_flags & HFSC_RSC)
+ 			init_ed(cl, len);
+ 		if (cl->cl_flags & HFSC_FSC)
+@@ -1589,7 +1588,7 @@ hfsc_enqueue(struct sk_buff *skb, struct Qdisc *sch, struct sk_buff **to_free)
+ 
+ 	}
+ 
+-	qdisc_qstats_backlog_inc(sch, skb);
++	sch->qstats.backlog += len;
+ 	sch->q.qlen++;
+ 
+ 	return NET_XMIT_SUCCESS;
+diff --git a/net/sched/sch_htb.c b/net/sched/sch_htb.c
+index 645b078c196b..b3ae1bfd78cf 100644
+--- a/net/sched/sch_htb.c
++++ b/net/sched/sch_htb.c
+@@ -597,6 +597,7 @@ static int htb_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 		       struct sk_buff **to_free)
+ {
+ 	int uninitialized_var(ret);
++	unsigned int len = qdisc_pkt_len(skb);
+ 	struct htb_sched *q = qdisc_priv(sch);
+ 	struct htb_class *cl = htb_classify(skb, sch, &ret);
+ 
+@@ -626,7 +627,7 @@ static int htb_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 		htb_activate(q, cl);
+ 	}
+ 
+-	qdisc_qstats_backlog_inc(sch, skb);
++	sch->qstats.backlog += len;
+ 	sch->q.qlen++;
+ 	return NET_XMIT_SUCCESS;
+ }
+diff --git a/net/sched/sch_prio.c b/net/sched/sch_prio.c
+index faf447b60b68..259a3986b9cc 100644
+--- a/net/sched/sch_prio.c
++++ b/net/sched/sch_prio.c
+@@ -71,6 +71,7 @@ prio_classify(struct sk_buff *skb, struct Qdisc *sch, int *qerr)
+ static int
+ prio_enqueue(struct sk_buff *skb, struct Qdisc *sch, struct sk_buff **to_free)
+ {
++	unsigned int len = qdisc_pkt_len(skb);
+ 	struct Qdisc *qdisc;
+ 	int ret;
+ 
+@@ -87,7 +88,7 @@ prio_enqueue(struct sk_buff *skb, struct Qdisc *sch, struct sk_buff **to_free)
+ 
+ 	ret = qdisc_enqueue(skb, qdisc, to_free);
+ 	if (ret == NET_XMIT_SUCCESS) {
+-		qdisc_qstats_backlog_inc(sch, skb);
++		sch->qstats.backlog += len;
+ 		sch->q.qlen++;
+ 		return NET_XMIT_SUCCESS;
+ 	}
+diff --git a/net/sched/sch_qfq.c b/net/sched/sch_qfq.c
+index e32de8470c24..29082e201380 100644
+--- a/net/sched/sch_qfq.c
++++ b/net/sched/sch_qfq.c
+@@ -1233,6 +1233,7 @@ static struct qfq_aggregate *qfq_choose_next_agg(struct qfq_sched *q)
+ static int qfq_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 		       struct sk_buff **to_free)
+ {
++	unsigned int len = qdisc_pkt_len(skb), gso_segs;
+ 	struct qfq_sched *q = qdisc_priv(sch);
+ 	struct qfq_class *cl;
+ 	struct qfq_aggregate *agg;
+@@ -1247,17 +1248,17 @@ static int qfq_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 	}
+ 	pr_debug("qfq_enqueue: cl = %x\n", cl->common.classid);
+ 
+-	if (unlikely(cl->agg->lmax < qdisc_pkt_len(skb))) {
++	if (unlikely(cl->agg->lmax < len)) {
+ 		pr_debug("qfq: increasing maxpkt from %u to %u for class %u",
+-			 cl->agg->lmax, qdisc_pkt_len(skb), cl->common.classid);
+-		err = qfq_change_agg(sch, cl, cl->agg->class_weight,
+-				     qdisc_pkt_len(skb));
++			 cl->agg->lmax, len, cl->common.classid);
++		err = qfq_change_agg(sch, cl, cl->agg->class_weight, len);
+ 		if (err) {
+ 			cl->qstats.drops++;
+ 			return qdisc_drop(skb, sch, to_free);
+ 		}
+ 	}
+ 
++	gso_segs = skb_is_gso(skb) ? skb_shinfo(skb)->gso_segs : 1;
+ 	err = qdisc_enqueue(skb, cl->qdisc, to_free);
+ 	if (unlikely(err != NET_XMIT_SUCCESS)) {
+ 		pr_debug("qfq_enqueue: enqueue failed %d\n", err);
+@@ -1268,8 +1269,9 @@ static int qfq_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 		return err;
+ 	}
+ 
+-	bstats_update(&cl->bstats, skb);
+-	qdisc_qstats_backlog_inc(sch, skb);
++	cl->bstats.bytes += len;
++	cl->bstats.packets += gso_segs;
++	sch->qstats.backlog += len;
+ 	++sch->q.qlen;
+ 
+ 	agg = cl->agg;
+@@ -1277,7 +1279,7 @@ static int qfq_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 	if (cl->qdisc->q.qlen != 1) {
+ 		if (unlikely(skb == cl->qdisc->ops->peek(cl->qdisc)) &&
+ 		    list_first_entry(&agg->active, struct qfq_class, alist)
+-		    == cl && cl->deficit < qdisc_pkt_len(skb))
++		    == cl && cl->deficit < len)
+ 			list_move_tail(&cl->alist, &agg->active);
+ 
+ 		return err;
+diff --git a/net/sched/sch_tbf.c b/net/sched/sch_tbf.c
+index 15a19519aa9c..5b1de4204077 100644
+--- a/net/sched/sch_tbf.c
++++ b/net/sched/sch_tbf.c
+@@ -185,6 +185,7 @@ static int tbf_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 		       struct sk_buff **to_free)
+ {
+ 	struct tbf_sched_data *q = qdisc_priv(sch);
++	unsigned int len = qdisc_pkt_len(skb);
+ 	int ret;
+ 
+ 	if (qdisc_pkt_len(skb) > q->max_size) {
+@@ -199,7 +200,7 @@ static int tbf_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+ 		return ret;
+ 	}
+ 
+-	qdisc_qstats_backlog_inc(sch, skb);
++	sch->qstats.backlog += len;
+ 	sch->q.qlen++;
+ 	return NET_XMIT_SUCCESS;
+ }
+-- 
+2.47.3
+

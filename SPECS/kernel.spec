@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 9
+%define ciq_patch_version 10
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -562,6 +562,11 @@ Patch1046: 0020-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
 Patch1047: 0021-i40e-fix-MMIO-write-access-to-an-invalid-page-in-i40.patch
 Patch1048: 0022-net-sched-sch_qfq-Fix-race-condition-on-qfq_aggregat.patch
 Patch1049: 0023-net-sched-sch_qfq-Avoid-triggering-might_sleep-in-at.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.10.1
+Patch1050: 0024-ext4-avoid-resizing-to-a-partial-cluster-size.patch
+Patch1051: 0025-sched-Avoid-dereferencing-skb-pointer-after-child-en.patch
+Patch1052: 0026-sch_hfsc-Fix-qlen-accounting-bug-when-using-peek-in-.patch
+Patch1053: 0027-net-sched-Always-pass-notifications-when-child-class.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -954,6 +959,10 @@ ApplyOptionalPatch 0020-net-usb-smsc75xx-Move-packet-length-check-to-prevent.pat
 ApplyOptionalPatch 0021-i40e-fix-MMIO-write-access-to-an-invalid-page-in-i40.patch
 ApplyOptionalPatch 0022-net-sched-sch_qfq-Fix-race-condition-on-qfq_aggregat.patch
 ApplyOptionalPatch 0023-net-sched-sch_qfq-Avoid-triggering-might_sleep-in-at.patch
+ApplyOptionalPatch 0024-ext4-avoid-resizing-to-a-partial-cluster-size.patch
+ApplyOptionalPatch 0025-sched-Avoid-dereferencing-skb-pointer-after-child-en.patch
+ApplyOptionalPatch 0026-sch_hfsc-Fix-qlen-accounting-bug-when-using-peek-in-.patch
+ApplyOptionalPatch 0027-net-sched-Always-pass-notifications-when-child-class.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -1957,6 +1966,12 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Wed Nov 19 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.10.1
+- net/sched: Always pass notifications when child class becomes empty (Brett Mastbergen) [ciqres] {CVE-2025-38350}
+- sch_hfsc: Fix qlen accounting bug when using peek in hfsc_enqueue() (Brett Mastbergen) [ciqres] {CVE-2025-38000}
+- sched: Avoid dereferencing skb pointer after child enqueue (Brett Mastbergen) [ciqres] {CVE-2025-38000}
+- ext4: avoid resizing to a partial cluster size (Brett Mastbergen) [ciqres] {CVE-2022-50020}
+
 * Mon Oct 20 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.9.1
 - net/sched: sch_qfq: Avoid triggering might_sleep in atomic context in qfq_delete_class (Brett Mastbergen) [ciqres] {CVE-2025-38477}
 - net/sched: sch_qfq: Fix race condition on qfq_aggregate (Brett Mastbergen) [ciqres] {CVE-2025-38477}
