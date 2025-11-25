@@ -3,8 +3,8 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 13
-%define ciq_build_id 1
+%define ciq_patch_version 14
+%define ciq_build_id 2
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2.92ciq_lts
 
@@ -1117,6 +1117,12 @@ Patch1000179: 0134-fix-propagation-graph-breakage-by-MOVE_MOUNT_SET_GRO.patch
 Patch1000180: 0135-drm-gem-shmem-When-drm_gem_object_init-failed-should.patch
 Patch1000181: 0136-drm-gem-Acquire-references-on-GEM-handles-for-frameb.patch
 Patch1000182: 0137-drm-framebuffer-Acquire-internal-references-on-GEM-h.patch
+#CIQ Patch Version: 284.30.1.el9_2.92ciq_lts.14.1
+Patch1000183: 0138-sctp-linearize-cloned-gso-packets-in-sctp_rcv.patch
+Patch1000184: 0139-net-usb-smsc75xx-Limit-packet-length-to-skb-len.patch
+Patch1000185: 0140-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
+Patch1000186: 0141-ipv6-mcast-Delay-put-pmc-idev-in-mld_del_delrec.patch
+Patch1000187: 0142-ALSA-hda-ca0132-Fix-buffer-overflow-in-add_tuning_co.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1975,6 +1981,11 @@ ApplyOptionalPatch 0134-fix-propagation-graph-breakage-by-MOVE_MOUNT_SET_GRO.pat
 ApplyOptionalPatch 0135-drm-gem-shmem-When-drm_gem_object_init-failed-should.patch
 ApplyOptionalPatch 0136-drm-gem-Acquire-references-on-GEM-handles-for-frameb.patch
 ApplyOptionalPatch 0137-drm-framebuffer-Acquire-internal-references-on-GEM-h.patch
+ApplyOptionalPatch 0138-sctp-linearize-cloned-gso-packets-in-sctp_rcv.patch
+ApplyOptionalPatch 0139-net-usb-smsc75xx-Limit-packet-length-to-skb-len.patch
+ApplyOptionalPatch 0140-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
+ApplyOptionalPatch 0141-ipv6-mcast-Delay-put-pmc-idev-in-mld_del_delrec.patch
+ApplyOptionalPatch 0142-ALSA-hda-ca0132-Fix-buffer-overflow-in-add_tuning_co.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3858,6 +3869,16 @@ fi
 #
 #
 %changelog
+* Mon Nov 17 2025 Michael L. Young <myoung@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.14.2
+- Update the signer information used to create the kernel module signing key when building (Michael L. Young)
+
+* Fri Nov 07 2025 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.14.1
+- ALSA: hda/ca0132: Fix buffer overflow in add_tuning_control (Brett Mastbergen) [ciqres] {CVE-2025-39751}
+- ipv6: mcast: Delay put pmc->idev in mld_del_delrec() (Brett Mastbergen) [ciqres] {CVE-2025-38550}
+- net: usb: smsc75xx: Move packet length check to prevent kernel panic in skb_pull (Brett Mastbergen) [ciqres] {CVE-2023-53125}
+- net: usb: smsc75xx: Limit packet length to skb->len (Brett Mastbergen) [ciqres] {CVE-2023-53125}
+- sctp: linearize cloned gso packets in sctp_rcv (Roxana Nicolescu) [ciqres] {CVE-2025-38718}
+
 * Tue Oct 28 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.13.1
 - drm/framebuffer: Acquire internal references on GEM handles (Brett Mastbergen) [ciqres] {CVE-2025-38449}
 - drm/gem: Acquire references on GEM handles for framebuffers (Brett Mastbergen) [ciqres] {CVE-2025-38449}

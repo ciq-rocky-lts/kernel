@@ -1,0 +1,41 @@
+From 19ccb2d724cabc36e09ceb0d661cf90e466e9262 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Fri, 24 Oct 2025 15:49:49 -0400
+Subject: [PATCH] ipv6: mcast: Delay put pmc->idev in mld_del_delrec()
+
+jira VULN-131123
+cve CVE-2025-38550
+commit-author Yue Haibing <yuehaibing@huawei.com>
+commit ae3264a25a4635531264728859dbe9c659fad554
+
+pmc->idev is still used in ip6_mc_clear_src(), so as mld_clear_delrec()
+does, the reference should be put after ip6_mc_clear_src() return.
+
+Fixes: 63ed8de4be81 ("mld: add mc_lock for protecting per-interface mld data")
+	Signed-off-by: Yue Haibing <yuehaibing@huawei.com>
+Link: https://patch.msgid.link/20250714141957.3301871-1-yuehaibing@huawei.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit ae3264a25a4635531264728859dbe9c659fad554)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ net/ipv6/mcast.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/ipv6/mcast.c b/net/ipv6/mcast.c
+index ce4e6db8d923..f547134c3055 100644
+--- a/net/ipv6/mcast.c
++++ b/net/ipv6/mcast.c
+@@ -803,8 +803,8 @@ static void mld_del_delrec(struct inet6_dev *idev, struct ifmcaddr6 *im)
+ 		} else {
+ 			im->mca_crcount = idev->mc_qrv;
+ 		}
+-		in6_dev_put(pmc->idev);
+ 		ip6_mc_clear_src(pmc);
++		in6_dev_put(pmc->idev);
+ 		kfree_rcu(pmc, rcu);
+ 	}
+ }
+-- 
+2.47.3
+
