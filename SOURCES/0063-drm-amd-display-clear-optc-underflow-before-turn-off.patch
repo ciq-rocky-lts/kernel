@@ -1,0 +1,50 @@
+From 4ad5dd0c9616d0bd4441bc52948431095e730e38 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Thu, 30 Oct 2025 11:49:45 +0100
+Subject: [PATCH] drm/amd/display: clear optc underflow before turn off odm
+ clock
+
+jira VULN-69260
+cve CVE-2022-49969
+commit-author Fudong Wang <Fudong.Wang@amd.com>
+commit b2a93490201300a749ad261b5c5d05cb50179c44
+
+[Why]
+After ODM clock off, optc underflow bit will be kept there always and clear not work.
+We need to clear that before clock off.
+
+[How]
+Clear that if have when clock off.
+
+	Reviewed-by: Alvin Lee <alvin.lee2@amd.com>
+	Acked-by: Tom Chung <chiahsuan.chung@amd.com>
+	Signed-off-by: Fudong Wang <Fudong.Wang@amd.com>
+	Tested-by: Daniel Wheeler <daniel.wheeler@amd.com>
+	Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+(cherry picked from commit b2a93490201300a749ad261b5c5d05cb50179c44)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+
+Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ drivers/gpu/drm/amd/display/dc/dcn10/dcn10_optc.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/gpu/drm/amd/display/dc/dcn10/dcn10_optc.c b/drivers/gpu/drm/amd/display/dc/dcn10/dcn10_optc.c
+index 3696faf12d86..a407e070ce06 100644
+--- a/drivers/gpu/drm/amd/display/dc/dcn10/dcn10_optc.c
++++ b/drivers/gpu/drm/amd/display/dc/dcn10/dcn10_optc.c
+@@ -480,6 +480,11 @@ void optc1_enable_optc_clock(struct timing_generator *optc, bool enable)
+ 				OTG_CLOCK_ON, 1,
+ 				1, 1000);
+ 	} else  {
++
++		//last chance to clear underflow, otherwise, it will always there due to clock is off.
++		if (optc->funcs->is_optc_underflow_occurred(optc) == true)
++			optc->funcs->clear_optc_underflow(optc);
++
+ 		REG_UPDATE_2(OTG_CLOCK_CONTROL,
+ 				OTG_CLOCK_GATE_DIS, 0,
+ 				OTG_CLOCK_EN, 0);
+-- 
+2.47.3
+

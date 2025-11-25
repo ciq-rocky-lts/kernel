@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 16
+%define ciq_patch_version 17
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6.86ciq_lts
@@ -783,6 +783,42 @@ Patch0214: 0059-x86-mm-Randomize-per-cpu-entry-area.patch
 Patch0215: 0060-x86-mm-Recompute-physical-address-for-every-page-of-.patch
 Patch0216: 0061-x86-mm-Populate-KASAN-shadow-for-entire-per-CPU-rang.patch
 Patch0217: 0062-x86-mm-Do-not-shuffle-CPU-entry-areas-without-KASLR.patch
+#CIQ Patch Version: 372.32.1.el8_6.86ciq_lts.17.1
+Patch0218: 0063-drm-amd-display-clear-optc-underflow-before-turn-off.patch
+Patch0219: 0064-bpf-Don-t-use-tnum_range-on-array-range-checking-for.patch
+Patch0220: 0065-mptcp-do-not-queue-data-on-closed-subflows.patch
+Patch0221: 0066-RDMA-irdma-Fix-a-window-for-use-after-free.patch
+Patch0222: 0067-md-raid10-fix-KASAN-warning.patch
+Patch0223: 0068-KVM-SVM-Don-t-BUG-if-userspace-injects-an-interrupt-.patch
+Patch0224: 0069-ALSA-bcd2000-Fix-a-UAF-bug-on-the-error-path-of-prob.patch
+Patch0225: 0070-net-usb-smsc75xx-Limit-packet-length-to-skb-len.patch
+Patch0226: 0071-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
+Patch0227: 0072-Bluetooth-L2CAP-Fix-use-after-free-caused-by-l2cap_c.patch
+Patch0228: 0073-Bluetooth-L2CAP-Fix-l2cap_global_chan_by_psm-regress.patch
+Patch0229: 0074-Bluetooth-L2CAP-Fix-build-errors-in-some-archs.patch
+Patch0230: 0075-Bluetooth-L2CAP-Fix-use-after-free.patch
+Patch0231: 0076-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-hand.patch
+Patch0232: 0077-net_sched-ets-Fix-double-list-add-in-class-with-nete.patch
+Patch0233: 0078-wifi-rtw88-fix-the-para-buffer-size-to-avoid-reading.patch
+Patch0234: 0079-i40e-fix-MMIO-write-access-to-an-invalid-page-in-i40.patch
+Patch0235: 0080-scsi-lpfc-Use-memcpy-for-BIOS-version.patch
+Patch0236: 0081-tipc-Fix-use-after-free-in-tipc_conn_close.patch
+Patch0237: 0082-vsock-reset-socket-state-when-de-assigning-the-trans.patch
+Patch0238: 0083-vsock-Fix-transport_-TOCTOU.patch
+Patch0239: 0084-vsock-fix-lock-inversion-in-vsock_assign_transport.patch
+Patch0240: 0085-wifi-brcmfmac-fix-use-after-free-bug-in-brcmf_netdev.patch
+Patch0241: 0086-wifi-ath9k-don-t-allow-to-overwrite-ENDPOINT0-attrib.patch
+Patch0242: 0087-wifi-brcmfmac-slab-out-of-bounds-read-in-brcmf_get_a.patch
+Patch0243: 0088-crypto-seqiv-Handle-EBUSY-correctly.patch
+Patch0244: 0089-Bluetooth-Fix-potential-use-after-free-when-clear-ke.patch
+Patch0245: 0090-net-sched-sch_qfq-Fix-race-condition-on-qfq_aggregat.patch
+Patch0246: 0091-net-sched-sch_qfq-Avoid-triggering-might_sleep-in-at.patch
+Patch0247: 0092-NFS-Fix-filehandle-bounds-checking-in-nfs_fh_to_dent.patch
+Patch0248: 0093-scsi-lpfc-Fix-buffer-free-clear-order-in-deferred-re.patch
+Patch0249: 0094-wifi-cfg80211-fix-use-after-free-in-cmp_bss.patch
+Patch0250: 0095-RDMA-iwcm-Fix-a-use-after-free-related-to-destroying.patch
+Patch0251: 0096-RDMA-iwcm-Fix-WARNING-at_kernel-workqueue.c-check_fl.patch
+Patch0252: 0097-RDMA-iwcm-Fix-use-after-free-of-work-objects-after-c.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1567,6 +1603,41 @@ ApplyOptionalPatch 0059-x86-mm-Randomize-per-cpu-entry-area.patch
 ApplyOptionalPatch 0060-x86-mm-Recompute-physical-address-for-every-page-of-.patch
 ApplyOptionalPatch 0061-x86-mm-Populate-KASAN-shadow-for-entire-per-CPU-rang.patch
 ApplyOptionalPatch 0062-x86-mm-Do-not-shuffle-CPU-entry-areas-without-KASLR.patch
+ApplyOptionalPatch 0063-drm-amd-display-clear-optc-underflow-before-turn-off.patch
+ApplyOptionalPatch 0064-bpf-Don-t-use-tnum_range-on-array-range-checking-for.patch
+ApplyOptionalPatch 0065-mptcp-do-not-queue-data-on-closed-subflows.patch
+ApplyOptionalPatch 0066-RDMA-irdma-Fix-a-window-for-use-after-free.patch
+ApplyOptionalPatch 0067-md-raid10-fix-KASAN-warning.patch
+ApplyOptionalPatch 0068-KVM-SVM-Don-t-BUG-if-userspace-injects-an-interrupt-.patch
+ApplyOptionalPatch 0069-ALSA-bcd2000-Fix-a-UAF-bug-on-the-error-path-of-prob.patch
+ApplyOptionalPatch 0070-net-usb-smsc75xx-Limit-packet-length-to-skb-len.patch
+ApplyOptionalPatch 0071-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
+ApplyOptionalPatch 0072-Bluetooth-L2CAP-Fix-use-after-free-caused-by-l2cap_c.patch
+ApplyOptionalPatch 0073-Bluetooth-L2CAP-Fix-l2cap_global_chan_by_psm-regress.patch
+ApplyOptionalPatch 0074-Bluetooth-L2CAP-Fix-build-errors-in-some-archs.patch
+ApplyOptionalPatch 0075-Bluetooth-L2CAP-Fix-use-after-free.patch
+ApplyOptionalPatch 0076-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-hand.patch
+ApplyOptionalPatch 0077-net_sched-ets-Fix-double-list-add-in-class-with-nete.patch
+ApplyOptionalPatch 0078-wifi-rtw88-fix-the-para-buffer-size-to-avoid-reading.patch
+ApplyOptionalPatch 0079-i40e-fix-MMIO-write-access-to-an-invalid-page-in-i40.patch
+ApplyOptionalPatch 0080-scsi-lpfc-Use-memcpy-for-BIOS-version.patch
+ApplyOptionalPatch 0081-tipc-Fix-use-after-free-in-tipc_conn_close.patch
+ApplyOptionalPatch 0082-vsock-reset-socket-state-when-de-assigning-the-trans.patch
+ApplyOptionalPatch 0083-vsock-Fix-transport_-TOCTOU.patch
+ApplyOptionalPatch 0084-vsock-fix-lock-inversion-in-vsock_assign_transport.patch
+ApplyOptionalPatch 0085-wifi-brcmfmac-fix-use-after-free-bug-in-brcmf_netdev.patch
+ApplyOptionalPatch 0086-wifi-ath9k-don-t-allow-to-overwrite-ENDPOINT0-attrib.patch
+ApplyOptionalPatch 0087-wifi-brcmfmac-slab-out-of-bounds-read-in-brcmf_get_a.patch
+ApplyOptionalPatch 0088-crypto-seqiv-Handle-EBUSY-correctly.patch
+ApplyOptionalPatch 0089-Bluetooth-Fix-potential-use-after-free-when-clear-ke.patch
+ApplyOptionalPatch 0090-net-sched-sch_qfq-Fix-race-condition-on-qfq_aggregat.patch
+ApplyOptionalPatch 0091-net-sched-sch_qfq-Avoid-triggering-might_sleep-in-at.patch
+ApplyOptionalPatch 0092-NFS-Fix-filehandle-bounds-checking-in-nfs_fh_to_dent.patch
+ApplyOptionalPatch 0093-scsi-lpfc-Fix-buffer-free-clear-order-in-deferred-re.patch
+ApplyOptionalPatch 0094-wifi-cfg80211-fix-use-after-free-in-cmp_bss.patch
+ApplyOptionalPatch 0095-RDMA-iwcm-Fix-a-use-after-free-related-to-destroying.patch
+ApplyOptionalPatch 0096-RDMA-iwcm-Fix-WARNING-at_kernel-workqueue.c-check_fl.patch
+ApplyOptionalPatch 0097-RDMA-iwcm-Fix-use-after-free-of-work-objects-after-c.patch
 
 
 # CIQ LTS patches:
@@ -3126,6 +3197,43 @@ fi
 #
 #
 %changelog
+* Thu Nov 20 2025 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.17.1
+- RDMA/iwcm: Fix use-after-free of work objects after cm_id destruction (Roxana Nicolescu) [ciqres] {CVE-2025-38211}
+- RDMA/iwcm: Fix WARNING:at_kernel/workqueue.c:#check_flush_dependency (Roxana Nicolescu) [ciqres] {CVE-2024-47696}
+- RDMA/iwcm: Fix a use-after-free related to destroying CM IDs (Roxana Nicolescu) [ciqres] {CVE-2024-42285}
+- wifi: cfg80211: fix use-after-free in cmp_bss() (Roxana Nicolescu) [ciqres] {CVE-2025-39864}
+- scsi: lpfc: Fix buffer free/clear order in deferred receive path (Roxana Nicolescu) [ciqres] {CVE-2025-39841}
+- NFS: Fix filehandle bounds checking in nfs_fh_to_dentry() (Roxana Nicolescu) [ciqres] {CVE-2025-39730}
+- net/sched: sch_qfq: Avoid triggering might_sleep in atomic context in qfq_delete_class (Roxana Nicolescu) [ciqres] {CVE-2025-38477}
+- net/sched: sch_qfq: Fix race condition on qfq_aggregate (Roxana Nicolescu) [ciqres] {CVE-2025-38477}
+- Bluetooth: Fix potential use-after-free when clear keys (Roxana Nicolescu) [ciqres] {CVE-2023-53386}
+- crypto: seqiv - Handle EBUSY correctly (Roxana Nicolescu) [ciqres] {CVE-2023-53373}
+- wifi: brcmfmac: slab-out-of-bounds read in brcmf_get_assoc_ies() (Roxana Nicolescu) [ciqres] {CVE-2023-53213}
+- wifi: ath9k: don't allow to overwrite ENDPOINT0 attributes (Roxana Nicolescu) [ciqres] {CVE-2023-53185}
+- wifi: brcmfmac: fix use-after-free bug in brcmf_netdev_start_xmit() (Roxana Nicolescu) [ciqres] {CVE-2022-50408}
+- vsock: fix lock inversion in vsock_assign_transport() (Roxana Nicolescu) [ciqres] {CVE-2025-38461}
+- vsock: Fix transport_* TOCTOU (Roxana Nicolescu) [ciqres] {CVE-2025-38461}
+- vsock: reset socket state when de-assigning the transport (Roxana Nicolescu) [ciqres] {CVE-2025-38461}
+- tipc: Fix use-after-free in tipc_conn_close(). (Roxana Nicolescu) [ciqres] {CVE-2025-38464}
+- scsi: lpfc: Use memcpy() for BIOS version (Roxana Nicolescu) [ciqres] {CVE-2025-38332}
+- i40e: fix MMIO write access to an invalid page in i40e_clear_hw (Roxana Nicolescu) [ciqres] {CVE-2025-38200}
+- wifi: rtw88: fix the 'para' buffer size to avoid reading out of bounds (Roxana Nicolescu) [ciqres] {CVE-2025-38159}
+- net_sched: ets: Fix double list add in class with netem as child qdisc (Roxana Nicolescu) [ciqres] {CVE-2025-37914}
+- net_sched: hfsc: Fix a UAF vulnerability in class handling (Roxana Nicolescu) [ciqres] {CVE-2025-37797}
+- Bluetooth: L2CAP: Fix use-after-free (Roxana Nicolescu) [ciqres] {CVE-2023-53305}
+- Bluetooth: L2CAP: Fix build errors in some archs (Roxana Nicolescu) [ciqres] {CVE-2023-53305}
+- Bluetooth: L2CAP: Fix l2cap_global_chan_by_psm regression (Roxana Nicolescu) [ciqres] {CVE-2023-53305}
+- Bluetooth: L2CAP: Fix use-after-free caused by l2cap_chan_put (Roxana Nicolescu) [ciqres] {CVE-2023-53305}
+- net: usb: smsc75xx: Move packet length check to prevent kernel panic in skb_pull (Roxana Nicolescu) [ciqres] {CVE-2023-53125}
+- net: usb: smsc75xx: Limit packet length to skb->len (Roxana Nicolescu) [ciqres] {CVE-2023-53125}
+- ALSA: bcd2000: Fix a UAF bug on the error path of probing (Roxana Nicolescu) [ciqres] {CVE-2022-50229}
+- KVM: SVM: Don't BUG if userspace injects an interrupt with GIF=0 (Roxana Nicolescu) [ciqres] {CVE-2022-50228}
+- md-raid10: fix KASAN warning (Roxana Nicolescu) [ciqres] {CVE-2022-50211}
+- RDMA/irdma: Fix a window for use-after-free (Roxana Nicolescu) [ciqres] {CVE-2022-50137}
+- mptcp: do not queue data on closed subflows (Roxana Nicolescu) [ciqres] {CVE-2022-50070}
+- bpf: Don't use tnum_range on array range checking for poke descriptors (Roxana Nicolescu) [ciqres] {CVE-2022-49985}
+- drm/amd/display: clear optc underflow before turn off odm clock (Roxana Nicolescu) [ciqres] {CVE-2022-49969}
+
 * Tue Oct 14 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.16.1
 - x86/mm: Do not shuffle CPU entry areas without KASLR (Marcin Wcisło) [ciqres] {CVE-2023-0597}
 - x86/mm: Populate KASAN shadow for entire per-CPU range of CPU entry area (Marcin Wcisło) [ciqres] {CVE-2023-0597}

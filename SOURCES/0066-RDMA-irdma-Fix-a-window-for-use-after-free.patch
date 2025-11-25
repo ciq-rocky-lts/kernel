@@ -1,0 +1,48 @@
+From bf48021c0216ac348bbd7b6aaafa813dd000455b Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Thu, 30 Oct 2025 11:50:10 +0100
+Subject: [PATCH] RDMA/irdma: Fix a window for use-after-free
+
+jira VULN-70164
+cve CVE-2022-50137
+commit-author Mustafa Ismail <mustafa.ismail@intel.com>
+commit 8ecef7890b3aea78c8bbb501a4b5b8134367b821
+
+During a destroy CQ an interrupt may cause processing of a CQE after CQ
+resources are freed by irdma_cq_free_rsrc(). Fix this by moving the call
+to irdma_cq_free_rsrc() after the irdma_sc_cleanup_ceqes(), which is
+called under the cq_lock.
+
+Fixes: b48c24c2d710 ("RDMA/irdma: Implement device supported verb APIs")
+Link: https://lore.kernel.org/r/20220705230815.265-6-shiraz.saleem@intel.com
+	Signed-off-by: Bartosz Sobczak <bartosz.sobczak@intel.com>
+	Signed-off-by: Mustafa Ismail <mustafa.ismail@intel.com>
+	Signed-off-by: Shiraz Saleem <shiraz.saleem@intel.com>
+	Signed-off-by: Leon Romanovsky <leon@kernel.org>
+(cherry picked from commit 8ecef7890b3aea78c8bbb501a4b5b8134367b821)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ drivers/infiniband/hw/irdma/verbs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/infiniband/hw/irdma/verbs.c b/drivers/infiniband/hw/irdma/verbs.c
+index f4f1a22430bb..44d03cc132c7 100644
+--- a/drivers/infiniband/hw/irdma/verbs.c
++++ b/drivers/infiniband/hw/irdma/verbs.c
+@@ -1765,11 +1765,11 @@ static int irdma_destroy_cq(struct ib_cq *ib_cq, struct ib_udata *udata)
+ 	spin_unlock_irqrestore(&iwcq->lock, flags);
+ 
+ 	irdma_cq_wq_destroy(iwdev->rf, cq);
+-	irdma_cq_free_rsrc(iwdev->rf, iwcq);
+ 
+ 	spin_lock_irqsave(&iwceq->ce_lock, flags);
+ 	irdma_sc_cleanup_ceqes(cq, ceq);
+ 	spin_unlock_irqrestore(&iwceq->ce_lock, flags);
++	irdma_cq_free_rsrc(iwdev->rf, iwcq);
+ 
+ 	return 0;
+ }
+-- 
+2.47.3
+

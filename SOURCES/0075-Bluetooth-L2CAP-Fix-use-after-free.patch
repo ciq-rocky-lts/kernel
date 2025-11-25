@@ -1,0 +1,44 @@
+From 950d6832b92f0ee2ac0a0a0ec19b788ca49927c6 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Fri, 31 Oct 2025 10:17:00 +0100
+Subject: [PATCH] Bluetooth: L2CAP: Fix use-after-free
+
+jira VULN-155016
+cve CVE-2023-53305
+commit-author Zhengping Jiang <jiangzp@google.com>
+commit f752a0b334bb95fe9b42ecb511e0864e2768046f
+
+Fix potential use-after-free in l2cap_le_command_rej.
+
+	Signed-off-by: Zhengping Jiang <jiangzp@google.com>
+	Signed-off-by: Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit f752a0b334bb95fe9b42ecb511e0864e2768046f)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ net/bluetooth/l2cap_core.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/net/bluetooth/l2cap_core.c b/net/bluetooth/l2cap_core.c
+index 11836ad5230a..fb12dfada57e 100644
+--- a/net/bluetooth/l2cap_core.c
++++ b/net/bluetooth/l2cap_core.c
+@@ -6346,9 +6346,14 @@ static inline int l2cap_le_command_rej(struct l2cap_conn *conn,
+ 	if (!chan)
+ 		goto done;
+ 
++	chan = l2cap_chan_hold_unless_zero(chan);
++	if (!chan)
++		goto done;
++
+ 	l2cap_chan_lock(chan);
+ 	l2cap_chan_del(chan, ECONNREFUSED);
+ 	l2cap_chan_unlock(chan);
++	l2cap_chan_put(chan);
+ 
+ done:
+ 	mutex_unlock(&conn->chan_lock);
+-- 
+2.47.3
+
