@@ -3,10 +3,10 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 14
-%define ciq_build_id 2
-%define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
-%define ciq_dist_tag .el9_2.92ciq_lts
+%define ciq_patch_version 15
+%define ciq_build_id 1
+%define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
+%define ciq_dist_tag .el9_2_ciq
 
 # Disable LTO in userspace packages.
 %global _lto_cflags %{nil}
@@ -172,7 +172,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 284.30.1%{?buildid}%{?dist}%{?ciq_patch_build_str}
+%define specrelease 284.30.1%{?buildid}%{?ciq_patch_build_str}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 5.14.0-284.30.1.el9_2
 
@@ -1123,6 +1123,34 @@ Patch1000184: 0139-net-usb-smsc75xx-Limit-packet-length-to-skb-len.patch
 Patch1000185: 0140-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
 Patch1000186: 0141-ipv6-mcast-Delay-put-pmc-idev-in-mld_del_delrec.patch
 Patch1000187: 0142-ALSA-hda-ca0132-Fix-buffer-overflow-in-add_tuning_co.patch
+#CIQ Patch Version: 284.30.1+15.1.el9_2_ciq
+Patch1000188: 0143-HID-core-Harden-s32ton-against-conversion-to-0-bits.patch
+Patch1000189: 0144-tls-stop-recv-if-initial-process_rx_list-gave-us-non.patch
+Patch1000190: 0145-tls-rx-fix-return-value-for-async-crypto.patch
+Patch1000191: 0146-net-tls-fix-returned-read-length-with-async-decrypt.patch
+Patch1000192: 0147-tls-don-t-skip-over-different-type-records-from-the-.patch
+Patch1000193: 0148-tls-adjust-recv-return-with-async-crypto-and-failed-.patch
+Patch1000194: 0149-tls-fix-handling-of-zero-length-records-on-the-rx_li.patch
+Patch1000195: 0150-cifs-fix-oops-during-encryption.patch
+Patch1000196: 0151-cifs-Remove-duplicated-include-in-cifsglob.h.patch
+Patch1000197: 0152-vsock-reset-socket-state-when-de-assigning-the-trans.patch
+Patch1000198: 0153-vsock-fix-lock-inversion-in-vsock_assign_transport.patch
+Patch1000199: 0154-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
+Patch1000200: 0155-wifi-ath9k-don-t-allow-to-overwrite-ENDPOINT0-attrib.patch
+Patch1000201: 0156-wifi-brcmfmac-slab-out-of-bounds-read-in-brcmf_get_a.patch
+Patch1000202: 0157-wifi-mwifiex-Fix-OOB-and-integer-underflow-when-rx-p.patch
+Patch1000203: 0158-wifi-mwifiex-Fix-missed-return-in-oob-checks-failed-.patch
+Patch1000204: 0159-wifi-mwifiex-Fix-oob-check-condition-in-mwifiex_proc.patch
+Patch1000205: 0160-mt76-mt7921-fix-kernel-panic-by-accessing-unallocate.patch
+Patch1000206: 0161-Bluetooth-L2CAP-Fix-use-after-free.patch
+Patch1000207: 0162-pstore-ram-Check-start-of-empty-przs-during-init.patch
+Patch1000208: 0163-crypto-seqiv-Handle-EBUSY-correctly.patch
+Patch1000209: 0164-Bluetooth-Fix-potential-use-after-free-when-clear-ke.patch
+Patch1000210: 0165-mm-kmem-fix-a-NULL-pointer-dereference-in-obj_stock_.patch
+Patch1000211: 0166-crypto-xts-Handle-EBUSY-correctly.patch
+Patch1000212: 0167-Add-.container_build_image.patch
+Patch1000213: 0168-net-sched-delete-duplicate-cleanup-of-backlog-and-ql.patch
+Patch1000214: 0169-net-sched-sfb-fix-null-pointer-access-issue-when-sfb.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1986,6 +2014,33 @@ ApplyOptionalPatch 0139-net-usb-smsc75xx-Limit-packet-length-to-skb-len.patch
 ApplyOptionalPatch 0140-net-usb-smsc75xx-Move-packet-length-check-to-prevent.patch
 ApplyOptionalPatch 0141-ipv6-mcast-Delay-put-pmc-idev-in-mld_del_delrec.patch
 ApplyOptionalPatch 0142-ALSA-hda-ca0132-Fix-buffer-overflow-in-add_tuning_co.patch
+ApplyOptionalPatch 0143-HID-core-Harden-s32ton-against-conversion-to-0-bits.patch
+ApplyOptionalPatch 0144-tls-stop-recv-if-initial-process_rx_list-gave-us-non.patch
+ApplyOptionalPatch 0145-tls-rx-fix-return-value-for-async-crypto.patch
+ApplyOptionalPatch 0146-net-tls-fix-returned-read-length-with-async-decrypt.patch
+ApplyOptionalPatch 0147-tls-don-t-skip-over-different-type-records-from-the-.patch
+ApplyOptionalPatch 0148-tls-adjust-recv-return-with-async-crypto-and-failed-.patch
+ApplyOptionalPatch 0149-tls-fix-handling-of-zero-length-records-on-the-rx_li.patch
+ApplyOptionalPatch 0150-cifs-fix-oops-during-encryption.patch
+ApplyOptionalPatch 0151-cifs-Remove-duplicated-include-in-cifsglob.h.patch
+ApplyOptionalPatch 0152-vsock-reset-socket-state-when-de-assigning-the-trans.patch
+ApplyOptionalPatch 0153-vsock-fix-lock-inversion-in-vsock_assign_transport.patch
+ApplyOptionalPatch 0154-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
+ApplyOptionalPatch 0155-wifi-ath9k-don-t-allow-to-overwrite-ENDPOINT0-attrib.patch
+ApplyOptionalPatch 0156-wifi-brcmfmac-slab-out-of-bounds-read-in-brcmf_get_a.patch
+ApplyOptionalPatch 0157-wifi-mwifiex-Fix-OOB-and-integer-underflow-when-rx-p.patch
+ApplyOptionalPatch 0158-wifi-mwifiex-Fix-missed-return-in-oob-checks-failed-.patch
+ApplyOptionalPatch 0159-wifi-mwifiex-Fix-oob-check-condition-in-mwifiex_proc.patch
+ApplyOptionalPatch 0160-mt76-mt7921-fix-kernel-panic-by-accessing-unallocate.patch
+ApplyOptionalPatch 0161-Bluetooth-L2CAP-Fix-use-after-free.patch
+ApplyOptionalPatch 0162-pstore-ram-Check-start-of-empty-przs-during-init.patch
+ApplyOptionalPatch 0163-crypto-seqiv-Handle-EBUSY-correctly.patch
+ApplyOptionalPatch 0164-Bluetooth-Fix-potential-use-after-free-when-clear-ke.patch
+ApplyOptionalPatch 0165-mm-kmem-fix-a-NULL-pointer-dereference-in-obj_stock_.patch
+ApplyOptionalPatch 0166-crypto-xts-Handle-EBUSY-correctly.patch
+ApplyOptionalPatch 0167-Add-.container_build_image.patch
+ApplyOptionalPatch 0168-net-sched-delete-duplicate-cleanup-of-backlog-and-ql.patch
+ApplyOptionalPatch 0169-net-sched-sfb-fix-null-pointer-access-issue-when-sfb.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3869,6 +3924,38 @@ fi
 #
 #
 %changelog
+* Mon Dec 01 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+15.1.el9_2_ciq
+- net: sched: sfb: fix null pointer access issue when sfb_init() fails (Roxana Nicolescu) [ciqres] {CVE-2022-50356}
+- net: sched: delete duplicate cleanup of backlog and qlen (Roxana Nicolescu) [ciqres] {CVE-2022-50356}
+- Add .container_build_image (Shreeya Patel) [ciqres]
+- crypto: xts - Handle EBUSY correctly (Shreeya Patel) [ciqres] {CVE-2023-53494}
+- mm: kmem: fix a NULL pointer dereference in obj_stock_flush_required() (Shreeya Patel) [ciqres] {CVE-2023-53401}
+- Bluetooth: Fix potential use-after-free when clear keys (Shreeya Patel) [ciqres] {CVE-2023-53386}
+- crypto: seqiv - Handle EBUSY correctly (Shreeya Patel) [ciqres] {CVE-2023-53373}
+- pstore/ram: Check start of empty przs during init (Shreeya Patel) [ciqres] {CVE-2023-53331}
+- Bluetooth: L2CAP: Fix use-after-free (Shreeya Patel) [ciqres] {CVE-2023-53305}
+- mt76: mt7921: fix kernel panic by accessing unallocated eeprom.data (Shreeya Patel) [ciqres] {CVE-2023-53232}
+- wifi: mwifiex: Fix oob check condition in mwifiex_process_rx_packet (Shreeya Patel) [ciqres] {CVE-2023-52525}
+- wifi: mwifiex: Fix missed return in oob checks failed path (Shreeya Patel) [ciqres] {CVE-2023-53226}
+- wifi: mwifiex: Fix OOB and integer underflow when rx packets (Shreeya Patel) [ciqres] {CVE-2023-53226}
+- wifi: brcmfmac: slab-out-of-bounds read in brcmf_get_assoc_ies() (Shreeya Patel) [ciqres] {CVE-2023-53213}
+- wifi: ath9k: don't allow to overwrite ENDPOINT0 attributes (Shreeya Patel) [ciqres] {CVE-2023-53185}
+- fs: fix UAF/GPF bug in nilfs_mdt_destroy (Shreeya Patel) [ciqres] {CVE-2022-50367}
+- vsock: fix lock inversion in vsock_assign_transport() (Roxana Nicolescu) [ciqres] {CVE-2025-38461}
+- vsock: reset socket state when de-assigning the transport (Roxana Nicolescu) [ciqres] {CVE-2025-38461}
+- cifs: Remove duplicated include in cifsglob.h (Brett Mastbergen) [ciqres] {CVE-2022-50341}
+- cifs: fix oops during encryption (Brett Mastbergen) [ciqres] {CVE-2022-50341}
+- tls: fix handling of zero-length records on the rx_list (Brett Mastbergen) [ciqres] {CVE-2025-39682}
+- tls: adjust recv return with async crypto and failed copy to userspace (Brett Mastbergen) [ciqres] {CVE-2025-39682}
+- tls: don't skip over different type records from the rx_list (Brett Mastbergen) [ciqres] {CVE-2025-39682}
+- net: tls: fix returned read length with async decrypt (Brett Mastbergen) [ciqres] {CVE-2025-39682}
+- tls: rx: fix return value for async crypto (Brett Mastbergen) [ciqres] {CVE-2025-39682}
+- tls: stop recv() if initial process_rx_list gave us non-DATA (Brett Mastbergen) [ciqres] {CVE-2024-58239}
+- HID: core: Harden s32ton() against conversion to 0 bits (Brett Mastbergen) [ciqres] {CVE-2025-38556}
+
+* Mon Dec 01 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+14.3.el9_2_ciq
+- Make NVR kernel to reflect other CIQ kernel NVR transformation. (Brett Mastbergen)
+
 * Mon Nov 17 2025 Michael L. Young <myoung@ciq.com> - 5.14.0-284.30.1.el9_2.92ciq_lts.14.2
 - Update the signer information used to create the kernel module signing key when building (Michael L. Young)
 

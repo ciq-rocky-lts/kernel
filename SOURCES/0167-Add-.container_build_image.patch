@@ -1,0 +1,25 @@
+From 2b126d2793335a084bb6f0e526715e54bd9612f2 Mon Sep 17 00:00:00 2001
+From: Shreeya Patel <spatel@ciq.com>
+Date: Tue, 21 Oct 2025 12:02:58 +0000
+Subject: [PATCH] Add .container_build_image
+
+This is needed for the Kernel CI Workflow to use the correct
+container image for ciqlts9_2.
+
+Signed-off-by: Shreeya Patel <spatel@ciq.com>
+---
+ .container_build_image | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 .container_build_image
+
+diff --git a/.container_build_image b/.container_build_image
+new file mode 100644
+index 000000000000..7b679673deea
+--- /dev/null
++++ b/.container_build_image
+@@ -0,0 +1 @@
++lts-9.2-kernel-builder
+\ No newline at end of file
+-- 
+2.47.3
+

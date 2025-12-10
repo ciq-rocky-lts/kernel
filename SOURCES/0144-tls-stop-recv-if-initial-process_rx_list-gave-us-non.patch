@@ -1,0 +1,46 @@
+From 839bab91d8a45bf47a98a886ab1bddbd666bacef Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Wed, 5 Nov 2025 09:48:32 -0500
+Subject: [PATCH] tls: stop recv() if initial process_rx_list gave us non-DATA
+
+jira VULN-131360
+cve CVE-2024-58239
+commit-author Sabrina Dubroca <sd@queasysnail.net>
+commit fdfbaec5923d9359698cbb286bc0deadbb717504
+
+If we have a non-DATA record on the rx_list and another record of the
+same type still on the queue, we will end up merging them:
+ - process_rx_list copies the non-DATA record
+ - we start the loop and process the first available record since it's
+   of the same type
+ - we break out of the loop since the record was not DATA
+
+Just check the record type and jump to the end in case process_rx_list
+did some work.
+
+Fixes: 692d7b5d1f91 ("tls: Fix recvmsg() to be able to peek across multiple records")
+	Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+Link: https://lore.kernel.org/r/bd31449e43bd4b6ff546f5c51cf958c31c511deb.1708007371.git.sd@queasysnail.net
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit fdfbaec5923d9359698cbb286bc0deadbb717504)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/tls/tls_sw.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/tls/tls_sw.c b/net/tls/tls_sw.c
+index 0374d86302bb..6ec60e21d9fc 100644
+--- a/net/tls/tls_sw.c
++++ b/net/tls/tls_sw.c
+@@ -1944,7 +1944,7 @@ int tls_sw_recvmsg(struct sock *sk,
+ 		goto end;
+ 
+ 	copied = err;
+-	if (len <= copied)
++	if (len <= copied || (copied && control != TLS_RECORD_TYPE_DATA))
+ 		goto end;
+ 
+ 	target = sock_rcvlowat(sk, flags & MSG_WAITALL, len);
+-- 
+2.47.3
+

@@ -1,0 +1,42 @@
+From 4dd33aa6ad39d93d24635406155c1254ae050624 Mon Sep 17 00:00:00 2001
+From: Shreeya Patel <spatel@ciq.com>
+Date: Wed, 12 Nov 2025 13:12:17 +0000
+Subject: [PATCH] crypto: seqiv - Handle EBUSY correctly
+
+jira VULN-155736
+cve CVE-2023-53373
+commit-author Herbert Xu <herbert@gondor.apana.org.au>
+commit 32e62025e5e52fbe4812ef044759de7010b15dbc
+
+As it is seqiv only handles the special return value of EINPROGERSS,
+which means that in all other cases it will free data related to the
+request.
+
+However, as the caller of seqiv may specify MAY_BACKLOG, we also need
+to expect EBUSY and treat it in the same way.  Otherwise backlogged
+requests will trigger a use-after-free.
+
+Fixes: 0a270321dbf9 ("[CRYPTO] seqiv: Add Sequence Number IV Generator")
+	Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+(cherry picked from commit 32e62025e5e52fbe4812ef044759de7010b15dbc)
+	Signed-off-by: Shreeya Patel <spatel@ciq.com>
+---
+ crypto/seqiv.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/crypto/seqiv.c b/crypto/seqiv.c
+index 86bb33644dd0..ae7256cfc77f 100644
+--- a/crypto/seqiv.c
++++ b/crypto/seqiv.c
+@@ -23,7 +23,7 @@ static void seqiv_aead_encrypt_complete2(struct aead_request *req, int err)
+ 	struct aead_request *subreq = aead_request_ctx(req);
+ 	struct crypto_aead *geniv;
+ 
+-	if (err == -EINPROGRESS)
++	if (err == -EINPROGRESS || err == -EBUSY)
+ 		return;
+ 
+ 	if (err)
+-- 
+2.47.3
+

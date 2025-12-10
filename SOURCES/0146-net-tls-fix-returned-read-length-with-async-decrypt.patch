@@ -1,0 +1,42 @@
+From 866da7dd992d04c74317acfdf2dc3946d1939246 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Wed, 5 Nov 2025 09:57:26 -0500
+Subject: [PATCH] net: tls: fix returned read length with async decrypt
+
+jira VULN-136507
+cve-pre CVE-2025-39682
+commit-author Jakub Kicinski <kuba@kernel.org>
+commit ac437a51ce662364062f704e321227f6728e6adc
+
+We double count async, non-zc rx data. The previous fix was
+lucky because if we fully zc async_copy_bytes is 0 so we add 0.
+Decrypted already has all the bytes we handled, in all cases.
+We don't have to adjust anything, delete the erroneous line.
+
+Fixes: 4d42cd6bc2ac ("tls: rx: fix return value for async crypto")
+Co-developed-by: Sabrina Dubroca <sd@queasysnail.net>
+	Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit ac437a51ce662364062f704e321227f6728e6adc)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/tls/tls_sw.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/net/tls/tls_sw.c b/net/tls/tls_sw.c
+index f311093bd05e..4705892ab625 100644
+--- a/net/tls/tls_sw.c
++++ b/net/tls/tls_sw.c
+@@ -2111,7 +2111,6 @@ int tls_sw_recvmsg(struct sock *sk,
+ 		else
+ 			err = process_rx_list(ctx, msg, &control, 0,
+ 					      async_copy_bytes, is_peek);
+-		decrypted += max(err, 0);
+ 	}
+ 
+ 	copied += decrypted;
+-- 
+2.47.3
+
