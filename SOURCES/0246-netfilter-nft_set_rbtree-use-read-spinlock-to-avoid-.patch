@@ -1,0 +1,53 @@
+From 674e6187c3c20b47926c1ea27b08338a0b09e320 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:50:21 +0100
+Subject: [PATCH] netfilter: nft_set_rbtree: use read spinlock to avoid
+ datapath contention
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 96b33300fba880ec0eafcf3d82486f3463b4b6da
+
+rbtree GC does not modify the datastructure, instead it collects expired
+elements and it enqueues a GC transaction. Use a read spinlock instead
+to avoid data contention while GC worker is running.
+
+Fixes: f6c383b8c31a ("netfilter: nf_tables: adapt set backend to use GC transaction API")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 96b33300fba880ec0eafcf3d82486f3463b4b6da)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nft_set_rbtree.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/net/netfilter/nft_set_rbtree.c b/net/netfilter/nft_set_rbtree.c
+index f100d5ab9676..487572dcd614 100644
+--- a/net/netfilter/nft_set_rbtree.c
++++ b/net/netfilter/nft_set_rbtree.c
+@@ -622,8 +622,7 @@ static void nft_rbtree_gc(struct work_struct *work)
+ 	if (!gc)
+ 		goto done;
+ 
+-	write_lock_bh(&priv->lock);
+-	write_seqcount_begin(&priv->count);
++	read_lock_bh(&priv->lock);
+ 	for (node = rb_first(&priv->root); node != NULL; node = rb_next(node)) {
+ 
+ 		/* Ruleset has been updated, try later. */
+@@ -673,8 +672,7 @@ static void nft_rbtree_gc(struct work_struct *work)
+ 	gc = nft_trans_gc_catchall_async(gc, gc_seq);
+ 
+ try_later:
+-	write_seqcount_end(&priv->count);
+-	write_unlock_bh(&priv->lock);
++	read_unlock_bh(&priv->lock);
+ 
+ 	if (gc)
+ 		nft_trans_gc_queue_async_done(gc);
+-- 
+2.47.3
+

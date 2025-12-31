@@ -1,0 +1,62 @@
+From 13c064bf41e5ff87461a56b6b2402a96141aa26c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 20:50:07 +0100
+Subject: [PATCH] netfilter: nf_tables: reject unbound chain set before commit
+ phase
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 62e1e94b246e685d89c3163aaef4b160e42ceb02
+
+Use binding list to track set transaction and to check for unbound
+chains before entering the commit phase.
+
+Bail out if chain binding remain unused before entering the commit
+step.
+
+Fixes: d0e2c7de92c7 ("netfilter: nf_tables: add NFT_CHAIN_BINDING")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 62e1e94b246e685d89c3163aaef4b160e42ceb02)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index a2bec321e9b9..761712b6240d 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -372,6 +372,11 @@ static void nft_trans_commit_list_add_tail(struct net *net, struct nft_trans *tr
+ 		    nft_set_is_anonymous(nft_trans_set(trans)))
+ 			list_add_tail(&trans->binding_list, &nft_net->binding_list);
+ 		break;
++	case NFT_MSG_NEWCHAIN:
++		if (!nft_trans_chain_update(trans) &&
++		    nft_chain_binding(nft_trans_chain(trans)))
++			list_add_tail(&trans->binding_list, &nft_net->binding_list);
++		break;
+ 	}
+ 
+ 	list_add_tail(&trans->list, &nft_net->commit_list);
+@@ -9101,6 +9106,14 @@ static int nf_tables_commit(struct net *net, struct sk_buff *skb)
+ 				return -EINVAL;
+ 			}
+ 			break;
++		case NFT_MSG_NEWCHAIN:
++			if (!nft_trans_chain_update(trans) &&
++			    nft_chain_binding(nft_trans_chain(trans)) &&
++			    !nft_trans_chain_bound(trans)) {
++				pr_warn_once("nftables ruleset with unbound chain\n");
++				return -EINVAL;
++			}
++			break;
+ 		}
+ 	}
+ 
+-- 
+2.47.3
+

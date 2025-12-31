@@ -1,0 +1,42 @@
+From 025180621057eb912aa23e14d89eed9f37808ac1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:55:45 +0100
+Subject: [PATCH] netfilter: nft_set_pipapo: no need to call
+ pipapo_deactivate() from flush
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 26cec9d4144eb23c45cd5c033d5c141f04d61a9c
+
+Use the element object that is already offered instead.
+
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 26cec9d4144eb23c45cd5c033d5c141f04d61a9c)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nft_set_pipapo.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/net/netfilter/nft_set_pipapo.c b/net/netfilter/nft_set_pipapo.c
+index 4e1cc31729b8..63e82a283d8b 100644
+--- a/net/netfilter/nft_set_pipapo.c
++++ b/net/netfilter/nft_set_pipapo.c
+@@ -1816,8 +1816,9 @@ static bool nft_pipapo_flush(const struct net *net, const struct nft_set *set,
+ {
+ 	struct nft_pipapo_elem *e = elem;
+ 
+-	return pipapo_deactivate(net, set, (const u8 *)nft_set_ext_key(&e->ext),
+-				 &e->ext);
++	nft_set_elem_change_active(net, set, &e->ext);
++
++	return true;
+ }
+ 
+ /**
+-- 
+2.47.3
+

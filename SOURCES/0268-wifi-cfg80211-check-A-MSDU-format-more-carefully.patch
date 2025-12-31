@@ -1,0 +1,74 @@
+From 44b84d456d4856d7a48ef173b3ac9c1d2b8ddd3d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 3 Dec 2025 00:01:04 +0100
+Subject: [PATCH] wifi: cfg80211: check A-MSDU format more carefully
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-5183
+cve CVE-2024-35937
+commit-author Johannes Berg <johannes.berg@intel.com>
+commit 9ad7974856926129f190ffbe3beea78460b3b7cc
+upstream-diff |
+  1. All changes to the `ieee80211_is_valid_amsdu' function were discarded
+     because it's missing from `ciqlts9_2'.
+  2. Changes to `ieee80211_amsdu_to_8023s' were adapted to account for the
+     missing 986e43b19ae9176093da35e0a844e65c8bf9ede7 from `ciqlts9_2'
+     history: the `copy_len > remaining' condition was changed to
+     `sizeof(eth) > remaining', as `sizeof(eth)' is the only possible
+     value `copy_len' could have assumed in `ciqlts9_2' if it was
+     introduced without backporting 986e43b (pointless).
+
+If it looks like there's another subframe in the A-MSDU
+but the header isn't fully there, we can end up reading
+data out of bounds, only to discard later. Make this a
+bit more careful and check if the subframe header can
+even be present.
+
+	Reported-by: syzbot+d050d437fe47d479d210@syzkaller.appspotmail.com
+Link: https://msgid.link/20240226203405.a731e2c95e38.I82ce7d8c0cc8970ce29d0a39fdc07f1ffc425be4@changeid
+	Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+(cherry picked from commit 9ad7974856926129f190ffbe3beea78460b3b7cc)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/wireless/util.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/net/wireless/util.c b/net/wireless/util.c
+index 39680e7bad45..582b9dbde01f 100644
+--- a/net/wireless/util.c
++++ b/net/wireless/util.c
+@@ -757,24 +757,27 @@ void ieee80211_amsdu_to_8023s(struct sk_buff *skb, struct sk_buff_head *list,
+ 	struct sk_buff *frame = NULL;
+ 	u16 ethertype;
+ 	u8 *payload;
+-	int offset = 0, remaining;
++	int offset = 0;
+ 	struct ethhdr eth;
+ 	bool reuse_frag = skb->head_frag && !skb_has_frag_list(skb);
+ 	bool reuse_skb = false;
+ 	bool last = false;
+ 
+ 	while (!last) {
++		int remaining = skb->len - offset;
+ 		unsigned int subframe_len;
+ 		int len;
+ 		u8 padding;
+ 
++		if (sizeof(eth) > remaining)
++			goto purge;
++
+ 		skb_copy_bits(skb, offset, &eth, sizeof(eth));
+ 		len = ntohs(eth.h_proto);
+ 		subframe_len = sizeof(struct ethhdr) + len;
+ 		padding = (4 - subframe_len) & 0x3;
+ 
+ 		/* the last MSDU has no padding */
+-		remaining = skb->len - offset;
+ 		if (subframe_len > remaining)
+ 			goto purge;
+ 		/* mitigate A-MSDU aggregation injection attacks */
+-- 
+2.47.3
+

@@ -1,0 +1,42 @@
+From 6b56f4a1ba0315c2759d8ed2750920cbdc2d74cb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 20:52:04 +0100
+Subject: [PATCH] netfilter: nf_tables: skip bound chain in netns release path
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 751d460ccff3137212f47d876221534bf0490996
+
+Skip bound chain from netns release path, the rule that owns this chain
+releases these objects.
+
+Fixes: d0e2c7de92c7 ("netfilter: nf_tables: add NFT_CHAIN_BINDING")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+(cherry picked from commit 751d460ccff3137212f47d876221534bf0490996)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 558c48e9dd2b..9a9c40854567 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -10318,6 +10318,9 @@ static void __nft_release_table(struct net *net, struct nft_table *table)
+ 	ctx.family = table->family;
+ 	ctx.table = table;
+ 	list_for_each_entry(chain, &table->chains, list) {
++		if (nft_chain_is_bound(chain))
++			continue;
++
+ 		ctx.chain = chain;
+ 		list_for_each_entry_safe(rule, nr, &chain->rules, list) {
+ 			list_del(&rule->list);
+-- 
+2.47.3
+

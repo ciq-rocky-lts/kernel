@@ -1,0 +1,92 @@
+From 68e3f519bc1750e4034b41fb2e58ab43d52ade24 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 22:14:07 +0100
+Subject: [PATCH] netfilter: nf_tables: remove catchall element in GC sync path
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+cve CVE-2023-6111
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 93995bf4af2c5a99e2a87f0cd5ce547d31eb7630
+upstream-diff Used the cleanly applying 9.4 backport
+  54e39cc9af90cbf660045cbef039d4066a885f55
+
+The expired catchall element is not deactivated and removed from GC sync
+path. This path holds mutex so just call nft_setelem_data_deactivate()
+and nft_setelem_catchall_remove() before queueing the GC work.
+
+Fixes: 4a9e12ea7e70 ("netfilter: nft_set_pipapo: call nft_trans_gc_queue_sync() in catchall GC")
+	Reported-by: lonial con <kongln9170@gmail.com>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 93995bf4af2c5a99e2a87f0cd5ce547d31eb7630)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 26 +++++++++++++++++++++-----
+ 1 file changed, 21 insertions(+), 5 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 7fcb4a29708a..9af53f111515 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -6168,6 +6168,12 @@ static int nft_setelem_deactivate(const struct net *net,
+ 	return ret;
+ }
+ 
++static void nft_setelem_catchall_destroy(struct nft_set_elem_catchall *catchall)
++{
++	list_del_rcu(&catchall->list);
++	kfree_rcu(catchall, rcu);
++}
++
+ static void nft_setelem_catchall_remove(const struct net *net,
+ 					const struct nft_set *set,
+ 					const struct nft_set_elem *elem)
+@@ -6176,8 +6182,7 @@ static void nft_setelem_catchall_remove(const struct net *net,
+ 
+ 	list_for_each_entry_safe(catchall, next, &set->catchall_list, list) {
+ 		if (catchall->elem == elem->priv) {
+-			list_del_rcu(&catchall->list);
+-			kfree_rcu(catchall, rcu);
++			nft_setelem_catchall_destroy(catchall);
+ 			break;
+ 		}
+ 	}
+@@ -9163,11 +9168,12 @@ static struct nft_trans_gc *nft_trans_gc_catchall(struct nft_trans_gc *gc,
+ 						  unsigned int gc_seq,
+ 						  bool sync)
+ {
+-	struct nft_set_elem_catchall *catchall;
++	struct nft_set_elem_catchall *catchall, *next;
+ 	const struct nft_set *set = gc->set;
++	struct nft_elem_priv *elem_priv;
+ 	struct nft_set_ext *ext;
+ 
+-	list_for_each_entry_rcu(catchall, &set->catchall_list, list) {
++	list_for_each_entry_safe(catchall, next, &set->catchall_list, list) {
+ 		ext = nft_set_elem_ext(set, catchall->elem);
+ 
+ 		if (!nft_set_elem_expired(ext))
+@@ -9185,7 +9191,17 @@ static struct nft_trans_gc *nft_trans_gc_catchall(struct nft_trans_gc *gc,
+ 		if (!gc)
+ 			return NULL;
+ 
+-		nft_trans_gc_elem_add(gc, catchall->elem);
++		elem_priv = catchall->elem;
++		if (sync) {
++			struct nft_set_elem elem = {
++				.priv = elem_priv,
++			};
++
++			nft_setelem_data_deactivate(gc->net, gc->set, &elem);
++			nft_setelem_catchall_destroy(catchall);
++		}
++
++		nft_trans_gc_elem_add(gc, elem_priv);
+ 	}
+ 
+ 	return gc;
+-- 
+2.47.3
+

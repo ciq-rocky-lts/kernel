@@ -1,0 +1,39 @@
+From 95216854b104055f305232cbb1c82c5d569f79f0 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Mon, 8 Dec 2025 11:42:35 -0500
+Subject: [PATCH] ALSA: usb-audio: Fix size validation in convert_chmap_v3()
+
+jira VULN-152936
+cve-bf CVE-2025-39757
+commit-author Dan Carpenter <dan.carpenter@linaro.org>
+commit 89f0addeee3cb2dc49837599330ed9c4612f05b0
+
+The "p" pointer is void so sizeof(*p) is 1.  The intent was to check
+sizeof(*cs_desc), which is 3, instead.
+
+Fixes: ecfd41166b72 ("ALSA: usb-audio: Validate UAC3 cluster segment descriptors")
+	Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+Link: https://patch.msgid.link/aKL5kftC1qGt6lpv@stanley.mountain
+	Signed-off-by: Takashi Iwai <tiwai@suse.de>
+(cherry picked from commit 89f0addeee3cb2dc49837599330ed9c4612f05b0)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ sound/usb/stream.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sound/usb/stream.c b/sound/usb/stream.c
+index 6185da05a918..ecd409e1c5ce 100644
+--- a/sound/usb/stream.c
++++ b/sound/usb/stream.c
+@@ -346,7 +346,7 @@ snd_pcm_chmap_elem *convert_chmap_v3(struct uac3_cluster_header_descriptor
+ 		u16 cs_len;
+ 		u8 cs_type;
+ 
+-		if (len < sizeof(*p))
++		if (len < sizeof(*cs_desc))
+ 			break;
+ 		cs_len = le16_to_cpu(cs_desc->wLength);
+ 		if (len < cs_len)
+-- 
+2.47.3
+

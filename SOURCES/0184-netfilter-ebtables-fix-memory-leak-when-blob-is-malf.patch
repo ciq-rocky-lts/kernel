@@ -1,0 +1,46 @@
+From b4e0d7fdc330e670a2fd6c87fcf503d61ad89f53 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 19:53:52 +0100
+Subject: [PATCH] netfilter: ebtables: fix memory leak when blob is malformed
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-34024
+subsystem-update netfilter: centos-stream-9 e4726e3376a4798e40b1bce02252a209fcf0de7c
+cve CVE-2022-48641
+commit-author Florian Westphal <fw@strlen.de>
+commit 62ce44c4fff947eebdf10bb582267e686e6835c9
+
+The bug fix was incomplete, it "replaced" crash with a memory leak.
+The old code had an assignment to "ret" embedded into the conditional,
+restore this.
+
+Fixes: 7997eff82828 ("netfilter: ebtables: reject blobs that don't provide all entry points")
+Reported-and-tested-by: syzbot+a24c5252f3e3ab733464@syzkaller.appspotmail.com
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+(cherry picked from commit 62ce44c4fff947eebdf10bb582267e686e6835c9)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/bridge/netfilter/ebtables.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/net/bridge/netfilter/ebtables.c b/net/bridge/netfilter/ebtables.c
+index 7231a1796f77..0f863762131c 100644
+--- a/net/bridge/netfilter/ebtables.c
++++ b/net/bridge/netfilter/ebtables.c
+@@ -1005,8 +1005,10 @@ static int do_replace_finish(struct net *net, struct ebt_replace *repl,
+ 		goto free_iterate;
+ 	}
+ 
+-	if (repl->valid_hooks != t->valid_hooks)
++	if (repl->valid_hooks != t->valid_hooks) {
++		ret = -EINVAL;
+ 		goto free_unlock;
++	}
+ 
+ 	if (repl->num_counters && repl->num_counters != t->private->nentries) {
+ 		ret = -EINVAL;
+-- 
+2.47.3
+

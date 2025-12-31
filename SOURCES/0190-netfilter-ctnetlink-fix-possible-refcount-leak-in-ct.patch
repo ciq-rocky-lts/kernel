@@ -1,0 +1,53 @@
+From 9192abff40806dcfe5881d294497eca100b473f0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 20:26:25 +0100
+Subject: [PATCH] netfilter: ctnetlink: fix possible refcount leak in
+ ctnetlink_create_conntrack()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-6817
+subsystem-update netfilter: centos-stream-9 e4726e3376a4798e40b1bce02252a209fcf0de7c
+cve CVE-2023-7192
+commit-author Hangyu Hua <hbh25y@gmail.com>
+commit ac4893980bbe79ce383daf9a0885666a30fe4c83
+
+nf_ct_put() needs to be called to put the refcount got by
+nf_conntrack_find_get() to avoid refcount leak when
+nf_conntrack_hash_check_insert() fails.
+
+Fixes: 7d367e06688d ("netfilter: ctnetlink: fix soft lockup when netlink adds new entries (v2)")
+	Signed-off-by: Hangyu Hua <hbh25y@gmail.com>
+	Acked-by: Florian Westphal <fw@strlen.de>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit ac4893980bbe79ce383daf9a0885666a30fe4c83)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_conntrack_netlink.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/net/netfilter/nf_conntrack_netlink.c b/net/netfilter/nf_conntrack_netlink.c
+index 04169b54f2a2..e8688a4b7ce7 100644
+--- a/net/netfilter/nf_conntrack_netlink.c
++++ b/net/netfilter/nf_conntrack_netlink.c
+@@ -2375,12 +2375,15 @@ ctnetlink_create_conntrack(struct net *net,
+ 
+ 	err = nf_conntrack_hash_check_insert(ct);
+ 	if (err < 0)
+-		goto err2;
++		goto err3;
+ 
+ 	rcu_read_unlock();
+ 
+ 	return ct;
+ 
++err3:
++	if (ct->master)
++		nf_ct_put(ct->master);
+ err2:
+ 	rcu_read_unlock();
+ err1:
+-- 
+2.47.3
+

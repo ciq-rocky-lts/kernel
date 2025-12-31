@@ -1,0 +1,137 @@
+From abfd250e9a3c68510ded9405b7b150a090c83027 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:50:13 +0100
+Subject: [PATCH] netfilter: nft_set_pipapo: call nft_trans_gc_queue_sync() in
+ catchall GC
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 4a9e12ea7e70223555ec010bec9f711089ce96f6
+
+pipapo needs to enqueue GC transactions for catchall elements through
+nft_trans_gc_queue_sync(). Add nft_trans_gc_catchall_sync() and
+nft_trans_gc_catchall_async() to handle GC transaction queueing
+accordingly.
+
+Fixes: 5f68718b34a5 ("netfilter: nf_tables: GC transaction API to avoid race with control plane")
+Fixes: f6c383b8c31a ("netfilter: nf_tables: adapt set backend to use GC transaction API")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 4a9e12ea7e70223555ec010bec9f711089ce96f6)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/net/netfilter/nf_tables.h |  5 +++--
+ net/netfilter/nf_tables_api.c     | 22 +++++++++++++++++++---
+ net/netfilter/nft_set_hash.c      |  2 +-
+ net/netfilter/nft_set_pipapo.c    |  2 +-
+ net/netfilter/nft_set_rbtree.c    |  2 +-
+ 5 files changed, 25 insertions(+), 8 deletions(-)
+
+diff --git a/include/net/netfilter/nf_tables.h b/include/net/netfilter/nf_tables.h
+index b61f4add1f09..bf4553dce9f8 100644
+--- a/include/net/netfilter/nf_tables.h
++++ b/include/net/netfilter/nf_tables.h
+@@ -1628,8 +1628,9 @@ void nft_trans_gc_queue_sync_done(struct nft_trans_gc *trans);
+ 
+ void nft_trans_gc_elem_add(struct nft_trans_gc *gc, void *priv);
+ 
+-struct nft_trans_gc *nft_trans_gc_catchall(struct nft_trans_gc *gc,
+-					   unsigned int gc_seq);
++struct nft_trans_gc *nft_trans_gc_catchall_async(struct nft_trans_gc *gc,
++						 unsigned int gc_seq);
++struct nft_trans_gc *nft_trans_gc_catchall_sync(struct nft_trans_gc *gc);
+ 
+ void nft_setelem_data_deactivate(const struct net *net,
+ 				 const struct nft_set *set,
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index b2ac5a25ca38..f446c6e2472f 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -9124,8 +9124,9 @@ void nft_trans_gc_queue_sync_done(struct nft_trans_gc *trans)
+ 	call_rcu(&trans->rcu, nft_trans_gc_trans_free);
+ }
+ 
+-struct nft_trans_gc *nft_trans_gc_catchall(struct nft_trans_gc *gc,
+-					   unsigned int gc_seq)
++static struct nft_trans_gc *nft_trans_gc_catchall(struct nft_trans_gc *gc,
++						  unsigned int gc_seq,
++						  bool sync)
+ {
+ 	struct nft_set_elem_catchall *catchall;
+ 	const struct nft_set *set = gc->set;
+@@ -9141,7 +9142,11 @@ struct nft_trans_gc *nft_trans_gc_catchall(struct nft_trans_gc *gc,
+ 
+ 		nft_set_elem_dead(ext);
+ dead_elem:
+-		gc = nft_trans_gc_queue_async(gc, gc_seq, GFP_ATOMIC);
++		if (sync)
++			gc = nft_trans_gc_queue_sync(gc, GFP_ATOMIC);
++		else
++			gc = nft_trans_gc_queue_async(gc, gc_seq, GFP_ATOMIC);
++
+ 		if (!gc)
+ 			return NULL;
+ 
+@@ -9151,6 +9156,17 @@ struct nft_trans_gc *nft_trans_gc_catchall(struct nft_trans_gc *gc,
+ 	return gc;
+ }
+ 
++struct nft_trans_gc *nft_trans_gc_catchall_async(struct nft_trans_gc *gc,
++						 unsigned int gc_seq)
++{
++	return nft_trans_gc_catchall(gc, gc_seq, false);
++}
++
++struct nft_trans_gc *nft_trans_gc_catchall_sync(struct nft_trans_gc *gc)
++{
++	return nft_trans_gc_catchall(gc, 0, true);
++}
++
+ static void nf_tables_module_autoload_cleanup(struct net *net)
+ {
+ 	struct nftables_pernet *nft_net = nft_pernet(net);
+diff --git a/net/netfilter/nft_set_hash.c b/net/netfilter/nft_set_hash.c
+index 524763659f25..eca20dc60138 100644
+--- a/net/netfilter/nft_set_hash.c
++++ b/net/netfilter/nft_set_hash.c
+@@ -372,7 +372,7 @@ static void nft_rhash_gc(struct work_struct *work)
+ 		nft_trans_gc_elem_add(gc, he);
+ 	}
+ 
+-	gc = nft_trans_gc_catchall(gc, gc_seq);
++	gc = nft_trans_gc_catchall_async(gc, gc_seq);
+ 
+ try_later:
+ 	/* catchall list iteration requires rcu read side lock. */
+diff --git a/net/netfilter/nft_set_pipapo.c b/net/netfilter/nft_set_pipapo.c
+index 8ae43164e0b5..929edbcbdec4 100644
+--- a/net/netfilter/nft_set_pipapo.c
++++ b/net/netfilter/nft_set_pipapo.c
+@@ -1611,7 +1611,7 @@ static void pipapo_gc(const struct nft_set *_set, struct nft_pipapo_match *m)
+ 		}
+ 	}
+ 
+-	gc = nft_trans_gc_catchall(gc, 0);
++	gc = nft_trans_gc_catchall_sync(gc);
+ 	if (gc) {
+ 		nft_trans_gc_queue_sync_done(gc);
+ 		priv->last_gc = jiffies;
+diff --git a/net/netfilter/nft_set_rbtree.c b/net/netfilter/nft_set_rbtree.c
+index f250b5399344..f100d5ab9676 100644
+--- a/net/netfilter/nft_set_rbtree.c
++++ b/net/netfilter/nft_set_rbtree.c
+@@ -670,7 +670,7 @@ static void nft_rbtree_gc(struct work_struct *work)
+ 		nft_trans_gc_elem_add(gc, rbe);
+ 	}
+ 
+-	gc = nft_trans_gc_catchall(gc, gc_seq);
++	gc = nft_trans_gc_catchall_async(gc, gc_seq);
+ 
+ try_later:
+ 	write_seqcount_end(&priv->count);
+-- 
+2.47.3
+

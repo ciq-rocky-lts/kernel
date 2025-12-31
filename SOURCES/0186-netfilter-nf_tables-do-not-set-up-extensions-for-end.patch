@@ -1,0 +1,63 @@
+From 639194d0ea876ed497e40a7f39c1b7cc87fa8499 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 20:02:46 +0100
+Subject: [PATCH] netfilter: nf_tables: do not set up extensions for end
+ interval
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 e4726e3376a4798e40b1bce02252a209fcf0de7c
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 33c7aba0b4ffd6d7cdab862a034eb582a5120a38
+upstream-diff Actually picked the 9.4 backport
+  c08553147be944db3bbb48d89aaca5cff675cd8e which applies cleanly without
+  context conflicts
+
+Elements with an end interval flag set on do not store extensions. The
+global set definition is currently setting on the timeout and stateful
+expression for end interval elements.
+
+This leads to skipping end interval elements from the set->ops->walk()
+path as the expired check bogusly reports true.
+
+Moreover, do not set up stateful expressions for elements with end
+interval flag set on since this is never used.
+
+Fixes: 65038428b2c6 ("netfilter: nf_tables: allow to specify stateful expression in set definition")
+Fixes: 8d8540c4f5e0 ("netfilter: nft_set_rbtree: add timeout support")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 33c7aba0b4ffd6d7cdab862a034eb582a5120a38)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 5264437d3b89..cc6d3d3b7d2f 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -6075,7 +6075,8 @@ static int nft_add_set_elem(struct nft_ctx *ctx, struct nft_set *set,
+ 					    &timeout);
+ 		if (err)
+ 			return err;
+-	} else if (set->flags & NFT_SET_TIMEOUT) {
++	} else if (set->flags & NFT_SET_TIMEOUT &&
++		   !(flags & NFT_SET_ELEM_INTERVAL_END)) {
+ 		timeout = READ_ONCE(set->timeout);
+ 	}
+ 
+@@ -6141,7 +6142,8 @@ static int nft_add_set_elem(struct nft_ctx *ctx, struct nft_set *set,
+ 			err = -EOPNOTSUPP;
+ 			goto err_set_elem_expr;
+ 		}
+-	} else if (set->num_exprs > 0) {
++	} else if (set->num_exprs > 0 &&
++		   !(flags & NFT_SET_ELEM_INTERVAL_END)) {
+ 		err = nft_set_elem_expr_clone(ctx, set, expr_array);
+ 		if (err < 0)
+ 			goto err_set_elem_expr_clone;
+-- 
+2.47.3
+

@@ -1,0 +1,44 @@
+From 6937a13d60c7d57d29687ea2e65f123670d61d7b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:47:54 +0100
+Subject: [PATCH] netfilter: nf_tables: use correct lock to protect gc_list
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 8357bc946a2abc2a10ca40e5a2105d2b4c57515e
+
+Use nf_tables_gc_list_lock spinlock, not nf_tables_destroy_list_lock to
+protect the gc list.
+
+Fixes: 5f68718b34a5 ("netfilter: nf_tables: GC transaction API to avoid race with control plane")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+(cherry picked from commit 8357bc946a2abc2a10ca40e5a2105d2b4c57515e)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 85bd2fb41e08..935f2ca60617 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -9014,9 +9014,9 @@ static void nft_trans_gc_work(struct work_struct *work)
+ 	struct nft_trans_gc *trans, *next;
+ 	LIST_HEAD(trans_gc_list);
+ 
+-	spin_lock(&nf_tables_destroy_list_lock);
++	spin_lock(&nf_tables_gc_list_lock);
+ 	list_splice_init(&nf_tables_gc_list, &trans_gc_list);
+-	spin_unlock(&nf_tables_destroy_list_lock);
++	spin_unlock(&nf_tables_gc_list_lock);
+ 
+ 	list_for_each_entry_safe(trans, next, &trans_gc_list, list) {
+ 		list_del(&trans->list);
+-- 
+2.47.3
+

@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 15
+%define ciq_patch_version 16
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1151,6 +1151,124 @@ Patch1000211: 0166-crypto-xts-Handle-EBUSY-correctly.patch
 Patch1000212: 0167-Add-.container_build_image.patch
 Patch1000213: 0168-net-sched-delete-duplicate-cleanup-of-backlog-and-ql.patch
 Patch1000214: 0169-net-sched-sfb-fix-null-pointer-access-issue-when-sfb.patch
+#CIQ Patch Version: 284.30.1+16.1.el9_2_ciq
+Patch1000215: 0170-SMB3-fix-lease-break-timeout-when-multiple-deferred-.patch
+Patch1000216: 0171-SMB3-Close-deferred-file-handles-in-case-of-handle-l.patch
+Patch1000217: 0172-SMB3-Close-all-deferred-handles-of-inode-in-case-of-.patch
+Patch1000218: 0173-SMB3-drop-reference-to-cfile-before-sending-oplock-b.patch
+Patch1000219: 0174-cifs-fix-lease-break-oops-in-xfstest-generic-098.patch
+Patch1000220: 0175-SMB3-Do-not-send-lease-break-acknowledgment-if-all-f.patch
+Patch1000221: 0176-cifs-fix-potential-oops-in-cifs_oplock_break.patch
+Patch1000222: 0177-smb-client-fix-use-after-free-in-cifs_oplock_break.patch
+Patch1000223: 0178-ipvs-fix-WARNING-in-__ip_vs_cleanup_batch.patch
+Patch1000224: 0179-ipvs-fix-WARNING-in-ip_vs_app_net_cleanup.patch
+Patch1000225: 0180-netfilter-ipset-Rework-long-task-execution-when-addi.patch
+Patch1000226: 0181-netfilter-br_netfilter-disable-sabotage_in-hook-afte.patch
+Patch1000227: 0182-netfilter-br_netfilter-fix-recent-physdev-match-brea.patch
+Patch1000228: 0183-netfilter-ebtables-fix-table-blob-use-after-free.patch
+Patch1000229: 0184-netfilter-ebtables-fix-memory-leak-when-blob-is-malf.patch
+Patch1000230: 0185-netfilter-tproxy-fix-deadlock-due-to-missing-BH-disa.patch
+Patch1000231: 0186-netfilter-nf_tables-do-not-set-up-extensions-for-end.patch
+Patch1000232: 0187-netfilter-nft_set_rbtree-Switch-to-node-list-walk-fo.patch
+Patch1000233: 0188-netfilter-nft_set_rbtree-skip-elements-in-transactio.patch
+Patch1000234: 0189-netfilter-nf_tables-allow-to-fetch-set-elements-when.patch
+Patch1000235: 0190-netfilter-ctnetlink-fix-possible-refcount-leak-in-ct.patch
+Patch1000236: 0191-netfilter-conntrack-fix-rmmod-double-free-race.patch
+Patch1000237: 0192-netfilter-conntrack-restore-IPS_CONFIRMED-out-of-nf_.patch
+Patch1000238: 0193-netfilter-conntrack-adopt-safer-max-chain-length.patch
+Patch1000239: 0194-netfilter-nft_nat-correct-length-for-loading-protoco.patch
+Patch1000240: 0195-netfilter-nft_masq-correct-length-for-loading-protoc.patch
+Patch1000241: 0196-netfilter-nft_redir-correct-length-for-loading-proto.patch
+Patch1000242: 0197-netfilter-nft_redir-correct-value-of-inet-type-.maxa.patch
+Patch1000243: 0198-netfilter-nf_tables-tighten-netlink-attribute-requir.patch
+Patch1000244: 0199-netfilter-conntrack-fix-wrong-ct-timeout-value.patch
+Patch1000245: 0200-netfilter-nf_tables-don-t-write-table-validation-sta.patch
+Patch1000246: 0201-netfilter-nf_tables-fix-nft_trans-type-confusion.patch
+Patch1000247: 0202-netfilter-conntrack-fix-NULL-pointer-dereference-in-.patch
+Patch1000248: 0203-netfilter-nf_tables-Add-null-check-for-nla_nest_star.patch
+Patch1000249: 0204-netfilter-nfnetlink-skip-error-delivery-on-batch-in-.patch
+Patch1000250: 0205-netfilter-nf_tables-always-release-netdev-hooks-from.patch
+Patch1000251: 0206-netfilter-nft_set_rbtree-fix-null-deref-on-element-i.patch
+Patch1000252: 0207-netfilter-ipset-Add-schedule-point-in-call_ad.patch
+Patch1000253: 0208-netfilter-nf_tables-upfront-validation-of-data-via-n.patch
+Patch1000254: 0209-netfilter-nf_tables-integrate-pipapo-into-commit-pro.patch
+Patch1000255: 0210-netfilter-nf_tables-relax-set-map-validation-checks.patch
+Patch1000256: 0211-netfilter-nft_set_pipapo-.walk-does-not-deal-with-ge.patch
+Patch1000257: 0212-netfilter-nf_tables-validate-variable-length-element.patch
+Patch1000258: 0213-netfilter-nf_tables-drop-map-element-references-from.patch
+Patch1000259: 0214-netfilter-nf_tables-fix-underflow-in-object-referenc.patch
+Patch1000260: 0215-netfilter-nf_tables-disallow-element-updates-of-boun.patch
+Patch1000261: 0216-netfilter-nf_tables-reject-unbound-anonymous-set-bef.patch
+Patch1000262: 0217-netfilter-nf_tables-reject-unbound-chain-set-before-.patch
+Patch1000263: 0218-netfilter-nf_tables-disallow-updates-of-anonymous-se.patch
+Patch1000264: 0219-netfilter-nf_tables-disallow-timeout-for-anonymous-s.patch
+Patch1000265: 0220-netfilter-nf_tables-fix-underflow-in-chain-reference.patch
+Patch1000266: 0221-netfilter-nf_tables-report-use-refcount-overflow.patch
+Patch1000267: 0222-netfilter-nf_tables-fix-spurious-set-element-inserti.patch
+Patch1000268: 0223-netfilter-nf_tables-skip-bound-chain-in-netns-releas.patch
+Patch1000269: 0224-netfilter-nf_tables-don-t-skip-expired-elements-duri.patch
+Patch1000270: 0225-netfilter-nf_tables-GC-transaction-API-to-avoid-race.patch
+Patch1000271: 0226-netfilter-nft_set_rbtree-fix-overlap-expiration-walk.patch
+Patch1000272: 0227-netfilter-nf_tables-skip-immediate-deactivate-in-_PR.patch
+Patch1000273: 0228-netfilter-nf_tables-adapt-set-backend-to-use-GC-tran.patch
+Patch1000274: 0229-netfilter-nft_set_hash-mark-set-element-as-dead-when.patch
+Patch1000275: 0230-netfilter-nf_tables-remove-busy-mark-and-gc-batch-AP.patch
+Patch1000276: 0231-netfilter-nf_tables-fix-false-positive-lockdep-splat.patch
+Patch1000277: 0232-netfilter-nf_tables-fix-kdoc-warnings-after-gc-rewor.patch
+Patch1000278: 0233-netfilter-nf_tables-deactivate-catchall-elements-in-.patch
+Patch1000279: 0234-netfilter-nf_tables-don-t-fail-inserts-if-duplicate-.patch
+Patch1000280: 0235-netfilter-nf_tables-fix-GC-transaction-races-with-ne.patch
+Patch1000281: 0236-netfilter-nf_tables-GC-transaction-race-with-netns-d.patch
+Patch1000282: 0237-netfilter-nft_dynset-disallow-object-maps.patch
+Patch1000283: 0238-netfilter-nf_tables-flush-pending-destroy-work-befor.patch
+Patch1000284: 0239-netfilter-nf_tables-GC-transaction-race-with-abort-p.patch
+Patch1000285: 0240-netfilter-nf_tables-use-correct-lock-to-protect-gc_l.patch
+Patch1000286: 0241-netfilter-nf_tables-fix-out-of-memory-error-handling.patch
+Patch1000287: 0242-netfilter-nf_tables-defer-gc-run-if-previous-batch-i.patch
+Patch1000288: 0243-netfilter-nft_set_rbtree-skip-sync-GC-for-new-elemen.patch
+Patch1000289: 0244-netfilter-nf_tables-disallow-rule-removal-from-chain.patch
+Patch1000290: 0245-netfilter-nft_set_pipapo-call-nft_trans_gc_queue_syn.patch
+Patch1000291: 0246-netfilter-nft_set_rbtree-use-read-spinlock-to-avoid-.patch
+Patch1000292: 0247-netfilter-nft_set_pipapo-stop-GC-iteration-if-GC-tra.patch
+Patch1000293: 0248-netfilter-nft_set_hash-try-later-when-GC-hits-EAGAIN.patch
+Patch1000294: 0249-netfilter-nf_tables-disallow-element-removal-on-anon.patch
+Patch1000295: 0250-netfilter-nf_tables-disable-toggling-dormant-table-s.patch
+Patch1000296: 0251-netfilter-nf_tables-fix-memleak-when-more-than-255-e.patch
+Patch1000297: 0252-netfilter-nf_tables-nft_set_rbtree-fix-spurious-inse.patch
+Patch1000298: 0253-netfilter-nf_tables-work-around-newrule-after-chain-.patch
+Patch1000299: 0254-netfilter-nft_set_pipapo-no-need-to-call-pipapo_deac.patch
+Patch1000300: 0255-netfilter-nf_tables-set-backend-.flush-always-succee.patch
+Patch1000301: 0256-netfilter-nf_tables-expose-opaque-set-element-as-str.patch
+Patch1000302: 0257-netfilter-nf_tables-remove-catchall-element-in-GC-sy.patch
+Patch1000303: 0258-netfilter-nf_tables-split-async-and-sync-catchall-in.patch
+Patch1000304: 0259-netfilter-bpf-Adjust-timeouts-of-non-confirmed-CTs-i.patch
+Patch1000305: 0260-netfilter-ipset-Fix-race-between-IPSET_CMD_CREATE-an.patch
+Patch1000306: 0261-netfilter-nft_set_rbtree-skip-end-interval-element-f.patch
+Patch1000307: 0262-netfilter-nf_tables-mark-set-as-dead-when-unbinding-.patch
+Patch1000308: 0263-netfilter-nf_tables-release-batch-on-table-validatio.patch
+Patch1000309: 0264-netfilter-nf_tables-release-mutex-after-nft_gc_seq_e.patch
+Patch1000310: 0265-af_unix-fix-lockdep-positive-in-sk_diag_dump_icons.patch
+Patch1000311: 0266-af_unix-Fix-garbage-collector-racing-against-connect.patch
+Patch1000312: 0267-af_unix-Suppress-false-positive-lockdep-splat-for-sp.patch
+Patch1000313: 0268-wifi-cfg80211-check-A-MSDU-format-more-carefully.patch
+Patch1000314: 0269-media-uvcvideo-Refactor-iterators.patch
+Patch1000315: 0270-media-uvcvideo-Only-save-async-fh-if-success.patch
+Patch1000316: 0271-media-uvcvideo-Remove-dangling-pointers.patch
+Patch1000317: 0272-Bluetooth-L2CAP-Fix-user-after-free.patch
+Patch1000318: 0273-wifi-mac80211-check-S1G-action-frame-size.patch
+Patch1000319: 0274-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_disconne.patch
+Patch1000320: 0275-Bluetooth-Fix-l2cap_disconnect_req-deadlock.patch
+Patch1000321: 0276-Bluetooth-L2CAP-fix-bad-unlock-balance-in-l2cap_disc.patch
+Patch1000322: 0277-ip6mr-Fix-skb_under_panic-in-ip6mr_cache_report.patch
+Patch1000323: 0278-nbd-fix-incomplete-validation-of-ioctl-arg.patch
+Patch1000324: 0279-ALSA-usb-audio-Validate-UAC3-power-domain-descriptor.patch
+Patch1000325: 0280-ipv6-sr-Fix-MAC-comparison-to-be-constant-time.patch
+Patch1000326: 0281-ALSA-usb-audio-Validate-UAC3-cluster-segment-descrip.patch
+Patch1000327: 0282-ALSA-usb-audio-Fix-size-validation-in-convert_chmap_.patch
+Patch1000328: 0283-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
+Patch1000329: 0284-Bluetooth-hci_core-Fix-use-after-free-in-vhci_flush.patch
+Patch1000330: 0285-nfs-fold-nfs_page_group_lock_subrequests-into-nfs_lo.patch
+Patch1000331: 0286-NFS-Fix-a-race-when-updating-an-existing-write.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2041,6 +2159,123 @@ ApplyOptionalPatch 0166-crypto-xts-Handle-EBUSY-correctly.patch
 ApplyOptionalPatch 0167-Add-.container_build_image.patch
 ApplyOptionalPatch 0168-net-sched-delete-duplicate-cleanup-of-backlog-and-ql.patch
 ApplyOptionalPatch 0169-net-sched-sfb-fix-null-pointer-access-issue-when-sfb.patch
+ApplyOptionalPatch 0170-SMB3-fix-lease-break-timeout-when-multiple-deferred-.patch
+ApplyOptionalPatch 0171-SMB3-Close-deferred-file-handles-in-case-of-handle-l.patch
+ApplyOptionalPatch 0172-SMB3-Close-all-deferred-handles-of-inode-in-case-of-.patch
+ApplyOptionalPatch 0173-SMB3-drop-reference-to-cfile-before-sending-oplock-b.patch
+ApplyOptionalPatch 0174-cifs-fix-lease-break-oops-in-xfstest-generic-098.patch
+ApplyOptionalPatch 0175-SMB3-Do-not-send-lease-break-acknowledgment-if-all-f.patch
+ApplyOptionalPatch 0176-cifs-fix-potential-oops-in-cifs_oplock_break.patch
+ApplyOptionalPatch 0177-smb-client-fix-use-after-free-in-cifs_oplock_break.patch
+ApplyOptionalPatch 0178-ipvs-fix-WARNING-in-__ip_vs_cleanup_batch.patch
+ApplyOptionalPatch 0179-ipvs-fix-WARNING-in-ip_vs_app_net_cleanup.patch
+ApplyOptionalPatch 0180-netfilter-ipset-Rework-long-task-execution-when-addi.patch
+ApplyOptionalPatch 0181-netfilter-br_netfilter-disable-sabotage_in-hook-afte.patch
+ApplyOptionalPatch 0182-netfilter-br_netfilter-fix-recent-physdev-match-brea.patch
+ApplyOptionalPatch 0183-netfilter-ebtables-fix-table-blob-use-after-free.patch
+ApplyOptionalPatch 0184-netfilter-ebtables-fix-memory-leak-when-blob-is-malf.patch
+ApplyOptionalPatch 0185-netfilter-tproxy-fix-deadlock-due-to-missing-BH-disa.patch
+ApplyOptionalPatch 0186-netfilter-nf_tables-do-not-set-up-extensions-for-end.patch
+ApplyOptionalPatch 0187-netfilter-nft_set_rbtree-Switch-to-node-list-walk-fo.patch
+ApplyOptionalPatch 0188-netfilter-nft_set_rbtree-skip-elements-in-transactio.patch
+ApplyOptionalPatch 0189-netfilter-nf_tables-allow-to-fetch-set-elements-when.patch
+ApplyOptionalPatch 0190-netfilter-ctnetlink-fix-possible-refcount-leak-in-ct.patch
+ApplyOptionalPatch 0191-netfilter-conntrack-fix-rmmod-double-free-race.patch
+ApplyOptionalPatch 0192-netfilter-conntrack-restore-IPS_CONFIRMED-out-of-nf_.patch
+ApplyOptionalPatch 0193-netfilter-conntrack-adopt-safer-max-chain-length.patch
+ApplyOptionalPatch 0194-netfilter-nft_nat-correct-length-for-loading-protoco.patch
+ApplyOptionalPatch 0195-netfilter-nft_masq-correct-length-for-loading-protoc.patch
+ApplyOptionalPatch 0196-netfilter-nft_redir-correct-length-for-loading-proto.patch
+ApplyOptionalPatch 0197-netfilter-nft_redir-correct-value-of-inet-type-.maxa.patch
+ApplyOptionalPatch 0198-netfilter-nf_tables-tighten-netlink-attribute-requir.patch
+ApplyOptionalPatch 0199-netfilter-conntrack-fix-wrong-ct-timeout-value.patch
+ApplyOptionalPatch 0200-netfilter-nf_tables-don-t-write-table-validation-sta.patch
+ApplyOptionalPatch 0201-netfilter-nf_tables-fix-nft_trans-type-confusion.patch
+ApplyOptionalPatch 0202-netfilter-conntrack-fix-NULL-pointer-dereference-in-.patch
+ApplyOptionalPatch 0203-netfilter-nf_tables-Add-null-check-for-nla_nest_star.patch
+ApplyOptionalPatch 0204-netfilter-nfnetlink-skip-error-delivery-on-batch-in-.patch
+ApplyOptionalPatch 0205-netfilter-nf_tables-always-release-netdev-hooks-from.patch
+ApplyOptionalPatch 0206-netfilter-nft_set_rbtree-fix-null-deref-on-element-i.patch
+ApplyOptionalPatch 0207-netfilter-ipset-Add-schedule-point-in-call_ad.patch
+ApplyOptionalPatch 0208-netfilter-nf_tables-upfront-validation-of-data-via-n.patch
+ApplyOptionalPatch 0209-netfilter-nf_tables-integrate-pipapo-into-commit-pro.patch
+ApplyOptionalPatch 0210-netfilter-nf_tables-relax-set-map-validation-checks.patch
+ApplyOptionalPatch 0211-netfilter-nft_set_pipapo-.walk-does-not-deal-with-ge.patch
+ApplyOptionalPatch 0212-netfilter-nf_tables-validate-variable-length-element.patch
+ApplyOptionalPatch 0213-netfilter-nf_tables-drop-map-element-references-from.patch
+ApplyOptionalPatch 0214-netfilter-nf_tables-fix-underflow-in-object-referenc.patch
+ApplyOptionalPatch 0215-netfilter-nf_tables-disallow-element-updates-of-boun.patch
+ApplyOptionalPatch 0216-netfilter-nf_tables-reject-unbound-anonymous-set-bef.patch
+ApplyOptionalPatch 0217-netfilter-nf_tables-reject-unbound-chain-set-before-.patch
+ApplyOptionalPatch 0218-netfilter-nf_tables-disallow-updates-of-anonymous-se.patch
+ApplyOptionalPatch 0219-netfilter-nf_tables-disallow-timeout-for-anonymous-s.patch
+ApplyOptionalPatch 0220-netfilter-nf_tables-fix-underflow-in-chain-reference.patch
+ApplyOptionalPatch 0221-netfilter-nf_tables-report-use-refcount-overflow.patch
+ApplyOptionalPatch 0222-netfilter-nf_tables-fix-spurious-set-element-inserti.patch
+ApplyOptionalPatch 0223-netfilter-nf_tables-skip-bound-chain-in-netns-releas.patch
+ApplyOptionalPatch 0224-netfilter-nf_tables-don-t-skip-expired-elements-duri.patch
+ApplyOptionalPatch 0225-netfilter-nf_tables-GC-transaction-API-to-avoid-race.patch
+ApplyOptionalPatch 0226-netfilter-nft_set_rbtree-fix-overlap-expiration-walk.patch
+ApplyOptionalPatch 0227-netfilter-nf_tables-skip-immediate-deactivate-in-_PR.patch
+ApplyOptionalPatch 0228-netfilter-nf_tables-adapt-set-backend-to-use-GC-tran.patch
+ApplyOptionalPatch 0229-netfilter-nft_set_hash-mark-set-element-as-dead-when.patch
+ApplyOptionalPatch 0230-netfilter-nf_tables-remove-busy-mark-and-gc-batch-AP.patch
+ApplyOptionalPatch 0231-netfilter-nf_tables-fix-false-positive-lockdep-splat.patch
+ApplyOptionalPatch 0232-netfilter-nf_tables-fix-kdoc-warnings-after-gc-rewor.patch
+ApplyOptionalPatch 0233-netfilter-nf_tables-deactivate-catchall-elements-in-.patch
+ApplyOptionalPatch 0234-netfilter-nf_tables-don-t-fail-inserts-if-duplicate-.patch
+ApplyOptionalPatch 0235-netfilter-nf_tables-fix-GC-transaction-races-with-ne.patch
+ApplyOptionalPatch 0236-netfilter-nf_tables-GC-transaction-race-with-netns-d.patch
+ApplyOptionalPatch 0237-netfilter-nft_dynset-disallow-object-maps.patch
+ApplyOptionalPatch 0238-netfilter-nf_tables-flush-pending-destroy-work-befor.patch
+ApplyOptionalPatch 0239-netfilter-nf_tables-GC-transaction-race-with-abort-p.patch
+ApplyOptionalPatch 0240-netfilter-nf_tables-use-correct-lock-to-protect-gc_l.patch
+ApplyOptionalPatch 0241-netfilter-nf_tables-fix-out-of-memory-error-handling.patch
+ApplyOptionalPatch 0242-netfilter-nf_tables-defer-gc-run-if-previous-batch-i.patch
+ApplyOptionalPatch 0243-netfilter-nft_set_rbtree-skip-sync-GC-for-new-elemen.patch
+ApplyOptionalPatch 0244-netfilter-nf_tables-disallow-rule-removal-from-chain.patch
+ApplyOptionalPatch 0245-netfilter-nft_set_pipapo-call-nft_trans_gc_queue_syn.patch
+ApplyOptionalPatch 0246-netfilter-nft_set_rbtree-use-read-spinlock-to-avoid-.patch
+ApplyOptionalPatch 0247-netfilter-nft_set_pipapo-stop-GC-iteration-if-GC-tra.patch
+ApplyOptionalPatch 0248-netfilter-nft_set_hash-try-later-when-GC-hits-EAGAIN.patch
+ApplyOptionalPatch 0249-netfilter-nf_tables-disallow-element-removal-on-anon.patch
+ApplyOptionalPatch 0250-netfilter-nf_tables-disable-toggling-dormant-table-s.patch
+ApplyOptionalPatch 0251-netfilter-nf_tables-fix-memleak-when-more-than-255-e.patch
+ApplyOptionalPatch 0252-netfilter-nf_tables-nft_set_rbtree-fix-spurious-inse.patch
+ApplyOptionalPatch 0253-netfilter-nf_tables-work-around-newrule-after-chain-.patch
+ApplyOptionalPatch 0254-netfilter-nft_set_pipapo-no-need-to-call-pipapo_deac.patch
+ApplyOptionalPatch 0255-netfilter-nf_tables-set-backend-.flush-always-succee.patch
+ApplyOptionalPatch 0256-netfilter-nf_tables-expose-opaque-set-element-as-str.patch
+ApplyOptionalPatch 0257-netfilter-nf_tables-remove-catchall-element-in-GC-sy.patch
+ApplyOptionalPatch 0258-netfilter-nf_tables-split-async-and-sync-catchall-in.patch
+ApplyOptionalPatch 0259-netfilter-bpf-Adjust-timeouts-of-non-confirmed-CTs-i.patch
+ApplyOptionalPatch 0260-netfilter-ipset-Fix-race-between-IPSET_CMD_CREATE-an.patch
+ApplyOptionalPatch 0261-netfilter-nft_set_rbtree-skip-end-interval-element-f.patch
+ApplyOptionalPatch 0262-netfilter-nf_tables-mark-set-as-dead-when-unbinding-.patch
+ApplyOptionalPatch 0263-netfilter-nf_tables-release-batch-on-table-validatio.patch
+ApplyOptionalPatch 0264-netfilter-nf_tables-release-mutex-after-nft_gc_seq_e.patch
+ApplyOptionalPatch 0265-af_unix-fix-lockdep-positive-in-sk_diag_dump_icons.patch
+ApplyOptionalPatch 0266-af_unix-Fix-garbage-collector-racing-against-connect.patch
+ApplyOptionalPatch 0267-af_unix-Suppress-false-positive-lockdep-splat-for-sp.patch
+ApplyOptionalPatch 0268-wifi-cfg80211-check-A-MSDU-format-more-carefully.patch
+ApplyOptionalPatch 0269-media-uvcvideo-Refactor-iterators.patch
+ApplyOptionalPatch 0270-media-uvcvideo-Only-save-async-fh-if-success.patch
+ApplyOptionalPatch 0271-media-uvcvideo-Remove-dangling-pointers.patch
+ApplyOptionalPatch 0272-Bluetooth-L2CAP-Fix-user-after-free.patch
+ApplyOptionalPatch 0273-wifi-mac80211-check-S1G-action-frame-size.patch
+ApplyOptionalPatch 0274-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_disconne.patch
+ApplyOptionalPatch 0275-Bluetooth-Fix-l2cap_disconnect_req-deadlock.patch
+ApplyOptionalPatch 0276-Bluetooth-L2CAP-fix-bad-unlock-balance-in-l2cap_disc.patch
+ApplyOptionalPatch 0277-ip6mr-Fix-skb_under_panic-in-ip6mr_cache_report.patch
+ApplyOptionalPatch 0278-nbd-fix-incomplete-validation-of-ioctl-arg.patch
+ApplyOptionalPatch 0279-ALSA-usb-audio-Validate-UAC3-power-domain-descriptor.patch
+ApplyOptionalPatch 0280-ipv6-sr-Fix-MAC-comparison-to-be-constant-time.patch
+ApplyOptionalPatch 0281-ALSA-usb-audio-Validate-UAC3-cluster-segment-descrip.patch
+ApplyOptionalPatch 0282-ALSA-usb-audio-Fix-size-validation-in-convert_chmap_.patch
+ApplyOptionalPatch 0283-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
+ApplyOptionalPatch 0284-Bluetooth-hci_core-Fix-use-after-free-in-vhci_flush.patch
+ApplyOptionalPatch 0285-nfs-fold-nfs_page_group_lock_subrequests-into-nfs_lo.patch
+ApplyOptionalPatch 0286-NFS-Fix-a-race-when-updating-an-existing-write.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3924,6 +4159,125 @@ fi
 #
 #
 %changelog
+* Mon Dec 22 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+16.1.el9_2_ciq
+- NFS: Fix a race when updating an existing write (Marcin Wcisło) [ciqres] {CVE-2025-39697}
+- nfs: fold nfs_page_group_lock_subrequests into nfs_lock_and_join_requests (Marcin Wcisło) [ciqres] {CVE-2025-39697}
+- Bluetooth: hci_core: Fix use-after-free in vhci_flush() (Marcin Wcisło) [ciqres] {CVE-2025-38250}
+- efivarfs: Fix slab-out-of-bounds in efivarfs_d_compare (Brett Mastbergen) [ciqres] {CVE-2025-39817}
+- ALSA: usb-audio: Fix size validation in convert_chmap_v3() (Brett Mastbergen) [ciqres] {CVE-2025-39757}
+- ALSA: usb-audio: Validate UAC3 cluster segment descriptors (Brett Mastbergen) [ciqres] {CVE-2025-39757}
+- ipv6: sr: Fix MAC comparison to be constant-time (Brett Mastbergen) [ciqres] {CVE-2025-39702}
+- ALSA: usb-audio: Validate UAC3 power domain descriptors, too (Brett Mastbergen) [ciqres] {CVE-2025-38729}
+- nbd: fix incomplete validation of ioctl arg (Brett Mastbergen) [ciqres] {CVE-2023-53513}
+- ip6mr: Fix skb_under_panic in ip6mr_cache_report() (Brett Mastbergen) [ciqres] {CVE-2023-53365}
+- Bluetooth: L2CAP: fix "bad unlock balance" in l2cap_disconnect_rsp (Brett Mastbergen) [ciqres] {CVE-2023-53297}
+- Bluetooth: Fix l2cap_disconnect_req deadlock (Brett Mastbergen) [ciqres] {CVE-2023-53297}
+- Bluetooth: L2CAP: Fix use-after-free in l2cap_disconnect_{req,rsp} (Brett Mastbergen) [ciqres] {CVE-2023-53827}
+- wifi: mac80211: check S1G action frame size (Brett Mastbergen) [ciqres] {CVE-2023-53257}
+- Bluetooth: L2CAP: Fix user-after-free (Brett Mastbergen) [ciqres] {CVE-2022-50386}
+- media: uvcvideo: Remove dangling pointers (Marcin Wcisło) [ciqres] {CVE-2024-58002}
+- media: uvcvideo: Only save async fh if success (Marcin Wcisło) [ciqres] {CVE-2024-58002}
+- media: uvcvideo: Refactor iterators (Marcin Wcisło) [ciqres] {CVE-2024-58002}
+- wifi: cfg80211: check A-MSDU format more carefully (Marcin Wcisło) [ciqres] {CVE-2024-35937}
+- af_unix: Suppress false-positive lockdep splat for spin_lock() in __unix_gc(). (Marcin Wcisło) [ciqres] {CVE-2024-26923}
+- af_unix: Fix garbage collector racing against connect() (Marcin Wcisło) [ciqres] {CVE-2024-26923}
+- af_unix: fix lockdep positive in sk_diag_dump_icons() (Marcin Wcisło) [ciqres] {CVE-2024-26923}
+- netfilter: nf_tables: release mutex after nft_gc_seq_end from abort path (Marcin Wcisło) [ciqres] {CVE-2024-26925}
+- netfilter: nf_tables: release batch on table validation from abort path (Marcin Wcisło) [ciqres] {CVE-2024-26925}
+- netfilter: nf_tables: mark set as dead when unbinding anonymous set with timeout (Marcin Wcisło) [ciqres] {CVE-2024-26643}
+- netfilter: nft_set_rbtree: skip end interval element from gc (Marcin Wcisło) [ciqres] {CVE-2024-26581}
+- netfilter: ipset: Fix race between IPSET_CMD_CREATE and IPSET_CMD_SWAP (Marcin Wcisło) [ciqres] {CVE-2023-42756}
+- netfilter, bpf: Adjust timeouts of non-confirmed CTs in bpf_ct_insert_entry() (Marcin Wcisło) [ciqres] {CVE-2023-4244}
+- netfilter: nf_tables: split async and sync catchall in two functions (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: remove catchall element in GC sync path (Marcin Wcisło) [ciqres] {CVE-2023-6111}
+- netfilter: nf_tables: expose opaque set element as struct nft_elem_priv (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: set backend .flush always succeeds (Marcin Wcisło) [ciqres]
+- netfilter: nft_set_pipapo: no need to call pipapo_deactivate() from flush (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: work around newrule after chain binding (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: nft_set_rbtree: fix spurious insertion failure (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: fix memleak when more than 255 elements expired (Marcin Wcisło) [ciqres] {CVE-2023-52581}
+- netfilter: nf_tables: disable toggling dormant table state more than once (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: disallow element removal on anonymous sets (Marcin Wcisło) [ciqres]
+- netfilter: nft_set_hash: try later when GC hits EAGAIN on iteration (Marcin Wcisło) [ciqres]
+- netfilter: nft_set_pipapo: stop GC iteration if GC transaction allocation fails (Marcin Wcisło) [ciqres]
+- netfilter: nft_set_rbtree: use read spinlock to avoid datapath contention (Marcin Wcisło) [ciqres]
+- netfilter: nft_set_pipapo: call nft_trans_gc_queue_sync() in catchall GC (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: disallow rule removal from chain binding (Marcin Wcisło) [ciqres] {CVE-2023-5197}
+- netfilter: nft_set_rbtree: skip sync GC for new elements in this transaction (Marcin Wcisło) [ciqres] {CVE-2023-52433}
+- netfilter: nf_tables: defer gc run if previous batch is still pending (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: fix out of memory error handling (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: use correct lock to protect gc_list (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: GC transaction race with abort path (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: flush pending destroy work before netlink notifier (Marcin Wcisło) [ciqres]
+- netfilter: nft_dynset: disallow object maps (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: GC transaction race with netns dismantle (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: fix GC transaction races with netns and netlink event exit path (Marcin Wcisło) [ciqres] {CVE-2023-4244}
+- netfilter: nf_tables: don't fail inserts if duplicate has expired (Marcin Wcisło) [ciqres] {CVE-2023-52925}
+- netfilter: nf_tables: deactivate catchall elements in next generation (Marcin Wcisło) [ciqres] {CVE-2023-4569}
+- netfilter: nf_tables: fix kdoc warnings after gc rework (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: fix false-positive lockdep splat (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: remove busy mark and gc batch API (Marcin Wcisło) [ciqres]
+- netfilter: nft_set_hash: mark set element as dead when deleting from packet path (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: adapt set backend to use GC transaction API (Marcin Wcisło) [ciqres] {CVE-2023-52923}
+- netfilter: nf_tables: skip immediate deactivate in _PREPARE_ERROR (Marcin Wcisło) [ciqres] {CVE-2023-4015}
+- netfilter: nft_set_rbtree: fix overlap expiration walk (Marcin Wcisło) [ciqres] {CVE-2023-53304}
+- netfilter: nf_tables: GC transaction API to avoid race with control plane (Marcin Wcisło) [ciqres] {CVE-2023-4244}
+- netfilter: nf_tables: don't skip expired elements during walk (Marcin Wcisło) [ciqres] {CVE-2023-52924}
+- netfilter: nf_tables: skip bound chain in netns release path (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: fix spurious set element insertion failure (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: report use refcount overflow (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: fix underflow in chain reference counter (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: disallow timeout for anonymous sets (Marcin Wcisło) [ciqres] {CVE-2023-52620}
+- netfilter: nf_tables: disallow updates of anonymous sets (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: reject unbound chain set before commit phase (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: reject unbound anonymous set before commit phase (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: disallow element updates of bound anonymous sets (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: fix underflow in object reference counter (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: drop map element references from preparation phase (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: validate variable length element extension (Marcin Wcisło) [ciqres]
+- netfilter: nft_set_pipapo: .walk does not deal with generations (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: relax set/map validation checks (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: integrate pipapo into commit protocol (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: upfront validation of data via nft_data_init() (Marcin Wcisło) [ciqres]
+- netfilter: ipset: Add schedule point in call_ad(). (Marcin Wcisło) [ciqres]
+- netfilter: nft_set_rbtree: fix null deref on element insertion (Marcin Wcisło) [ciqres] {CVE-2023-53566}
+- netfilter: nf_tables: always release netdev hooks from notifier (Marcin Wcisło) [ciqres]
+- netfilter: nfnetlink: skip error delivery on batch in case of ENOMEM (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: Add null check for nla_nest_start_noflag() in nft_dump_basechain_hook() (Marcin Wcisło) [ciqres]
+- netfilter: conntrack: fix NULL pointer dereference in nf_confirm_cthelper (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: fix nft_trans type confusion (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: don't write table validation state without mutex (Marcin Wcisło) [ciqres]
+- netfilter: conntrack: fix wrong ct->timeout value (Marcin Wcisło) [ciqres] {CVE-2023-53635}
+- netfilter: nf_tables: tighten netlink attribute requirements for catch-all elements (Marcin Wcisło) [ciqres]
+- netfilter: nft_redir: correct value of inet type `.maxattrs` (Marcin Wcisło) [ciqres]
+- netfilter: nft_redir: correct length for loading protocol registers (Marcin Wcisło) [ciqres]
+- netfilter: nft_masq: correct length for loading protocol registers (Marcin Wcisło) [ciqres]
+- netfilter: nft_nat: correct length for loading protocol registers (Marcin Wcisło) [ciqres]
+- netfilter: conntrack: adopt safer max chain length (Marcin Wcisło) [ciqres]
+- netfilter: conntrack: restore IPS_CONFIRMED out of nf_conntrack_hash_check_insert() (Marcin Wcisło) [ciqres]
+- netfilter: conntrack: fix rmmod double-free race (Marcin Wcisło) [ciqres]
+- netfilter: ctnetlink: fix possible refcount leak in ctnetlink_create_conntrack() (Marcin Wcisło) [ciqres] {CVE-2023-7192}
+- netfilter: nf_tables: allow to fetch set elements when table has an owner (Marcin Wcisło) [ciqres]
+- netfilter: nft_set_rbtree: skip elements in transaction from garbage collection (Marcin Wcisło) [ciqres]
+- netfilter: nft_set_rbtree: Switch to node list walk for overlap detection (Marcin Wcisło) [ciqres]
+- netfilter: nf_tables: do not set up extensions for end interval (Marcin Wcisło) [ciqres]
+- netfilter: tproxy: fix deadlock due to missing BH disable (Marcin Wcisło) [ciqres]
+- netfilter: ebtables: fix memory leak when blob is malformed (Marcin Wcisło) [ciqres] {CVE-2022-48641}
+- netfilter: ebtables: fix table blob use-after-free (Marcin Wcisło) [ciqres]
+- netfilter: br_netfilter: fix recent physdev match breakage (Marcin Wcisło) [ciqres]
+- netfilter: br_netfilter: disable sabotage_in hook after first suppression (Marcin Wcisło) [ciqres]
+- netfilter: ipset: Rework long task execution when adding/deleting entries (Marcin Wcisło) [ciqres] {CVE-2023-53549}
+- ipvs: fix WARNING in ip_vs_app_net_cleanup() (Marcin Wcisło) [ciqres] {CVE-2022-49917}
+- ipvs: fix WARNING in __ip_vs_cleanup_batch() (Marcin Wcisło) [ciqres] {CVE-2022-49918}
+- smb: client: fix use-after-free in cifs_oplock_break (Brett Mastbergen) [ciqres] {CVE-2025-38527}
+- cifs: fix potential oops in cifs_oplock_break (Brett Mastbergen) [ciqres] {CVE-2025-38527}
+- SMB3: Do not send lease break acknowledgment if all file handles have been closed (Brett Mastbergen) [ciqres] {CVE-2025-38527}
+- cifs: fix lease break oops in xfstest generic/098 (Brett Mastbergen) [ciqres] {CVE-2025-38527}
+- SMB3: drop reference to cfile before sending oplock break (Brett Mastbergen) [ciqres] {CVE-2025-38527}
+- SMB3: Close all deferred handles of inode in case of handle lease break (Brett Mastbergen) [ciqres] {CVE-2025-38527}
+- SMB3: Close deferred file handles in case of handle lease break (Brett Mastbergen) [ciqres] {CVE-2025-38527}
+- SMB3: fix lease break timeout when multiple deferred close handles for the same file. (Brett Mastbergen) [ciqres] {CVE-2025-38527}
+
 * Mon Dec 01 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+15.1.el9_2_ciq
 - net: sched: sfb: fix null pointer access issue when sfb_init() fails (Roxana Nicolescu) [ciqres] {CVE-2022-50356}
 - net: sched: delete duplicate cleanup of backlog and qlen (Roxana Nicolescu) [ciqres] {CVE-2022-50356}

@@ -1,0 +1,64 @@
+From d174bb9fe4f1f10efc36050f136b0ca668081b9e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:50:32 +0100
+Subject: [PATCH] netfilter: nf_tables: disallow element removal on anonymous
+ sets
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 23a3bfd4ba7acd36abf52b78605f61b21bdac216
+
+Anonymous sets need to be populated once at creation and then they are
+bound to rule since 938154b93be8 ("netfilter: nf_tables: reject unbound
+anonymous set before commit phase"), otherwise transaction reports
+EINVAL.
+
+Userspace does not need to delete elements of anonymous sets that are
+not yet bound, reject this with EOPNOTSUPP.
+
+From flush command path, skip anonymous sets, they are expected to be
+bound already. Otherwise, EINVAL is hit at the end of this transaction
+for unbound sets.
+
+Fixes: 96518518cc41 ("netfilter: add nftables")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 23a3bfd4ba7acd36abf52b78605f61b21bdac216)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index f446c6e2472f..d832cd194015 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -1385,8 +1385,7 @@ static int nft_flush_table(struct nft_ctx *ctx)
+ 		if (!nft_is_active_next(ctx->net, set))
+ 			continue;
+ 
+-		if (nft_set_is_anonymous(set) &&
+-		    !list_empty(&set->bindings))
++		if (nft_set_is_anonymous(set))
+ 			continue;
+ 
+ 		err = nft_delset(ctx, set);
+@@ -6852,8 +6851,10 @@ static int nf_tables_delsetelem(struct sk_buff *skb,
+ 	if (IS_ERR(set))
+ 		return PTR_ERR(set);
+ 
+-	if (!list_empty(&set->bindings) &&
+-	    (set->flags & (NFT_SET_CONSTANT | NFT_SET_ANONYMOUS)))
++	if (nft_set_is_anonymous(set))
++		return -EOPNOTSUPP;
++
++	if (!list_empty(&set->bindings) && (set->flags & NFT_SET_CONSTANT))
+ 		return -EBUSY;
+ 
+ 	nft_ctx_init(&ctx, net, skb, info->nlh, family, table, NULL, nla);
+-- 
+2.47.3
+

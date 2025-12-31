@@ -1,0 +1,52 @@
+From c79e7e17dd64509f06e8dc223a731d1d1d9adfee Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 20:48:15 +0100
+Subject: [PATCH] netfilter: nft_set_pipapo: .walk does not deal with
+ generations
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 2b84e215f87443c74ac0aa7f76bb172d43a87033
+
+The .walk callback iterates over the current active set, but it might be
+useful to iterate over the next generation set. Use the generation mask
+to determine what set view (either current or next generation) is use
+for the walk iteration.
+
+Fixes: 3c4287f62044 ("nf_tables: Add set type for arbitrary concatenation of ranges")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 2b84e215f87443c74ac0aa7f76bb172d43a87033)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nft_set_pipapo.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/net/netfilter/nft_set_pipapo.c b/net/netfilter/nft_set_pipapo.c
+index 899fc8911191..91a0689e278a 100644
+--- a/net/netfilter/nft_set_pipapo.c
++++ b/net/netfilter/nft_set_pipapo.c
+@@ -1978,12 +1978,16 @@ static void nft_pipapo_walk(const struct nft_ctx *ctx, struct nft_set *set,
+ 			    struct nft_set_iter *iter)
+ {
+ 	struct nft_pipapo *priv = nft_set_priv(set);
++	struct net *net = read_pnet(&set->net);
+ 	struct nft_pipapo_match *m;
+ 	struct nft_pipapo_field *f;
+ 	int i, r;
+ 
+ 	rcu_read_lock();
+-	m = rcu_dereference(priv->match);
++	if (iter->genmask == nft_genmask_cur(net))
++		m = rcu_dereference(priv->match);
++	else
++		m = priv->clone;
+ 
+ 	if (unlikely(!m))
+ 		goto out;
+-- 
+2.47.3
+

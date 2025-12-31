@@ -1,0 +1,49 @@
+From 8419afb4090d570b79092e08677d48ce3ee1249f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:47:41 +0100
+Subject: [PATCH] netfilter: nf_tables: flush pending destroy work before
+ netlink notifier
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 2c9f0293280e258606e54ed2b96fa71498432eae
+
+Destroy work waits for the RCU grace period then it releases the objects
+with no mutex held. All releases objects follow this path for
+transactions, therefore, order is guaranteed and references to top-level
+objects in the hierarchy remain valid.
+
+However, netlink notifier might interfer with pending destroy work.
+rcu_barrier() is not correct because objects are not release via RCU
+callback. Flush destroy work before releasing objects from netlink
+notifier path.
+
+Fixes: d4bc8271db21 ("netfilter: nf_tables: netlink notifier might race to release objects")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+(cherry picked from commit 2c9f0293280e258606e54ed2b96fa71498432eae)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 65358238358c..5974f110afac 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -10584,7 +10584,7 @@ static int nft_rcv_nl_event(struct notifier_block *this, unsigned long event,
+ 	gc_seq = nft_gc_seq_begin(nft_net);
+ 
+ 	if (!list_empty(&nf_tables_destroy_list))
+-		rcu_barrier();
++		nf_tables_trans_destroy_flush_work();
+ again:
+ 	list_for_each_entry(table, &nft_net->tables, list) {
+ 		if (nft_table_has_owner(table) &&
+-- 
+2.47.3
+

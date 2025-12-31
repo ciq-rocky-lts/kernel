@@ -1,0 +1,41 @@
+From 74af54c3ee631e870a002cc6d8bba39388f19aba Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:47:35 +0100
+Subject: [PATCH] netfilter: nft_dynset: disallow object maps
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 23185c6aed1ffb8fc44087880ba2767aba493779
+
+Do not allow to insert elements from datapath to objects maps.
+
+Fixes: 8aeff920dcc9 ("netfilter: nf_tables: add stateful object reference to set elements")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+(cherry picked from commit 23185c6aed1ffb8fc44087880ba2767aba493779)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nft_dynset.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/net/netfilter/nft_dynset.c b/net/netfilter/nft_dynset.c
+index 5daf8f6c35dc..3f264bd94b4a 100644
+--- a/net/netfilter/nft_dynset.c
++++ b/net/netfilter/nft_dynset.c
+@@ -191,6 +191,9 @@ static int nft_dynset_init(const struct nft_ctx *ctx,
+ 	if (IS_ERR(set))
+ 		return PTR_ERR(set);
+ 
++	if (set->flags & NFT_SET_OBJECT)
++		return -EOPNOTSUPP;
++
+ 	if (set->ops->update == NULL)
+ 		return -EOPNOTSUPP;
+ 
+-- 
+2.47.3
+

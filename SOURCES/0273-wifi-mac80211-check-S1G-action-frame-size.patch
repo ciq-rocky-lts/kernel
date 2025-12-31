@@ -1,0 +1,39 @@
+From 0e8975ab62d57bdc8d785080ad941d636c43fda8 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Mon, 8 Dec 2025 11:34:29 -0500
+Subject: [PATCH] wifi: mac80211: check S1G action frame size
+
+jira VULN-154635
+cve CVE-2023-53257
+commit-author Johannes Berg <johannes.berg@intel.com>
+commit 19e4a47ee74718a22e963e8a647c8c3bfe8bb05c
+
+Before checking the action code, check that it even
+exists in the frame.
+
+	Reported-by: syzbot+be9c824e6f269d608288@syzkaller.appspotmail.com
+	Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+(cherry picked from commit 19e4a47ee74718a22e963e8a647c8c3bfe8bb05c)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/mac80211/rx.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/net/mac80211/rx.c b/net/mac80211/rx.c
+index 03a41684f58e..582d75698191 100644
+--- a/net/mac80211/rx.c
++++ b/net/mac80211/rx.c
+@@ -3623,6 +3623,10 @@ ieee80211_rx_h_action(struct ieee80211_rx_data *rx)
+ 			break;
+ 		goto queue;
+ 	case WLAN_CATEGORY_S1G:
++		if (len < offsetofend(typeof(*mgmt),
++				      u.action.u.s1g.action_code))
++			break;
++
+ 		switch (mgmt->u.action.u.s1g.action_code) {
+ 		case WLAN_S1G_TWT_SETUP:
+ 		case WLAN_S1G_TWT_TEARDOWN:
+-- 
+2.47.3
+

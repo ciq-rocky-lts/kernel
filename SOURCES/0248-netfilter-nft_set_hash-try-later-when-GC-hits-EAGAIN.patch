@@ -1,0 +1,48 @@
+From e2a754f60c7ca4040ae29346aae705280ada3dfa Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:50:26 +0100
+Subject: [PATCH] netfilter: nft_set_hash: try later when GC hits EAGAIN on
+ iteration
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit b079155faae94e9b3ab9337e82100a914ebb4e8d
+
+Skip GC run if iterator rewinds to the beginning with EAGAIN, otherwise GC
+might collect the same element more than once.
+
+Fixes: f6c383b8c31a ("netfilter: nf_tables: adapt set backend to use GC transaction API")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit b079155faae94e9b3ab9337e82100a914ebb4e8d)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nft_set_hash.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/net/netfilter/nft_set_hash.c b/net/netfilter/nft_set_hash.c
+index eca20dc60138..2013de934cef 100644
+--- a/net/netfilter/nft_set_hash.c
++++ b/net/netfilter/nft_set_hash.c
+@@ -338,12 +338,9 @@ static void nft_rhash_gc(struct work_struct *work)
+ 
+ 	while ((he = rhashtable_walk_next(&hti))) {
+ 		if (IS_ERR(he)) {
+-			if (PTR_ERR(he) != -EAGAIN) {
+-				nft_trans_gc_destroy(gc);
+-				gc = NULL;
+-				goto try_later;
+-			}
+-			continue;
++			nft_trans_gc_destroy(gc);
++			gc = NULL;
++			goto try_later;
+ 		}
+ 
+ 		/* Ruleset has been updated, try later. */
+-- 
+2.47.3
+

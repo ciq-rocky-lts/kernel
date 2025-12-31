@@ -1,0 +1,87 @@
+From 33251963a45337e63f69476d5446f4e964c0928f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:48:02 +0100
+Subject: [PATCH] netfilter: nf_tables: defer gc run if previous batch is still
+ pending
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Florian Westphal <fw@strlen.de>
+commit 8e51830e29e12670b4c10df070a4ea4c9593e961
+
+Don't queue more gc work, else we may queue the same elements multiple
+times.
+
+If an element is flagged as dead, this can mean that either the previous
+gc request was invalidated/discarded by a transaction or that the previous
+request is still pending in the system work queue.
+
+The latter will happen if the gc interval is set to a very low value,
+e.g. 1ms, and system work queue is backlogged.
+
+The sets refcount is 1 if no previous gc requeusts are queued, so add
+a helper for this and skip gc run if old requests are pending.
+
+Add a helper for this and skip the gc run in this case.
+
+Fixes: f6c383b8c31a ("netfilter: nf_tables: adapt set backend to use GC transaction API")
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+	Reviewed-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 8e51830e29e12670b4c10df070a4ea4c9593e961)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/net/netfilter/nf_tables.h | 5 +++++
+ net/netfilter/nft_set_hash.c      | 3 +++
+ net/netfilter/nft_set_rbtree.c    | 3 +++
+ 3 files changed, 11 insertions(+)
+
+diff --git a/include/net/netfilter/nf_tables.h b/include/net/netfilter/nf_tables.h
+index 47dc45d01482..b61f4add1f09 100644
+--- a/include/net/netfilter/nf_tables.h
++++ b/include/net/netfilter/nf_tables.h
+@@ -550,6 +550,11 @@ static inline void *nft_set_priv(const struct nft_set *set)
+ 	return (void *)set->data;
+ }
+ 
++static inline bool nft_set_gc_is_pending(const struct nft_set *s)
++{
++	return refcount_read(&s->refs) != 1;
++}
++
+ static inline struct nft_set *nft_set_container_of(const void *priv)
+ {
+ 	return (void *)priv - offsetof(struct nft_set, data);
+diff --git a/net/netfilter/nft_set_hash.c b/net/netfilter/nft_set_hash.c
+index cef5df846000..524763659f25 100644
+--- a/net/netfilter/nft_set_hash.c
++++ b/net/netfilter/nft_set_hash.c
+@@ -326,6 +326,9 @@ static void nft_rhash_gc(struct work_struct *work)
+ 	nft_net = nft_pernet(net);
+ 	gc_seq = READ_ONCE(nft_net->gc_seq);
+ 
++	if (nft_set_gc_is_pending(set))
++		goto done;
++
+ 	gc = nft_trans_gc_alloc(set, gc_seq, GFP_KERNEL);
+ 	if (!gc)
+ 		goto done;
+diff --git a/net/netfilter/nft_set_rbtree.c b/net/netfilter/nft_set_rbtree.c
+index f9d4c8fcbbf8..c6435e709231 100644
+--- a/net/netfilter/nft_set_rbtree.c
++++ b/net/netfilter/nft_set_rbtree.c
+@@ -611,6 +611,9 @@ static void nft_rbtree_gc(struct work_struct *work)
+ 	nft_net = nft_pernet(net);
+ 	gc_seq  = READ_ONCE(nft_net->gc_seq);
+ 
++	if (nft_set_gc_is_pending(set))
++		goto done;
++
+ 	gc = nft_trans_gc_alloc(set, gc_seq, GFP_KERNEL);
+ 	if (!gc)
+ 		goto done;
+-- 
+2.47.3
+

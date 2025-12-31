@@ -1,0 +1,133 @@
+From 5b57d331e504f8a78bd9ecb517594b4381481693 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 22:16:10 +0100
+Subject: [PATCH] netfilter: nf_tables: split async and sync catchall in two
+ functions
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 8837ba3e58ea1e3d09ae36db80b1e80853aada95
+upstream-diff Used the cleanly applying 9.4 backport
+  45aad0524d11f3bba3c790dc5c53a79a8e0574fd
+
+list_for_each_entry_safe() does not work for the async case which runs
+under RCU, therefore, split GC logic for catchall in two functions
+instead, one for each of the sync and async GC variants.
+
+The catchall sync GC variant never sees a _DEAD bit set on ever, thus,
+this handling is removed in such case, moreover, allocate GC sync batch
+via GFP_KERNEL.
+
+Fixes: 93995bf4af2c ("netfilter: nf_tables: remove catchall element in GC sync path")
+	Reported-by: Florian Westphal <fw@strlen.de>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 8837ba3e58ea1e3d09ae36db80b1e80853aada95)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 62 +++++++++++++++++++----------------
+ 1 file changed, 34 insertions(+), 28 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 9af53f111515..6ebc582efc28 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -9164,16 +9164,14 @@ void nft_trans_gc_queue_sync_done(struct nft_trans_gc *trans)
+ 	call_rcu(&trans->rcu, nft_trans_gc_trans_free);
+ }
+ 
+-static struct nft_trans_gc *nft_trans_gc_catchall(struct nft_trans_gc *gc,
+-						  unsigned int gc_seq,
+-						  bool sync)
++struct nft_trans_gc *nft_trans_gc_catchall_async(struct nft_trans_gc *gc,
++						 unsigned int gc_seq)
+ {
+-	struct nft_set_elem_catchall *catchall, *next;
++	struct nft_set_elem_catchall *catchall;
+ 	const struct nft_set *set = gc->set;
+-	struct nft_elem_priv *elem_priv;
+ 	struct nft_set_ext *ext;
+ 
+-	list_for_each_entry_safe(catchall, next, &set->catchall_list, list) {
++	list_for_each_entry_rcu(catchall, &set->catchall_list, list) {
+ 		ext = nft_set_elem_ext(set, catchall->elem);
+ 
+ 		if (!nft_set_elem_expired(ext))
+@@ -9183,41 +9181,49 @@ static struct nft_trans_gc *nft_trans_gc_catchall(struct nft_trans_gc *gc,
+ 
+ 		nft_set_elem_dead(ext);
+ dead_elem:
+-		if (sync)
+-			gc = nft_trans_gc_queue_sync(gc, GFP_ATOMIC);
+-		else
+-			gc = nft_trans_gc_queue_async(gc, gc_seq, GFP_ATOMIC);
++		gc = nft_trans_gc_queue_async(gc, gc_seq, GFP_ATOMIC);
++		if (!gc)
++			return NULL;
++
++		nft_trans_gc_elem_add(gc, catchall->elem);
++	}
++
++	return gc;
++}
+ 
++struct nft_trans_gc *nft_trans_gc_catchall_sync(struct nft_trans_gc *gc)
++{
++	struct nft_set_elem_catchall *catchall, *next;
++	const struct nft_set *set = gc->set;
++	struct nft_elem_priv *elem_priv;
++	struct nft_set_elem elem;
++	struct nft_set_ext *ext;
++
++	WARN_ON_ONCE(!lockdep_commit_lock_is_held(gc->net));
++
++	list_for_each_entry_safe(catchall, next, &set->catchall_list, list) {
++		ext = nft_set_elem_ext(set, catchall->elem);
++
++		if (!nft_set_elem_expired(ext))
++			continue;
++
++		gc = nft_trans_gc_queue_sync(gc, GFP_KERNEL);
+ 		if (!gc)
+ 			return NULL;
+ 
+ 		elem_priv = catchall->elem;
+-		if (sync) {
+-			struct nft_set_elem elem = {
+-				.priv = elem_priv,
+-			};
+ 
+-			nft_setelem_data_deactivate(gc->net, gc->set, &elem);
+-			nft_setelem_catchall_destroy(catchall);
+-		}
++		memset(&elem, 0, sizeof(elem));
++		elem.priv = catchall->elem;
+ 
++		nft_setelem_data_deactivate(gc->net, gc->set, &elem);
++		nft_setelem_catchall_destroy(catchall);
+ 		nft_trans_gc_elem_add(gc, elem_priv);
+ 	}
+ 
+ 	return gc;
+ }
+ 
+-struct nft_trans_gc *nft_trans_gc_catchall_async(struct nft_trans_gc *gc,
+-						 unsigned int gc_seq)
+-{
+-	return nft_trans_gc_catchall(gc, gc_seq, false);
+-}
+-
+-struct nft_trans_gc *nft_trans_gc_catchall_sync(struct nft_trans_gc *gc)
+-{
+-	return nft_trans_gc_catchall(gc, 0, true);
+-}
+-
+ static void nf_tables_module_autoload_cleanup(struct net *net)
+ {
+ 	struct nftables_pernet *nft_net = nft_pernet(net);
+-- 
+2.47.3
+

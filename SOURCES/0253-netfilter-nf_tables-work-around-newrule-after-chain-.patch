@@ -1,0 +1,144 @@
+From 142f89399760401543783dc92736b29080a6aef5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:51:30 +0100
+Subject: [PATCH] netfilter: nf_tables: work around newrule after chain binding
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Florian Westphal <fwestpha@redhat.com>
+commit d2fd2e46cb93b7661686d29b08c8b6ae15996712
+upstream-diff There is no upstream commit to diff with. Picked directly
+  from RH's branch. See message below for details.
+
+JIRA: https://issues.redhat.com/browse/RHEL-1720
+JIRA: https://issues.redhat.com/browse/RHEL-1721
+Upstream Status: RHEL only
+
+RHEL only.  Proposed upstream but was rejected.
+I don't think we can force a rebase of nftables userland
+in RHEL <= 9.4.  Even if we can do this, we would still need
+this change for z-stream.
+
+This change SHOULD NOT be forwarded into versions later than
+RHEL 9.4. For those releases nftables userspace should be updated
+to release 1.0.7 or later instead.
+
+nftables versions prior to
+commit 3975430b12d9 ("src: expand table command before evaluation"), i.e.
+1.0.6 and earlier, will handle the following snippet in the wrong order:
+
+table ip t {
+	chain c {
+		jump { counter; }
+	}
+}
+
+1. create the table, chain,c and an anon chain.
+2. append a rule to chain c to jump to the anon chain.
+3. append the rule(s) (here: "counter") to the anon chain.
+
+(step 3 should be before 2).
+
+With below commit, this is now rejected by the kernel.
+
+Reason is that the 'jump {' rule added to chain c adds an explicit binding
+(dependency), i.e. the kernel will automatically remove the anon chain when
+userspace later asks to delete the 'jump {' rule from chain c.
+
+This caused crashes in the kernel in case of a errors further down
+in the same transaction.
+
+The abort part has to unroll all pending changes, including the request to
+add the rule 'jump {'.  As its already bound, all the rules added to it
+get deleted as well.
+
+Because we tolerated late-add-after-bind, the transaction log also contains
+the NEWRULE requests (here "counter"), so those were deleted again.
+
+Instead of rejecting newrule-to-bound-chain, allow it iff the anon chain
+is new in this transaction and we are appending.
+
+Mark the newrule transaction as already_bound so abort path skips them.
+
+Fixes: 0ebc1064e487 ("netfilter: nf_tables: disallow rule addition to bound chain via NFTA_RULE_CHAIN_ID")
+	Reported-by: Timo Sigurdsson <public_timo.s@silentcreek.de>
+Closes: https://lore.kernel.org/netfilter-devel/20230911213750.5B4B663206F5@dd20004.kasserver.com/
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+
+	Signed-off-by: Florian Westphal <fwestpha@redhat.com>
+(cherry picked from commit d2fd2e46cb93b7661686d29b08c8b6ae15996712)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 32 ++++++++++++++++++++++++++++++--
+ 1 file changed, 30 insertions(+), 2 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 16c221724f87..161b95746857 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -3532,6 +3532,26 @@ static struct nft_rule *nft_rule_lookup_byid(const struct net *net,
+ 					     const struct nft_chain *chain,
+ 					     const struct nlattr *nla);
+ 
++/* nft <= 1.0.6 appends rules to anon chains after they have been bound */
++static bool nft_rule_work_around_old_version(const struct nfnl_info *info,
++					     struct nft_chain *chain)
++{
++	/* bound (anonymous) chain is already used */
++	if (nft_is_active(info->net, chain))
++		return false;
++
++	/* nft never asks to replace rules here */
++	if (info->nlh->nlmsg_flags & (NLM_F_REPLACE | NLM_F_EXCL))
++		return false;
++
++	/* nft and it only ever appends. */
++	if ((info->nlh->nlmsg_flags & NLM_F_APPEND) == 0)
++		return false;
++
++	pr_warn_once("enabling workaround for nftables 1.0.6 and older\n");
++	return true;
++}
++
+ #define NFT_RULE_MAXEXPRS	128
+ 
+ static int nf_tables_newrule(struct sk_buff *skb, const struct nfnl_info *info,
+@@ -3545,6 +3565,7 @@ static int nf_tables_newrule(struct sk_buff *skb, const struct nfnl_info *info,
+ 	struct nft_expr_info *expr_info = NULL;
+ 	u8 family = info->nfmsg->nfgen_family;
+ 	struct nft_flow_rule *flow = NULL;
++	bool add_after_bind = false;
+ 	struct net *net = info->net;
+ 	struct nft_userdata *udata;
+ 	struct nft_table *table;
+@@ -3584,8 +3605,12 @@ static int nf_tables_newrule(struct sk_buff *skb, const struct nfnl_info *info,
+ 		return -EINVAL;
+ 	}
+ 
+-	if (nft_chain_is_bound(chain))
+-		return -EOPNOTSUPP;
++	if (nft_chain_is_bound(chain)) {
++		if (!nft_rule_work_around_old_version(info, chain))
++			return -EOPNOTSUPP;
++
++		add_after_bind = true;
++	}
+ 
+ 	if (nla[NFTA_RULE_HANDLE]) {
+ 		handle = be64_to_cpu(nla_get_be64(nla[NFTA_RULE_HANDLE]));
+@@ -3730,6 +3755,9 @@ static int nf_tables_newrule(struct sk_buff *skb, const struct nfnl_info *info,
+ 			goto err_destroy_flow_rule;
+ 		}
+ 
++		if (add_after_bind)
++			nft_trans_rule_bound(trans) = true;
++
+ 		if (info->nlh->nlmsg_flags & NLM_F_APPEND) {
+ 			if (old_rule)
+ 				list_add_rcu(&rule->list, &old_rule->list);
+-- 
+2.47.3
+

@@ -1,0 +1,76 @@
+From a1bab57f05d42307826d05b5e27c9c6cc9d9d7de Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 19:53:19 +0100
+Subject: [PATCH] netfilter: br_netfilter: fix recent physdev match breakage
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 e4726e3376a4798e40b1bce02252a209fcf0de7c
+commit-author Florian Westphal <fw@strlen.de>
+commit 94623f579ce338b5fa61b5acaa5beb8aa657fb9e
+
+Recent attempt to ensure PREROUTING hook is executed again when a
+decrypted ipsec packet received on a bridge passes through the network
+stack a second time broke the physdev match in INPUT hook.
+
+We can't discard the nf_bridge info strct from sabotage_in hook, as
+this is needed by the physdev match.
+
+Keep the struct around and handle this with another conditional instead.
+
+Fixes: 2b272bb558f1 ("netfilter: br_netfilter: disable sabotage_in hook after first suppression")
+Reported-and-tested-by: Farid BENAMROUCHE <fariouche@yahoo.fr>
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 94623f579ce338b5fa61b5acaa5beb8aa657fb9e)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/linux/skbuff.h          |  1 +
+ net/bridge/br_netfilter_hooks.c | 17 +++++++++++------
+ 2 files changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/include/linux/skbuff.h b/include/linux/skbuff.h
+index e9b9c0f30e55..343ce45bc35c 100644
+--- a/include/linux/skbuff.h
++++ b/include/linux/skbuff.h
+@@ -261,6 +261,7 @@ struct nf_bridge_info {
+ 	u8			pkt_otherhost:1;
+ 	u8			in_prerouting:1;
+ 	u8			bridged_dnat:1;
++	u8			sabotage_in_done:1;
+ 	__u16			frag_max_size;
+ 	struct net_device	*physindev;
+ 
+diff --git a/net/bridge/br_netfilter_hooks.c b/net/bridge/br_netfilter_hooks.c
+index 9554abcfd5b4..812bd7e1750b 100644
+--- a/net/bridge/br_netfilter_hooks.c
++++ b/net/bridge/br_netfilter_hooks.c
+@@ -868,12 +868,17 @@ static unsigned int ip_sabotage_in(void *priv,
+ {
+ 	struct nf_bridge_info *nf_bridge = nf_bridge_info_get(skb);
+ 
+-	if (nf_bridge && !nf_bridge->in_prerouting &&
+-	    !netif_is_l3_master(skb->dev) &&
+-	    !netif_is_l3_slave(skb->dev)) {
+-		nf_bridge_info_free(skb);
+-		state->okfn(state->net, state->sk, skb);
+-		return NF_STOLEN;
++	if (nf_bridge) {
++		if (nf_bridge->sabotage_in_done)
++			return NF_ACCEPT;
++
++		if (!nf_bridge->in_prerouting &&
++		    !netif_is_l3_master(skb->dev) &&
++		    !netif_is_l3_slave(skb->dev)) {
++			nf_bridge->sabotage_in_done = 1;
++			state->okfn(state->net, state->sk, skb);
++			return NF_STOLEN;
++		}
+ 	}
+ 
+ 	return NF_ACCEPT;
+-- 
+2.47.3
+

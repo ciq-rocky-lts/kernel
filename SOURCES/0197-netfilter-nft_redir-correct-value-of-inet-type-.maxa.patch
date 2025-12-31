@@ -1,0 +1,42 @@
+From f015e950f29018772a4457e6f33c8d6c4eece634 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 20:30:44 +0100
+Subject: [PATCH] netfilter: nft_redir: correct value of inet type `.maxattrs`
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 e4726e3376a4798e40b1bce02252a209fcf0de7c
+commit-author Jeremy Sowden <jeremy@azazel.net>
+commit 493924519b1fe3faab13ee621a43b0d0939abab1
+
+`nft_redir_inet_type.maxattrs` was being set, presumably because of a
+cut-and-paste error, to `NFTA_MASQ_MAX`, instead of `NFTA_REDIR_MAX`.
+
+Fixes: 63ce3940f3ab ("netfilter: nft_redir: add inet support")
+	Signed-off-by: Jeremy Sowden <jeremy@azazel.net>
+	Reviewed-by: Florian Westphal <fw@strlen.de>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 493924519b1fe3faab13ee621a43b0d0939abab1)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nft_redir.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/netfilter/nft_redir.c b/net/netfilter/nft_redir.c
+index deb7e65c8d82..e64f531d66cf 100644
+--- a/net/netfilter/nft_redir.c
++++ b/net/netfilter/nft_redir.c
+@@ -232,7 +232,7 @@ static struct nft_expr_type nft_redir_inet_type __read_mostly = {
+ 	.name		= "redir",
+ 	.ops		= &nft_redir_inet_ops,
+ 	.policy		= nft_redir_policy,
+-	.maxattr	= NFTA_MASQ_MAX,
++	.maxattr	= NFTA_REDIR_MAX,
+ 	.owner		= THIS_MODULE,
+ };
+ 
+-- 
+2.47.3
+

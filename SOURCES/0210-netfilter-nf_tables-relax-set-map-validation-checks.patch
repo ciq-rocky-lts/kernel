@@ -1,0 +1,118 @@
+From 6b5eeff0358b6039a6e1a43c2b3489c15ab60cb2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 20:48:12 +0100
+Subject: [PATCH] netfilter: nf_tables: relax set/map validation checks
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Florian Westphal <fw@strlen.de>
+commit a4878eeae39048e6abe85891c714b49dc13fc08c
+
+Its currently not allowed to perform queries on a map, for example:
+
+table t {
+	map m {
+		typeof ip saddr : meta mark
+		..
+
+	chain c {
+		ip saddr @m counter
+
+will fail, because kernel requires that userspace provides a destination
+register when the referenced set is a map.
+
+However, internally there is no real distinction between sets and maps,
+maps are just sets where each key is associated with a value.
+
+Relax this so that maps can be used just like sets.
+
+This allows to have rules that query if a given key exists
+without making use of the associated value.
+
+This also permits != checks which don't work for map lookups.
+
+When no destination reg is given for a map, then permit this for named
+maps.
+
+Data and dump paths need to be updated to consider priv->dreg_set
+instead of the 'set-is-a-map' check.
+
+Checks in reduce and validate callbacks are not changed, this
+can be relaxed later if a need arises.
+
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+(cherry picked from commit a4878eeae39048e6abe85891c714b49dc13fc08c)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nft_lookup.c | 23 +++++++++++++++--------
+ 1 file changed, 15 insertions(+), 8 deletions(-)
+
+diff --git a/net/netfilter/nft_lookup.c b/net/netfilter/nft_lookup.c
+index 9d18c5428d53..a62cb368daff 100644
+--- a/net/netfilter/nft_lookup.c
++++ b/net/netfilter/nft_lookup.c
+@@ -19,6 +19,7 @@ struct nft_lookup {
+ 	struct nft_set			*set;
+ 	u8				sreg;
+ 	u8				dreg;
++	bool				dreg_set;
+ 	bool				invert;
+ 	struct nft_set_binding		binding;
+ };
+@@ -75,7 +76,7 @@ void nft_lookup_eval(const struct nft_expr *expr,
+ 	}
+ 
+ 	if (ext) {
+-		if (set->flags & NFT_SET_MAP)
++		if (priv->dreg_set)
+ 			nft_data_copy(&regs->data[priv->dreg],
+ 				      nft_set_ext_data(ext), set->dlen);
+ 
+@@ -122,11 +123,8 @@ static int nft_lookup_init(const struct nft_ctx *ctx,
+ 		if (flags & ~NFT_LOOKUP_F_INV)
+ 			return -EINVAL;
+ 
+-		if (flags & NFT_LOOKUP_F_INV) {
+-			if (set->flags & NFT_SET_MAP)
+-				return -EINVAL;
++		if (flags & NFT_LOOKUP_F_INV)
+ 			priv->invert = true;
+-		}
+ 	}
+ 
+ 	if (tb[NFTA_LOOKUP_DREG] != NULL) {
+@@ -140,8 +138,17 @@ static int nft_lookup_init(const struct nft_ctx *ctx,
+ 					       set->dlen);
+ 		if (err < 0)
+ 			return err;
+-	} else if (set->flags & NFT_SET_MAP)
+-		return -EINVAL;
++		priv->dreg_set = true;
++	} else if (set->flags & NFT_SET_MAP) {
++		/* Map given, but user asks for lookup only (i.e. to
++		 * ignore value assoicated with key).
++		 *
++		 * This makes no sense for anonymous maps since they are
++		 * scoped to the rule, but for named sets this can be useful.
++		 */
++		if (set->flags & NFT_SET_ANONYMOUS)
++			return -EINVAL;
++	}
+ 
+ 	priv->binding.flags = set->flags & NFT_SET_MAP;
+ 
+@@ -187,7 +194,7 @@ static int nft_lookup_dump(struct sk_buff *skb, const struct nft_expr *expr)
+ 		goto nla_put_failure;
+ 	if (nft_dump_register(skb, NFTA_LOOKUP_SREG, priv->sreg))
+ 		goto nla_put_failure;
+-	if (priv->set->flags & NFT_SET_MAP)
++	if (priv->dreg_set)
+ 		if (nft_dump_register(skb, NFTA_LOOKUP_DREG, priv->dreg))
+ 			goto nla_put_failure;
+ 	if (nla_put_be32(skb, NFTA_LOOKUP_FLAGS, htonl(flags)))
+-- 
+2.47.3
+

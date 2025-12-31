@@ -1,0 +1,64 @@
+From 1fd2e6b7e99a5f6a6affba3ac790e91ece2c317b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 4 Nov 2025 21:50:35 +0100
+Subject: [PATCH] netfilter: nf_tables: disable toggling dormant table state
+ more than once
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+subsystem-update netfilter: centos-stream-9 cfd9694caf4378958e4f2314024f50a4009015f3
+commit-author Florian Westphal <fw@strlen.de>
+commit c9bd26513b3a11b3adb3c2ed8a31a01a87173ff1
+
+nft -f -<<EOF
+add table ip t
+add table ip t { flags dormant; }
+add chain ip t c { type filter hook input priority 0; }
+add table ip t
+EOF
+
+Triggers a splat from nf core on next table delete because we lose
+track of right hook register state:
+
+WARNING: CPU: 2 PID: 1597 at net/netfilter/core.c:501 __nf_unregister_net_hook
+RIP: 0010:__nf_unregister_net_hook+0x41b/0x570
+ nf_unregister_net_hook+0xb4/0xf0
+ __nf_tables_unregister_hook+0x160/0x1d0
+[..]
+
+The above should have table in *active* state, but in fact no
+hooks were registered.
+
+Reject on/off/on games rather than attempting to fix this.
+
+Fixes: 179d9ba5559a ("netfilter: nf_tables: fix table flag updates")
+	Reported-by: "Lee, Cherie-Anne" <cherie.lee@starlabs.sg>
+	Cc: Bing-Jhong Billy Jheng <billy@starlabs.sg>
+	Cc: info@starlabs.sg
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+(cherry picked from commit c9bd26513b3a11b3adb3c2ed8a31a01a87173ff1)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index d832cd194015..6a3a68fdb212 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -1159,6 +1159,10 @@ static int nf_tables_updtable(struct nft_ctx *ctx)
+ 	     flags & NFT_TABLE_F_OWNER))
+ 		return -EOPNOTSUPP;
+ 
++	/* No dormant off/on/off/on games in single transaction */
++	if (ctx->table->flags & __NFT_TABLE_F_UPDATE)
++		return -EINVAL;
++
+ 	trans = nft_trans_alloc(ctx, NFT_MSG_NEWTABLE,
+ 				sizeof(struct nft_trans_table));
+ 	if (trans == NULL)
+-- 
+2.47.3
+
