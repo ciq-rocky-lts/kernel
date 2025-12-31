@@ -1,0 +1,318 @@
+From 3f8ef3d7ed6a15fdc69996c37ceb11f720c1fb21 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Wed, 3 Dec 2025 16:21:37 +0100
+Subject: [PATCH] net: sched: delete duplicate cleanup of backlog and qlen
+
+jira VULN-155239
+cve-pre CVE-2022-50356
+commit-author Zhengchao Shao <shaozhengchao@huawei.com>
+commit c19d893fbf3f2f8fa864ae39652c7fee939edde2
+
+qdisc_reset() is clearing qdisc->q.qlen and qdisc->qstats.backlog
+_after_ calling qdisc->ops->reset. There is no need to clear them
+again in the specific reset function.
+
+	Signed-off-by: Zhengchao Shao <shaozhengchao@huawei.com>
+Link: https://lore.kernel.org/r/20220824005231.345727-1-shaozhengchao@huawei.com
+	Signed-off-by: Paolo Abeni <pabeni@redhat.com>
+(cherry picked from commit c19d893fbf3f2f8fa864ae39652c7fee939edde2)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ include/net/sch_generic.h | 1 -
+ net/sched/sch_atm.c       | 1 -
+ net/sched/sch_cbq.c       | 1 -
+ net/sched/sch_choke.c     | 2 --
+ net/sched/sch_drr.c       | 2 --
+ net/sched/sch_dsmark.c    | 2 --
+ net/sched/sch_etf.c       | 3 ---
+ net/sched/sch_ets.c       | 2 --
+ net/sched/sch_fq_codel.c  | 2 --
+ net/sched/sch_fq_pie.c    | 3 ---
+ net/sched/sch_hfsc.c      | 2 --
+ net/sched/sch_htb.c       | 2 --
+ net/sched/sch_multiq.c    | 1 -
+ net/sched/sch_prio.c      | 2 --
+ net/sched/sch_qfq.c       | 2 --
+ net/sched/sch_red.c       | 2 --
+ net/sched/sch_sfb.c       | 2 --
+ net/sched/sch_skbprio.c   | 3 ---
+ net/sched/sch_taprio.c    | 2 --
+ net/sched/sch_tbf.c       | 2 --
+ net/sched/sch_teql.c      | 1 -
+ 21 files changed, 40 deletions(-)
+
+diff --git a/include/net/sch_generic.h b/include/net/sch_generic.h
+index 4fc36751be5c..d1543c4f98ec 100644
+--- a/include/net/sch_generic.h
++++ b/include/net/sch_generic.h
+@@ -1175,7 +1175,6 @@ static inline void __qdisc_reset_queue(struct qdisc_skb_head *qh)
+ static inline void qdisc_reset_queue(struct Qdisc *sch)
+ {
+ 	__qdisc_reset_queue(&sch->q);
+-	sch->qstats.backlog = 0;
+ }
+ 
+ static inline struct Qdisc *qdisc_replace(struct Qdisc *sch, struct Qdisc *new,
+diff --git a/net/sched/sch_atm.c b/net/sched/sch_atm.c
+index 678f1fa527e5..b6f291685b3d 100644
+--- a/net/sched/sch_atm.c
++++ b/net/sched/sch_atm.c
+@@ -575,7 +575,6 @@ static void atm_tc_reset(struct Qdisc *sch)
+ 	pr_debug("atm_tc_reset(sch %p,[qdisc %p])\n", sch, p);
+ 	list_for_each_entry(flow, &p->flows, list)
+ 		qdisc_reset(flow->q);
+-	sch->q.qlen = 0;
+ }
+ 
+ static void atm_tc_destroy(struct Qdisc *sch)
+diff --git a/net/sched/sch_cbq.c b/net/sched/sch_cbq.c
+index ba586e965904..027d69135dde 100644
+--- a/net/sched/sch_cbq.c
++++ b/net/sched/sch_cbq.c
+@@ -1058,7 +1058,6 @@ cbq_reset(struct Qdisc *sch)
+ 			cl->cpriority = cl->priority;
+ 		}
+ 	}
+-	sch->q.qlen = 0;
+ }
+ 
+ 
+diff --git a/net/sched/sch_choke.c b/net/sched/sch_choke.c
+index a400f7f756e1..efdb5426982b 100644
+--- a/net/sched/sch_choke.c
++++ b/net/sched/sch_choke.c
+@@ -319,8 +319,6 @@ static void choke_reset(struct Qdisc *sch)
+ 		rtnl_qdisc_drop(skb, sch);
+ 	}
+ 
+-	sch->q.qlen = 0;
+-	sch->qstats.backlog = 0;
+ 	if (q->tab)
+ 		memset(q->tab, 0, (q->tab_mask + 1) * sizeof(struct sk_buff *));
+ 	q->head = q->tail = 0;
+diff --git a/net/sched/sch_drr.c b/net/sched/sch_drr.c
+index 01609025118e..abf48a316fb9 100644
+--- a/net/sched/sch_drr.c
++++ b/net/sched/sch_drr.c
+@@ -447,8 +447,6 @@ static void drr_reset_qdisc(struct Qdisc *sch)
+ 			qdisc_reset(cl->qdisc);
+ 		}
+ 	}
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+ }
+ 
+ static void drr_destroy_qdisc(struct Qdisc *sch)
+diff --git a/net/sched/sch_dsmark.c b/net/sched/sch_dsmark.c
+index 5b52f5bb93ab..baabc706ddf7 100644
+--- a/net/sched/sch_dsmark.c
++++ b/net/sched/sch_dsmark.c
+@@ -408,8 +408,6 @@ static void dsmark_reset(struct Qdisc *sch)
+ 	pr_debug("%s(sch %p,[qdisc %p])\n", __func__, sch, p);
+ 	if (p->q)
+ 		qdisc_reset(p->q);
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+ }
+ 
+ static void dsmark_destroy(struct Qdisc *sch)
+diff --git a/net/sched/sch_etf.c b/net/sched/sch_etf.c
+index c48f91075b5c..d96103b0e2bf 100644
+--- a/net/sched/sch_etf.c
++++ b/net/sched/sch_etf.c
+@@ -445,9 +445,6 @@ static void etf_reset(struct Qdisc *sch)
+ 	timesortedlist_clear(sch);
+ 	__qdisc_reset_queue(&sch->q);
+ 
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+-
+ 	q->last = 0;
+ }
+ 
+diff --git a/net/sched/sch_ets.c b/net/sched/sch_ets.c
+index 70568054d0ef..269572bbd901 100644
+--- a/net/sched/sch_ets.c
++++ b/net/sched/sch_ets.c
+@@ -731,8 +731,6 @@ static void ets_qdisc_reset(struct Qdisc *sch)
+ 	}
+ 	for (band = 0; band < q->nbands; band++)
+ 		qdisc_reset(q->classes[band].qdisc);
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+ }
+ 
+ static void ets_qdisc_destroy(struct Qdisc *sch)
+diff --git a/net/sched/sch_fq_codel.c b/net/sched/sch_fq_codel.c
+index 14a57cadb0fb..ab48b9621083 100644
+--- a/net/sched/sch_fq_codel.c
++++ b/net/sched/sch_fq_codel.c
+@@ -351,8 +351,6 @@ static void fq_codel_reset(struct Qdisc *sch)
+ 		codel_vars_init(&flow->cvars);
+ 	}
+ 	memset(q->backlogs, 0, q->flows_cnt * sizeof(u32));
+-	sch->q.qlen = 0;
+-	sch->qstats.backlog = 0;
+ 	q->memory_usage = 0;
+ }
+ 
+diff --git a/net/sched/sch_fq_pie.c b/net/sched/sch_fq_pie.c
+index 1e8b2690264d..1ed43494d9da 100644
+--- a/net/sched/sch_fq_pie.c
++++ b/net/sched/sch_fq_pie.c
+@@ -514,9 +514,6 @@ static void fq_pie_reset(struct Qdisc *sch)
+ 		INIT_LIST_HEAD(&flow->flowchain);
+ 		pie_vars_init(&flow->vars);
+ 	}
+-
+-	sch->q.qlen = 0;
+-	sch->qstats.backlog = 0;
+ }
+ 
+ static void fq_pie_destroy(struct Qdisc *sch)
+diff --git a/net/sched/sch_hfsc.c b/net/sched/sch_hfsc.c
+index 0deb453be9e8..730a2fd2ad11 100644
+--- a/net/sched/sch_hfsc.c
++++ b/net/sched/sch_hfsc.c
+@@ -1511,8 +1511,6 @@ hfsc_reset_qdisc(struct Qdisc *sch)
+ 	}
+ 	q->eligible = RB_ROOT;
+ 	qdisc_watchdog_cancel(&q->watchdog);
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+ }
+ 
+ static void
+diff --git a/net/sched/sch_htb.c b/net/sched/sch_htb.c
+index 217fe2208c7c..b5b4008509a4 100644
+--- a/net/sched/sch_htb.c
++++ b/net/sched/sch_htb.c
+@@ -977,8 +977,6 @@ static void htb_reset(struct Qdisc *sch)
+ 	}
+ 	qdisc_watchdog_cancel(&q->watchdog);
+ 	__qdisc_reset_queue(&q->direct_queue);
+-	sch->q.qlen = 0;
+-	sch->qstats.backlog = 0;
+ 	memset(q->hlevel, 0, sizeof(q->hlevel));
+ 	memset(q->row_mask, 0, sizeof(q->row_mask));
+ }
+diff --git a/net/sched/sch_multiq.c b/net/sched/sch_multiq.c
+index 56490f6fdcd1..8133a678929f 100644
+--- a/net/sched/sch_multiq.c
++++ b/net/sched/sch_multiq.c
+@@ -163,7 +163,6 @@ multiq_reset(struct Qdisc *sch)
+ 
+ 	for (band = 0; band < q->bands; band++)
+ 		qdisc_reset(q->queues[band]);
+-	sch->q.qlen = 0;
+ 	q->curband = 0;
+ }
+ 
+diff --git a/net/sched/sch_prio.c b/net/sched/sch_prio.c
+index fe5b7387f220..4ee5c4ade9bd 100644
+--- a/net/sched/sch_prio.c
++++ b/net/sched/sch_prio.c
+@@ -139,8 +139,6 @@ prio_reset(struct Qdisc *sch)
+ 
+ 	for (prio = 0; prio < q->bands; prio++)
+ 		qdisc_reset(q->queues[prio]);
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+ }
+ 
+ static int prio_offload(struct Qdisc *sch, struct tc_prio_qopt *qopt)
+diff --git a/net/sched/sch_qfq.c b/net/sched/sch_qfq.c
+index fae81a097e7c..d3e727fe8bd9 100644
+--- a/net/sched/sch_qfq.c
++++ b/net/sched/sch_qfq.c
+@@ -1487,8 +1487,6 @@ static void qfq_reset_qdisc(struct Qdisc *sch)
+ 			qdisc_reset(cl->qdisc);
+ 		}
+ 	}
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+ }
+ 
+ static void qfq_destroy_qdisc(struct Qdisc *sch)
+diff --git a/net/sched/sch_red.c b/net/sched/sch_red.c
+index 2f89d5f43a6f..5159db1da3dd 100644
+--- a/net/sched/sch_red.c
++++ b/net/sched/sch_red.c
+@@ -182,8 +182,6 @@ static void red_reset(struct Qdisc *sch)
+ 	struct red_sched_data *q = qdisc_priv(sch);
+ 
+ 	qdisc_reset(q->qdisc);
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+ 	red_restart(&q->vars);
+ }
+ 
+diff --git a/net/sched/sch_sfb.c b/net/sched/sch_sfb.c
+index 493b60871fa3..ddef74cb6ab6 100644
+--- a/net/sched/sch_sfb.c
++++ b/net/sched/sch_sfb.c
+@@ -457,8 +457,6 @@ static void sfb_reset(struct Qdisc *sch)
+ 	struct sfb_sched_data *q = qdisc_priv(sch);
+ 
+ 	qdisc_reset(q->qdisc);
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+ 	q->slot = 0;
+ 	q->double_buffering = false;
+ 	sfb_zero_all_buckets(q);
+diff --git a/net/sched/sch_skbprio.c b/net/sched/sch_skbprio.c
+index 3d9de52849bc..1d5ece3a7831 100644
+--- a/net/sched/sch_skbprio.c
++++ b/net/sched/sch_skbprio.c
+@@ -217,9 +217,6 @@ static void skbprio_reset(struct Qdisc *sch)
+ 	struct skbprio_sched_data *q = qdisc_priv(sch);
+ 	int prio;
+ 
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+-
+ 	for (prio = 0; prio < SKBPRIO_MAX_PRIORITY; prio++)
+ 		__skb_queue_purge(&q->qdiscs[prio]);
+ 
+diff --git a/net/sched/sch_taprio.c b/net/sched/sch_taprio.c
+index ab5e2eefa3ad..99be93da5b46 100644
+--- a/net/sched/sch_taprio.c
++++ b/net/sched/sch_taprio.c
+@@ -1658,8 +1658,6 @@ static void taprio_reset(struct Qdisc *sch)
+ 			if (q->qdiscs[i])
+ 				qdisc_reset(q->qdiscs[i]);
+ 	}
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+ }
+ 
+ static void taprio_destroy(struct Qdisc *sch)
+diff --git a/net/sched/sch_tbf.c b/net/sched/sch_tbf.c
+index 678862a91a8f..4054d5a87df8 100644
+--- a/net/sched/sch_tbf.c
++++ b/net/sched/sch_tbf.c
+@@ -321,8 +321,6 @@ static void tbf_reset(struct Qdisc *sch)
+ 	struct tbf_sched_data *q = qdisc_priv(sch);
+ 
+ 	qdisc_reset(q->qdisc);
+-	sch->qstats.backlog = 0;
+-	sch->q.qlen = 0;
+ 	q->t_c = ktime_get_ns();
+ 	q->tokens = q->buffer;
+ 	q->ptokens = q->mtu;
+diff --git a/net/sched/sch_teql.c b/net/sched/sch_teql.c
+index 163364124691..7c3447019de9 100644
+--- a/net/sched/sch_teql.c
++++ b/net/sched/sch_teql.c
+@@ -128,7 +128,6 @@ teql_reset(struct Qdisc *sch)
+ 	struct teql_sched_data *dat = qdisc_priv(sch);
+ 
+ 	skb_queue_purge(&dat->q);
+-	sch->q.qlen = 0;
+ }
+ 
+ static void
+-- 
+2.47.3
+

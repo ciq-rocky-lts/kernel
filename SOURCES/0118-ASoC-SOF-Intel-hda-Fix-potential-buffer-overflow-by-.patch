@@ -1,0 +1,48 @@
+From 6661e5f13f2c88b1f8b863bb69bcf27362a4c3c9 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Thu, 4 Dec 2025 15:06:50 +0100
+Subject: [PATCH] ASoC: SOF: Intel: hda: Fix potential buffer overflow by
+ snprintf()
+
+jira VULN-70503
+cve CVE-2022-50050
+commit-author Takashi Iwai <tiwai@suse.de>
+commit 94c1ceb043c1a002de9649bb630c8e8347645982
+upstream-diff |
+	Adjusted context due to missing commit
+	71778f7940f0b("ASoC: SOF: Intel: hda: Define rom_status_reg in sof_intel_dsp_desc")
+
+snprintf() returns the would-be-filled size when the string overflows
+the given buffer size, hence using this value may result in the buffer
+overflow (although it's unrealistic).
+
+This patch replaces with a safer version, scnprintf() for papering
+over such a potential issue.
+
+Fixes: 29c8e4398f02 ("ASoC: SOF: Intel: hda: add extended rom status dump to error log")
+	Signed-off-by: Takashi Iwai <tiwai@suse.de>
+Link: https://lore.kernel.org/r/20220801165420.25978-4-tiwai@suse.de
+	Signed-off-by: Mark Brown <broonie@kernel.org>
+(cherry picked from commit 94c1ceb043c1a002de9649bb630c8e8347645982)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ sound/soc/sof/intel/hda.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sound/soc/sof/intel/hda.c b/sound/soc/sof/intel/hda.c
+index 9dacb8515082..4ee804fb22da 100644
+--- a/sound/soc/sof/intel/hda.c
++++ b/sound/soc/sof/intel/hda.c
+@@ -536,7 +536,7 @@ static void hda_dsp_dump_ext_rom_status(struct snd_sof_dev *sdev, u32 flags)
+ 
+ 	for (i = 0; i < HDA_EXT_ROM_STATUS_SIZE; i++) {
+ 		value = snd_sof_dsp_read(sdev, HDA_DSP_BAR, HDA_DSP_SRAM_REG_ROM_STATUS + i * 0x4);
+-		len += snprintf(msg + len, sizeof(msg) - len, " 0x%x", value);
++		len += scnprintf(msg + len, sizeof(msg) - len, " 0x%x", value);
+ 	}
+ 
+ 	dev_err(sdev->dev, "extended rom status: %s", msg);
+-- 
+2.47.3
+

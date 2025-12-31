@@ -1,0 +1,41 @@
+From c05d38bde1fb619be388d6c7a981d0f9ede81611 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Mon, 1 Dec 2025 12:23:29 +0100
+Subject: [PATCH] Bluetooth: L2CAP: fix "bad unlock balance" in
+ l2cap_disconnect_rsp
+
+jira VULN-154997
+cve CVE-2023-53297
+commit-author Min Li <lm0963hack@gmail.com>
+commit 25e97f7b1866e6b8503be349eeea44bb52d661ce
+
+conn->chan_lock isn't acquired before l2cap_get_chan_by_scid,
+if l2cap_get_chan_by_scid returns NULL, then 'bad unlock balance'
+is triggered.
+
+	Reported-by: syzbot+9519d6b5b79cf7787cf3@syzkaller.appspotmail.com
+Link: https://lore.kernel.org/all/000000000000894f5f05f95e9f4d@google.com/
+	Signed-off-by: Min Li <lm0963hack@gmail.com>
+	Signed-off-by: Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+(cherry picked from commit 25e97f7b1866e6b8503be349eeea44bb52d661ce)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ net/bluetooth/l2cap_core.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/net/bluetooth/l2cap_core.c b/net/bluetooth/l2cap_core.c
+index 40e279d7d455..049430ade6b5 100644
+--- a/net/bluetooth/l2cap_core.c
++++ b/net/bluetooth/l2cap_core.c
+@@ -4675,7 +4675,6 @@ static inline int l2cap_disconnect_rsp(struct l2cap_conn *conn,
+ 
+ 	chan = l2cap_get_chan_by_scid(conn, scid);
+ 	if (!chan) {
+-		mutex_unlock(&conn->chan_lock);
+ 		return 0;
+ 	}
+ 
+-- 
+2.47.3
+

@@ -45,13 +45,13 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 17
+%define ciq_patch_version 18
 %define ciq_build_id 1
-%define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
-%define ciq_dist_tag .el8_6.86ciq_lts
+%define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
+%define ciq_dist_tag .el8_6_ciq
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 372.32.1%{?buildid}%{?dist}%{?ciq_patch_build_str}
+%define specrelease 372.32.1%{?buildid}%{?ciq_patch_build_str}%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -819,6 +819,36 @@ Patch0249: 0094-wifi-cfg80211-fix-use-after-free-in-cmp_bss.patch
 Patch0250: 0095-RDMA-iwcm-Fix-a-use-after-free-related-to-destroying.patch
 Patch0251: 0096-RDMA-iwcm-Fix-WARNING-at_kernel-workqueue.c-check_fl.patch
 Patch0252: 0097-RDMA-iwcm-Fix-use-after-free-of-work-objects-after-c.patch
+#CIQ Patch Version: 372.32.1+18.1.el8_6_ciq
+Patch0253: 0098-Bluetooth-L2CAP-Fix-user-after-free.patch
+Patch0254: 0099-ext4-fix-undefined-behavior-in-bit-shift-for-ext4_ch.patch
+Patch0255: 0100-wifi-mac80211-check-S1G-action-frame-size.patch
+Patch0256: 0101-ip6mr-Fix-skb_under_panic-in-ip6mr_cache_report.patch
+Patch0257: 0102-sctp-linearize-cloned-gso-packets-in-sctp_rcv.patch
+Patch0258: 0103-ALSA-usb-audio-Validate-UAC3-power-domain-descriptor.patch
+Patch0259: 0104-ALSA-hda-ca0132-Fix-buffer-overflow-in-add_tuning_co.patch
+Patch0260: 0105-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_disconne.patch
+Patch0261: 0106-Bluetooth-Fix-l2cap_disconnect_req-deadlock.patch
+Patch0262: 0107-Bluetooth-L2CAP-fix-bad-unlock-balance-in-l2cap_disc.patch
+Patch0263: 0108-net-Pass-NULL-to-skb_network_protocol-when-we-don-t-.patch
+Patch0264: 0109-net-gso-fix-panic-on-frag_list-with-mixed-head-alloc.patch
+Patch0265: 0110-skbuff-skb_segment-Call-zero-copy-functions-before-u.patch
+Patch0266: 0111-wifi-mwifiex-Fix-OOB-and-integer-underflow-when-rx-p.patch
+Patch0267: 0112-wifi-mwifiex-Fix-missed-return-in-oob-checks-failed-.patch
+Patch0268: 0113-wifi-mwifiex-Fix-oob-check-condition-in-mwifiex_proc.patch
+Patch0269: 0114-do_change_type-refuse-to-operate-on-unmounted-not-ou.patch
+Patch0270: 0115-move_mount-allow-to-add-a-mount-into-an-existing-gro.patch
+Patch0271: 0116-fix-propagation-graph-breakage-by-MOVE_MOUNT_SET_GRO.patch
+Patch0272: 0117-use-uniform-permission-checks-for-all-mount-propagat.patch
+Patch0273: 0118-ASoC-SOF-Intel-hda-Fix-potential-buffer-overflow-by-.patch
+Patch0274: 0119-ALSA-usb-audio-Validate-UAC3-cluster-segment-descrip.patch
+Patch0275: 0120-ALSA-usb-audio-Fix-size-validation-in-convert_chmap_.patch
+Patch0276: 0121-net-sched-delete-duplicate-cleanup-of-backlog-and-ql.patch
+Patch0277: 0122-net-sched-sfb-fix-null-pointer-access-issue-when-sfb.patch
+Patch0278: 0123-scsi-lpfc-Terminate-string-in-lpfc_debugfs_nvmeio_tr.patch
+Patch0279: 0124-scsi-lpfc-Prevent-buffer-overflow-crashes-in-debugfs.patch
+Patch0280: 0125-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
+Patch0281: 0126-firmware-arm_scpi-Ensure-scpi_info-is-not-assigned-i.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1638,6 +1668,35 @@ ApplyOptionalPatch 0094-wifi-cfg80211-fix-use-after-free-in-cmp_bss.patch
 ApplyOptionalPatch 0095-RDMA-iwcm-Fix-a-use-after-free-related-to-destroying.patch
 ApplyOptionalPatch 0096-RDMA-iwcm-Fix-WARNING-at_kernel-workqueue.c-check_fl.patch
 ApplyOptionalPatch 0097-RDMA-iwcm-Fix-use-after-free-of-work-objects-after-c.patch
+ApplyOptionalPatch 0098-Bluetooth-L2CAP-Fix-user-after-free.patch
+ApplyOptionalPatch 0099-ext4-fix-undefined-behavior-in-bit-shift-for-ext4_ch.patch
+ApplyOptionalPatch 0100-wifi-mac80211-check-S1G-action-frame-size.patch
+ApplyOptionalPatch 0101-ip6mr-Fix-skb_under_panic-in-ip6mr_cache_report.patch
+ApplyOptionalPatch 0102-sctp-linearize-cloned-gso-packets-in-sctp_rcv.patch
+ApplyOptionalPatch 0103-ALSA-usb-audio-Validate-UAC3-power-domain-descriptor.patch
+ApplyOptionalPatch 0104-ALSA-hda-ca0132-Fix-buffer-overflow-in-add_tuning_co.patch
+ApplyOptionalPatch 0105-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_disconne.patch
+ApplyOptionalPatch 0106-Bluetooth-Fix-l2cap_disconnect_req-deadlock.patch
+ApplyOptionalPatch 0107-Bluetooth-L2CAP-fix-bad-unlock-balance-in-l2cap_disc.patch
+ApplyOptionalPatch 0108-net-Pass-NULL-to-skb_network_protocol-when-we-don-t-.patch
+ApplyOptionalPatch 0109-net-gso-fix-panic-on-frag_list-with-mixed-head-alloc.patch
+ApplyOptionalPatch 0110-skbuff-skb_segment-Call-zero-copy-functions-before-u.patch
+ApplyOptionalPatch 0111-wifi-mwifiex-Fix-OOB-and-integer-underflow-when-rx-p.patch
+ApplyOptionalPatch 0112-wifi-mwifiex-Fix-missed-return-in-oob-checks-failed-.patch
+ApplyOptionalPatch 0113-wifi-mwifiex-Fix-oob-check-condition-in-mwifiex_proc.patch
+ApplyOptionalPatch 0114-do_change_type-refuse-to-operate-on-unmounted-not-ou.patch
+ApplyOptionalPatch 0115-move_mount-allow-to-add-a-mount-into-an-existing-gro.patch
+ApplyOptionalPatch 0116-fix-propagation-graph-breakage-by-MOVE_MOUNT_SET_GRO.patch
+ApplyOptionalPatch 0117-use-uniform-permission-checks-for-all-mount-propagat.patch
+ApplyOptionalPatch 0118-ASoC-SOF-Intel-hda-Fix-potential-buffer-overflow-by-.patch
+ApplyOptionalPatch 0119-ALSA-usb-audio-Validate-UAC3-cluster-segment-descrip.patch
+ApplyOptionalPatch 0120-ALSA-usb-audio-Fix-size-validation-in-convert_chmap_.patch
+ApplyOptionalPatch 0121-net-sched-delete-duplicate-cleanup-of-backlog-and-ql.patch
+ApplyOptionalPatch 0122-net-sched-sfb-fix-null-pointer-access-issue-when-sfb.patch
+ApplyOptionalPatch 0123-scsi-lpfc-Terminate-string-in-lpfc_debugfs_nvmeio_tr.patch
+ApplyOptionalPatch 0124-scsi-lpfc-Prevent-buffer-overflow-crashes-in-debugfs.patch
+ApplyOptionalPatch 0125-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
+ApplyOptionalPatch 0126-firmware-arm_scpi-Ensure-scpi_info-is-not-assigned-i.patch
 
 
 # CIQ LTS patches:
@@ -3197,6 +3256,40 @@ fi
 #
 #
 %changelog
+* Tue Dec 23 2025 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1+18.1.el8_6_ciq
+- firmware: arm_scpi: Ensure scpi_info is not assigned if the probe fails (Roxana Nicolescu) [ciqres] {CVE-2022-50087}
+- fs: fix UAF/GPF bug in nilfs_mdt_destroy (Roxana Nicolescu) [ciqres] {CVE-2022-50367}
+- scsi: lpfc: Prevent buffer overflow crashes in debugfs with malformed user input (Roxana Nicolescu) [ciqres] {CVE-2022-50030}
+- scsi: lpfc: Terminate string in lpfc_debugfs_nvmeio_trc_write() (Roxana Nicolescu) [ciqres] {CVE-2022-50030}
+- net: sched: sfb: fix null pointer access issue when sfb_init() fails (Roxana Nicolescu) [ciqres] {CVE-2022-50356}
+- net: sched: delete duplicate cleanup of backlog and qlen (Roxana Nicolescu) [ciqres] {CVE-2022-50356}
+- ALSA: usb-audio: Fix size validation in convert_chmap_v3() (Roxana Nicolescu) [ciqres] {CVE-2025-39757}
+- ALSA: usb-audio: Validate UAC3 cluster segment descriptors (Roxana Nicolescu) [ciqres] {CVE-2025-39757}
+- ASoC: SOF: Intel: hda: Fix potential buffer overflow by snprintf() (Roxana Nicolescu) [ciqres] {CVE-2022-50050}
+- use uniform permission checks for all mount propagation changes (Roxana Nicolescu) [ciqres] {CVE-2025-38498}
+- fix propagation graph breakage by MOVE_MOUNT_SET_GROUP move_mount(2) (Roxana Nicolescu) [ciqres] {CVE-2025-38498}
+- move_mount: allow to add a mount into an existing group (Roxana Nicolescu) [ciqres] {CVE-2025-38498}
+- do_change_type(): refuse to operate on unmounted/not ours mounts (Roxana Nicolescu) [ciqres] {CVE-2025-38498}
+- wifi: mwifiex: Fix oob check condition in mwifiex_process_rx_packet (Roxana Nicolescu) [ciqres] {CVE-2023-52525}
+- wifi: mwifiex: Fix missed return in oob checks failed path (Roxana Nicolescu) [ciqres] {CVE-2023-53226}
+- wifi: mwifiex: Fix OOB and integer underflow when rx packets (Roxana Nicolescu) [ciqres] {CVE-2023-53226}
+- skbuff: skb_segment, Call zero copy functions before using skbuff frags (Roxana Nicolescu) [ciqres] {CVE-2023-53354}
+- net: gso: fix panic on frag_list with mixed head alloc types (Roxana Nicolescu) [ciqres] {CVE-2022-49872}
+- net: Pass NULL to skb_network_protocol() when we don't care about vlan depth (Roxana Nicolescu) [ciqres] {CVE-2022-49872}
+- Bluetooth: L2CAP: fix "bad unlock balance" in l2cap_disconnect_rsp (Roxana Nicolescu) [ciqres] {CVE-2023-53297}
+- Bluetooth: Fix l2cap_disconnect_req deadlock (Roxana Nicolescu) [ciqres] {CVE-2023-53297}
+- Bluetooth: L2CAP: Fix use-after-free in l2cap_disconnect_{req,rsp} (Roxana Nicolescu) [ciqres] {CVE-2023-53297}
+- ALSA: hda/ca0132: Fix buffer overflow in add_tuning_control (Roxana Nicolescu) [ciqres] {CVE-2025-39751}
+- ALSA: usb-audio: Validate UAC3 power domain descriptors, too (Roxana Nicolescu) [ciqres] {CVE-2025-38729}
+- sctp: linearize cloned gso packets in sctp_rcv (Roxana Nicolescu) [ciqres] {CVE-2025-38718}
+- ip6mr: Fix skb_under_panic in ip6mr_cache_report() (Roxana Nicolescu) [ciqres] {CVE-2023-53365}
+- wifi: mac80211: check S1G action frame size (Roxana Nicolescu) [ciqres] {CVE-2023-53257}
+- ext4: fix undefined behavior in bit shift for ext4_check_flag_values (Roxana Nicolescu) [ciqres] {CVE-2022-50403}
+- Bluetooth: L2CAP: Fix user-after-free (Roxana Nicolescu) [ciqres] {CVE-2022-50386}
+
+* Tue Dec 02 2025 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+17.2.el8_6_ciq
+- Make NVR kernel to reflect other CIQ kernel NVR transformation. (Brett Mastbergen)
+
 * Thu Nov 20 2025 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1.el8_6.86ciq_lts.17.1
 - RDMA/iwcm: Fix use-after-free of work objects after cm_id destruction (Roxana Nicolescu) [ciqres] {CVE-2025-38211}
 - RDMA/iwcm: Fix WARNING:at_kernel/workqueue.c:#check_flush_dependency (Roxana Nicolescu) [ciqres] {CVE-2024-47696}
