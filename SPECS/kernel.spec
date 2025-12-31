@@ -170,15 +170,15 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 11
-%define ciq_build_id 2
-%define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
-%define ciq_dist_tag .el9_4.94ciq_lts
+%define ciq_patch_version 12
+%define ciq_build_id 1
+%define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
+%define ciq_dist_tag .el9_4_ciq
 
 # This is needed to do merge window version magic
 %define patchlevel 14
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 427.42.1%{?buildid}%{?dist}%{?ciq_patch_build_str}
+%define specrelease 427.42.1%{?buildid}%{?ciq_patch_build_str}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 5.14.0-427.42.1.el9_4
 
@@ -1086,6 +1086,31 @@ Patch1000085: 0065-fix-propagation-graph-breakage-by-MOVE_MOUNT_SET_GRO.patch
 Patch1000086: 0066-use-uniform-permission-checks-for-all-mount-propagat.patch
 Patch1000087: 0067-drm-gem-Acquire-references-on-GEM-handles-for-frameb.patch
 Patch1000088: 0068-drm-framebuffer-Acquire-internal-references-on-GEM-h.patch
+#CIQ Patch Version: 427.42.1+12.1.el9_4_ciq
+Patch1000089: 0069-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
+Patch1000090: 0070-pstore-ram-Check-start-of-empty-przs-during-init.patch
+Patch1000091: 0071-crypto-seqiv-Handle-EBUSY-correctly.patch
+Patch1000092: 0072-mm-kmem-fix-a-NULL-pointer-dereference-in-obj_stock_.patch
+Patch1000093: 0073-tcp-dccp-Don-t-use-timer_pending-in-reqsk_queue_unli.patch
+Patch1000094: 0074-tcp-Fix-use-after-free-of-nreq-in-reqsk_timer_handle.patch
+Patch1000095: 0075-smb-client-fix-use-after-free-in-cifs_oplock_break.patch
+Patch1000096: 0076-ipv6-mcast-Delay-put-pmc-idev-in-mld_del_delrec.patch
+Patch1000097: 0077-vsock-virtio-Validate-length-in-packet-header-before.patch
+Patch1000098: 0078-NFS-Fix-filehandle-bounds-checking-in-nfs_fh_to_dent.patch
+Patch1000099: 0079-vsock-reset-socket-state-when-de-assigning-the-trans.patch
+Patch1000100: 0080-vsock-fix-lock-inversion-in-vsock_assign_transport.patch
+Patch1000101: 0081-RDMA-iwcm-Fix-a-use-after-free-related-to-destroying.patch
+Patch1000102: 0082-RDMA-iwcm-Fix-WARNING-at_kernel-workqueue.c-check_fl.patch
+Patch1000103: 0083-RDMA-iwcm-Fix-use-after-free-of-work-objects-after-c.patch
+Patch1000104: 0084-crypto-xts-Handle-EBUSY-correctly.patch
+Patch1000105: 0085-sctp-linearize-cloned-gso-packets-in-sctp_rcv.patch
+Patch1000106: 0086-ALSA-usb-audio-Validate-UAC3-power-domain-descriptor.patch
+Patch1000107: 0087-ALSA-hda-ca0132-Fix-buffer-overflow-in-add_tuning_co.patch
+Patch1000108: 0088-ALSA-usb-audio-Validate-UAC3-cluster-segment-descrip.patch
+Patch1000109: 0089-ALSA-usb-audio-Fix-size-validation-in-convert_chmap_.patch
+Patch1000110: 0090-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
+Patch1000111: 0091-wifi-cfg80211-sme-cap-SSID-length-in-__cfg80211_conn.patch
+Patch1000112: 0092-ipv6-sr-Fix-MAC-comparison-to-be-constant-time.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1927,6 +1952,30 @@ ApplyOptionalPatch 0065-fix-propagation-graph-breakage-by-MOVE_MOUNT_SET_GRO.pat
 ApplyOptionalPatch 0066-use-uniform-permission-checks-for-all-mount-propagat.patch
 ApplyOptionalPatch 0067-drm-gem-Acquire-references-on-GEM-handles-for-frameb.patch
 ApplyOptionalPatch 0068-drm-framebuffer-Acquire-internal-references-on-GEM-h.patch
+ApplyOptionalPatch 0069-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
+ApplyOptionalPatch 0070-pstore-ram-Check-start-of-empty-przs-during-init.patch
+ApplyOptionalPatch 0071-crypto-seqiv-Handle-EBUSY-correctly.patch
+ApplyOptionalPatch 0072-mm-kmem-fix-a-NULL-pointer-dereference-in-obj_stock_.patch
+ApplyOptionalPatch 0073-tcp-dccp-Don-t-use-timer_pending-in-reqsk_queue_unli.patch
+ApplyOptionalPatch 0074-tcp-Fix-use-after-free-of-nreq-in-reqsk_timer_handle.patch
+ApplyOptionalPatch 0075-smb-client-fix-use-after-free-in-cifs_oplock_break.patch
+ApplyOptionalPatch 0076-ipv6-mcast-Delay-put-pmc-idev-in-mld_del_delrec.patch
+ApplyOptionalPatch 0077-vsock-virtio-Validate-length-in-packet-header-before.patch
+ApplyOptionalPatch 0078-NFS-Fix-filehandle-bounds-checking-in-nfs_fh_to_dent.patch
+ApplyOptionalPatch 0079-vsock-reset-socket-state-when-de-assigning-the-trans.patch
+ApplyOptionalPatch 0080-vsock-fix-lock-inversion-in-vsock_assign_transport.patch
+ApplyOptionalPatch 0081-RDMA-iwcm-Fix-a-use-after-free-related-to-destroying.patch
+ApplyOptionalPatch 0082-RDMA-iwcm-Fix-WARNING-at_kernel-workqueue.c-check_fl.patch
+ApplyOptionalPatch 0083-RDMA-iwcm-Fix-use-after-free-of-work-objects-after-c.patch
+ApplyOptionalPatch 0084-crypto-xts-Handle-EBUSY-correctly.patch
+ApplyOptionalPatch 0085-sctp-linearize-cloned-gso-packets-in-sctp_rcv.patch
+ApplyOptionalPatch 0086-ALSA-usb-audio-Validate-UAC3-power-domain-descriptor.patch
+ApplyOptionalPatch 0087-ALSA-hda-ca0132-Fix-buffer-overflow-in-add_tuning_co.patch
+ApplyOptionalPatch 0088-ALSA-usb-audio-Validate-UAC3-cluster-segment-descrip.patch
+ApplyOptionalPatch 0089-ALSA-usb-audio-Fix-size-validation-in-convert_chmap_.patch
+ApplyOptionalPatch 0090-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
+ApplyOptionalPatch 0091-wifi-cfg80211-sme-cap-SSID-length-in-__cfg80211_conn.patch
+ApplyOptionalPatch 0092-ipv6-sr-Fix-MAC-comparison-to-be-constant-time.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4004,6 +4053,35 @@ fi
 #
 #
 %changelog
+* Tue Dec 09 2025 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-427.42.1+12.1.el9_4_ciq
+- ipv6: sr: Fix MAC comparison to be constant-time (Roxana Nicolescu) [ciqres] {CVE-2025-39702}
+- wifi: cfg80211: sme: cap SSID length in __cfg80211_connect_result() (Roxana Nicolescu) [ciqres] {CVE-2025-39849}
+- efivarfs: Fix slab-out-of-bounds in efivarfs_d_compare (Roxana Nicolescu) [ciqres] {CVE-2025-39817}
+- ALSA: usb-audio: Fix size validation in convert_chmap_v3() (Roxana Nicolescu) [ciqres] {CVE-2025-39757}
+- ALSA: usb-audio: Validate UAC3 cluster segment descriptors (Roxana Nicolescu) [ciqres] {CVE-2025-39757}
+- ALSA: hda/ca0132: Fix buffer overflow in add_tuning_control (Roxana Nicolescu) [ciqres] {CVE-2025-39751}
+- ALSA: usb-audio: Validate UAC3 power domain descriptors, too (Roxana Nicolescu) [ciqres] {CVE-2025-38729}
+- sctp: linearize cloned gso packets in sctp_rcv (Roxana Nicolescu) [ciqres] {CVE-2025-38718}
+- crypto: xts - Handle EBUSY correctly (Roxana Nicolescu) [ciqres] {CVE-2023-53494}
+- RDMA/iwcm: Fix use-after-free of work objects after cm_id destruction (Roxana Nicolescu) [ciqres] {CVE-2025-38211}
+- RDMA/iwcm: Fix WARNING:at_kernel/workqueue.c:#check_flush_dependency (Roxana Nicolescu) [ciqres] {CVE-2024-47696}
+- RDMA/iwcm: Fix a use-after-free related to destroying CM IDs (Roxana Nicolescu) [ciqres] {CVE-2024-42285}
+- vsock: fix lock inversion in vsock_assign_transport() (Roxana Nicolescu) [ciqres] {CVE-2025-38461}
+- vsock: reset socket state when de-assigning the transport (Roxana Nicolescu) [ciqres] {CVE-2025-38461}
+- NFS: Fix filehandle bounds checking in nfs_fh_to_dentry() (Shreeya Patel) [ciqres] {CVE-2025-39730}
+- vsock/virtio: Validate length in packet header before skb_put() (Shreeya Patel) [ciqres] {CVE-2025-39718}
+- ipv6: mcast: Delay put pmc->idev in mld_del_delrec() (Shreeya Patel) [ciqres] {CVE-2025-38550}
+- smb: client: fix use-after-free in cifs_oplock_break (Shreeya Patel) [ciqres] {CVE-2025-38527}
+- tcp: Fix use-after-free of nreq in reqsk_timer_handler(). (Shreeya Patel) [ciqres] {CVE-2024-53206}
+- tcp/dccp: Don't use timer_pending() in reqsk_queue_unlink(). (Shreeya Patel) [ciqres] {CVE-2024-50154}
+- mm: kmem: fix a NULL pointer dereference in obj_stock_flush_required() (Shreeya Patel) [ciqres] {CVE-2023-53401}
+- crypto: seqiv - Handle EBUSY correctly (Shreeya Patel) [ciqres] {CVE-2023-53373}
+- pstore/ram: Check start of empty przs during init (Shreeya Patel) [ciqres] {CVE-2023-53331}
+- fs: fix UAF/GPF bug in nilfs_mdt_destroy (Shreeya Patel) [ciqres] {CVE-2022-50367}
+
+* Tue Dec 02 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+11.3.el9_4_ciq
+- Make NVR kernel to reflect other CIQ kernel NVR transformation. (Brett Mastbergen)
+
 * Mon Nov 17 2025 Michael L. Young <myoung@ciq.com> - 5.14.0-427.42.1.el9_4.94ciq_lts.11.2
 - Update the signer information used to create the kernel module signing key when building (Michael L. Young)
 

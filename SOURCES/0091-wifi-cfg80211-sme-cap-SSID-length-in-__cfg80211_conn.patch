@@ -1,0 +1,58 @@
+From e301bcb1968f79e07fc26fee7bb7a744e9162bde Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Wed, 3 Dec 2025 14:52:17 +0100
+Subject: [PATCH] wifi: cfg80211: sme: cap SSID length in
+ __cfg80211_connect_result()
+
+jira VULN-156052
+cve CVE-2025-39849
+commit-author Dan Carpenter <dan.carpenter@linaro.org>
+commit 62b635dcd69c4fde7ce1de4992d71420a37e51e3
+upstream-diff |
+	Had to change the call from min to min_t due to type checking failure.
+	This kernel is missing multiple improvements done in min, including
+	the removal of type checking done in commit
+	dc1c8034e31b1("minmax: simplify min()/max()/clamp() implementation").
+	This was not backported because it required other changes as well,
+	including making sure that all C constant expression context that use
+	min() or max() had to be converted.
+
+If the ssid->datalen is more than IEEE80211_MAX_SSID_LEN (32) it would
+lead to memory corruption so add some bounds checking.
+
+Fixes: c38c70185101 ("wifi: cfg80211: Set SSID if it is not already set")
+	Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+Link: https://patch.msgid.link/0aaaae4a3ed37c6252363c34ae4904b1604e8e32.1756456951.git.dan.carpenter@linaro.org
+	Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+(cherry picked from commit 62b635dcd69c4fde7ce1de4992d71420a37e51e3)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ net/wireless/sme.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/net/wireless/sme.c b/net/wireless/sme.c
+index acfe66da7109..12bf3e18fb0d 100644
+--- a/net/wireless/sme.c
++++ b/net/wireless/sme.c
+@@ -900,13 +900,16 @@ void __cfg80211_connect_result(struct net_device *dev,
+ 	if (!wdev->u.client.ssid_len) {
+ 		rcu_read_lock();
+ 		for_each_valid_link(cr, link) {
++			u32 ssid_len;
++
+ 			ssid = ieee80211_bss_get_elem(cr->links[link].bss,
+ 						      WLAN_EID_SSID);
+ 
+ 			if (!ssid || !ssid->datalen)
+ 				continue;
+ 
+-			memcpy(wdev->u.client.ssid, ssid->data, ssid->datalen);
++			ssid_len = min_t(u32, ssid->datalen, IEEE80211_MAX_SSID_LEN);
++			memcpy(wdev->u.client.ssid, ssid->data, ssid_len);
+ 			wdev->u.client.ssid_len = ssid->datalen;
+ 			break;
+ 		}
+-- 
+2.47.3
+

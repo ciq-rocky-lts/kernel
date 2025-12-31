@@ -1,0 +1,54 @@
+From de489b95f51379f6c2779c942a53c7b3f449240d Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Tue, 11 Nov 2025 15:18:34 +0100
+Subject: [PATCH] vsock: reset socket state when de-assigning the transport
+
+jira VULN-80685
+cve-bf CVE-2025-38461
+commit-author Stefano Garzarella <sgarzare@redhat.com>
+commit a24009bc9be60242651a21702609381b5092459e
+
+Transport's release() and destruct() are called when de-assigning the
+vsock transport. These callbacks can touch some socket state like
+sock flags, sk_state, and peer_shutdown.
+
+Since we are reassigning the socket to a new transport during
+vsock_connect(), let's reset these fields to have a clean state with
+the new transport.
+
+Fixes: c0cfa2d8a788 ("vsock: add multi-transports support")
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Stefano Garzarella <sgarzare@redhat.com>
+	Reviewed-by: Luigi Leonardi <leonardi@redhat.com>
+	Signed-off-by: Paolo Abeni <pabeni@redhat.com>
+
+(cherry picked from commit a24009bc9be60242651a21702609381b5092459e)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ net/vmw_vsock/af_vsock.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/net/vmw_vsock/af_vsock.c b/net/vmw_vsock/af_vsock.c
+index f60b3670490d..345a5888152a 100644
+--- a/net/vmw_vsock/af_vsock.c
++++ b/net/vmw_vsock/af_vsock.c
+@@ -498,6 +498,15 @@ int vsock_assign_transport(struct vsock_sock *vsk, struct vsock_sock *psk)
+ 		 */
+ 		vsk->transport->release(vsk);
+ 		vsock_deassign_transport(vsk);
++
++		/* transport's release() and destruct() can touch some socket
++		 * state, since we are reassigning the socket to a new transport
++		 * during vsock_connect(), let's reset these fields to have a
++		 * clean state.
++		 */
++		sock_reset_flag(sk, SOCK_DONE);
++		sk->sk_state = TCP_CLOSE;
++		vsk->peer_shutdown = 0;
+ 	}
+ 
+ 	/* We increase the module refcnt to prevent the transport unloading
+-- 
+2.47.3
+

@@ -1,0 +1,52 @@
+From 1498d8255345802edc8fdb5bb5fe9f529d50a156 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Wed, 3 Dec 2025 14:49:41 +0100
+Subject: [PATCH] ipv6: sr: Fix MAC comparison to be constant-time
+
+jira VULN-136545
+cve CVE-2025-39702
+commit-author Eric Biggers <ebiggers@kernel.org>
+commit a458b2902115b26a25d67393b12ddd57d1216aaa
+upstream-diff |
+	Use crypto/algahi.h instead of crypto/utils.h
+
+To prevent timing attacks, MACs need to be compared in constant time.
+Use the appropriate helper function for this.
+
+Fixes: bf355b8d2c30 ("ipv6: sr: add core files for SR HMAC support")
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Eric Biggers <ebiggers@kernel.org>
+	Reviewed-by: Andrea Mayer <andrea.mayer@uniroma2.it>
+Link: https://patch.msgid.link/20250818202724.15713-1-ebiggers@kernel.org
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit a458b2902115b26a25d67393b12ddd57d1216aaa)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ net/ipv6/seg6_hmac.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/net/ipv6/seg6_hmac.c b/net/ipv6/seg6_hmac.c
+index 3c3800223e0e..e21ccb2863c9 100644
+--- a/net/ipv6/seg6_hmac.c
++++ b/net/ipv6/seg6_hmac.c
+@@ -34,6 +34,7 @@
+ #include <net/addrconf.h>
+ #include <net/xfrm.h>
+ 
++#include <crypto/algapi.h>
+ #include <crypto/hash.h>
+ #include <net/seg6.h>
+ #include <net/genetlink.h>
+@@ -269,7 +270,7 @@ bool seg6_hmac_validate_skb(struct sk_buff *skb)
+ 	if (seg6_hmac_compute(hinfo, srh, &ipv6_hdr(skb)->saddr, hmac_output))
+ 		return false;
+ 
+-	if (memcmp(hmac_output, tlv->hmac, SEG6_HMAC_FIELD_LEN) != 0)
++	if (crypto_memneq(hmac_output, tlv->hmac, SEG6_HMAC_FIELD_LEN))
+ 		return false;
+ 
+ 	return true;
+-- 
+2.47.3
+
