@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 10
+%define ciq_patch_version 11
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -567,6 +567,13 @@ Patch1050: 0024-ext4-avoid-resizing-to-a-partial-cluster-size.patch
 Patch1051: 0025-sched-Avoid-dereferencing-skb-pointer-after-child-en.patch
 Patch1052: 0026-sch_hfsc-Fix-qlen-accounting-bug-when-using-peek-in-.patch
 Patch1053: 0027-net-sched-Always-pass-notifications-when-child-class.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.11.1
+Patch1054: 0028-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-hand.patch
+Patch1055: 0029-ALSA-hda-ca0132-Fix-buffer-overflow-in-add_tuning_co.patch
+Patch1056: 0030-crypto-seqiv-Handle-EBUSY-correctly.patch
+Patch1057: 0031-HID-core-detect-and-skip-invalid-inputs-to-snto32.patch
+Patch1058: 0032-HID-core-fix-shift-out-of-bounds-in-hid_report_raw_e.patch
+Patch1059: 0033-HID-core-Harden-s32ton-against-conversion-to-0-bits.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -963,6 +970,12 @@ ApplyOptionalPatch 0024-ext4-avoid-resizing-to-a-partial-cluster-size.patch
 ApplyOptionalPatch 0025-sched-Avoid-dereferencing-skb-pointer-after-child-en.patch
 ApplyOptionalPatch 0026-sch_hfsc-Fix-qlen-accounting-bug-when-using-peek-in-.patch
 ApplyOptionalPatch 0027-net-sched-Always-pass-notifications-when-child-class.patch
+ApplyOptionalPatch 0028-net_sched-hfsc-Fix-a-UAF-vulnerability-in-class-hand.patch
+ApplyOptionalPatch 0029-ALSA-hda-ca0132-Fix-buffer-overflow-in-add_tuning_co.patch
+ApplyOptionalPatch 0030-crypto-seqiv-Handle-EBUSY-correctly.patch
+ApplyOptionalPatch 0031-HID-core-detect-and-skip-invalid-inputs-to-snto32.patch
+ApplyOptionalPatch 0032-HID-core-fix-shift-out-of-bounds-in-hid_report_raw_e.patch
+ApplyOptionalPatch 0033-HID-core-Harden-s32ton-against-conversion-to-0-bits.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -1966,6 +1979,14 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Thu Dec 11 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.11.1
+- HID: core: Harden s32ton() against conversion to 0 bits (Brett Mastbergen) [ciqres] {CVE-2025-38556}
+- HID: core: fix shift-out-of-bounds in hid_report_raw_event (Brett Mastbergen) [ciqres] {CVE-2022-48978}
+- HID: core: detect and skip invalid inputs to snto32() (Brett Mastbergen) [ciqres] {CVE-2022-48978}
+- crypto: seqiv - Handle EBUSY correctly (Brett Mastbergen) [ciqres] {CVE-2023-53373}
+- ALSA: hda/ca0132: Fix buffer overflow in add_tuning_control (Brett Mastbergen) [ciqres] {CVE-2025-39751}
+- net_sched: hfsc: Fix a UAF vulnerability in class handling (Brett Mastbergen) [ciqres] {CVE-2025-37797}
+
 * Wed Nov 19 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.10.1
 - net/sched: Always pass notifications when child class becomes empty (Brett Mastbergen) [ciqres] {CVE-2025-38350}
 - sch_hfsc: Fix qlen accounting bug when using peek in hfsc_enqueue() (Brett Mastbergen) [ciqres] {CVE-2025-38000}
