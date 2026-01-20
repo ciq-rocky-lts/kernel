@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 11
+%define ciq_patch_version 12
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -574,6 +574,27 @@ Patch1056: 0030-crypto-seqiv-Handle-EBUSY-correctly.patch
 Patch1057: 0031-HID-core-detect-and-skip-invalid-inputs-to-snto32.patch
 Patch1058: 0032-HID-core-fix-shift-out-of-bounds-in-hid_report_raw_e.patch
 Patch1059: 0033-HID-core-Harden-s32ton-against-conversion-to-0-bits.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.12.1
+Patch1060: 0034-Bluetooth-L2CAP-Fix-use-after-free-caused-by-l2cap_c.patch
+Patch1061: 0035-Bluetooth-L2CAP-Fix-l2cap_global_chan_by_psm-regress.patch
+Patch1062: 0036-Bluetooth-L2CAP-Fix-build-errors-in-some-archs.patch
+Patch1063: 0037-Bluetooth-L2CAP-Fix-user-after-free.patch
+Patch1064: 0038-Bluetooth-L2CAP-fix-use-after-free-in-l2cap_conn_del.patch
+Patch1065: 0039-Bluetooth-L2CAP-Fix-use-after-free.patch
+Patch1066: 0040-wifi-brcmfmac-fix-use-after-free-bug-in-brcmf_netdev.patch
+Patch1067: 0041-ip6mr-Fix-skb_under_panic-in-ip6mr_cache_report.patch
+Patch1068: 0042-ext4-fix-undefined-behavior-in-bit-shift-for-ext4_ch.patch
+Patch1069: 0043-scsi-qla2xxx-Wait-for-io-return-on-terminate-rport.patch
+Patch1070: 0044-ALSA-usb-audio-Validate-UAC3-power-domain-descriptor.patch
+Patch1071: 0045-ALSA-usb-audio-Validate-UAC3-cluster-segment-descrip.patch
+Patch1072: 0046-ALSA-usb-audio-Fix-size-validation-in-convert_chmap_.patch
+Patch1073: 0047-Bluetooth-Check-state-in-l2cap_disconnect_rsp.patch
+Patch1074: 0048-Bluetooth-Fix-refcount-use-after-free-issue.patch
+Patch1075: 0049-Bluetooth-prefetch-channel-before-killing-sock.patch
+Patch1076: 0050-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_disconne.patch
+Patch1077: 0051-Bluetooth-Fix-l2cap_disconnect_req-deadlock.patch
+Patch1078: 0052-Bluetooth-L2CAP-fix-bad-unlock-balance-in-l2cap_disc.patch
+Patch1079: 0053-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -976,6 +997,26 @@ ApplyOptionalPatch 0030-crypto-seqiv-Handle-EBUSY-correctly.patch
 ApplyOptionalPatch 0031-HID-core-detect-and-skip-invalid-inputs-to-snto32.patch
 ApplyOptionalPatch 0032-HID-core-fix-shift-out-of-bounds-in-hid_report_raw_e.patch
 ApplyOptionalPatch 0033-HID-core-Harden-s32ton-against-conversion-to-0-bits.patch
+ApplyOptionalPatch 0034-Bluetooth-L2CAP-Fix-use-after-free-caused-by-l2cap_c.patch
+ApplyOptionalPatch 0035-Bluetooth-L2CAP-Fix-l2cap_global_chan_by_psm-regress.patch
+ApplyOptionalPatch 0036-Bluetooth-L2CAP-Fix-build-errors-in-some-archs.patch
+ApplyOptionalPatch 0037-Bluetooth-L2CAP-Fix-user-after-free.patch
+ApplyOptionalPatch 0038-Bluetooth-L2CAP-fix-use-after-free-in-l2cap_conn_del.patch
+ApplyOptionalPatch 0039-Bluetooth-L2CAP-Fix-use-after-free.patch
+ApplyOptionalPatch 0040-wifi-brcmfmac-fix-use-after-free-bug-in-brcmf_netdev.patch
+ApplyOptionalPatch 0041-ip6mr-Fix-skb_under_panic-in-ip6mr_cache_report.patch
+ApplyOptionalPatch 0042-ext4-fix-undefined-behavior-in-bit-shift-for-ext4_ch.patch
+ApplyOptionalPatch 0043-scsi-qla2xxx-Wait-for-io-return-on-terminate-rport.patch
+ApplyOptionalPatch 0044-ALSA-usb-audio-Validate-UAC3-power-domain-descriptor.patch
+ApplyOptionalPatch 0045-ALSA-usb-audio-Validate-UAC3-cluster-segment-descrip.patch
+ApplyOptionalPatch 0046-ALSA-usb-audio-Fix-size-validation-in-convert_chmap_.patch
+ApplyOptionalPatch 0047-Bluetooth-Check-state-in-l2cap_disconnect_rsp.patch
+ApplyOptionalPatch 0048-Bluetooth-Fix-refcount-use-after-free-issue.patch
+ApplyOptionalPatch 0049-Bluetooth-prefetch-channel-before-killing-sock.patch
+ApplyOptionalPatch 0050-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_disconne.patch
+ApplyOptionalPatch 0051-Bluetooth-Fix-l2cap_disconnect_req-deadlock.patch
+ApplyOptionalPatch 0052-Bluetooth-L2CAP-fix-bad-unlock-balance-in-l2cap_disc.patch
+ApplyOptionalPatch 0053-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -1979,6 +2020,28 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Mon Jan 05 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.12.1
+- fs: fix UAF/GPF bug in nilfs_mdt_destroy (Brett Mastbergen) [ciqres] {CVE-2022-50367}
+- Bluetooth: L2CAP: fix "bad unlock balance" in l2cap_disconnect_rsp (Brett Mastbergen) [ciqres] {CVE-2023-53297}
+- Bluetooth: Fix l2cap_disconnect_req deadlock (Brett Mastbergen) [ciqres] {CVE-2023-53297}
+- Bluetooth: L2CAP: Fix use-after-free in l2cap_disconnect_{req,rsp} (Brett Mastbergen) [ciqres] {CVE-2023-53827}
+- Bluetooth: prefetch channel before killing sock (Brett Mastbergen) [ciqres] {CVE-2023-53297}
+- Bluetooth: Fix refcount use-after-free issue (Brett Mastbergen) [ciqres] {CVE-2023-53297}
+- Bluetooth: Check state in l2cap_disconnect_rsp (Brett Mastbergen) [ciqres] {CVE-2023-53297}
+- ALSA: usb-audio: Fix size validation in convert_chmap_v3() (Brett Mastbergen) [ciqres] {CVE-2025-39757}
+- ALSA: usb-audio: Validate UAC3 cluster segment descriptors (Brett Mastbergen) [ciqres] {CVE-2025-39757}
+- ALSA: usb-audio: Validate UAC3 power domain descriptors, too (Brett Mastbergen) [ciqres] {CVE-2025-38729}
+- scsi: qla2xxx: Wait for io return on terminate rport (Brett Mastbergen) [ciqres] {CVE-2023-53322}
+- ext4: fix undefined behavior in bit shift for ext4_check_flag_values (Brett Mastbergen) [ciqres] {CVE-2022-50403}
+- ip6mr: Fix skb_under_panic in ip6mr_cache_report() (Brett Mastbergen) [ciqres] {CVE-2023-53365}
+- wifi: brcmfmac: fix use-after-free bug in brcmf_netdev_start_xmit() (Brett Mastbergen) [ciqres] {CVE-2022-50408}
+- Bluetooth: L2CAP: Fix use-after-free (Brett Mastbergen) [ciqres] {CVE-2023-53305}
+- Bluetooth: L2CAP: fix use-after-free in l2cap_conn_del() (Brett Mastbergen) [ciqres] {CVE-2022-3640}
+- Bluetooth: L2CAP: Fix user-after-free (Brett Mastbergen) [ciqres] {CVE-2022-50386}
+- Bluetooth: L2CAP: Fix build errors in some archs (Brett Mastbergen) [ciqres] {CVE-2022-50386}
+- Bluetooth: L2CAP: Fix l2cap_global_chan_by_psm regression (Brett Mastbergen) [ciqres] {CVE-2022-50386}
+- Bluetooth: L2CAP: Fix use-after-free caused by l2cap_chan_put (Brett Mastbergen) [ciqres] {CVE-2022-50386}
+
 * Thu Dec 11 2025 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.11.1
 - HID: core: Harden s32ton() against conversion to 0 bits (Brett Mastbergen) [ciqres] {CVE-2025-38556}
 - HID: core: fix shift-out-of-bounds in hid_report_raw_event (Brett Mastbergen) [ciqres] {CVE-2022-48978}

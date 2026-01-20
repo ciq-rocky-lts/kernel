@@ -1,0 +1,62 @@
+From 7bd01a42c0aa97d3cdc2dd8e445fd66210d22e8e Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Fri, 2 Jan 2026 14:44:18 -0500
+Subject: [PATCH] Bluetooth: prefetch channel before killing sock
+
+jira VULN-154996
+cve-pre CVE-2023-53297
+commit-author Hillf Danton <hdanton@sina.com>
+commit 2a154903cec20fb64ff4d7d617ca53c16f8fd53a
+
+Prefetch channel before killing sock in order to fix UAF like
+
+ BUG: KASAN: use-after-free in l2cap_sock_release+0x24c/0x290 net/bluetooth/l2cap_sock.c:1212
+ Read of size 8 at addr ffff8880944904a0 by task syz-fuzzer/9751
+
+	Reported-by: syzbot+c3c5bdea7863886115dc@syzkaller.appspotmail.com
+Fixes: 6c08fc896b60 ("Bluetooth: Fix refcount use-after-free issue")
+	Cc: Manish Mandlik <mmandlik@google.com>
+	Signed-off-by: Hillf Danton <hdanton@sina.com>
+	Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+(cherry picked from commit 2a154903cec20fb64ff4d7d617ca53c16f8fd53a)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/bluetooth/l2cap_sock.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/net/bluetooth/l2cap_sock.c b/net/bluetooth/l2cap_sock.c
+index c452282ea5be..c02aef152815 100644
+--- a/net/bluetooth/l2cap_sock.c
++++ b/net/bluetooth/l2cap_sock.c
+@@ -1189,6 +1189,7 @@ static int l2cap_sock_release(struct socket *sock)
+ {
+ 	struct sock *sk = sock->sk;
+ 	int err;
++	struct l2cap_chan *chan;
+ 
+ 	BT_DBG("sock %p, sk %p", sock, sk);
+ 
+@@ -1198,15 +1199,16 @@ static int l2cap_sock_release(struct socket *sock)
+ 	bt_sock_unlink(&l2cap_sk_list, sk);
+ 
+ 	err = l2cap_sock_shutdown(sock, 2);
++	chan = l2cap_pi(sk)->chan;
+ 
+-	l2cap_chan_hold(l2cap_pi(sk)->chan);
+-	l2cap_chan_lock(l2cap_pi(sk)->chan);
++	l2cap_chan_hold(chan);
++	l2cap_chan_lock(chan);
+ 
+ 	sock_orphan(sk);
+ 	l2cap_sock_kill(sk);
+ 
+-	l2cap_chan_unlock(l2cap_pi(sk)->chan);
+-	l2cap_chan_put(l2cap_pi(sk)->chan);
++	l2cap_chan_unlock(chan);
++	l2cap_chan_put(chan);
+ 
+ 	return err;
+ }
+-- 
+2.47.3
+

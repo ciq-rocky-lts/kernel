@@ -1,0 +1,73 @@
+From ff873a1fd1971ce4f46766d0d6a2e111158f1d56 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Fri, 2 Jan 2026 09:35:32 -0500
+Subject: [PATCH] fs: fix UAF/GPF bug in nilfs_mdt_destroy
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-155282
+cve CVE-2022-50367
+commit-author Dongliang Mu <mudongliangabcd@gmail.com>
+commit 2e488f13755ffbb60f307e991b27024716a33b29
+upstream-diff Minor conflicts due to missing:
+              4a075e39c864 ("locks: add a new struct file_locking_context
+              pointer to struct inode")
+              3d65ae4634ed ("writeback: initialize inode members that
+              track writeback history")
+
+In alloc_inode, inode_init_always() could return -ENOMEM if
+security_inode_alloc() fails, which causes inode->i_private
+uninitialized. Then nilfs_is_metadata_file_inode() returns
+true and nilfs_free_inode() wrongly calls nilfs_mdt_destroy(),
+which frees the uninitialized inode->i_private
+and leads to crashes(e.g., UAF/GPF).
+
+Fix this by moving security_inode_alloc just prior to
+this_cpu_inc(nr_inodes)
+
+Link: https://lkml.kernel.org/r/CAFcO6XOcf1Jj2SeGt=jJV59wmhESeSKpfR0omdFRq+J9nD1vfQ@mail.gmail.com
+	Reported-by: butt3rflyh4ck <butterflyhuangxx@gmail.com>
+	Reported-by: Hao Sun <sunhao.th@gmail.com>
+	Reported-by: Jiacheng Xu <stitch@zju.edu.cn>
+	Reviewed-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+	Signed-off-by: Dongliang Mu <mudongliangabcd@gmail.com>
+	Cc: Al Viro <viro@zeniv.linux.org.uk>
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+(cherry picked from commit 2e488f13755ffbb60f307e991b27024716a33b29)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ fs/inode.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/fs/inode.c b/fs/inode.c
+index bb3d9fde8010..226e5e64ae27 100644
+--- a/fs/inode.c
++++ b/fs/inode.c
+@@ -154,8 +154,6 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
+ 	inode->i_rdev = 0;
+ 	inode->dirtied_when = 0;
+ 
+-	if (security_inode_alloc(inode))
+-		goto out;
+ 	spin_lock_init(&inode->i_lock);
+ 	lockdep_set_class(&inode->i_lock, &sb->s_type->i_lock_key);
+ 
+@@ -195,11 +193,11 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
+ 	inode->i_fsnotify_mask = 0;
+ #endif
+ 
++	if (unlikely(security_inode_alloc(inode)))
++		return -ENOMEM;
+ 	this_cpu_inc(nr_inodes);
+ 
+ 	return 0;
+-out:
+-	return -ENOMEM;
+ }
+ EXPORT_SYMBOL(inode_init_always);
+ 
+-- 
+2.47.3
+
