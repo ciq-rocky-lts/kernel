@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 16
+%define ciq_patch_version 17
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1269,6 +1269,30 @@ Patch1000328: 0283-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
 Patch1000329: 0284-Bluetooth-hci_core-Fix-use-after-free-in-vhci_flush.patch
 Patch1000330: 0285-nfs-fold-nfs_page_group_lock_subrequests-into-nfs_lo.patch
 Patch1000331: 0286-NFS-Fix-a-race-when-updating-an-existing-write.patch
+#CIQ Patch Version: 284.30.1+17.1.el9_2_ciq
+Patch1000332: 0287-scsi-qla2xxx-Wait-for-io-return-on-terminate-rport.patch
+Patch1000333: 0288-scsi-lpfc-Fix-buffer-free-clear-order-in-deferred-re.patch
+Patch1000334: 0289-wifi-cfg80211-fix-use-after-free-in-cmp_bss.patch
+Patch1000335: 0290-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
+Patch1000336: 0291-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
+Patch1000337: 0292-hugetlb-unshare-some-PMDs-when-splitting-VMAs.patch
+Patch1000338: 0293-mm-hugetlb-independent-PMD-page-table-shared-count.patch
+Patch1000339: 0294-mm-hugetlb-unshare-page-tables-during-VMA-split-not-.patch
+Patch1000340: 0295-mm-khugepaged-fix-GUP-fast-interaction-by-sending-IP.patch
+Patch1000341: 0296-mm-hugetlb-fix-huge_pmd_unshare-vs-GUP-fast-race.patch
+Patch1000342: 0297-mm-hugetlb-make-detecting-shared-pte-more-reliable.patch
+Patch1000343: 0298-mm-hugetlb-fix-copy_hugetlb_page_range-to-use-pt_sha.patch
+Patch1000344: 0299-netfilter-nf_tables-fix-pointer-math-issue-in-nft_by.patch
+Patch1000345: 0300-netfilter-nf_tables-skip-set-commit-for-deleted-dest.patch
+Patch1000346: 0301-netfilter-nf_tables-mark-newset-as-dead-on-transacti.patch
+Patch1000347: 0302-netfilter-nft_set_pipapo-prefer-gfp_kernel-allocatio.patch
+Patch1000348: 0303-netfilter-nf_tables-skip-dead-set-elements-in-netlin.patch
+Patch1000349: 0304-netfilter-nft_set_pipapo-remove-static-in-nft_pipapo.patch
+Patch1000350: 0305-netfilter-nf_tables-unconditionally-flush-pending-wo.patch
+Patch1000351: 0306-netfilter-nf_tables-flush-pending-destroy-work-befor.patch
+Patch1000352: 0307-netfilter-nf_tables-make-destruction-work-queue-pern.patch
+Patch1000353: 0308-netfilter-nft_set_hash-skip-duplicated-elements-pend.patch
+Patch1000354: 0309-netfilter-nft_set_hash-unaligned-atomic-read-on-stru.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2276,6 +2300,29 @@ ApplyOptionalPatch 0283-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.pat
 ApplyOptionalPatch 0284-Bluetooth-hci_core-Fix-use-after-free-in-vhci_flush.patch
 ApplyOptionalPatch 0285-nfs-fold-nfs_page_group_lock_subrequests-into-nfs_lo.patch
 ApplyOptionalPatch 0286-NFS-Fix-a-race-when-updating-an-existing-write.patch
+ApplyOptionalPatch 0287-scsi-qla2xxx-Wait-for-io-return-on-terminate-rport.patch
+ApplyOptionalPatch 0288-scsi-lpfc-Fix-buffer-free-clear-order-in-deferred-re.patch
+ApplyOptionalPatch 0289-wifi-cfg80211-fix-use-after-free-in-cmp_bss.patch
+ApplyOptionalPatch 0290-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
+ApplyOptionalPatch 0291-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
+ApplyOptionalPatch 0292-hugetlb-unshare-some-PMDs-when-splitting-VMAs.patch
+ApplyOptionalPatch 0293-mm-hugetlb-independent-PMD-page-table-shared-count.patch
+ApplyOptionalPatch 0294-mm-hugetlb-unshare-page-tables-during-VMA-split-not-.patch
+ApplyOptionalPatch 0295-mm-khugepaged-fix-GUP-fast-interaction-by-sending-IP.patch
+ApplyOptionalPatch 0296-mm-hugetlb-fix-huge_pmd_unshare-vs-GUP-fast-race.patch
+ApplyOptionalPatch 0297-mm-hugetlb-make-detecting-shared-pte-more-reliable.patch
+ApplyOptionalPatch 0298-mm-hugetlb-fix-copy_hugetlb_page_range-to-use-pt_sha.patch
+ApplyOptionalPatch 0299-netfilter-nf_tables-fix-pointer-math-issue-in-nft_by.patch
+ApplyOptionalPatch 0300-netfilter-nf_tables-skip-set-commit-for-deleted-dest.patch
+ApplyOptionalPatch 0301-netfilter-nf_tables-mark-newset-as-dead-on-transacti.patch
+ApplyOptionalPatch 0302-netfilter-nft_set_pipapo-prefer-gfp_kernel-allocatio.patch
+ApplyOptionalPatch 0303-netfilter-nf_tables-skip-dead-set-elements-in-netlin.patch
+ApplyOptionalPatch 0304-netfilter-nft_set_pipapo-remove-static-in-nft_pipapo.patch
+ApplyOptionalPatch 0305-netfilter-nf_tables-unconditionally-flush-pending-wo.patch
+ApplyOptionalPatch 0306-netfilter-nf_tables-flush-pending-destroy-work-befor.patch
+ApplyOptionalPatch 0307-netfilter-nf_tables-make-destruction-work-queue-pern.patch
+ApplyOptionalPatch 0308-netfilter-nft_set_hash-skip-duplicated-elements-pend.patch
+ApplyOptionalPatch 0309-netfilter-nft_set_hash-unaligned-atomic-read-on-stru.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4159,6 +4206,31 @@ fi
 #
 #
 %changelog
+* Wed Jan 14 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1+17.1.el9_2_ciq
+- netfilter: nft_set_hash: unaligned atomic read on struct nft_set_ext (Marcin Wcisło) [ciqres] {CVE-2024-54031}
+- netfilter: nft_set_hash: skip duplicated elements pending gc run (Marcin Wcisło) [ciqres] {CVE-2023-52923}
+- netfilter: nf_tables: make destruction work queue pernet (Marcin Wcisło) [ciqres] {CVE-2024-42109}
+- netfilter: nf_tables: flush pending destroy work before exit_net release (Marcin Wcisło) [ciqres] {CVE-2024-35899}
+- netfilter: nf_tables: unconditionally flush pending work before notifier (Marcin Wcisło) [ciqres] {CVE-2024-42109}
+- netfilter: nft_set_pipapo: remove static in nft_pipapo_get() (Marcin Wcisło) [ciqres] {CVE-2023-4244}
+- netfilter: nf_tables: skip dead set elements in netlink dump (Marcin Wcisło) [ciqres] {CVE-2023-4244}
+- netfilter: nft_set_pipapo: prefer gfp_kernel allocation (Marcin Wcisło) [ciqres] {CVE-2023-52923}
+- netfilter: nf_tables: mark newset as dead on transaction abort (Marcin Wcisło) [ciqres] {CVE-2023-4244}
+- netfilter: nf_tables: skip set commit for deleted/destroyed sets (Marcin Wcisło) [ciqres] {CVE-2024-0193}
+- netfilter: nf_tables: fix pointer math issue in nft_byteorder_eval() (Marcin Wcisło) [ciqres] {CVE-2024-0607}
+- mm/hugetlb: fix copy_hugetlb_page_range() to use ->pt_share_count (Marcin Wcisło) [ciqres] {CVE-2024-57883}
+- mm/hugetlb: make detecting shared pte more reliable (Marcin Wcisło) [ciqres] {CVE-2024-57883}
+- mm/hugetlb: fix huge_pmd_unshare() vs GUP-fast race (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- mm/khugepaged: fix GUP-fast interaction by sending IPI (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- mm/hugetlb: unshare page tables during VMA split, not before (Marcin Wcisło) [ciqres] {CVE-2025-38084}
+- mm: hugetlb: independent PMD page table shared count (Marcin Wcisło) [ciqres] {CVE-2024-57883}
+- hugetlb: unshare some PMDs when splitting VMAs (Marcin Wcisło) [ciqres] {CVE-2025-38084}
+- tcp: Don't call reqsk_fastopen_remove() in tcp_conn_request(). (Brett Mastbergen) [ciqres] {CVE-2025-40186}
+- tcp: Clear tcp_sk(sk)->fastopen_rsk in tcp_disconnect(). (Brett Mastbergen) [ciqres] {CVE-2025-39955}
+- wifi: cfg80211: fix use-after-free in cmp_bss() (Brett Mastbergen) [ciqres] {CVE-2025-39864}
+- scsi: lpfc: Fix buffer free/clear order in deferred receive path (Brett Mastbergen) [ciqres] {CVE-2025-39841}
+- scsi: qla2xxx: Wait for io return on terminate rport (Brett Mastbergen) [ciqres] {CVE-2023-53322}
+
 * Mon Dec 22 2025 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+16.1.el9_2_ciq
 - NFS: Fix a race when updating an existing write (Marcin Wcisło) [ciqres] {CVE-2025-39697}
 - nfs: fold nfs_page_group_lock_subrequests into nfs_lock_and_join_requests (Marcin Wcisło) [ciqres] {CVE-2025-39697}

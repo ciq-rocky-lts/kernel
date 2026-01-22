@@ -1,0 +1,108 @@
+From 937d0cbc2a1b94af3bf7d5695e4d0658797d9384 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 5 Dec 2025 19:39:52 +0100
+Subject: [PATCH] mm/khugepaged: fix GUP-fast interaction by sending IPI
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-71586
+cve-pre CVE-2025-38085
+commit-author Jann Horn <jannh@google.com>
+commit 2ba99c5e08812494bc57f319fb562f527d9bacd8
+upstream-diff Resolved contextual conflicts due to lack of backported
+  8d3c106e19e8d251da31ff4cc7462e4565d65084
+
+Since commit 70cbc3cc78a99 ("mm: gup: fix the fast GUP race against THP
+collapse"), the lockless_pages_from_mm() fastpath rechecks the pmd_t to
+ensure that the page table was not removed by khugepaged in between.
+
+However, lockless_pages_from_mm() still requires that the page table is
+not concurrently freed.  Fix it by sending IPIs (if the architecture uses
+semi-RCU-style page table freeing) before freeing/reusing page tables.
+
+Link: https://lkml.kernel.org/r/20221129154730.2274278-2-jannh@google.com
+Link: https://lkml.kernel.org/r/20221128180252.1684965-2-jannh@google.com
+Link: https://lkml.kernel.org/r/20221125213714.4115729-2-jannh@google.com
+Fixes: ba76149f47d8 ("thp: khugepaged")
+	Signed-off-by: Jann Horn <jannh@google.com>
+	Reviewed-by: Yang Shi <shy828301@gmail.com>
+	Acked-by: David Hildenbrand <david@redhat.com>
+	Cc: John Hubbard <jhubbard@nvidia.com>
+	Cc: Peter Xu <peterx@redhat.com>
+	Cc: <stable@vger.kernel.org>
+	Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+(cherry picked from commit 2ba99c5e08812494bc57f319fb562f527d9bacd8)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/asm-generic/tlb.h | 4 ++++
+ mm/khugepaged.c           | 2 ++
+ mm/mmu_gather.c           | 4 +---
+ 3 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/include/asm-generic/tlb.h b/include/asm-generic/tlb.h
+index d49cde0cdca7..204f5c8dfb77 100644
+--- a/include/asm-generic/tlb.h
++++ b/include/asm-generic/tlb.h
+@@ -222,12 +222,16 @@ extern void tlb_remove_table(struct mmu_gather *tlb, void *table);
+ #define tlb_needs_table_invalidate() (true)
+ #endif
+ 
++void tlb_remove_table_sync_one(void);
++
+ #else
+ 
+ #ifdef tlb_needs_table_invalidate
+ #error tlb_needs_table_invalidate() requires MMU_GATHER_RCU_TABLE_FREE
+ #endif
+ 
++static inline void tlb_remove_table_sync_one(void) { }
++
+ #endif /* CONFIG_MMU_GATHER_RCU_TABLE_FREE */
+ 
+ 
+diff --git a/mm/khugepaged.c b/mm/khugepaged.c
+index 6223b06e4802..f77c7f5b9d8f 100644
+--- a/mm/khugepaged.c
++++ b/mm/khugepaged.c
+@@ -1138,6 +1138,7 @@ static void collapse_huge_page(struct mm_struct *mm,
+ 	_pmd = pmdp_collapse_flush(vma, address, pmd);
+ 	spin_unlock(pmd_ptl);
+ 	mmu_notifier_invalidate_range_end(&range);
++	tlb_remove_table_sync_one();
+ 
+ 	spin_lock(pte_ptl);
+ 	isolated = __collapse_huge_page_isolate(vma, address, pte,
+@@ -1413,6 +1414,7 @@ static void collapse_and_free_pmd(struct mm_struct *mm, struct vm_area_struct *v
+ 	ptl = pmd_lock(vma->vm_mm, pmdp);
+ 	pmd = pmdp_collapse_flush(vma, addr, pmdp);
+ 	spin_unlock(ptl);
++	tlb_remove_table_sync_one();
+ 	mm_dec_nr_ptes(mm);
+ 	page_table_check_pte_clear_range(mm, addr, pmd);
+ 	pte_free(mm, pmd_pgtable(pmd));
+diff --git a/mm/mmu_gather.c b/mm/mmu_gather.c
+index afb7185ffdc4..8d46aa7af6f4 100644
+--- a/mm/mmu_gather.c
++++ b/mm/mmu_gather.c
+@@ -140,7 +140,7 @@ static void tlb_remove_table_smp_sync(void *arg)
+ 	/* Simply deliver the interrupt */
+ }
+ 
+-static void tlb_remove_table_sync_one(void)
++void tlb_remove_table_sync_one(void)
+ {
+ 	/*
+ 	 * This isn't an RCU grace period and hence the page-tables cannot be
+@@ -164,8 +164,6 @@ static void tlb_remove_table_free(struct mmu_table_batch *batch)
+ 
+ #else /* !CONFIG_MMU_GATHER_RCU_TABLE_FREE */
+ 
+-static void tlb_remove_table_sync_one(void) { }
+-
+ static void tlb_remove_table_free(struct mmu_table_batch *batch)
+ {
+ 	__tlb_remove_table_free(batch);
+-- 
+2.47.3
+

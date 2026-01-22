@@ -1,0 +1,41 @@
+From 3e327c98f36f4d29bd413b476513a6661ed0681e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 30 Dec 2025 00:29:18 +0100
+Subject: [PATCH] netfilter: nft_set_pipapo: remove static in nft_pipapo_get()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-430
+cve-bf CVE-2023-4244
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit ab0beafd52b98dfb8b8244b2c6794efbc87478db
+
+This has slipped through when reducing memory footprint for set
+elements, remove it.
+
+Fixes: 9dad402b89e8 ("netfilter: nf_tables: expose opaque set element as struct nft_elem_priv")
+	Reported-by: Florian Westphal <fw@strlen.de>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit ab0beafd52b98dfb8b8244b2c6794efbc87478db)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nft_set_pipapo.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/netfilter/nft_set_pipapo.c b/net/netfilter/nft_set_pipapo.c
+index 2f3efeb3793b..1b9fb8d59f9d 100644
+--- a/net/netfilter/nft_set_pipapo.c
++++ b/net/netfilter/nft_set_pipapo.c
+@@ -603,7 +603,7 @@ static struct nft_elem_priv *
+ nft_pipapo_get(const struct net *net, const struct nft_set *set,
+ 	       const struct nft_set_elem *elem, unsigned int flags)
+ {
+-	static struct nft_pipapo_elem *e;
++	struct nft_pipapo_elem *e;
+ 
+ 	e = pipapo_get(net, set, (const u8 *)elem->key.val.data,
+ 		       nft_genmask_cur(net));
+-- 
+2.47.3
+

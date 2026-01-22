@@ -1,0 +1,41 @@
+From be195080a8109a3e6cae98ed178bbe9579f6c4de Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 30 Dec 2025 00:26:37 +0100
+Subject: [PATCH] netfilter: nft_set_pipapo: prefer gfp_kernel allocation
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-158865
+subsystem-update centos-stream-9 f8751245d3174ab38a11084355955fdf8ff4d53d
+cve-bf CVE-2023-52923
+commit-author Florian Westphal <fw@strlen.de>
+commit ffb40fba404561f141d37e5878ec542b67464d74
+
+No need to use GFP_ATOMIC here.
+
+Fixes: f6c383b8c31a ("netfilter: nf_tables: adapt set backend to use GC transaction API")
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit ffb40fba404561f141d37e5878ec542b67464d74)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nft_set_pipapo.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/netfilter/nft_set_pipapo.c b/net/netfilter/nft_set_pipapo.c
+index c4da1a1c1a1b..2f3efeb3793b 100644
+--- a/net/netfilter/nft_set_pipapo.c
++++ b/net/netfilter/nft_set_pipapo.c
+@@ -1603,7 +1603,7 @@ static void pipapo_gc(const struct nft_set *_set, struct nft_pipapo_match *m)
+ 		if (nft_set_elem_expired(&e->ext)) {
+ 			priv->dirty = true;
+ 
+-			gc = nft_trans_gc_queue_sync(gc, GFP_ATOMIC);
++			gc = nft_trans_gc_queue_sync(gc, GFP_KERNEL);
+ 			if (!gc)
+ 				return;
+ 
+-- 
+2.47.3
+

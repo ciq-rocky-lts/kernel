@@ -1,0 +1,97 @@
+From e12ebf6f697cb73e4bacc1b0c61c7cef644ae84f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 25 Nov 2025 21:20:55 +0100
+Subject: [PATCH] mm/hugetlb: make detecting shared pte more reliable
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-46929
+cve-bf CVE-2024-57883
+commit-author Miaohe Lin <linmiaohe@huawei.com>
+commit 3aa4ed8040e1535d95c03cef8b52cf11bf0d8546
+upstream-diff Accounted for e95a9851787bbb3cd4deb40fe8bab03f731852d1 not
+  being backported to ciqlts9_2 - dropped the unnecessary braces in a
+  one-statement `if' conditional.
+
+If the pagetables are shared, we shouldn't copy or take references.  Since
+src could have unshared and dst shares with another vma, huge_pte_none()
+is thus used to determine whether dst_pte is shared.  But this check isn't
+reliable.  A shared pte could have pte none in pagetable in fact.  The
+page count of ptep page should be checked here in order to reliably
+determine whether pte is shared.
+
+[lukas.bulwahn@gmail.com: remove unused local variable dst_entry in copy_hugetlb_page_range()]
+  Link: https://lkml.kernel.org/r/20220822082525.26071-1-lukas.bulwahn@gmail.com
+Link: https://lkml.kernel.org/r/20220816130553.31406-7-linmiaohe@huawei.com
+	Signed-off-by: Miaohe Lin <linmiaohe@huawei.com>
+	Signed-off-by: Lukas Bulwahn <lukas.bulwahn@gmail.com>
+	Reviewed-by: Mike Kravetz <mike.kravetz@oracle.com>
+	Cc: Muchun Song <songmuchun@bytedance.com>
+	Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+(cherry picked from commit 3aa4ed8040e1535d95c03cef8b52cf11bf0d8546)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ mm/hugetlb.c | 21 ++++++++-------------
+ 1 file changed, 8 insertions(+), 13 deletions(-)
+
+diff --git a/mm/hugetlb.c b/mm/hugetlb.c
+index 7e25e852731b..832fe8451197 100644
+--- a/mm/hugetlb.c
++++ b/mm/hugetlb.c
+@@ -4769,7 +4769,7 @@ int copy_hugetlb_page_range(struct mm_struct *dst, struct mm_struct *src,
+ 			    struct vm_area_struct *dst_vma,
+ 			    struct vm_area_struct *src_vma)
+ {
+-	pte_t *src_pte, *dst_pte, entry, dst_entry;
++	pte_t *src_pte, *dst_pte, entry;
+ 	struct page *ptepage;
+ 	unsigned long addr;
+ 	bool cow = is_cow_mapping(src_vma->vm_flags);
+@@ -4810,28 +4810,23 @@ int copy_hugetlb_page_range(struct mm_struct *dst, struct mm_struct *src,
+ 
+ 		/*
+ 		 * If the pagetables are shared don't copy or take references.
+-		 * dst_pte == src_pte is the common case of src/dest sharing.
+ 		 *
++		 * dst_pte == src_pte is the common case of src/dest sharing.
+ 		 * However, src could have 'unshared' and dst shares with
+-		 * another vma.  If dst_pte !none, this implies sharing.
+-		 * Check here before taking page table lock, and once again
+-		 * after taking the lock below.
++		 * another vma. So page_count of ptep page is checked instead
++		 * to reliably determine whether pte is shared.
+ 		 */
+-		dst_entry = huge_ptep_get(dst_pte);
+-		if ((dst_pte == src_pte) || !huge_pte_none(dst_entry))
++		if (page_count(virt_to_page(dst_pte)) > 1)
+ 			continue;
+ 
+ 		dst_ptl = huge_pte_lock(h, dst, dst_pte);
+ 		src_ptl = huge_pte_lockptr(h, src, src_pte);
+ 		spin_lock_nested(src_ptl, SINGLE_DEPTH_NESTING);
+ 		entry = huge_ptep_get(src_pte);
+-		dst_entry = huge_ptep_get(dst_pte);
+ again:
+-		if (huge_pte_none(entry) || !huge_pte_none(dst_entry)) {
++		if (huge_pte_none(entry)) {
+ 			/*
+-			 * Skip if src entry none.  Also, skip in the
+-			 * unlikely case dst entry !none as this implies
+-			 * sharing with another vma.
++			 * Skip if src entry none.
+ 			 */
+ 			;
+ 		} else if (unlikely(is_hugetlb_entry_hwpoisoned(entry))) {
+@@ -4911,7 +4906,7 @@ int copy_hugetlb_page_range(struct mm_struct *dst, struct mm_struct *src,
+ 					restore_reserve_on_error(h, dst_vma, addr,
+ 								new);
+ 					put_page(new);
+-					/* dst_entry won't change as in child */
++					/* huge_ptep of dst_pte won't change as in child */
+ 					goto again;
+ 				}
+ 				hugetlb_install_page(dst_vma, dst_pte, addr, new);
+-- 
+2.47.3
+

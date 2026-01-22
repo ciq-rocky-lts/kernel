@@ -1,0 +1,45 @@
+From 8adf62bf4571362ad949faf31825d4efe273296e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 30 Dec 2025 00:22:37 +0100
+Subject: [PATCH] netfilter: nf_tables: skip set commit for deleted/destroyed
+ sets
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-6825
+subsystem-update centos-stream-9 f8751245d3174ab38a11084355955fdf8ff4d53d
+cve CVE-2024-0193
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 7315dc1e122c85ffdfc8defffbb8f8b616c2eb1a
+
+NFT_MSG_DELSET deactivates all elements in the set, skip
+set->ops->commit() to avoid the unnecessary clone (for the pipapo case)
+as well as the sync GC cycle, which could deactivate again expired
+elements in such set.
+
+Fixes: 5f68718b34a5 ("netfilter: nf_tables: GC transaction API to avoid race with control plane")
+	Reported-by: Kevin Rich <kevinrich1337@gmail.com>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 7315dc1e122c85ffdfc8defffbb8f8b616c2eb1a)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index a9d9408997af..d96b89cbf2c5 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -9376,7 +9376,7 @@ static void nft_set_commit_update(struct list_head *set_update_list)
+ 	list_for_each_entry_safe(set, next, set_update_list, pending_update) {
+ 		list_del_init(&set->pending_update);
+ 
+-		if (!set->ops->commit)
++		if (!set->ops->commit || set->dead)
+ 			continue;
+ 
+ 		set->ops->commit(set);
+-- 
+2.47.3
+
