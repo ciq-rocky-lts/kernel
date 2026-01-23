@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 12
+%define ciq_patch_version 13
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1111,6 +1111,12 @@ Patch1000109: 0089-ALSA-usb-audio-Fix-size-validation-in-convert_chmap_.patch
 Patch1000110: 0090-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
 Patch1000111: 0091-wifi-cfg80211-sme-cap-SSID-length-in-__cfg80211_conn.patch
 Patch1000112: 0092-ipv6-sr-Fix-MAC-comparison-to-be-constant-time.patch
+#CIQ Patch Version: 427.42.1+13.1.el9_4_ciq
+Patch1000113: 0093-powerpc-pseries-memhp-Fix-access-beyond-end-of-drmem.patch
+Patch1000114: 0094-scsi-lpfc-Fix-buffer-free-clear-order-in-deferred-re.patch
+Patch1000115: 0095-wifi-cfg80211-fix-use-after-free-in-cmp_bss.patch
+Patch1000116: 0096-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
+Patch1000117: 0097-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1976,6 +1982,11 @@ ApplyOptionalPatch 0089-ALSA-usb-audio-Fix-size-validation-in-convert_chmap_.pat
 ApplyOptionalPatch 0090-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
 ApplyOptionalPatch 0091-wifi-cfg80211-sme-cap-SSID-length-in-__cfg80211_conn.patch
 ApplyOptionalPatch 0092-ipv6-sr-Fix-MAC-comparison-to-be-constant-time.patch
+ApplyOptionalPatch 0093-powerpc-pseries-memhp-Fix-access-beyond-end-of-drmem.patch
+ApplyOptionalPatch 0094-scsi-lpfc-Fix-buffer-free-clear-order-in-deferred-re.patch
+ApplyOptionalPatch 0095-wifi-cfg80211-fix-use-after-free-in-cmp_bss.patch
+ApplyOptionalPatch 0096-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
+ApplyOptionalPatch 0097-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4053,6 +4064,13 @@ fi
 #
 #
 %changelog
+* Sun Jan 11 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+13.1.el9_4_ciq
+- tcp: Don't call reqsk_fastopen_remove() in tcp_conn_request(). (Shreeya Patel) [ciqres] {CVE-2025-40186}
+- tcp: Clear tcp_sk(sk)->fastopen_rsk in tcp_disconnect(). (Shreeya Patel) [ciqres] {CVE-2025-39955}
+- wifi: cfg80211: fix use-after-free in cmp_bss() (Shreeya Patel) [ciqres] {CVE-2025-39864}
+- scsi: lpfc: Fix buffer free/clear order in deferred receive path (Roxana Nicolescu) [ciqres] {CVE-2025-39841}
+- powerpc/pseries/memhp: Fix access beyond end of drmem array (Roxana Nicolescu) [ciqres] {CVE-2023-52451}
+
 * Tue Dec 09 2025 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-427.42.1+12.1.el9_4_ciq
 - ipv6: sr: Fix MAC comparison to be constant-time (Roxana Nicolescu) [ciqres] {CVE-2025-39702}
 - wifi: cfg80211: sme: cap SSID length in __cfg80211_connect_result() (Roxana Nicolescu) [ciqres] {CVE-2025-39849}
