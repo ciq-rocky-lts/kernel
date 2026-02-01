@@ -1,0 +1,39 @@
+From fa03a7e0a4a88e1748f7bd9c1fe683e5a59c85ef Mon Sep 17 00:00:00 2001
+From: Sultan Alsawaf <sultan@ciq.com>
+Date: Wed, 11 Jun 2025 14:16:35 -0700
+Subject: [PATCH] crypto: drbg - Align buffers to at least a cache line
+
+None of the ciphers used by the DRBG have an alignment requirement; thus,
+they all return 0 from .crypto_init, resulting in inconsistent alignment
+across all buffers.
+
+Align all buffers to at least a cache line to improve performance. This is
+especially useful when multiple DRBG instances are used, since it prevents
+false sharing of cache lines between the different instances.
+
+Signed-off-by: Sultan Alsawaf <sultan@ciq.com>
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ crypto/drbg.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/crypto/drbg.c b/crypto/drbg.c
+index accf425de57f..d14cc09b5d39 100644
+--- a/crypto/drbg.c
++++ b/crypto/drbg.c
+@@ -1283,6 +1283,12 @@ static inline int drbg_alloc_state(struct drbg_state *drbg)
+ 	if (ret < 0)
+ 		goto err;
+ 
++	/*
++	 * Align to at least a cache line for better performance. This also
++	 * prevents false sharing of cache lines between different instances.
++	 */
++	ret = max(ret, L1_CACHE_BYTES - 1);
++
+ 	drbg->Vbuf = kmalloc(drbg_statelen(drbg) + ret, GFP_KERNEL);
+ 	if (!drbg->Vbuf) {
+ 		ret = -ENOMEM;
+-- 
+2.47.1
+

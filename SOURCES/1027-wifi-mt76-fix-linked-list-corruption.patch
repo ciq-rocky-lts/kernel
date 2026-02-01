@@ -1,0 +1,62 @@
+From 10ad776c9c43c4f9eeb5653bf912370d6a5a4cb2 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Tue, 16 Dec 2025 15:05:58 -0500
+Subject: [PATCH] wifi: mt76: fix linked list corruption
+
+jira VULN-161567
+cve CVE-2025-39918
+commit-author Felix Fietkau <nbd@nbd.name>
+commit 49fba87205bec14a0f6bd997635bf3968408161e
+
+Never leave scheduled wcid entries on the temporary on-stack list
+
+Fixes: 0b3be9d1d34e ("wifi: mt76: add separate tx scheduling queue for off-channel tx")
+Link: https://patch.msgid.link/20250827085352.51636-6-nbd@nbd.name
+	Signed-off-by: Felix Fietkau <nbd@nbd.name>
+(cherry picked from commit 49fba87205bec14a0f6bd997635bf3968408161e)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ drivers/net/wireless/mediatek/mt76/tx.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/net/wireless/mediatek/mt76/tx.c b/drivers/net/wireless/mediatek/mt76/tx.c
+index ce193e625666..e6a4da66b869 100644
+--- a/drivers/net/wireless/mediatek/mt76/tx.c
++++ b/drivers/net/wireless/mediatek/mt76/tx.c
+@@ -642,6 +642,7 @@ mt76_txq_schedule_pending_wcid(struct mt76_phy *phy, struct mt76_wcid *wcid,
+ static void mt76_txq_schedule_pending(struct mt76_phy *phy)
+ {
+ 	LIST_HEAD(tx_list);
++	int ret = 0;
+ 
+ 	if (list_empty(&phy->tx_list))
+ 		return;
+@@ -653,13 +654,13 @@ static void mt76_txq_schedule_pending(struct mt76_phy *phy)
+ 	list_splice_init(&phy->tx_list, &tx_list);
+ 	while (!list_empty(&tx_list)) {
+ 		struct mt76_wcid *wcid;
+-		int ret;
+ 
+ 		wcid = list_first_entry(&tx_list, struct mt76_wcid, tx_list);
+ 		list_del_init(&wcid->tx_list);
+ 
+ 		spin_unlock(&phy->tx_lock);
+-		ret = mt76_txq_schedule_pending_wcid(phy, wcid, &wcid->tx_offchannel);
++		if (ret >= 0)
++			ret = mt76_txq_schedule_pending_wcid(phy, wcid, &wcid->tx_offchannel);
+ 		if (ret >= 0 && !phy->offchannel)
+ 			ret = mt76_txq_schedule_pending_wcid(phy, wcid, &wcid->tx_pending);
+ 		spin_lock(&phy->tx_lock);
+@@ -668,9 +669,6 @@ static void mt76_txq_schedule_pending(struct mt76_phy *phy)
+ 		    !skb_queue_empty(&wcid->tx_offchannel) &&
+ 		    list_empty(&wcid->tx_list))
+ 			list_add_tail(&wcid->tx_list, &phy->tx_list);
+-
+-		if (ret < 0)
+-			break;
+ 	}
+ 	spin_unlock(&phy->tx_lock);
+ 
+-- 
+2.47.3
+

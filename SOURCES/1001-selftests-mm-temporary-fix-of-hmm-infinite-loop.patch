@@ -1,0 +1,40 @@
+From 825bc5fc0641942e39d0b08efe18a1a3bb7b5f86 Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Tue, 22 Oct 2024 19:08:16 -0400
+Subject: [PATCH] selftests/mm temporary fix of hmm infinite loop
+
+jira SECO-170
+
+In Rocky9 if you run ./run_vmtests.sh -t hmm it will fail and cause an
+infinite loop on ASSERTs in FIXTURE_TEARDOWN()
+This temporary fix is based on the discussion here
+https://patchwork.kernel.org/project/linux-kselftest/patch/26017fe3-5ad7-6946-57db-e5ec48063ceb@suse.cz/#25046055
+
+We will investigate further kselftest updates that will resolve the root
+causes of this.
+
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+Signed-off-by: Shreeya Patel <spatel@ciq.com>
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ tools/testing/selftests/mm/hmm-tests.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/tools/testing/selftests/mm/hmm-tests.c b/tools/testing/selftests/mm/hmm-tests.c
+index d2cfc9b494a0..6f75c5456417 100644
+--- a/tools/testing/selftests/mm/hmm-tests.c
++++ b/tools/testing/selftests/mm/hmm-tests.c
+@@ -159,6 +159,10 @@ FIXTURE_TEARDOWN(hmm)
+ {
+ 	int ret = close(self->fd);
+ 
++	if (ret != 0) {
++		fprintf(stderr, "close returned (%d) fd is (%d)\n", ret, self->fd);
++		exit(1);
++	}
+ 	ASSERT_EQ(ret, 0);
+ 	self->fd = -1;
+ }
+-- 
+2.47.1
+

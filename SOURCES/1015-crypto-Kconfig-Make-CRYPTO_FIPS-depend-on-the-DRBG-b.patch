@@ -1,0 +1,63 @@
+From 965a789c529dd785594e5ec2cdabb1793db04eef Mon Sep 17 00:00:00 2001
+From: Sultan Alsawaf <sultan@ciq.com>
+Date: Tue, 22 Jul 2025 15:47:52 -0700
+Subject: [PATCH] crypto: Kconfig - Make CRYPTO_FIPS depend on the DRBG being
+ built-in
+
+When FIPS mode is enabled (via fips=1), there is an absolute need for the
+DRBG to be available. This is at odds with the fact that the DRBG can be
+built as a module when in FIPS mode, leaving critical RNG functionality at
+the whims of userspace.
+
+Userspace could simply rmmod the DRBG module, or not provide it at all and
+thus a different stdrng algorithm could be used without anyone noticing.
+
+Additionally, when running a FIPS-enabled userspace, modprobe itself may
+perform a getrandom() syscall _before_ loading a given module. As a result,
+there's a possible deadlock scenario where the RNG core (crypto/rng.c)
+initializes _before_ the DRBG, thereby installing its getrandom() override
+without having an stdrng algorithm available. Then, when userspace calls
+getrandom() which redirects to the override in crypto/rng.c,
+crypto_alloc_rng("stdrng") invokes the UMH (modprobe) to load the DRBG
+(which is aliased to stdrng). And *then* that modprobe invocation gets
+stuck at getrandom() because there's no stdrng algorithm available!
+
+There are too many risks that come with allowing the DRBG and RNG core to
+be modular for FIPS mode. Therefore, make CRYPTO_FIPS require the DRBG to
+be built-in, which in turn makes the DRBG require the RNG core to be
+built-in. That way, it's guaranteed for these drivers to be built-in when
+running in FIPS mode.
+
+Also clean up the CRYPTO_FIPS option name and remove the CRYPTO_ANSI_CPRNG
+dependency since it's obsolete for FIPS now.
+
+Signed-off-by: Sultan Alsawaf <sultan@ciq.com>
+
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ crypto/Kconfig | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/crypto/Kconfig b/crypto/Kconfig
+index 17c113cd5fe5..c5ef8cac60ef 100644
+--- a/crypto/Kconfig
++++ b/crypto/Kconfig
+@@ -23,12 +23,12 @@ if CRYPTO
+ comment "Crypto core or helper"
+ 
+ config CRYPTO_FIPS
+-	bool "FIPS 200 compliance"
+-	depends on (CRYPTO_ANSI_CPRNG || CRYPTO_DRBG) && !CRYPTO_MANAGER_DISABLE_TESTS
++	bool "FIPS compliance"
++	depends on CRYPTO_DRBG=y && !CRYPTO_MANAGER_DISABLE_TESTS
+ 	depends on (MODULE_SIG || !MODULES)
+ 	help
+ 	  This option enables the fips boot option which is
+-	  required if you want the system to operate in a FIPS 200
++	  required if you want the system to operate in a FIPS
+ 	  certification.  You should say no unless you know what
+ 	  this is.
+ 
+-- 
+2.47.1
+

@@ -1,0 +1,62 @@
+From ef467f3c43338f72f4173c98b15bc8021f79c3a1 Mon Sep 17 00:00:00 2001
+From: Sultan Alsawaf <sultan@ciq.com>
+Date: Wed, 18 Jun 2025 23:42:08 -0700
+Subject: [PATCH] mm/gup: reintroduce pin_user_pages_fast_only()
+
+Like pin_user_pages_fast(), but with the internal-only FOLL_FAST_ONLY flag.
+
+This complements the get_user_pages*() API, which already has
+get_user_pages_fast_only().
+
+Note that pin_user_pages_fast_only() used to exist but was removed in
+upstream commit edad1bb1fbf7 ("mm/gup: remove pin_user_pages_fast_only()")
+due to it not having any users.
+
+Signed-off-by: Sultan Alsawaf <sultan@ciq.com>
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ include/linux/mm.h |  2 ++
+ mm/gup.c           | 14 ++++++++++++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/include/linux/mm.h b/include/linux/mm.h
+index ab100f6bd25a..3f1772eb2426 100644
+--- a/include/linux/mm.h
++++ b/include/linux/mm.h
+@@ -2571,6 +2571,8 @@ int get_user_pages_fast(unsigned long start, int nr_pages,
+ 			unsigned int gup_flags, struct page **pages);
+ int pin_user_pages_fast(unsigned long start, int nr_pages,
+ 			unsigned int gup_flags, struct page **pages);
++int pin_user_pages_fast_only(unsigned long start, int nr_pages,
++			     unsigned int gup_flags, struct page **pages);
+ void folio_add_pin(struct folio *folio);
+ 
+ int account_locked_vm(struct mm_struct *mm, unsigned long pages, bool inc);
+diff --git a/mm/gup.c b/mm/gup.c
+index 16cdddef9158..40b8a69fc312 100644
+--- a/mm/gup.c
++++ b/mm/gup.c
+@@ -3359,6 +3359,20 @@ int pin_user_pages_fast(unsigned long start, int nr_pages,
+ }
+ EXPORT_SYMBOL_GPL(pin_user_pages_fast);
+ 
++/*
++ * This is the FOLL_PIN equivalent of get_user_pages_fast_only(). Behavior is
++ * the same, except that this one sets FOLL_PIN instead of FOLL_GET.
++ */
++int pin_user_pages_fast_only(unsigned long start, int nr_pages,
++			     unsigned int gup_flags, struct page **pages)
++{
++	if (!is_valid_gup_args(pages, NULL, &gup_flags,
++			       FOLL_PIN | FOLL_FAST_ONLY))
++		return -EINVAL;
++	return internal_get_user_pages_fast(start, nr_pages, gup_flags, pages);
++}
++EXPORT_SYMBOL_GPL(pin_user_pages_fast_only);
++
+ /**
+  * pin_user_pages_remote() - pin pages of a remote process
+  *
+-- 
+2.47.1
+
