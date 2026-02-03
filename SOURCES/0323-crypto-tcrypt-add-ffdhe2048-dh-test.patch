@@ -1,0 +1,32 @@
+From 8fa790706723e74d23a59dc2020a9f4dcc4c2895 Mon Sep 17 00:00:00 2001
+From: Vladis Dronov <vdronov@redhat.com>
+Date: Thu, 29 Feb 2024 18:36:03 +0100
+Subject: [PATCH] crypto: tcrypt - add ffdhe2048(dh) test
+
+Commit 7dce59819750 ("crypto: dh - implement ffdheXYZ(dh) templates")
+implemented the said templates. Add ffdhe2048(dh) test as it is the
+fastest one. This is a requirement for the FIPS certification.
+
+Signed-off-by: Vladis Dronov <vdronov@redhat.com>
+Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+---
+ crypto/tcrypt.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/crypto/tcrypt.c b/crypto/tcrypt.c
+index 0fa94abdf89a..be1a648fc0d9 100644
+--- a/crypto/tcrypt.c
++++ b/crypto/tcrypt.c
+@@ -2033,6 +2033,9 @@ static int do_test(const char *alg, u32 type, u32 mask, int m, u32 num_mb)
+ 		ret += tcrypt_test("cbc(sm4)");
+ 		ret += tcrypt_test("ctr(sm4)");
+ 		break;
++	case 193:
++        ret = min(ret, tcrypt_test("ffdhe2048(dh)"));
++        break;
+ 	case 200:
+ 		test_cipher_speed("ecb(aes)", ENCRYPT, sec, NULL, 0,
+ 				speed_template_16_24_32);
+-- 
+2.47.3
+

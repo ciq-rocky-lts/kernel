@@ -1,0 +1,54 @@
+From 96abf93424acf349d3c82296385ba055ca068903 Mon Sep 17 00:00:00 2001
+From: Jeremy Allison <jallison@ciq.com>
+Date: Wed, 4 Sep 2024 10:24:07 -0700
+Subject: [PATCH] crypto: aead,cipher - zeroize key buffer after use
+
+    I.G 9.7.B for FIPS 140-3 specifies that variables temporarily holding
+    cryptographic information should be zeroized once they are no longer
+    needed. Accomplish this by using kfree_sensitive for buffers that
+    previously held the private key.
+
+    Signed-off-by: Hailey Mothershead <hailmo@amazon.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+        Back-ported from commit 23e4099bdc3c8381992f9eb975c79196d6755210
+        Author: Hailey Mothershead <hailmo@amazon.com>
+        Date:   Mon Apr 15 22:19:15 2024 +0000
+
+Signed-off-by: Jeremy Allison <jallison@ciq.com>
+---
+ crypto/aead.c   | 3 +--
+ crypto/cipher.c | 3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/crypto/aead.c b/crypto/aead.c
+index 16991095270d..c4ece86c45bc 100644
+--- a/crypto/aead.c
++++ b/crypto/aead.c
+@@ -35,8 +35,7 @@ static int setkey_unaligned(struct crypto_aead *tfm, const u8 *key,
+ 	alignbuffer = (u8 *)ALIGN((unsigned long)buffer, alignmask + 1);
+ 	memcpy(alignbuffer, key, keylen);
+ 	ret = crypto_aead_alg(tfm)->setkey(tfm, alignbuffer, keylen);
+-	memset(alignbuffer, 0, keylen);
+-	kfree(buffer);
++	kfree_sensitive(buffer);
+ 	return ret;
+ }
+ 
+diff --git a/crypto/cipher.c b/crypto/cipher.c
+index b47141ed4a9f..395f0c2fbb9f 100644
+--- a/crypto/cipher.c
++++ b/crypto/cipher.c
+@@ -34,8 +34,7 @@ static int setkey_unaligned(struct crypto_cipher *tfm, const u8 *key,
+ 	alignbuffer = (u8 *)ALIGN((unsigned long)buffer, alignmask + 1);
+ 	memcpy(alignbuffer, key, keylen);
+ 	ret = cia->cia_setkey(crypto_cipher_tfm(tfm), alignbuffer, keylen);
+-	memset(alignbuffer, 0, keylen);
+-	kfree(buffer);
++	kfree_sensitive(buffer);
+ 	return ret;
+ 
+ }
+-- 
+2.47.3
+

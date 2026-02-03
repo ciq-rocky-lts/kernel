@@ -1,0 +1,59 @@
+From ef9f46e32a168cb40f9c5193806508212a0834d3 Mon Sep 17 00:00:00 2001
+From: Srinivas Neginhal <sneginhal@google.com>
+Date: Wed, 19 Mar 2025 22:07:39 +0000
+Subject: [PATCH] bonding: add ESP offload features when slaves support
+
+commit-author Jianbo Liu <jianbol@nvidia.com>
+commit 4861333b42178fa3d8fd1bb4e2cfb2fedc968dba
+
+Add NETIF_F_GSO_ESP bit to bond's gso_partial_features if all slaves
+support it, such that ESP segmentation is handled by hardware if possible.
+
+	Signed-off-by: Jianbo Liu <jianbol@nvidia.com>
+	Reviewed-by: Boris Pismenny <borisp@nvidia.com>
+	Signed-off-by: Tariq Toukan <tariqt@nvidia.com>
+Link: https://patch.msgid.link/20241105192721.584822-1-tariqt@nvidia.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 4861333b42178fa3d8fd1bb4e2cfb2fedc968dba)
+	Signed-off-by: Srinivas Neginhal <sneginhal@google.com>
+---
+ drivers/net/bonding/bond_main.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/net/bonding/bond_main.c b/drivers/net/bonding/bond_main.c
+index 19cbc9ce66ff..4a77a80b5a3f 100644
+--- a/drivers/net/bonding/bond_main.c
++++ b/drivers/net/bonding/bond_main.c
+@@ -1408,6 +1408,7 @@ static void bond_compute_features(struct bonding *bond)
+ {
+ 	unsigned int dst_release_flag = IFF_XMIT_DST_RELEASE |
+ 					IFF_XMIT_DST_RELEASE_PERM;
++	netdev_features_t gso_partial_features = NETIF_F_GSO_ESP;
+ 	netdev_features_t vlan_features = BOND_VLAN_FEATURES;
+ 	netdev_features_t enc_features  = BOND_ENC_FEATURES;
+ #ifdef CONFIG_XFRM_OFFLOAD
+@@ -1440,6 +1441,9 @@ static void bond_compute_features(struct bonding *bond)
+ 							  BOND_XFRM_FEATURES);
+ #endif /* CONFIG_XFRM_OFFLOAD */
+ 
++		if (slave->dev->hw_enc_features & NETIF_F_GSO_PARTIAL)
++			gso_partial_features &= slave->dev->gso_partial_features;
++
+ 		mpls_features = netdev_increment_features(mpls_features,
+ 							  slave->dev->mpls_features,
+ 							  BOND_MPLS_FEATURES);
+@@ -1453,6 +1457,11 @@ static void bond_compute_features(struct bonding *bond)
+ 	}
+ 	bond_dev->hard_header_len = max_hard_header_len;
+ 
++	if (gso_partial_features & NETIF_F_GSO_ESP)
++		bond_dev->gso_partial_features |= NETIF_F_GSO_ESP;
++	else
++		bond_dev->gso_partial_features &= ~NETIF_F_GSO_ESP;
++
+ done:
+ 	bond_dev->vlan_features = vlan_features;
+ 	bond_dev->hw_enc_features = enc_features | NETIF_F_GSO_ENCAP_ALL |
+-- 
+2.47.3
+

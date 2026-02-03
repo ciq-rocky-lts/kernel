@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 17
+%define ciq_patch_version 22
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1293,6 +1293,42 @@ Patch1000351: 0306-netfilter-nf_tables-flush-pending-destroy-work-befor.patch
 Patch1000352: 0307-netfilter-nf_tables-make-destruction-work-queue-pern.patch
 Patch1000353: 0308-netfilter-nft_set_hash-skip-duplicated-elements-pend.patch
 Patch1000354: 0309-netfilter-nft_set_hash-unaligned-atomic-read-on-stru.patch
+#CIQ Patch Version: 284.30.1+22.1.el9_2_ciq
+Patch1000355: 0310-mm-memory-failure-fix-VM_BUG_ON_PAGE-PagePoisoned-pa.patch
+Patch1000356: 0311-netfilter-nft_set_pipapo-walk-over-current-view-on-n.patch
+Patch1000357: 0312-netfilter-nf_tables-missing-iterator-type-in-lookup-.patch
+Patch1000358: 0313-netfilter-nf_tables-restore-set-elements-when-delete.patch
+Patch1000359: 0314-netfilter-nft_set_rbtree-.deactivate-fails-if-elemen.patch
+Patch1000360: 0315-netfilter-nf_tables-use-timestamp-to-check-for-set-e.patch
+Patch1000361: 0316-netfilter-nft_set_pipapo-constify-lookup-fn-args-whe.patch
+Patch1000362: 0317-netfilter-nf_set_pipapo-fix-initial-map-fill.patch
+Patch1000363: 0318-netfilter-nf_set_pipapo_avx2-fix-initial-map-fill.patch
+Patch1000364: 0319-crypto-jitter-replace-LFSR-with-SHA3-256.patch
+Patch1000365: 0320-crypto-aead-cipher-zeroize-key-buffer-after-use.patch
+Patch1000366: 0321-SUSE-patch-crypto-dh-implement-FIPS-PCT.patch.patch
+Patch1000367: 0322-SUSE-patch-crypto-ecdh-implement-FIPS-PCT.patch.patch
+Patch1000368: 0323-crypto-tcrypt-add-ffdhe2048-dh-test.patch
+Patch1000369: 0324-crypto-rsa-allow-only-odd-e-and-restrict-value-in-FI.patch
+Patch1000370: 0325-crypto-rsa-add-a-check-for-allocation-failure.patch
+Patch1000371: 0326-crypto-ecdh-explicitly-zeroize-private_key.patch
+Patch1000372: 0327-crypto-lib-mpi-Fix-unexpected-pointer-access-in-mpi_.patch
+Patch1000373: 0328-geneve-fix-header-validation-in-geneve-6-_xmit_skb.patch
+Patch1000374: 0329-net-geneve-support-IPv4-IPv6-as-inner-protocol.patch
+Patch1000375: 0330-net-geneve-add-missing-netlink-policy-and-size-for-I.patch
+Patch1000376: 0331-geneve-Fix-incorrect-inner-network-header-offset-whe.patch
+Patch1000377: 0332-net-mlx5e-Fix-features-validation-check-for-tunneled.patch
+Patch1000378: 0333-In-essiv_aead_setkey-use-the-same-logic-as-crypto_au.patch
+Patch1000379: 0334-bonding-add-ESP-offload-features-when-slaves-support.patch
+Patch1000380: 0335-bonding-Correctly-support-GSO-ESP-offload.patch
+Patch1000381: 0336-xfrm_output-Force-software-GSO-only-in-tunnel-mode.patch
+Patch1000382: 0337-xfrm-Support-ESN-context-update-to-hardware-for-TX.patch
+Patch1000383: 0338-net-sched-cls_route-No-longer-copy-tcf_result-on-upd.patch
+Patch1000384: 0339-Partial-revert-of-In-essiv_aead_setkey-use-the-same-.patch
+Patch1000385: 0340-bpf-Fix-a-segment-issue-when-downgrading-gso_size.patch
+Patch1000386: 0341-gso-fix-udp-gso-fraglist-segmentation-after-pull-fro.patch
+Patch1000387: 0342-net-fix-udp-gso-skb_segment-after-pull-from-frag_lis.patch
+Patch1000388: 0343-net_sched-hfsc-Fix-a-potential-UAF-in-hfsc_dequeue-t.patch
+Patch1000389: 0344-NFS-Fix-filehandle-bounds-checking-in-nfs_fh_to_dent.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2323,6 +2359,41 @@ ApplyOptionalPatch 0306-netfilter-nf_tables-flush-pending-destroy-work-befor.pat
 ApplyOptionalPatch 0307-netfilter-nf_tables-make-destruction-work-queue-pern.patch
 ApplyOptionalPatch 0308-netfilter-nft_set_hash-skip-duplicated-elements-pend.patch
 ApplyOptionalPatch 0309-netfilter-nft_set_hash-unaligned-atomic-read-on-stru.patch
+ApplyOptionalPatch 0310-mm-memory-failure-fix-VM_BUG_ON_PAGE-PagePoisoned-pa.patch
+ApplyOptionalPatch 0311-netfilter-nft_set_pipapo-walk-over-current-view-on-n.patch
+ApplyOptionalPatch 0312-netfilter-nf_tables-missing-iterator-type-in-lookup-.patch
+ApplyOptionalPatch 0313-netfilter-nf_tables-restore-set-elements-when-delete.patch
+ApplyOptionalPatch 0314-netfilter-nft_set_rbtree-.deactivate-fails-if-elemen.patch
+ApplyOptionalPatch 0315-netfilter-nf_tables-use-timestamp-to-check-for-set-e.patch
+ApplyOptionalPatch 0316-netfilter-nft_set_pipapo-constify-lookup-fn-args-whe.patch
+ApplyOptionalPatch 0317-netfilter-nf_set_pipapo-fix-initial-map-fill.patch
+ApplyOptionalPatch 0318-netfilter-nf_set_pipapo_avx2-fix-initial-map-fill.patch
+ApplyOptionalPatch 0319-crypto-jitter-replace-LFSR-with-SHA3-256.patch
+ApplyOptionalPatch 0320-crypto-aead-cipher-zeroize-key-buffer-after-use.patch
+ApplyOptionalPatch 0321-SUSE-patch-crypto-dh-implement-FIPS-PCT.patch.patch
+ApplyOptionalPatch 0322-SUSE-patch-crypto-ecdh-implement-FIPS-PCT.patch.patch
+ApplyOptionalPatch 0323-crypto-tcrypt-add-ffdhe2048-dh-test.patch
+ApplyOptionalPatch 0324-crypto-rsa-allow-only-odd-e-and-restrict-value-in-FI.patch
+ApplyOptionalPatch 0325-crypto-rsa-add-a-check-for-allocation-failure.patch
+ApplyOptionalPatch 0326-crypto-ecdh-explicitly-zeroize-private_key.patch
+ApplyOptionalPatch 0327-crypto-lib-mpi-Fix-unexpected-pointer-access-in-mpi_.patch
+ApplyOptionalPatch 0328-geneve-fix-header-validation-in-geneve-6-_xmit_skb.patch
+ApplyOptionalPatch 0329-net-geneve-support-IPv4-IPv6-as-inner-protocol.patch
+ApplyOptionalPatch 0330-net-geneve-add-missing-netlink-policy-and-size-for-I.patch
+ApplyOptionalPatch 0331-geneve-Fix-incorrect-inner-network-header-offset-whe.patch
+ApplyOptionalPatch 0332-net-mlx5e-Fix-features-validation-check-for-tunneled.patch
+ApplyOptionalPatch 0333-In-essiv_aead_setkey-use-the-same-logic-as-crypto_au.patch
+ApplyOptionalPatch 0334-bonding-add-ESP-offload-features-when-slaves-support.patch
+ApplyOptionalPatch 0335-bonding-Correctly-support-GSO-ESP-offload.patch
+ApplyOptionalPatch 0336-xfrm_output-Force-software-GSO-only-in-tunnel-mode.patch
+ApplyOptionalPatch 0337-xfrm-Support-ESN-context-update-to-hardware-for-TX.patch
+ApplyOptionalPatch 0338-net-sched-cls_route-No-longer-copy-tcf_result-on-upd.patch
+ApplyOptionalPatch 0339-Partial-revert-of-In-essiv_aead_setkey-use-the-same-.patch
+ApplyOptionalPatch 0340-bpf-Fix-a-segment-issue-when-downgrading-gso_size.patch
+ApplyOptionalPatch 0341-gso-fix-udp-gso-fraglist-segmentation-after-pull-fro.patch
+ApplyOptionalPatch 0342-net-fix-udp-gso-skb_segment-after-pull-from-frag_lis.patch
+ApplyOptionalPatch 0343-net_sched-hfsc-Fix-a-potential-UAF-in-hfsc_dequeue-t.patch
+ApplyOptionalPatch 0344-NFS-Fix-filehandle-bounds-checking-in-nfs_fh_to_dent.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4206,6 +4277,45 @@ fi
 #
 #
 %changelog
+* Thu Jan 22 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+22.1.el9_2_ciq
+- Start Integration of all changes from FIPS 5.14.0-284.30.1.el9_2.ciqfips.0.21.1
+- NFS: Fix filehandle bounds checking in nfs_fh_to_dentry() (Shreeya Patel) [ciqres] {CVE-2025-39730}
+- net_sched: hfsc: Fix a potential UAF in hfsc_dequeue() too (Shreeya Patel) [ciqres] {CVE-2025-37823}
+- net: fix udp gso skb_segment after pull from frag_list (Jonathan Maple) [ciqres] {CVE-2025-38124}
+- gso: fix udp gso fraglist segmentation after pull from frag_list (Jonathan Maple) [ciqres] {CVE-2024-49978}
+- bpf: Fix a segment issue when downgrading gso_size (Jonathan Maple) [ciqres] {CVE-2024-42281}
+- Partial revert of "In essiv_aead_setkey(), use the same logic as crypto_authenc_esn_setkey() to zeroize keys on exit." (Jason Rodriguez) [ciqres]
+- net/sched: cls_route: No longer copy tcf_result on update to avoid use-after-free (Brett Mastbergen) [ciqres] {CVE-2023-4206 CVE-2023-4218 CVE-2023-4128 CVE-2023-4208.}
+- xfrm: Support ESN context update to hardware for TX (Srinivas Neginhal) [ciqres]
+- xfrm_output: Force software GSO only in tunnel mode (Srinivas Neginhal) [ciqres]
+- bonding: Correctly support GSO ESP offload (Srinivas Neginhal) [ciqres]
+- bonding: add ESP offload features when slaves support (Srinivas Neginhal) [ciqres]
+- In essiv_aead_setkey(), use the same logic as crypto_authenc_esn_setkey() to zeroize keys on exit. (Jason Rodriguez) [ciqres]
+- net/mlx5e: Fix features validation check for tunneled UDP (non-VXLAN) packets (Jonathan Maple) [ciqres]
+- geneve: Fix incorrect inner network header offset when innerprotoinherit is set (Jonathan Maple) [ciqres]
+- net: geneve: add missing netlink policy and size for IFLA_GENEVE_INNER_PROTO_INHERIT (Jonathan Maple) [ciqres]
+- net: geneve: support IPv4/IPv6 as inner protocol (Jonathan Maple) [ciqres]
+- geneve: fix header validation in geneve[6]_xmit_skb (Jonathan Maple) [ciqres]
+- crypto: lib/mpi - Fix unexpected pointer access in mpi_ec_init (Tianjia Zhang) [ciqres]
+- crypto: ecdh - explicitly zeroize private_key (Joachim Vandersmissen) [ciqres]
+- crypto: rsa - add a check for allocation failure (Dan Carpenter) [ciqres]
+- crypto: rsa - allow only odd e and restrict value in FIPS mode (Mahmoud Adam) [ciqres]
+- crypto: tcrypt - add ffdhe2048(dh) test (Vladis Dronov) [ciqres]
+- SUSE: patch: crypto-ecdh-implement-FIPS-PCT.patch (Jeremy Allison) [ciqres]
+- SUSE: patch: crypto-dh-implement-FIPS-PCT.patch (Jeremy Allison) [ciqres]
+- crypto: aead,cipher - zeroize key buffer after use (Jeremy Allison) [ciqres]
+- crypto: jitter - replace LFSR with SHA3-256 (Jeremy Allison) [ciqres]
+- END 5.14.0-284.30.1.el9_2.ciqfips.0.21.1 integration
+- netfilter: nf_set_pipapo_avx2: fix initial map fill (Marcin Wcisło) [ciqres] {CVE-2025-38120}
+- netfilter: nf_set_pipapo: fix initial map fill (Marcin Wcisło) [ciqres] {CVE-2024-57947}
+- netfilter: nft_set_pipapo: constify lookup fn args where possible (Marcin Wcisło) [ciqres] {CVE-2024-57947}
+- netfilter: nf_tables: use timestamp to check for set element timeout (Marcin Wcisło) [ciqres] {CVE-2024-27397}
+- netfilter: nft_set_rbtree: .deactivate fails if element has expired (Marcin Wcisło) [ciqres] {CVE-2024-27397}
+- netfilter: nf_tables: restore set elements when delete set fails (Marcin Wcisło) [ciqres] {CVE-2024-27012}
+- netfilter: nf_tables: missing iterator type in lookup walk (Marcin Wcisło) [ciqres] {CVE-2024-27017}
+- netfilter: nft_set_pipapo: walk over current view on netlink dump (Marcin Wcisło) [ciqres] {CVE-2024-27017}
+- mm/memory-failure: fix VM_BUG_ON_PAGE(PagePoisoned(page)) when unpoison memory (Brett Mastbergen) [ciqres] {CVE-2025-39883}
+
 * Wed Jan 14 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1+17.1.el9_2_ciq
 - netfilter: nft_set_hash: unaligned atomic read on struct nft_set_ext (Marcin Wcisło) [ciqres] {CVE-2024-54031}
 - netfilter: nft_set_hash: skip duplicated elements pending gc run (Marcin Wcisło) [ciqres] {CVE-2023-52923}

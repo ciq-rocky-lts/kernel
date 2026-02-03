@@ -1,0 +1,48 @@
+From cc0a8879c2448c4b3c09a1b73d1d3f127b7730a4 Mon Sep 17 00:00:00 2001
+From: Jason Rodriguez <jrodriguez@ciq.com>
+Date: Thu, 5 Jun 2025 16:55:03 -0400
+Subject: [PATCH] Partial revert of "In essiv_aead_setkey(), use the same logic
+ as crypto_authenc_esn_setkey() to zeroize keys on exit."
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+LE-3197
+
+A bug was introduced while updating the kernel per atsec’s request. When
+key zeroization was added, setting the crypto algorithm key was removed in
+error. This re-adds the code to set the crypto key.
+
+Tested under non-FIPS and FIPS mode. NB. This bug only causes the algorithm
+to be unusable and an error message returned to users. No corruption or
+insecure algorithm use is allowed.
+
+[Sultan: touched up the commit message with what Jeremy wrote]
+
+Signed-off-by: Jason Rodriguez <jrodriguez@ciq.com>
+Signed-off-by: Jeremy Allison <jallison@ciq.com>
+Signed-off-by: Sultan Alsawaf <sultan@ciq.com>
+---
+ crypto/essiv.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/crypto/essiv.c b/crypto/essiv.c
+index fc7a69c9f42c..ec81bdea2563 100644
+--- a/crypto/essiv.c
++++ b/crypto/essiv.c
+@@ -119,9 +119,11 @@ static int essiv_aead_setkey(struct crypto_aead *tfm, const u8 *key,
+ 	crypto_cipher_clear_flags(tctx->essiv_cipher, CRYPTO_TFM_REQ_MASK);
+ 	crypto_cipher_set_flags(tctx->essiv_cipher, crypto_aead_get_flags(tfm) &
+ 						    CRYPTO_TFM_REQ_MASK);
++	err = crypto_cipher_setkey(tctx->essiv_cipher, salt,
++				   crypto_shash_digestsize(tctx->hash));
+ out:
+ 	memzero_explicit(&keys, sizeof(keys));
+-    return err;
++	return err;
+ }
+ 
+ static int essiv_aead_setauthsize(struct crypto_aead *tfm,
+-- 
+2.47.3
+

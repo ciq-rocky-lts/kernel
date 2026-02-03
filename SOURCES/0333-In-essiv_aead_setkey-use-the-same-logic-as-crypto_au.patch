@@ -1,0 +1,35 @@
+From 8f35e4bcbb9dc99456c1a8915a4f5b7cb61f1510 Mon Sep 17 00:00:00 2001
+From: Jason Rodriguez <jrodriguez@ciq.com>
+Date: Mon, 30 Sep 2024 12:57:14 -0400
+Subject: [PATCH] In essiv_aead_setkey(), use the same logic as
+ crypto_authenc_esn_setkey() to zeroize keys on exit.
+
+---
+ crypto/essiv.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/crypto/essiv.c b/crypto/essiv.c
+index 8bcc5bdcb2a9..fc7a69c9f42c 100644
+--- a/crypto/essiv.c
++++ b/crypto/essiv.c
+@@ -114,13 +114,14 @@ static int essiv_aead_setkey(struct crypto_aead *tfm, const u8 *key,
+ 	      crypto_shash_update(desc, keys.enckey, keys.enckeylen) ?:
+ 	      crypto_shash_finup(desc, keys.authkey, keys.authkeylen, salt);
+ 	if (err)
+-		return err;
++		goto out;
+ 
+ 	crypto_cipher_clear_flags(tctx->essiv_cipher, CRYPTO_TFM_REQ_MASK);
+ 	crypto_cipher_set_flags(tctx->essiv_cipher, crypto_aead_get_flags(tfm) &
+ 						    CRYPTO_TFM_REQ_MASK);
+-	return crypto_cipher_setkey(tctx->essiv_cipher, salt,
+-				    crypto_shash_digestsize(tctx->hash));
++out:
++	memzero_explicit(&keys, sizeof(keys));
++    return err;
+ }
+ 
+ static int essiv_aead_setauthsize(struct crypto_aead *tfm,
+-- 
+2.47.3
+

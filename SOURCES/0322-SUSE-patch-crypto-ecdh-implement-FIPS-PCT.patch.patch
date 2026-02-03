@@ -1,0 +1,62 @@
+From 8f4a2a69a147676e85b815311f397941b0fbd336 Mon Sep 17 00:00:00 2001
+From: Jeremy Allison <jallison@ciq.com>
+Date: Thu, 29 Aug 2024 16:58:53 -0700
+Subject: [PATCH] SUSE: patch: crypto-ecdh-implement-FIPS-PCT.patch
+
+Signed-off-by: Jeremy Allison <jallison@ciq.com>
+---
+ crypto/ecdh.c | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/crypto/ecdh.c b/crypto/ecdh.c
+index fe8966511e9d..af702cfefd22 100644
+--- a/crypto/ecdh.c
++++ b/crypto/ecdh.c
+@@ -10,6 +10,7 @@
+ #include <crypto/kpp.h>
+ #include <crypto/ecdh.h>
+ #include <linux/scatterlist.h>
++#include <linux/fips.h>
+ #include "ecc.h"
+ 
+ struct ecdh_ctx {
+@@ -94,6 +95,36 @@ static int ecdh_compute_value(struct kpp_request *req)
+ 				       ctx->private_key, public_key);
+ 		buf = public_key;
+ 		nbytes = public_key_sz;
++
++		/*
++		 * SP800-56Arev3, 5.6.2.1.4: ("Owner Assurance of
++		 * Pair-wise Consistency"): recompute the public key
++		 * and check if the results match.
++		 */
++		if (fips_enabled) {
++			u64 *public_key_pct;
++
++			if (ret < 0)
++				goto free_all;
++
++			public_key_pct = kmalloc(public_key_sz, GFP_KERNEL);
++			if (!public_key_pct) {
++				ret = -ENOMEM;
++				goto free_all;
++			}
++
++			ret = ecc_make_pub_key(ctx->curve_id, ctx->ndigits,
++					       ctx->private_key,
++					       public_key_pct);
++			if (ret < 0) {
++				kfree(public_key_pct);
++				goto free_all;
++			}
++
++			if (memcmp(public_key, public_key_pct, public_key_sz))
++				panic("ECDH PCT failed in FIPS mode");
++			kfree(public_key_pct);
++		}
+ 	}
+ 
+ 	if (ret < 0)
+-- 
+2.47.3
+

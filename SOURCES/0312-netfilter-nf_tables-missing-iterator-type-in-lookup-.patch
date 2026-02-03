@@ -1,0 +1,54 @@
+From f1d7af0e869f55a6b1f77ceb077b84837adea509 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Mon, 5 Jan 2026 14:57:57 +0100
+Subject: [PATCH] netfilter: nf_tables: missing iterator type in lookup walk
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-37652
+cve-bf CVE-2024-27017
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit efefd4f00c967d00ad7abe092554ffbb70c1a793
+
+Add missing decorator type to lookup expression and tighten WARN_ON_ONCE
+check in pipapo to spot earlier that this is unset.
+
+Fixes: 29b359cf6d95 ("netfilter: nft_set_pipapo: walk over current view on netlink dump")
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit efefd4f00c967d00ad7abe092554ffbb70c1a793)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nft_lookup.c     | 1 +
+ net/netfilter/nft_set_pipapo.c | 3 ++-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/net/netfilter/nft_lookup.c b/net/netfilter/nft_lookup.c
+index a62cb368daff..f16ebe94e98a 100644
+--- a/net/netfilter/nft_lookup.c
++++ b/net/netfilter/nft_lookup.c
+@@ -217,6 +217,7 @@ static int nft_lookup_validate(const struct nft_ctx *ctx,
+ 		return 0;
+ 
+ 	iter.genmask	= nft_genmask_next(ctx->net);
++	iter.type	= NFT_ITER_UPDATE;
+ 	iter.skip	= 0;
+ 	iter.count	= 0;
+ 	iter.err	= 0;
+diff --git a/net/netfilter/nft_set_pipapo.c b/net/netfilter/nft_set_pipapo.c
+index ebd9500ec54b..73523310f0b8 100644
+--- a/net/netfilter/nft_set_pipapo.c
++++ b/net/netfilter/nft_set_pipapo.c
+@@ -2025,7 +2025,8 @@ static void nft_pipapo_walk(const struct nft_ctx *ctx, struct nft_set *set,
+ 	struct nft_pipapo_field *f;
+ 	int i, r;
+ 
+-	WARN_ON_ONCE(iter->type == NFT_ITER_UNSPEC);
++	WARN_ON_ONCE(iter->type != NFT_ITER_READ &&
++		     iter->type != NFT_ITER_UPDATE);
+ 
+ 	rcu_read_lock();
+ 	if (iter->type == NFT_ITER_READ)
+-- 
+2.47.3
+
