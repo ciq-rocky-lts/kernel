@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 3
+%define ciq_patch_version 4
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1015,6 +1015,10 @@ Patch1000028: 1028-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
 Patch1000029: 1029-i40e-fix-idx-validation-in-config-queues-msg.patch
 Patch1000030: 1030-io_uring-waitid-always-prune-wait-queue-entry-in-io_.patch
 Patch1000031: 1031-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
+#CIQ Patch Version: 570.60.1+4.1.el9_6_ciq
+Patch1000032: 1032-sctp-detect-and-prevent-references-to-a-freed-transp.patch
+Patch1000033: 1033-tls-wait-for-pending-async-decryptions-if-tls_strp_m.patch
+Patch1000034: 1034-usb-dwc3-Fix-race-condition-between-concurrent-dwc3_.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1805,6 +1809,9 @@ ApplyOptionalPatch 1028-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
 ApplyOptionalPatch 1029-i40e-fix-idx-validation-in-config-queues-msg.patch
 ApplyOptionalPatch 1030-io_uring-waitid-always-prune-wait-queue-entry-in-io_.patch
 ApplyOptionalPatch 1031-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
+ApplyOptionalPatch 1032-sctp-detect-and-prevent-references-to-a-freed-transp.patch
+ApplyOptionalPatch 1033-tls-wait-for-pending-async-decryptions-if-tls_strp_m.patch
+ApplyOptionalPatch 1034-usb-dwc3-Fix-race-condition-between-concurrent-dwc3_.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3918,6 +3925,11 @@ fi
 #
 #
 %changelog
+* Thu Feb 05 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-570.60.1+4.1.el9_6_ciq
+- usb: dwc3: Fix race condition between concurrent dwc3_remove_requests() call paths (Brett Mastbergen) [ciqres] {CVE-2025-68287}
+- tls: wait for pending async decryptions if tls_strp_msg_hold fails (Brett Mastbergen) [ciqres] {CVE-2025-40176}
+- sctp: detect and prevent references to a freed transport in sendmsg (Brett Mastbergen) [ciqres] {CVE-2025-23142}
+
 * Wed Jan 07 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+3.1.el9_6_ciq
 - tcp: Don't call reqsk_fastopen_remove() in tcp_conn_request(). (Brett Mastbergen) [ciqres] {CVE-2025-40186}
 - io_uring/waitid: always prune wait queue entry in io_waitid_wait() (Brett Mastbergen) [ciqres] {CVE-2025-40047}
