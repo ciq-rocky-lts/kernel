@@ -1,0 +1,42 @@
+From 9d4c3ca4d88170496f19ab82bcce13224a04f5a5 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Wed, 21 Jan 2026 10:21:08 -0500
+Subject: [PATCH] Bluetooth: ISO: Fix possible UAF on iso_conn_free
+
+jira VULN-160179
+cve CVE-2025-40141
+commit-author Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+commit 9950f095d6c875dbe0c9ebfcf972ec88fdf26fc8
+
+This attempt to fix similar issue to sco_conn_free where if the
+conn->sk is not set to NULL may lead to UAF on iso_conn_free.
+
+Fixes: ccf74f2390d6 ("Bluetooth: Add BTPROTO_ISO socket type")
+	Signed-off-by: Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+(cherry picked from commit 9950f095d6c875dbe0c9ebfcf972ec88fdf26fc8)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/bluetooth/iso.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/net/bluetooth/iso.c b/net/bluetooth/iso.c
+index bb0ded2132f4..95381b9cd464 100644
+--- a/net/bluetooth/iso.c
++++ b/net/bluetooth/iso.c
+@@ -626,6 +626,13 @@ static void iso_sock_kill(struct sock *sk)
+ 
+ 	BT_DBG("sk %p state %d", sk, sk->sk_state);
+ 
++	/* Sock is dead, so set conn->sk to NULL to avoid possible UAF */
++	if (iso_pi(sk)->conn) {
++		iso_conn_lock(iso_pi(sk)->conn);
++		iso_pi(sk)->conn->sk = NULL;
++		iso_conn_unlock(iso_pi(sk)->conn);
++	}
++
+ 	/* Kill poor orphan */
+ 	bt_sock_unlink(&iso_sk_list, sk);
+ 	sock_set_flag(sk, SOCK_DEAD);
+-- 
+2.47.3
+

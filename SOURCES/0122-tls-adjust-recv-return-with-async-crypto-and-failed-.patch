@@ -1,0 +1,55 @@
+From 254e56f32559f9594dbcd8cef260090245ec2b5f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 21 Jan 2026 00:04:40 +0100
+Subject: [PATCH] tls: adjust recv return with async crypto and failed copy to
+ userspace
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-136508
+cve-pre CVE-2025-39682
+commit-author Sabrina Dubroca <sd@queasysnail.net>
+commit 85eef9a41d019b59be7bc91793f26251909c0710
+
+process_rx_list may not copy as many bytes as we want to the userspace
+buffer, for example in case we hit an EFAULT during the copy. If this
+happens, we should only count the bytes that were actually copied,
+which may be 0.
+
+Subtracting async_copy_bytes is correct in both peek and !peek cases,
+because decrypted == async_copy_bytes + peeked for the peek case: peek
+is always !ZC, and we can go through either the sync or async path. In
+the async case, we add chunk to both decrypted and
+async_copy_bytes. In the sync case, we add chunk to both decrypted and
+peeked. I missed that in commit 6caaf104423d ("tls: fix peeking with
+sync+async decryption").
+
+Fixes: 4d42cd6bc2ac ("tls: rx: fix return value for async crypto")
+	Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+Link: https://lore.kernel.org/r/1b5a1eaab3c088a9dd5d9f1059ceecd7afe888d1.1711120964.git.sd@queasysnail.net
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 85eef9a41d019b59be7bc91793f26251909c0710)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/tls/tls_sw.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/net/tls/tls_sw.c b/net/tls/tls_sw.c
+index b4fe3ba4774b..48efae996914 100644
+--- a/net/tls/tls_sw.c
++++ b/net/tls/tls_sw.c
+@@ -2182,6 +2182,9 @@ int tls_sw_recvmsg(struct sock *sk,
+ 		else
+ 			err = process_rx_list(ctx, msg, &control, 0,
+ 					      async_copy_bytes, is_peek, NULL);
++
++		/* we could have copied less than we wanted, and possibly nothing */
++		decrypted += max(err, 0) - async_copy_bytes;
+ 	}
+ 
+ 	copied += decrypted;
+-- 
+2.47.3
+

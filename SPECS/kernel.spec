@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 13
+%define ciq_patch_version 14
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1117,6 +1117,33 @@ Patch1000114: 0094-scsi-lpfc-Fix-buffer-free-clear-order-in-deferred-re.patch
 Patch1000115: 0095-wifi-cfg80211-fix-use-after-free-in-cmp_bss.patch
 Patch1000116: 0096-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
 Patch1000117: 0097-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
+#CIQ Patch Version: 427.42.1+14.1.el9_4_ciq
+Patch1000118: 0098-sctp-detect-and-prevent-references-to-a-freed-transp.patch
+Patch1000119: 0099-nfsd-handle-get_client_locked-failure-in-nfsd4_setcl.patch
+Patch1000120: 0100-smb-client-fix-race-with-concurrent-opens-in-rename-.patch
+Patch1000121: 0101-i40e-fix-idx-validation-in-config-queues-msg.patch
+Patch1000122: 0102-Bluetooth-hci_event-Fix-UAF-in-hci_acl_create_conn_s.patch
+Patch1000123: 0103-Bluetooth-ISO-Fix-possible-UAF-on-iso_conn_free.patch
+Patch1000124: 0104-tls-wait-for-pending-async-decryptions-if-tls_strp_m.patch
+Patch1000125: 0105-libceph-fix-potential-use-after-free-in-have_mon_and.patch
+Patch1000126: 0106-usb-dwc3-Fix-race-condition-between-concurrent-dwc3_.patch
+Patch1000127: 0107-net-forward_alloc_get-depends-on-CONFIG_MPTCP.patch
+Patch1000128: 0108-net-annotate-data-races-around-sk-sk_forward_alloc.patch
+Patch1000129: 0109-udp-Fix-memory-accounting-leak.patch
+Patch1000130: 0110-Bluetooth-hci_core-Fix-use-after-free-in-vhci_flush.patch
+Patch1000131: 0111-HID-core-Harden-s32ton-against-conversion-to-0-bits.patch
+Patch1000132: 0112-sunrpc-fix-handling-of-server-side-tls-alerts.patch
+Patch1000133: 0113-KVM-arm64-Tear-down-vGIC-on-failed-vCPU-creation.patch
+Patch1000134: 0114-ALSA-ump-Fix-buffer-overflow-at-UMP-SysEx-message-co.patch
+Patch1000135: 0115-ASoC-Intel-bytcr_rt5640-Fix-invalid-quirk-input-mapp.patch
+Patch1000136: 0116-drm-vmwgfx-Validate-command-header-size-against-SVGA.patch
+Patch1000137: 0117-sunrpc-fix-client-side-handling-of-tls-alerts.patch
+Patch1000138: 0118-SUNRPC-call-xs_sock_process_cmsg-for-all-cmsg.patch
+Patch1000139: 0119-tls-stop-recv-if-initial-process_rx_list-gave-us-non.patch
+Patch1000140: 0120-net-tls-fix-returned-read-length-with-async-decrypt.patch
+Patch1000141: 0121-tls-don-t-skip-over-different-type-records-from-the-.patch
+Patch1000142: 0122-tls-adjust-recv-return-with-async-crypto-and-failed-.patch
+Patch1000143: 0123-tls-fix-handling-of-zero-length-records-on-the-rx_li.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1987,6 +2014,32 @@ ApplyOptionalPatch 0094-scsi-lpfc-Fix-buffer-free-clear-order-in-deferred-re.pat
 ApplyOptionalPatch 0095-wifi-cfg80211-fix-use-after-free-in-cmp_bss.patch
 ApplyOptionalPatch 0096-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
 ApplyOptionalPatch 0097-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
+ApplyOptionalPatch 0098-sctp-detect-and-prevent-references-to-a-freed-transp.patch
+ApplyOptionalPatch 0099-nfsd-handle-get_client_locked-failure-in-nfsd4_setcl.patch
+ApplyOptionalPatch 0100-smb-client-fix-race-with-concurrent-opens-in-rename-.patch
+ApplyOptionalPatch 0101-i40e-fix-idx-validation-in-config-queues-msg.patch
+ApplyOptionalPatch 0102-Bluetooth-hci_event-Fix-UAF-in-hci_acl_create_conn_s.patch
+ApplyOptionalPatch 0103-Bluetooth-ISO-Fix-possible-UAF-on-iso_conn_free.patch
+ApplyOptionalPatch 0104-tls-wait-for-pending-async-decryptions-if-tls_strp_m.patch
+ApplyOptionalPatch 0105-libceph-fix-potential-use-after-free-in-have_mon_and.patch
+ApplyOptionalPatch 0106-usb-dwc3-Fix-race-condition-between-concurrent-dwc3_.patch
+ApplyOptionalPatch 0107-net-forward_alloc_get-depends-on-CONFIG_MPTCP.patch
+ApplyOptionalPatch 0108-net-annotate-data-races-around-sk-sk_forward_alloc.patch
+ApplyOptionalPatch 0109-udp-Fix-memory-accounting-leak.patch
+ApplyOptionalPatch 0110-Bluetooth-hci_core-Fix-use-after-free-in-vhci_flush.patch
+ApplyOptionalPatch 0111-HID-core-Harden-s32ton-against-conversion-to-0-bits.patch
+ApplyOptionalPatch 0112-sunrpc-fix-handling-of-server-side-tls-alerts.patch
+ApplyOptionalPatch 0113-KVM-arm64-Tear-down-vGIC-on-failed-vCPU-creation.patch
+ApplyOptionalPatch 0114-ALSA-ump-Fix-buffer-overflow-at-UMP-SysEx-message-co.patch
+ApplyOptionalPatch 0115-ASoC-Intel-bytcr_rt5640-Fix-invalid-quirk-input-mapp.patch
+ApplyOptionalPatch 0116-drm-vmwgfx-Validate-command-header-size-against-SVGA.patch
+ApplyOptionalPatch 0117-sunrpc-fix-client-side-handling-of-tls-alerts.patch
+ApplyOptionalPatch 0118-SUNRPC-call-xs_sock_process_cmsg-for-all-cmsg.patch
+ApplyOptionalPatch 0119-tls-stop-recv-if-initial-process_rx_list-gave-us-non.patch
+ApplyOptionalPatch 0120-net-tls-fix-returned-read-length-with-async-decrypt.patch
+ApplyOptionalPatch 0121-tls-don-t-skip-over-different-type-records-from-the-.patch
+ApplyOptionalPatch 0122-tls-adjust-recv-return-with-async-crypto-and-failed-.patch
+ApplyOptionalPatch 0123-tls-fix-handling-of-zero-length-records-on-the-rx_li.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4064,6 +4117,34 @@ fi
 #
 #
 %changelog
+* Mon Feb 09 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+14.1.el9_4_ciq
+- tls: fix handling of zero-length records on the rx_list (Marcin Wcisło) [ciqres] {CVE-2025-39682}
+- tls: adjust recv return with async crypto and failed copy to userspace (Marcin Wcisło) [ciqres] {CVE-2025-39682}
+- tls: don't skip over different type records from the rx_list (Marcin Wcisło) [ciqres] {CVE-2025-39682}
+- net: tls: fix returned read length with async decrypt (Marcin Wcisło) [ciqres] {CVE-2025-39682}
+- tls: stop recv() if initial process_rx_list gave us non-DATA (Marcin Wcisło) [ciqres] {CVE-2024-58239}
+- SUNRPC: call xs_sock_process_cmsg for all cmsg (Marcin Wcisło) [ciqres] {CVE-2025-38571}
+- sunrpc: fix client side handling of tls alerts (Marcin Wcisło) [ciqres] {CVE-2025-38571}
+- drm/vmwgfx: Validate command header size against SVGA_CMD_MAX_DATASIZE (Brett Mastbergen) [ciqres] {CVE-2025-40277}
+- ASoC: Intel: bytcr_rt5640: Fix invalid quirk input mapping (Brett Mastbergen) [ciqres] {CVE-2025-40154}
+- ALSA: ump: Fix buffer overflow at UMP SysEx message conversion (Brett Mastbergen) [ciqres] {CVE-2025-37891}
+- KVM: arm64: Tear down vGIC on failed vCPU creation (Brett Mastbergen) [ciqres] {CVE-2025-37849}
+- sunrpc: fix handling of server side tls alerts (Marcin Wcisło) [ciqres] {CVE-2025-38566}
+- HID: core: Harden s32ton() against conversion to 0 bits (Marcin Wcisło) [ciqres] {CVE-2025-38556}
+- Bluetooth: hci_core: Fix use-after-free in vhci_flush() (Marcin Wcisło) [ciqres] {CVE-2025-38250}
+- udp: Fix memory accounting leak. (Marcin Wcisło) [ciqres] {CVE-2025-22058}
+- net: annotate data-races around sk->sk_forward_alloc (Marcin Wcisło) [ciqres] {CVE-2025-22058}
+- net: forward_alloc_get depends on CONFIG_MPTCP (Marcin Wcisło) [ciqres] {CVE-2025-22058}
+- usb: dwc3: Fix race condition between concurrent dwc3_remove_requests() call paths (Brett Mastbergen) [ciqres] {CVE-2025-68287}
+- libceph: fix potential use-after-free in have_mon_and_osd_map() (Brett Mastbergen) [ciqres] {CVE-2025-68285}
+- tls: wait for pending async decryptions if tls_strp_msg_hold fails (Brett Mastbergen) [ciqres] {CVE-2025-40176}
+- Bluetooth: ISO: Fix possible UAF on iso_conn_free (Brett Mastbergen) [ciqres] {CVE-2025-40141}
+- Bluetooth: hci_event: Fix UAF in hci_acl_create_conn_sync (Brett Mastbergen) [ciqres] {CVE-2025-39982}
+- i40e: fix idx validation in config queues msg (Brett Mastbergen) [ciqres] {CVE-2025-39971}
+- smb: client: fix race with concurrent opens in rename(2) (Brett Mastbergen) [ciqres] {CVE-2025-39825}
+- nfsd: handle get_client_locked() failure in nfsd4_setclientid_confirm() (Brett Mastbergen) [ciqres] {CVE-2025-38724}
+- sctp: detect and prevent references to a freed transport in sendmsg (Brett Mastbergen) [ciqres] {CVE-2025-23142}
+
 * Sun Jan 11 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+13.1.el9_4_ciq
 - tcp: Don't call reqsk_fastopen_remove() in tcp_conn_request(). (Shreeya Patel) [ciqres] {CVE-2025-40186}
 - tcp: Clear tcp_sk(sk)->fastopen_rsk in tcp_disconnect(). (Shreeya Patel) [ciqres] {CVE-2025-39955}

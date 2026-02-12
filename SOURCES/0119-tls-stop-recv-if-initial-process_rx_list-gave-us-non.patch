@@ -1,0 +1,49 @@
+From 1bc317e22988496f765b553346bc0b19889b6d18 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 21 Jan 2026 00:04:09 +0100
+Subject: [PATCH] tls: stop recv() if initial process_rx_list gave us non-DATA
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-131361
+cve CVE-2024-58239
+commit-author Sabrina Dubroca <sd@queasysnail.net>
+commit fdfbaec5923d9359698cbb286bc0deadbb717504
+
+If we have a non-DATA record on the rx_list and another record of the
+same type still on the queue, we will end up merging them:
+ - process_rx_list copies the non-DATA record
+ - we start the loop and process the first available record since it's
+   of the same type
+ - we break out of the loop since the record was not DATA
+
+Just check the record type and jump to the end in case process_rx_list
+did some work.
+
+Fixes: 692d7b5d1f91 ("tls: Fix recvmsg() to be able to peek across multiple records")
+	Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+Link: https://lore.kernel.org/r/bd31449e43bd4b6ff546f5c51cf958c31c511deb.1708007371.git.sd@queasysnail.net
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit fdfbaec5923d9359698cbb286bc0deadbb717504)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/tls/tls_sw.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/tls/tls_sw.c b/net/tls/tls_sw.c
+index 7ef7dda013ca..a31305bbceeb 100644
+--- a/net/tls/tls_sw.c
++++ b/net/tls/tls_sw.c
+@@ -2015,7 +2015,7 @@ int tls_sw_recvmsg(struct sock *sk,
+ 		goto end;
+ 
+ 	copied = err;
+-	if (len <= copied)
++	if (len <= copied || (copied && control != TLS_RECORD_TYPE_DATA))
+ 		goto end;
+ 
+ 	target = sock_rcvlowat(sk, flags & MSG_WAITALL, len);
+-- 
+2.47.3
+

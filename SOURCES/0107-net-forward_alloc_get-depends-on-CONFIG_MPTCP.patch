@@ -1,0 +1,56 @@
+From 1548a3d755c3006cb744cc645c9d08ce53aa123e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 13 Jan 2026 00:48:30 +0100
+Subject: [PATCH] net: forward_alloc_get depends on CONFIG_MPTCP
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-65245
+cve-pre CVE-2025-22058
+commit-author Eric Dumazet <edumazet@google.com>
+commit 6c302e799a0d4be1362f505453b714fe05d91f2a
+
+(struct proto)->sk_forward_alloc is currently only used by MPTCP.
+
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit 6c302e799a0d4be1362f505453b714fe05d91f2a)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/net/sock.h | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/include/net/sock.h b/include/net/sock.h
+index 07fc5cadf120..d4caa1443c47 100644
+--- a/include/net/sock.h
++++ b/include/net/sock.h
+@@ -1298,7 +1298,9 @@ struct proto {
+ 	unsigned int		inuse_idx;
+ #endif
+ 
++#if IS_ENABLED(CONFIG_MPTCP)
+ 	int			(*forward_alloc_get)(const struct sock *sk);
++#endif
+ 
+ 	bool			(*stream_memory_free)(const struct sock *sk, int wake);
+ 	bool			(*sock_is_readable)(struct sock *sk);
+@@ -1405,10 +1407,11 @@ INDIRECT_CALLABLE_DECLARE(bool tcp_stream_memory_free(const struct sock *sk, int
+ 
+ static inline int sk_forward_alloc_get(const struct sock *sk)
+ {
+-	if (!sk->sk_prot->forward_alloc_get)
+-		return sk->sk_forward_alloc;
+-
+-	return sk->sk_prot->forward_alloc_get(sk);
++#if IS_ENABLED(CONFIG_MPTCP)
++	if (sk->sk_prot->forward_alloc_get)
++		return sk->sk_prot->forward_alloc_get(sk);
++#endif
++	return sk->sk_forward_alloc;
+ }
+ 
+ static inline bool __sk_stream_memory_free(const struct sock *sk, int wake)
+-- 
+2.47.3
+

@@ -1,0 +1,90 @@
+From 71d8695028734d351af7a0bbe54027e111fe69ab Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Wed, 21 Jan 2026 10:19:33 -0500
+Subject: [PATCH] smb: client: fix race with concurrent opens in rename(2)
+
+jira VULN-155189
+cve CVE-2025-39825
+commit-author Paulo Alcantara <pc@manguebit.org>
+commit d84291fc7453df7881a970716f8256273aca5747
+
+Besides sending the rename request to the server, the rename process
+also involves closing any deferred close, waiting for outstanding I/O
+to complete as well as marking all existing open handles as deleted to
+prevent them from deferring closes, which increases the race window
+for potential concurrent opens on the target file.
+
+Fix this by unhashing the dentry in advance to prevent any concurrent
+opens on the target.
+
+	Signed-off-by: Paulo Alcantara (Red Hat) <pc@manguebit.org>
+	Reviewed-by: David Howells <dhowells@redhat.com>
+	Cc: Al Viro <viro@zeniv.linux.org.uk>
+	Cc: linux-cifs@vger.kernel.org
+	Signed-off-by: Steve French <stfrench@microsoft.com>
+(cherry picked from commit d84291fc7453df7881a970716f8256273aca5747)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ fs/smb/client/inode.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/fs/smb/client/inode.c b/fs/smb/client/inode.c
+index e305f4cf0fa8..5cca0674564f 100644
+--- a/fs/smb/client/inode.c
++++ b/fs/smb/client/inode.c
+@@ -2146,6 +2146,7 @@ cifs_rename2(struct user_namespace *mnt_userns, struct inode *source_dir,
+ 	struct cifs_sb_info *cifs_sb;
+ 	struct tcon_link *tlink;
+ 	struct cifs_tcon *tcon;
++	bool rehash = false;
+ 	unsigned int xid;
+ 	int rc, tmprc;
+ 	int retry_count = 0;
+@@ -2161,6 +2162,17 @@ cifs_rename2(struct user_namespace *mnt_userns, struct inode *source_dir,
+ 	if (unlikely(cifs_forced_shutdown(cifs_sb)))
+ 		return -EIO;
+ 
++	/*
++	 * Prevent any concurrent opens on the target by unhashing the dentry.
++	 * VFS already unhashes the target when renaming directories.
++	 */
++	if (d_is_positive(target_dentry) && !d_is_dir(target_dentry)) {
++		if (!d_unhashed(target_dentry)) {
++			d_drop(target_dentry);
++			rehash = true;
++		}
++	}
++
+ 	tlink = cifs_sb_tlink(cifs_sb);
+ 	if (IS_ERR(tlink))
+ 		return PTR_ERR(tlink);
+@@ -2200,6 +2212,8 @@ cifs_rename2(struct user_namespace *mnt_userns, struct inode *source_dir,
+ 		}
+ 	}
+ 
++	if (!rc)
++		rehash = false;
+ 	/*
+ 	 * No-replace is the natural behavior for CIFS, so skip unlink hacks.
+ 	 */
+@@ -2258,6 +2272,8 @@ cifs_rename2(struct user_namespace *mnt_userns, struct inode *source_dir,
+ 			goto cifs_rename_exit;
+ 		rc = cifs_do_rename(xid, source_dentry, from_name,
+ 				    target_dentry, to_name);
++		if (!rc)
++			rehash = false;
+ 	}
+ 
+ 	/* force revalidate to go get info when needed */
+@@ -2267,6 +2283,8 @@ cifs_rename2(struct user_namespace *mnt_userns, struct inode *source_dir,
+ 		target_dir->i_mtime = current_time(source_dir);
+ 
+ cifs_rename_exit:
++	if (rehash)
++		d_rehash(target_dentry);
+ 	kfree(info_buf_source);
+ 	free_dentry_path(page2);
+ 	free_dentry_path(page1);
+-- 
+2.47.3
+

@@ -1,0 +1,52 @@
+From 24966a4eef5d6eec17ed0c85ddebf22f16ed82a5 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Wed, 21 Jan 2026 10:20:12 -0500
+Subject: [PATCH] i40e: fix idx validation in config queues msg
+
+jira VULN-158752
+cve CVE-2025-39971
+commit-author Lukasz Czapnik <lukasz.czapnik@intel.com>
+commit f1ad24c5abe1eaef69158bac1405a74b3c365115
+
+Ensure idx is within range of active/initialized TCs when iterating over
+vf->ch[idx] in i40e_vc_config_queues_msg().
+
+Fixes: c27eac48160d ("i40e: Enable ADq and create queue channel/s on VF")
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Lukasz Czapnik <lukasz.czapnik@intel.com>
+	Reviewed-by: Aleksandr Loktionov <aleksandr.loktionov@intel.com>
+	Signed-off-by: Przemek Kitszel <przemyslaw.kitszel@intel.com>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+	Tested-by: Kamakshi Nellore <nellorex.kamakshi@intel.com> (A Contingent Worker at Intel)
+	Signed-off-by: Tony Nguyen <anthony.l.nguyen@intel.com>
+(cherry picked from commit f1ad24c5abe1eaef69158bac1405a74b3c365115)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c b/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c
+index 37e77163da4c..abcc4c3ccc46 100644
+--- a/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c
++++ b/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c
+@@ -2386,7 +2386,7 @@ static int i40e_vc_config_queues_msg(struct i40e_vf *vf, u8 *msg)
+ 		}
+ 
+ 		if (vf->adq_enabled) {
+-			if (idx >= ARRAY_SIZE(vf->ch)) {
++			if (idx >= vf->num_tc) {
+ 				aq_ret = -ENODEV;
+ 				goto error_param;
+ 			}
+@@ -2407,7 +2407,7 @@ static int i40e_vc_config_queues_msg(struct i40e_vf *vf, u8 *msg)
+ 		 * to its appropriate VSIs based on TC mapping
+ 		 */
+ 		if (vf->adq_enabled) {
+-			if (idx >= ARRAY_SIZE(vf->ch)) {
++			if (idx >= vf->num_tc) {
+ 				aq_ret = -ENODEV;
+ 				goto error_param;
+ 			}
+-- 
+2.47.3
+
