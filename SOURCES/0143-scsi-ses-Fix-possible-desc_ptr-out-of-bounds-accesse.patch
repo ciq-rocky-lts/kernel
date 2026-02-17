@@ -1,0 +1,55 @@
+From d07a8bb8c745b4040ae2a76059bcc3191cf9eab5 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Thu, 15 Jan 2026 10:28:54 +0100
+Subject: [PATCH] scsi: ses: Fix possible desc_ptr out-of-bounds accesses
+
+jira VULN-158435
+cve CVE-2023-53675
+commit-author Tomas Henzl <thenzl@redhat.com>
+commit 801ab13d50cf3d26170ee073ea8bb4eececb76ab
+
+Sanitize possible desc_ptr out-of-bounds accesses in
+ses_enclosure_data_process().
+
+Link: https://lore.kernel.org/r/20230202162451.15346-4-thenzl@redhat.com
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Tomas Henzl <thenzl@redhat.com>
+	Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+(cherry picked from commit 801ab13d50cf3d26170ee073ea8bb4eececb76ab)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ drivers/scsi/ses.c | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/scsi/ses.c b/drivers/scsi/ses.c
+index 90c1a0eb6a2d..3076985f9a49 100644
+--- a/drivers/scsi/ses.c
++++ b/drivers/scsi/ses.c
+@@ -588,15 +588,19 @@ static void ses_enclosure_data_process(struct enclosure_device *edev,
+ 			int max_desc_len;
+ 
+ 			if (desc_ptr) {
+-				if (desc_ptr >= buf + page7_len) {
++				if (desc_ptr + 3 >= buf + page7_len) {
+ 					desc_ptr = NULL;
+ 				} else {
+ 					len = (desc_ptr[2] << 8) + desc_ptr[3];
+ 					desc_ptr += 4;
+-					/* Add trailing zero - pushes into
+-					 * reserved space */
+-					desc_ptr[len] = '\0';
+-					name = desc_ptr;
++					if (desc_ptr + len > buf + page7_len)
++						desc_ptr = NULL;
++					else {
++						/* Add trailing zero - pushes into
++						 * reserved space */
++						desc_ptr[len] = '\0';
++						name = desc_ptr;
++					}
+ 				}
+ 			}
+ 			if (type_ptr[0] == ENCLOSURE_COMPONENT_DEVICE ||
+-- 
+2.47.3
+

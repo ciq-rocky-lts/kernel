@@ -1,0 +1,41 @@
+From d2cac63c18898bce1571b469a3fca837bdb7fa0e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 14 Dec 2022 10:39:11 +0800
+Subject: [PATCH] cifs: Remove duplicated include in cifsglob.h
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-154751
+cve-bf CVE-2022-50341
+commit-author Yang Li <yang.lee@linux.alibaba.com>
+commit d74f4a3f6d88a2416564bc6bf937e423a4ae8f8e
+
+./fs/cifs/cifsglob.h: linux/scatterlist.h is included more than once.
+
+Link: https://bugzilla.openanolis.cn/show_bug.cgi?id=3459
+Fixes: f7f291e14dde ("cifs: fix oops during encryption")
+	Reported-by: Abaci Robot <abaci@linux.alibaba.com>
+	Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
+	Signed-off-by: Steve French <stfrench@microsoft.com>
+(cherry picked from commit d74f4a3f6d88a2416564bc6bf937e423a4ae8f8e)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/cifs/cifsglob.h | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/fs/cifs/cifsglob.h b/fs/cifs/cifsglob.h
+index 3e3db15038d7..bf8ccff78b02 100644
+--- a/fs/cifs/cifsglob.h
++++ b/fs/cifs/cifsglob.h
+@@ -29,7 +29,6 @@
+ #include "cifs_fs_sb.h"
+ #include "cifsacl.h"
+ #include <crypto/internal/hash.h>
+-#include <linux/scatterlist.h>
+ #include <uapi/linux/cifs/cifs_mount.h>
+ #include "smb2pdu.h"
+ #include "smb2glob.h"
+-- 
+2.47.3
+

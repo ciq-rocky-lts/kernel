@@ -1,0 +1,69 @@
+From aefdefcc11cfaa93ff5d9d0820abc32540ae6426 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Fri, 5 Dec 2025 14:27:25 +0100
+Subject: [PATCH] sch_hfsc: Fix qlen accounting bug when using peek in
+ hfsc_enqueue()
+
+jira VULN-68350
+cve CVE-2025-38000
+commit-author Cong Wang <xiyou.wangcong@gmail.com>
+commit 3f981138109f63232a5fb7165938d4c945cc1b9d
+upstream-diff |
+	Adjusted context due to commit
+	ac9fe7dd8e730 ("net_sched: hfsc: Address reentrant enqueue adding class to eltree twice")
+	being backported before this one.
+
+When enqueuing the first packet to an HFSC class, hfsc_enqueue() calls the
+child qdisc's peek() operation before incrementing sch->q.qlen and
+sch->qstats.backlog. If the child qdisc uses qdisc_peek_dequeued(), this may
+trigger an immediate dequeue and potential packet drop. In such cases,
+qdisc_tree_reduce_backlog() is called, but the HFSC qdisc's qlen and backlog
+have not yet been updated, leading to inconsistent queue accounting. This
+can leave an empty HFSC class in the active list, causing further
+consequences like use-after-free.
+
+This patch fixes the bug by moving the increment of sch->q.qlen and
+sch->qstats.backlog before the call to the child qdisc's peek() operation.
+This ensures that queue length and backlog are always accurate when packet
+drops or dequeues are triggered during the peek.
+
+Fixes: 12d0ad3be9c3 ("net/sched/sch_hfsc.c: handle corner cases where head may change invalidating calculated deadline")
+	Reported-by: Mingi Cho <mincho@theori.io>
+	Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+Link: https://patch.msgid.link/20250518222038.58538-2-xiyou.wangcong@gmail.com
+	Reviewed-by: Jamal Hadi Salim <jhs@mojatatu.com>
+	Signed-off-by: Paolo Abeni <pabeni@redhat.com>
+(cherry picked from commit 3f981138109f63232a5fb7165938d4c945cc1b9d)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ net/sched/sch_hfsc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/net/sched/sch_hfsc.c b/net/sched/sch_hfsc.c
+index 730a2fd2ad11..53b80c79cc60 100644
+--- a/net/sched/sch_hfsc.c
++++ b/net/sched/sch_hfsc.c
+@@ -1579,6 +1579,9 @@ hfsc_enqueue(struct sk_buff *skb, struct Qdisc *sch, struct sk_buff **to_free)
+ 		return err;
+ 	}
+ 
++	sch->qstats.backlog += len;
++	sch->q.qlen++;
++
+ 	if (first && !cl_in_el_or_vttree(cl)) {
+ 		if (cl->cl_flags & HFSC_RSC)
+ 			init_ed(cl, len);
+@@ -1594,9 +1597,6 @@ hfsc_enqueue(struct sk_buff *skb, struct Qdisc *sch, struct sk_buff **to_free)
+ 
+ 	}
+ 
+-	sch->qstats.backlog += len;
+-	sch->q.qlen++;
+-
+ 	return NET_XMIT_SUCCESS;
+ }
+ 
+-- 
+2.47.3
+

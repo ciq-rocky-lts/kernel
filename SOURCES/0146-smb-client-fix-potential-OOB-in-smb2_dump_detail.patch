@@ -1,0 +1,112 @@
+From ec2fbb2b2aff47d198a68757524e8c5ba20edaa0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 27 Jan 2026 18:07:57 +0100
+Subject: [PATCH] smb: client: fix potential OOB in smb2_dump_detail()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-4131
+cve CVE-2023-6610
+commit-author Paulo Alcantara <pc@manguebit.com>
+commit 567320c46a60a3c39b69aa1df802d753817a3f86
+upstream-diff |
+  1. Modified different files due to missing
+     38c8a9a52082579090e34c033d439ed2cd1a462d ("smb: move client and
+     server files to common directory fs/smb")
+     - `fs/cifs/smb2ops.c' instead of `fs/smb/client/smb2ops.c'
+     - `fs/cifs/smb2misc.c' instead of `fs/smb/client/smb2misc.c'
+  2. Accounted for the missing commit
+     0d35e382e4e96a4fd97a1438bc1b11a91d2d85a6 ("cifs: Create a new shared
+     file holding smb2 pdu definitions") in `fs/cifs/smb2ops.c' (although
+     it's inconsequential because CONFIG_CIFS_DEBUG2 isn't enabled in any
+     default configuration anyway).
+  3. Accounted for the missing commit
+     68ed14496b032b0c9ef21b38ee45c6c8f3a18ff1 ("cifs: remove unused server
+     parameter from calc_smb_size()") in the `calc_smb_size()' call.
+
+Validate SMB message with ->check_message() before calling
+->calc_smb_size().
+
+This fixes CVE-2023-6610.
+
+	Reported-by: j51569436@gmail.com
+Closes: https://bugzilla.kernel.org/show_bug.cgi?id=218219
+Cc; stable@vger.kernel.org
+	Signed-off-by: Paulo Alcantara <pc@manguebit.com>
+	Signed-off-by: Steve French <stfrench@microsoft.com>
+(cherry picked from commit 567320c46a60a3c39b69aa1df802d753817a3f86)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/cifs/smb2misc.c | 30 +++++++++++++++---------------
+ fs/cifs/smb2ops.c  |  6 ++++--
+ 2 files changed, 19 insertions(+), 17 deletions(-)
+
+diff --git a/fs/cifs/smb2misc.c b/fs/cifs/smb2misc.c
+index d88e2683626e..586cfdc3cc5f 100644
+--- a/fs/cifs/smb2misc.c
++++ b/fs/cifs/smb2misc.c
+@@ -166,6 +166,21 @@ smb2_check_message(char *buf, unsigned int len, struct TCP_Server_Info *srvr)
+ 	}
+ 
+ 	mid = le64_to_cpu(shdr->MessageId);
++	if (check_smb2_hdr(shdr, mid))
++		return 1;
++
++	if (shdr->StructureSize != SMB2_HEADER_STRUCTURE_SIZE) {
++		cifs_dbg(VFS, "Invalid structure size %u\n",
++			 le16_to_cpu(shdr->StructureSize));
++		return 1;
++	}
++
++	command = le16_to_cpu(shdr->Command);
++	if (command >= NUMBER_OF_SMB2_COMMANDS) {
++		cifs_dbg(VFS, "Invalid SMB2 command %d\n", command);
++		return 1;
++	}
++
+ 	if (len < pdu_size) {
+ 		if ((len >= hdr_size)
+ 		    && (shdr->Status != 0)) {
+@@ -186,21 +201,6 @@ smb2_check_message(char *buf, unsigned int len, struct TCP_Server_Info *srvr)
+ 		return 1;
+ 	}
+ 
+-	if (check_smb2_hdr(shdr, mid))
+-		return 1;
+-
+-	if (shdr->StructureSize != SMB2_HEADER_STRUCTURE_SIZE) {
+-		cifs_dbg(VFS, "Invalid structure size %u\n",
+-			 le16_to_cpu(shdr->StructureSize));
+-		return 1;
+-	}
+-
+-	command = le16_to_cpu(shdr->Command);
+-	if (command >= NUMBER_OF_SMB2_COMMANDS) {
+-		cifs_dbg(VFS, "Invalid SMB2 command %d\n", command);
+-		return 1;
+-	}
+-
+ 	if (smb2_rsp_struct_sizes[command] != pdu->StructureSize2) {
+ 		if (command != SMB2_OPLOCK_BREAK_HE && (shdr->Status == 0 ||
+ 		    pdu->StructureSize2 != SMB2_ERROR_STRUCTURE_SIZE2)) {
+diff --git a/fs/cifs/smb2ops.c b/fs/cifs/smb2ops.c
+index 926d7e41fefd..ff992995ba4e 100644
+--- a/fs/cifs/smb2ops.c
++++ b/fs/cifs/smb2ops.c
+@@ -327,8 +327,10 @@ smb2_dump_detail(void *buf, struct TCP_Server_Info *server)
+ 	cifs_server_dbg(VFS, "Cmd: %d Err: 0x%x Flags: 0x%x Mid: %llu Pid: %d\n",
+ 		 shdr->Command, shdr->Status, shdr->Flags, shdr->MessageId,
+ 		 shdr->ProcessId);
+-	cifs_server_dbg(VFS, "smb buf %p len %u\n", buf,
+-		 server->ops->calc_smb_size(buf, server));
++	if (!server->ops->check_message(buf, server->total_read, server)) {
++		cifs_server_dbg(VFS, "smb buf %p len %u\n", buf,
++				server->ops->calc_smb_size(buf, server));
++	}
+ #endif
+ }
+ 
+-- 
+2.47.3
+

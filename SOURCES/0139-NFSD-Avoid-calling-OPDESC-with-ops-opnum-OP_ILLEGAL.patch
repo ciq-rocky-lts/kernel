@@ -1,0 +1,57 @@
+From d0d2a18f0a0fc822ce1f89b87943a37dc412f0e0 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Thu, 15 Jan 2026 10:29:19 +0100
+Subject: [PATCH] NFSD: Avoid calling OPDESC() with ops->opnum == OP_ILLEGAL
+
+jira VULN-158467
+cve CVE-2023-53680
+commit-author Chuck Lever <chuck.lever@oracle.com>
+commit 804d8e0a6e54427268790472781e03bc243f4ee3
+
+OPDESC() simply indexes into nfsd4_ops[] by the op's operation
+number, without range checking that value. It assumes callers are
+careful to avoid calling it with an out-of-bounds opnum value.
+
+nfsd4_decode_compound() is not so careful, and can invoke OPDESC()
+with opnum set to OP_ILLEGAL, which is 10044 -- well beyond the end
+of nfsd4_ops[].
+
+	Reported-by: Jeff Layton <jlayton@kernel.org>
+Fixes: f4f9ef4a1b0a ("nfsd4: opdesc will be useful outside nfs4proc.c")
+	Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+(cherry picked from commit 804d8e0a6e54427268790472781e03bc243f4ee3)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ fs/nfsd/nfs4xdr.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/fs/nfsd/nfs4xdr.c b/fs/nfsd/nfs4xdr.c
+index 5c1ba8a76bc0..298306be139c 100644
+--- a/fs/nfsd/nfs4xdr.c
++++ b/fs/nfsd/nfs4xdr.c
+@@ -2170,11 +2170,13 @@ nfsd4_decode_compound(struct nfsd4_compoundargs *argp)
+ 	for (i = 0; i < argp->opcnt; i++) {
+ 		op = &argp->ops[i];
+ 		op->replay = NULL;
++		op->opdesc = NULL;
+ 
+ 		READ_BUF(4);
+ 		op->opnum = be32_to_cpup(p++);
+ 
+ 		if (nfsd4_opnum_in_range(argp, op)) {
++			op->opdesc = OPDESC(op);
+ 			op->status = nfsd4_dec_ops[op->opnum](argp, &op->u);
+ 			if (op->status != nfs_ok)
+ 				trace_nfsd_compound_decode_err(argp->rqstp,
+@@ -2185,7 +2187,7 @@ nfsd4_decode_compound(struct nfsd4_compoundargs *argp)
+ 			op->opnum = OP_ILLEGAL;
+ 			op->status = nfserr_op_illegal;
+ 		}
+-		op->opdesc = OPDESC(op);
++
+ 		/*
+ 		 * We'll try to cache the result in the DRC if any one
+ 		 * op in the compound wants to be cached:
+-- 
+2.47.3
+

@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 18
+%define ciq_patch_version 19
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -849,6 +849,29 @@ Patch0278: 0123-scsi-lpfc-Terminate-string-in-lpfc_debugfs_nvmeio_tr.patch
 Patch0279: 0124-scsi-lpfc-Prevent-buffer-overflow-crashes-in-debugfs.patch
 Patch0280: 0125-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
 Patch0281: 0126-firmware-arm_scpi-Ensure-scpi_info-is-not-assigned-i.patch
+#CIQ Patch Version: 372.32.1+19.1.el8_6_ciq
+Patch0282: 0127-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
+Patch0283: 0128-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
+Patch0284: 0129-sch_hfsc-Fix-qlen-accounting-bug-when-using-peek-in-.patch
+Patch0285: 0130-net-sched-Always-pass-notifications-when-child-class.patch
+Patch0286: 0131-net_sched-sch_ets-implement-lockless-ets_dump.patch
+Patch0287: 0132-sch_ets-make-est_qlen_notify-idempotent.patch
+Patch0288: 0133-net-sched-tbf-don-t-call-qdisc_put-while-holding-tre.patch
+Patch0289: 0134-net_sched-tbf-fix-a-race-in-tbf_change.patch
+Patch0290: 0135-net_sched-ets-fix-a-race-in-ets_qdisc_change.patch
+Patch0291: 0136-net-sched-ets-use-old-nbands-while-purging-unused-cl.patch
+Patch0292: 0137-scsi-qla2xxx-Wait-for-io-return-on-terminate-rport.patch
+Patch0293: 0138-nbd-fix-incomplete-validation-of-ioctl-arg.patch
+Patch0294: 0139-NFSD-Avoid-calling-OPDESC-with-ops-opnum-OP_ILLEGAL.patch
+Patch0295: 0140-smb-client-Fix-use-after-free-in-cifs_fill_dirent.patch
+Patch0296: 0141-libceph-fix-potential-use-after-free-in-have_mon_and.patch
+Patch0297: 0142-scsi-ses-Fix-possible-addl_desc_ptr-out-of-bounds-ac.patch
+Patch0298: 0143-scsi-ses-Fix-possible-desc_ptr-out-of-bounds-accesse.patch
+Patch0299: 0144-drm-atomic-Fix-potential-use-after-free-in-nonblocki.patch
+Patch0300: 0145-smb-client-fix-OOB-in-smbCalcSize.patch
+Patch0301: 0146-smb-client-fix-potential-OOB-in-smb2_dump_detail.patch
+Patch0302: 0147-cifs-fix-oops-during-encryption.patch
+Patch0303: 0148-cifs-Remove-duplicated-include-in-cifsglob.h.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1697,6 +1720,28 @@ ApplyOptionalPatch 0123-scsi-lpfc-Terminate-string-in-lpfc_debugfs_nvmeio_tr.pat
 ApplyOptionalPatch 0124-scsi-lpfc-Prevent-buffer-overflow-crashes-in-debugfs.patch
 ApplyOptionalPatch 0125-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
 ApplyOptionalPatch 0126-firmware-arm_scpi-Ensure-scpi_info-is-not-assigned-i.patch
+ApplyOptionalPatch 0127-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
+ApplyOptionalPatch 0128-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
+ApplyOptionalPatch 0129-sch_hfsc-Fix-qlen-accounting-bug-when-using-peek-in-.patch
+ApplyOptionalPatch 0130-net-sched-Always-pass-notifications-when-child-class.patch
+ApplyOptionalPatch 0131-net_sched-sch_ets-implement-lockless-ets_dump.patch
+ApplyOptionalPatch 0132-sch_ets-make-est_qlen_notify-idempotent.patch
+ApplyOptionalPatch 0133-net-sched-tbf-don-t-call-qdisc_put-while-holding-tre.patch
+ApplyOptionalPatch 0134-net_sched-tbf-fix-a-race-in-tbf_change.patch
+ApplyOptionalPatch 0135-net_sched-ets-fix-a-race-in-ets_qdisc_change.patch
+ApplyOptionalPatch 0136-net-sched-ets-use-old-nbands-while-purging-unused-cl.patch
+ApplyOptionalPatch 0137-scsi-qla2xxx-Wait-for-io-return-on-terminate-rport.patch
+ApplyOptionalPatch 0138-nbd-fix-incomplete-validation-of-ioctl-arg.patch
+ApplyOptionalPatch 0139-NFSD-Avoid-calling-OPDESC-with-ops-opnum-OP_ILLEGAL.patch
+ApplyOptionalPatch 0140-smb-client-Fix-use-after-free-in-cifs_fill_dirent.patch
+ApplyOptionalPatch 0141-libceph-fix-potential-use-after-free-in-have_mon_and.patch
+ApplyOptionalPatch 0142-scsi-ses-Fix-possible-addl_desc_ptr-out-of-bounds-ac.patch
+ApplyOptionalPatch 0143-scsi-ses-Fix-possible-desc_ptr-out-of-bounds-accesse.patch
+ApplyOptionalPatch 0144-drm-atomic-Fix-potential-use-after-free-in-nonblocki.patch
+ApplyOptionalPatch 0145-smb-client-fix-OOB-in-smbCalcSize.patch
+ApplyOptionalPatch 0146-smb-client-fix-potential-OOB-in-smb2_dump_detail.patch
+ApplyOptionalPatch 0147-cifs-fix-oops-during-encryption.patch
+ApplyOptionalPatch 0148-cifs-Remove-duplicated-include-in-cifsglob.h.patch
 
 
 # CIQ LTS patches:
@@ -3256,6 +3301,30 @@ fi
 #
 #
 %changelog
+* Wed Feb 11 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+19.1.el8_6_ciq
+- cifs: Remove duplicated include in cifsglob.h (Marcin Wcisło) [ciqres] {CVE-2022-50341}
+- cifs: fix oops during encryption (Marcin Wcisło) [ciqres] {CVE-2022-50341}
+- smb: client: fix potential OOB in smb2_dump_detail() (Marcin Wcisło) [ciqres] {CVE-2023-6610}
+- smb: client: fix OOB in smbCalcSize() (Marcin Wcisło) [ciqres] {CVE-2023-6606}
+- drm/atomic: Fix potential use-after-free in nonblocking commits (Marcin Wcisło) [ciqres] {CVE-2023-51043}
+- scsi: ses: Fix possible desc_ptr out-of-bounds accesses (Roxana Nicolescu) [ciqres] {CVE-2023-53675}
+- scsi: ses: Fix possible addl_desc_ptr out-of-bounds accesses (Roxana Nicolescu) [ciqres] {CVE-2023-7324}
+- libceph: fix potential use-after-free in have_mon_and_osd_map() (Roxana Nicolescu) [ciqres] {CVE-2025-68285}
+- smb: client: Fix use-after-free in cifs_fill_dirent (Roxana Nicolescu) [ciqres] {CVE-2025-38051}
+- NFSD: Avoid calling OPDESC() with ops->opnum == OP_ILLEGAL (Roxana Nicolescu) [ciqres] {CVE-2023-53680}
+- nbd: fix incomplete validation of ioctl arg (Roxana Nicolescu) [ciqres] {CVE-2023-53513}
+- scsi: qla2xxx: Wait for io return on terminate rport (Roxana Nicolescu) [ciqres] {CVE-2023-53322}
+- net/sched: ets: use old 'nbands' while purging unused classes (Roxana Nicolescu) [ciqres] {CVE-2025-38684}
+- net_sched: ets: fix a race in ets_qdisc_change() (Roxana Nicolescu) [ciqres] {CVE-2025-38107}
+- net_sched: tbf: fix a race in tbf_change() (Roxana Nicolescu) [ciqres] {CVE-2025-38107}
+- net: sched: tbf: don't call qdisc_put() while holding tree lock (Roxana Nicolescu) [ciqres] {CVE-2025-38107}
+- sch_ets: make est_qlen_notify() idempotent (Roxana Nicolescu) [ciqres] {CVE-2025-38107}
+- net_sched: sch_ets: implement lockless ets_dump() (Roxana Nicolescu) [ciqres] {CVE-2025-38107}
+- net/sched: Always pass notifications when child class becomes empty (Roxana Nicolescu) [ciqres] {CVE-2025-38350}
+- sch_hfsc: Fix qlen accounting bug when using peek in hfsc_enqueue() (Roxana Nicolescu) [ciqres] {CVE-2025-38000}
+- tcp: Don't call reqsk_fastopen_remove() in tcp_conn_request(). (Roxana Nicolescu) [ciqres] {CVE-2025-40186}
+- tcp: Clear tcp_sk(sk)->fastopen_rsk in tcp_disconnect(). (Roxana Nicolescu) [ciqres] {CVE-2025-39955}
+
 * Tue Dec 23 2025 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1+18.1.el8_6_ciq
 - firmware: arm_scpi: Ensure scpi_info is not assigned if the probe fails (Roxana Nicolescu) [ciqres] {CVE-2022-50087}
 - fs: fix UAF/GPF bug in nilfs_mdt_destroy (Roxana Nicolescu) [ciqres] {CVE-2022-50367}

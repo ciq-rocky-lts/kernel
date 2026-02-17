@@ -1,0 +1,72 @@
+From d3798fbad12c09b5ec08dd04ae699c8dadeb46eb Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Tue, 9 Dec 2025 15:12:55 +0100
+Subject: [PATCH] sch_ets: make est_qlen_notify() idempotent
+
+jira VULN-71723
+cve-pre CVE-2025-38107
+commit-author Cong Wang <xiyou.wangcong@gmail.com>
+commit a7a15f39c682ac4268624da2abdb9114bdde96d5
+
+est_qlen_notify() deletes its class from its active list with
+list_del() when qlen is 0, therefore, it is not idempotent and
+not friendly to its callers, like fq_codel_dequeue().
+
+Let's make it idempotent to ease qdisc_tree_reduce_backlog() callers'
+life. Also change other list_del()'s to list_del_init() just to be
+extra safe.
+
+	Reported-by: Gerrard Tai <gerrard.tai@starlabs.sg>
+	Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+Link: https://patch.msgid.link/20250403211033.166059-6-xiyou.wangcong@gmail.com
+	Acked-by: Jamal Hadi Salim <jhs@mojatatu.com>
+	Signed-off-by: Paolo Abeni <pabeni@redhat.com>
+(cherry picked from commit a7a15f39c682ac4268624da2abdb9114bdde96d5)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ net/sched/sch_ets.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/net/sched/sch_ets.c b/net/sched/sch_ets.c
+index 3be370551c77..aba1ed83bcfb 100644
+--- a/net/sched/sch_ets.c
++++ b/net/sched/sch_ets.c
+@@ -296,7 +296,7 @@ static void ets_class_qlen_notify(struct Qdisc *sch, unsigned long arg)
+ 	 * to remove them.
+ 	 */
+ 	if (!ets_class_is_strict(q, cl) && sch->q.qlen)
+-		list_del(&cl->alist);
++		list_del_init(&cl->alist);
+ }
+ 
+ static int ets_class_dump(struct Qdisc *sch, unsigned long arg,
+@@ -497,7 +497,7 @@ static struct sk_buff *ets_qdisc_dequeue(struct Qdisc *sch)
+ 			if (unlikely(!skb))
+ 				goto out;
+ 			if (cl->qdisc->q.qlen == 0)
+-				list_del(&cl->alist);
++				list_del_init(&cl->alist);
+ 			return ets_qdisc_dequeue_skb(sch, skb);
+ 		}
+ 
+@@ -671,7 +671,7 @@ static int ets_qdisc_change(struct Qdisc *sch, struct nlattr *opt,
+ 	}
+ 	for (i = q->nbands; i < oldbands; i++) {
+ 		if (i >= q->nstrict && q->classes[i].qdisc->q.qlen)
+-			list_del(&q->classes[i].alist);
++			list_del_init(&q->classes[i].alist);
+ 		qdisc_tree_flush_backlog(q->classes[i].qdisc);
+ 	}
+ 	WRITE_ONCE(q->nstrict, nstrict);
+@@ -727,7 +727,7 @@ static void ets_qdisc_reset(struct Qdisc *sch)
+ 
+ 	for (band = q->nstrict; band < q->nbands; band++) {
+ 		if (q->classes[band].qdisc->q.qlen)
+-			list_del(&q->classes[band].alist);
++			list_del_init(&q->classes[band].alist);
+ 	}
+ 	for (band = 0; band < q->nbands; band++)
+ 		qdisc_reset(q->classes[band].qdisc);
+-- 
+2.47.3
+
