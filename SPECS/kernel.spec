@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 22
+%define ciq_patch_version 23
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1329,6 +1329,24 @@ Patch1000386: 0341-gso-fix-udp-gso-fraglist-segmentation-after-pull-fro.patch
 Patch1000387: 0342-net-fix-udp-gso-skb_segment-after-pull-from-frag_lis.patch
 Patch1000388: 0343-net_sched-hfsc-Fix-a-potential-UAF-in-hfsc_dequeue-t.patch
 Patch1000389: 0344-NFS-Fix-filehandle-bounds-checking-in-nfs_fh_to_dent.patch
+#CIQ Patch Version: 284.30.1+23.1.el9_2_ciq
+Patch1000390: 0345-scsi-ses-Fix-possible-desc_ptr-out-of-bounds-accesse.patch
+Patch1000391: 0346-NFSD-Avoid-calling-OPDESC-with-ops-opnum-OP_ILLEGAL.patch
+Patch1000392: 0347-nfsd-handle-get_client_locked-failure-in-nfsd4_setcl.patch
+Patch1000393: 0348-smb-client-fix-race-with-concurrent-opens-in-rename-.patch
+Patch1000394: 0349-Bluetooth-hci_event-Fix-UAF-in-hci_acl_create_conn_s.patch
+Patch1000395: 0350-libceph-fix-potential-use-after-free-in-have_mon_and.patch
+Patch1000396: 0351-usb-dwc3-Fix-race-condition-between-concurrent-dwc3_.patch
+Patch1000397: 0352-xsk-check-IFF_UP-earlier-in-Tx-path.patch
+Patch1000398: 0353-xsk-Skip-polling-event-check-for-unbound-socket.patch
+Patch1000399: 0354-drm-i915-mark-requests-for-GuC-virtual-engines-to-av.patch
+Patch1000400: 0355-net-mlx5e-Check-for-NOT_READY-flag-state-after-locki.patch
+Patch1000401: 0356-ipv6-Fix-out-of-bounds-access-in-ipv6_find_tlv.patch
+Patch1000402: 0357-sctp-detect-and-prevent-references-to-a-freed-transp.patch
+Patch1000403: 0358-KVM-arm64-Tear-down-vGIC-on-failed-vCPU-creation.patch
+Patch1000404: 0359-Bluetooth-ISO-Fix-possible-UAF-on-iso_conn_free.patch
+Patch1000405: 0360-ASoC-Intel-bytcr_rt5640-Fix-invalid-quirk-input-mapp.patch
+Patch1000406: 0361-drm-vmwgfx-Validate-command-header-size-against-SVGA.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2394,6 +2412,23 @@ ApplyOptionalPatch 0341-gso-fix-udp-gso-fraglist-segmentation-after-pull-fro.pat
 ApplyOptionalPatch 0342-net-fix-udp-gso-skb_segment-after-pull-from-frag_lis.patch
 ApplyOptionalPatch 0343-net_sched-hfsc-Fix-a-potential-UAF-in-hfsc_dequeue-t.patch
 ApplyOptionalPatch 0344-NFS-Fix-filehandle-bounds-checking-in-nfs_fh_to_dent.patch
+ApplyOptionalPatch 0345-scsi-ses-Fix-possible-desc_ptr-out-of-bounds-accesse.patch
+ApplyOptionalPatch 0346-NFSD-Avoid-calling-OPDESC-with-ops-opnum-OP_ILLEGAL.patch
+ApplyOptionalPatch 0347-nfsd-handle-get_client_locked-failure-in-nfsd4_setcl.patch
+ApplyOptionalPatch 0348-smb-client-fix-race-with-concurrent-opens-in-rename-.patch
+ApplyOptionalPatch 0349-Bluetooth-hci_event-Fix-UAF-in-hci_acl_create_conn_s.patch
+ApplyOptionalPatch 0350-libceph-fix-potential-use-after-free-in-have_mon_and.patch
+ApplyOptionalPatch 0351-usb-dwc3-Fix-race-condition-between-concurrent-dwc3_.patch
+ApplyOptionalPatch 0352-xsk-check-IFF_UP-earlier-in-Tx-path.patch
+ApplyOptionalPatch 0353-xsk-Skip-polling-event-check-for-unbound-socket.patch
+ApplyOptionalPatch 0354-drm-i915-mark-requests-for-GuC-virtual-engines-to-av.patch
+ApplyOptionalPatch 0355-net-mlx5e-Check-for-NOT_READY-flag-state-after-locki.patch
+ApplyOptionalPatch 0356-ipv6-Fix-out-of-bounds-access-in-ipv6_find_tlv.patch
+ApplyOptionalPatch 0357-sctp-detect-and-prevent-references-to-a-freed-transp.patch
+ApplyOptionalPatch 0358-KVM-arm64-Tear-down-vGIC-on-failed-vCPU-creation.patch
+ApplyOptionalPatch 0359-Bluetooth-ISO-Fix-possible-UAF-on-iso_conn_free.patch
+ApplyOptionalPatch 0360-ASoC-Intel-bytcr_rt5640-Fix-invalid-quirk-input-mapp.patch
+ApplyOptionalPatch 0361-drm-vmwgfx-Validate-command-header-size-against-SVGA.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4277,6 +4312,25 @@ fi
 #
 #
 %changelog
+* Tue Feb 17 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+23.1.el9_2_ciq
+- drm/vmwgfx: Validate command header size against SVGA_CMD_MAX_DATASIZE (Shreeya Patel) [ciqres] {CVE-2025-40277}
+- ASoC: Intel: bytcr_rt5640: Fix invalid quirk input mapping (Shreeya Patel) [ciqres] {CVE-2025-40154}
+- Bluetooth: ISO: Fix possible UAF on iso_conn_free (Shreeya Patel) [ciqres] {CVE-2025-40141}
+- KVM: arm64: Tear down vGIC on failed vCPU creation (Shreeya Patel) [ciqres] {CVE-2025-37849}
+- sctp: detect and prevent references to a freed transport in sendmsg (Shreeya Patel) [ciqres] {CVE-2025-23142}
+- ipv6: Fix out-of-bounds access in ipv6_find_tlv() (Shreeya Patel) [ciqres] {CVE-2023-53705}
+- net/mlx5e: Check for NOT_READY flag state after locking (Shreeya Patel) [ciqres] {CVE-2023-53581}
+- drm/i915: mark requests for GuC virtual engines to avoid use-after-free (Shreeya Patel) [ciqres] {CVE-2023-53552}
+- xsk: Skip polling event check for unbound socket (Shreeya Patel) [ciqres] {CVE-2023-53240}
+- xsk: check IFF_UP earlier in Tx path (Shreeya Patel) [ciqres] {CVE-2023-53240}
+- usb: dwc3: Fix race condition between concurrent dwc3_remove_requests() call paths (Brett Mastbergen) [ciqres] {CVE-2025-68287}
+- libceph: fix potential use-after-free in have_mon_and_osd_map() (Brett Mastbergen) [ciqres] {CVE-2025-68285}
+- Bluetooth: hci_event: Fix UAF in hci_acl_create_conn_sync (Brett Mastbergen) [ciqres] {CVE-2025-39982}
+- smb: client: fix race with concurrent opens in rename(2) (Brett Mastbergen) [ciqres] {CVE-2025-39825}
+- nfsd: handle get_client_locked() failure in nfsd4_setclientid_confirm() (Brett Mastbergen) [ciqres] {CVE-2025-38724}
+- NFSD: Avoid calling OPDESC() with ops->opnum == OP_ILLEGAL (Brett Mastbergen) [ciqres] {CVE-2023-53680}
+- scsi: ses: Fix possible desc_ptr out-of-bounds accesses (Brett Mastbergen) [ciqres] {CVE-2023-53675}
+
 * Thu Jan 22 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+22.1.el9_2_ciq
 - Start Integration of all changes from FIPS 5.14.0-284.30.1.el9_2.ciqfips.0.21.1
 - NFS: Fix filehandle bounds checking in nfs_fh_to_dentry() (Shreeya Patel) [ciqres] {CVE-2025-39730}

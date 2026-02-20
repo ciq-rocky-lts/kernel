@@ -1,0 +1,58 @@
+From 5c1d97dd8e74aa227876a1e553ba29ef118d7e90 Mon Sep 17 00:00:00 2001
+From: Shreeya Patel <spatel@ciq.com>
+Date: Mon, 2 Feb 2026 12:20:07 +0000
+Subject: [PATCH] xsk: Skip polling event check for unbound socket
+
+jira VULN-154576
+cve-bf CVE-2023-53240
+commit-author Yewon Choi <woni9911@gmail.com>
+commit e4d008d49a7135214e0ee70537405b6a069e3a3f
+
+In xsk_poll(), checking available events and setting mask bits should
+be executed only when a socket has been bound. Setting mask bits for
+unbound socket is meaningless.
+
+Currently, it checks events even when xsk_check_common() failed.
+To prevent this, we move goto location (skip_tx) after that checking.
+
+Fixes: 1596dae2f17e ("xsk: check IFF_UP earlier in Tx path")
+	Signed-off-by: Yewon Choi <woni9911@gmail.com>
+	Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
+	Acked-by: Magnus Karlsson <magnus.karlsson@intel.com>
+Link: https://lore.kernel.org/bpf/20231201061048.GA1510@libra05
+(cherry picked from commit e4d008d49a7135214e0ee70537405b6a069e3a3f)
+	Signed-off-by: Shreeya Patel <spatel@ciq.com>
+---
+ net/xdp/xsk.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/net/xdp/xsk.c b/net/xdp/xsk.c
+index 13f62d2402e7..a3395e4043f3 100644
+--- a/net/xdp/xsk.c
++++ b/net/xdp/xsk.c
+@@ -722,7 +722,7 @@ static __poll_t xsk_poll(struct file *file, struct socket *sock,
+ 
+ 	rcu_read_lock();
+ 	if (xsk_check_common(xs))
+-		goto skip_tx;
++		goto out;
+ 
+ 	pool = xs->pool;
+ 
+@@ -734,12 +734,11 @@ static __poll_t xsk_poll(struct file *file, struct socket *sock,
+ 			xsk_generic_xmit(sk);
+ 	}
+ 
+-skip_tx:
+ 	if (xs->rx && !xskq_prod_is_empty(xs->rx))
+ 		mask |= EPOLLIN | EPOLLRDNORM;
+ 	if (xs->tx && xsk_tx_writeable(xs))
+ 		mask |= EPOLLOUT | EPOLLWRNORM;
+-
++out:
+ 	rcu_read_unlock();
+ 	return mask;
+ }
+-- 
+2.47.3
+
