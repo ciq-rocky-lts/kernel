@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 19
+%define ciq_patch_version 20
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -872,6 +872,14 @@ Patch0300: 0145-smb-client-fix-OOB-in-smbCalcSize.patch
 Patch0301: 0146-smb-client-fix-potential-OOB-in-smb2_dump_detail.patch
 Patch0302: 0147-cifs-fix-oops-during-encryption.patch
 Patch0303: 0148-cifs-Remove-duplicated-include-in-cifsglob.h.patch
+#CIQ Patch Version: 372.32.1+20.1.el8_6_ciq
+Patch0304: 0149-RDMA-cma-Do-not-change-route.addr.src_addr-outside-s.patch
+Patch0305: 0150-RDMA-core-Refactor-rdma_bind_addr.patch
+Patch0306: 0151-RDMA-core-Update-CMA-destination-address-on-rdma_res.patch
+Patch0307: 0152-RDMA-rxe-Fix-mr-map-double-free.patch
+Patch0308: 0153-mm-fix-zswap-writeback-race-condition.patch
+Patch0309: 0154-mm-zswap-fix-missing-folio-cleanup-in-writeback-race.patch
+Patch0310: 0155-lockdown-also-lock-down-previous-kgdb-use.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1742,6 +1750,13 @@ ApplyOptionalPatch 0145-smb-client-fix-OOB-in-smbCalcSize.patch
 ApplyOptionalPatch 0146-smb-client-fix-potential-OOB-in-smb2_dump_detail.patch
 ApplyOptionalPatch 0147-cifs-fix-oops-during-encryption.patch
 ApplyOptionalPatch 0148-cifs-Remove-duplicated-include-in-cifsglob.h.patch
+ApplyOptionalPatch 0149-RDMA-cma-Do-not-change-route.addr.src_addr-outside-s.patch
+ApplyOptionalPatch 0150-RDMA-core-Refactor-rdma_bind_addr.patch
+ApplyOptionalPatch 0151-RDMA-core-Update-CMA-destination-address-on-rdma_res.patch
+ApplyOptionalPatch 0152-RDMA-rxe-Fix-mr-map-double-free.patch
+ApplyOptionalPatch 0153-mm-fix-zswap-writeback-race-condition.patch
+ApplyOptionalPatch 0154-mm-zswap-fix-missing-folio-cleanup-in-writeback-race.patch
+ApplyOptionalPatch 0155-lockdown-also-lock-down-previous-kgdb-use.patch
 
 
 # CIQ LTS patches:
@@ -3301,6 +3316,15 @@ fi
 #
 #
 %changelog
+* Fri Feb 20 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+20.1.el8_6_ciq
+- lockdown: also lock down previous kgdb use (Jonathan Maple) [ciqres] {CVE-2022-21499}
+- mm: zswap: fix missing folio cleanup in writeback race path (Marcin Wcisło) [ciqres] {CVE-2024-26832}
+- mm: fix zswap writeback race condition (Marcin Wcisło) [ciqres] {CVE-2023-53178}
+- RDMA/rxe: Fix mr->map double free (Marcin Wcisło) [ciqres] {CVE-2022-50543}
+- RDMA/core: Update CMA destination address on rdma_resolve_addr (Marcin Wcisło) [ciqres] {CVE-2023-2176}
+- RDMA/core: Refactor rdma_bind_addr (Marcin Wcisło) [ciqres] {CVE-2023-2176}
+- RDMA/cma: Do not change route.addr.src_addr outside state checks (Marcin Wcisło) [ciqres] {CVE-2022-48925}
+
 * Wed Feb 11 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+19.1.el8_6_ciq
 - cifs: Remove duplicated include in cifsglob.h (Marcin Wcisło) [ciqres] {CVE-2022-50341}
 - cifs: fix oops during encryption (Marcin Wcisło) [ciqres] {CVE-2022-50341}
