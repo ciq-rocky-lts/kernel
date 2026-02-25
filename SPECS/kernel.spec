@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 14
+%define ciq_patch_version 15
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1144,6 +1144,28 @@ Patch1000140: 0120-net-tls-fix-returned-read-length-with-async-decrypt.patch
 Patch1000141: 0121-tls-don-t-skip-over-different-type-records-from-the-.patch
 Patch1000142: 0122-tls-adjust-recv-return-with-async-crypto-and-failed-.patch
 Patch1000143: 0123-tls-fix-handling-of-zero-length-records-on-the-rx_li.patch
+#CIQ Patch Version: 427.42.1+15.1.el9_4_ciq
+Patch1000144: 0124-hugetlb-unshare-some-PMDs-when-splitting-VMAs.patch
+Patch1000145: 0125-mm-hugetlb-unshare-page-tables-during-VMA-split-not-.patch
+Patch1000146: 0126-mm-hugetlb-independent-PMD-page-table-shared-count.patch
+Patch1000147: 0127-mm-hugetlb-fix-huge_pmd_unshare-vs-GUP-fast-race.patch
+Patch1000148: 0128-mm-hugetlb-fix-copy_hugetlb_page_range-to-use-pt_sha.patch
+Patch1000149: 0129-mm-hugetlb-fix-hugetlb_pmd_shared.patch
+Patch1000150: 0130-mm-hugetlb-fix-two-comments-related-to-huge_pmd_unsh.patch
+Patch1000151: 0131-mm-rmap-fix-two-comments-related-to-huge_pmd_unshare.patch
+Patch1000152: 0132-smb-client-Fix-use-after-free-in-cifs_fill_dirent.patch
+Patch1000153: 0133-drm-sched-Fix-potential-double-free-in-drm_sched_job.patch
+Patch1000154: 0134-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
+Patch1000155: 0135-mptcp-fix-race-condition-in-mptcp_schedule_work.patch
+Patch1000156: 0136-net-atlantic-fix-fragment-overflow-handling-in-RX-pa.patch
+Patch1000157: 0137-drm-Check-output-polling-initialized-before-disablin.patch
+Patch1000158: 0138-usb-core-config-Prevent-OOB-read-in-SS-endpoint-comp.patch
+Patch1000159: 0139-ALSA-usb-audio-Fix-potential-overflow-of-PCM-transfe.patch
+Patch1000160: 0140-fs-proc-fix-uaf-in-proc_readdir_de.patch
+Patch1000161: 0141-Bluetooth-MGMT-Fix-OOB-access-in-parse_adv_monitor_p.patch
+Patch1000162: 0142-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
+Patch1000163: 0143-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
+Patch1000164: 0144-NFSv4-pNFS-Clear-NFS_INO_LAYOUTCOMMIT-in-pnfs_mark_l.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2040,6 +2062,27 @@ ApplyOptionalPatch 0120-net-tls-fix-returned-read-length-with-async-decrypt.patc
 ApplyOptionalPatch 0121-tls-don-t-skip-over-different-type-records-from-the-.patch
 ApplyOptionalPatch 0122-tls-adjust-recv-return-with-async-crypto-and-failed-.patch
 ApplyOptionalPatch 0123-tls-fix-handling-of-zero-length-records-on-the-rx_li.patch
+ApplyOptionalPatch 0124-hugetlb-unshare-some-PMDs-when-splitting-VMAs.patch
+ApplyOptionalPatch 0125-mm-hugetlb-unshare-page-tables-during-VMA-split-not-.patch
+ApplyOptionalPatch 0126-mm-hugetlb-independent-PMD-page-table-shared-count.patch
+ApplyOptionalPatch 0127-mm-hugetlb-fix-huge_pmd_unshare-vs-GUP-fast-race.patch
+ApplyOptionalPatch 0128-mm-hugetlb-fix-copy_hugetlb_page_range-to-use-pt_sha.patch
+ApplyOptionalPatch 0129-mm-hugetlb-fix-hugetlb_pmd_shared.patch
+ApplyOptionalPatch 0130-mm-hugetlb-fix-two-comments-related-to-huge_pmd_unsh.patch
+ApplyOptionalPatch 0131-mm-rmap-fix-two-comments-related-to-huge_pmd_unshare.patch
+ApplyOptionalPatch 0132-smb-client-Fix-use-after-free-in-cifs_fill_dirent.patch
+ApplyOptionalPatch 0133-drm-sched-Fix-potential-double-free-in-drm_sched_job.patch
+ApplyOptionalPatch 0134-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
+ApplyOptionalPatch 0135-mptcp-fix-race-condition-in-mptcp_schedule_work.patch
+ApplyOptionalPatch 0136-net-atlantic-fix-fragment-overflow-handling-in-RX-pa.patch
+ApplyOptionalPatch 0137-drm-Check-output-polling-initialized-before-disablin.patch
+ApplyOptionalPatch 0138-usb-core-config-Prevent-OOB-read-in-SS-endpoint-comp.patch
+ApplyOptionalPatch 0139-ALSA-usb-audio-Fix-potential-overflow-of-PCM-transfe.patch
+ApplyOptionalPatch 0140-fs-proc-fix-uaf-in-proc_readdir_de.patch
+ApplyOptionalPatch 0141-Bluetooth-MGMT-Fix-OOB-access-in-parse_adv_monitor_p.patch
+ApplyOptionalPatch 0142-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
+ApplyOptionalPatch 0143-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
+ApplyOptionalPatch 0144-NFSv4-pNFS-Clear-NFS_INO_LAYOUTCOMMIT-in-pnfs_mark_l.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4117,6 +4160,29 @@ fi
 #
 #
 %changelog
+* Mon Feb 23 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+15.1.el9_4_ciq
+- NFSv4/pNFS: Clear NFS_INO_LAYOUTCOMMIT in pnfs_mark_layout_stateid_invalid (Brett Mastbergen) [ciqres] {CVE-2025-68349}
+- fbdev: bitblit: bound-check glyph index in bit_putcs* (Brett Mastbergen) [ciqres] {CVE-2025-40322}
+- fbdev: Add bounds checking in bit_putcs to fix vmalloc-out-of-bounds (Brett Mastbergen) [ciqres] {CVE-2025-40304}
+- Bluetooth: MGMT: Fix OOB access in parse_adv_monitor_pattern() (Brett Mastbergen) [ciqres] {CVE-2025-40294}
+- fs/proc: fix uaf in proc_readdir_de() (Brett Mastbergen) [ciqres] {CVE-2025-40271}
+- ALSA: usb-audio: Fix potential overflow of PCM transfer buffer (Brett Mastbergen) [ciqres] {CVE-2025-40269}
+- usb: core: config: Prevent OOB read in SS endpoint companion parsing (Brett Mastbergen) [ciqres] {CVE-2025-39760}
+- drm: Check output polling initialized before disabling (Brett Mastbergen) [ciqres] {CVE-2024-35927}
+- net: atlantic: fix fragment overflow handling in RX path (Brett Mastbergen) [ciqres] {CVE-2025-68301}
+- mptcp: fix race condition in mptcp_schedule_work() (Brett Mastbergen) [ciqres] {CVE-2025-40258}
+- vsock: Ignore signal/timeout on connect() if already established (Brett Mastbergen) [ciqres] {CVE-2025-40248}
+- drm/sched: Fix potential double free in drm_sched_job_add_resv_dependencies (Brett Mastbergen) [ciqres] {CVE-2025-40096}
+- smb: client: Fix use-after-free in cifs_fill_dirent (Brett Mastbergen) [ciqres] {CVE-2025-38051}
+- mm/rmap: fix two comments related to huge_pmd_unshare() (Marcin Wcisło) [ciqres] {CVE-2024-57883}
+- mm/hugetlb: fix two comments related to huge_pmd_unshare() (Marcin Wcisło) [ciqres] {CVE-2024-57883}
+- mm/hugetlb: fix hugetlb_pmd_shared() (Marcin Wcisło) [ciqres] {CVE-2026-23100}
+- mm/hugetlb: fix copy_hugetlb_page_range() to use ->pt_share_count (Marcin Wcisło) [ciqres] {CVE-2024-57883}
+- mm/hugetlb: fix huge_pmd_unshare() vs GUP-fast race (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- mm: hugetlb: independent PMD page table shared count (Marcin Wcisło) [ciqres] {CVE-2024-57883}
+- mm/hugetlb: unshare page tables during VMA split, not before (Marcin Wcisło) [ciqres] {CVE-2025-38084}
+- hugetlb: unshare some PMDs when splitting VMAs (Marcin Wcisło) [ciqres] {CVE-2025-38084}
+
 * Mon Feb 09 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+14.1.el9_4_ciq
 - tls: fix handling of zero-length records on the rx_list (Marcin Wcisło) [ciqres] {CVE-2025-39682}
 - tls: adjust recv return with async crypto and failed copy to userspace (Marcin Wcisło) [ciqres] {CVE-2025-39682}

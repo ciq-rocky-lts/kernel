@@ -1,0 +1,82 @@
+From e2fca74e5ef5fdf11fc55ab3c0dd4018caeda4c1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 23 Dec 2025 22:40:36 +0100
+Subject: [PATCH] mm/rmap: fix two comments related to huge_pmd_unshare()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-46930
+cve-bf CVE-2024-57883
+commit-author David Hildenbrand (Red Hat) <david@kernel.org>
+commit a8682d500f691b6dfaa16ae1502d990aeb86e8be
+
+PMD page table unsharing no longer touches the refcount of a PMD page
+table.  Also, it is not about dropping the refcount of a "PMD page" but
+the "PMD page table".
+
+Let's just simplify by saying that the PMD page table was unmapped,
+consequently also unmapping the folio that was mapped into this page.
+
+This code should be deduplicated in the future.
+
+Link: https://lkml.kernel.org/r/20251223214037.580860-4-david@kernel.org
+Fixes: 59d9094df3d7 ("mm: hugetlb: independent PMD page table shared count")
+	Signed-off-by: David Hildenbrand (Red Hat) <david@kernel.org>
+	Reviewed-by: Rik van Riel <riel@surriel.com>
+	Tested-by: Laurence Oberman <loberman@redhat.com>
+	Reviewed-by: Lorenzo Stoakes <lorenzo.stoakes@oracle.com>
+	Acked-by: Oscar Salvador <osalvador@suse.de>
+	Cc: Liu Shixin <liushixin2@huawei.com>
+	Cc: Harry Yoo <harry.yoo@oracle.com>
+	Cc: Lance Yang <lance.yang@linux.dev>
+	Cc: "Uschakow, Stanislav" <suschako@amazon.de>
+	Cc: <stable@vger.kernel.org>
+	Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+(cherry picked from commit a8682d500f691b6dfaa16ae1502d990aeb86e8be)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ mm/rmap.c | 20 ++++----------------
+ 1 file changed, 4 insertions(+), 16 deletions(-)
+
+diff --git a/mm/rmap.c b/mm/rmap.c
+index 07e8b4cbcb18..dc2e7db5bca5 100644
+--- a/mm/rmap.c
++++ b/mm/rmap.c
+@@ -1556,14 +1556,8 @@ static bool try_to_unmap_one(struct folio *folio, struct vm_area_struct *vma,
+ 					flush_tlb_range(vma,
+ 						range.start, range.end);
+ 					/*
+-					 * The ref count of the PMD page was
+-					 * dropped which is part of the way map
+-					 * counting is done for shared PMDs.
+-					 * Return 'true' here.  When there is
+-					 * no other sharing, huge_pmd_unshare
+-					 * returns false and we will unmap the
+-					 * actual page and drop map count
+-					 * to zero.
++					 * The PMD table was unmapped,
++					 * consequently unmapping the folio.
+ 					 */
+ 					page_vma_mapped_walk_done(&pvmw);
+ 					break;
+@@ -1926,14 +1920,8 @@ static bool try_to_migrate_one(struct folio *folio, struct vm_area_struct *vma,
+ 						range.start, range.end);
+ 
+ 					/*
+-					 * The ref count of the PMD page was
+-					 * dropped which is part of the way map
+-					 * counting is done for shared PMDs.
+-					 * Return 'true' here.  When there is
+-					 * no other sharing, huge_pmd_unshare
+-					 * returns false and we will unmap the
+-					 * actual page and drop map count
+-					 * to zero.
++					 * The PMD table was unmapped,
++					 * consequently unmapping the folio.
+ 					 */
+ 					page_vma_mapped_walk_done(&pvmw);
+ 					break;
+-- 
+2.47.3
+
