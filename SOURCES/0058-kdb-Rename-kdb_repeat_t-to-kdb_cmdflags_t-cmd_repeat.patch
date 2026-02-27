@@ -1,0 +1,107 @@
+From 6d5d29120defc125fc9f4966b6890d1efcca697f Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Tue, 24 Feb 2026 16:48:59 -0500
+Subject: [PATCH] kdb: Rename kdb_repeat_t to kdb_cmdflags_t, cmd_repeat to
+ cmd_flags
+
+jira VULN-1501
+cve-pre CVE-2022-21499
+commit-author Anton Vorontsov <anton.vorontsov@linaro.org>
+commit 15a42a9bc9ffcff4315a7154313db08c6bf9ef11
+
+We're about to add more options for command behaviour, so let's expand
+the meaning of kdb_repeat_t.
+
+So far we just do various renames, there should be no functional changes.
+
+	Signed-off-by: Anton Vorontsov <anton.vorontsov@linaro.org>
+	Signed-off-by: John Stultz <john.stultz@linaro.org>
+	Signed-off-by: Daniel Thompson <daniel.thompson@linaro.org>
+	Cc: Jason Wessel <jason.wessel@windriver.com>
+	Signed-off-by: Jason Wessel <jason.wessel@windriver.com>
+(cherry picked from commit 15a42a9bc9ffcff4315a7154313db08c6bf9ef11)
+	Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ include/linux/kdb.h            | 6 +++---
+ kernel/debug/kdb/kdb_main.c    | 6 +++---
+ kernel/debug/kdb/kdb_private.h | 2 +-
+ 3 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/include/linux/kdb.h b/include/linux/kdb.h
+index 290db1269c4c..e650f79aa414 100644
+--- a/include/linux/kdb.h
++++ b/include/linux/kdb.h
+@@ -17,7 +17,7 @@ typedef enum {
+ 	KDB_REPEAT_NONE = 0,	/* Do not repeat this command */
+ 	KDB_REPEAT_NO_ARGS,	/* Repeat the command without arguments */
+ 	KDB_REPEAT_WITH_ARGS,	/* Repeat the command including its arguments */
+-} kdb_repeat_t;
++} kdb_cmdflags_t;
+ 
+ typedef int (*kdb_func_t)(int, const char **);
+ 
+@@ -147,7 +147,7 @@ static inline const char *kdb_walk_kallsyms(loff_t *pos)
+ /* Dynamic kdb shell command registration */
+ extern int kdb_register(char *, kdb_func_t, char *, char *, short);
+ extern int kdb_register_repeat(char *, kdb_func_t, char *, char *,
+-			       short, kdb_repeat_t);
++			       short, kdb_cmdflags_t);
+ extern int kdb_unregister(char *);
+ #else /* ! CONFIG_KGDB_KDB */
+ static inline __printf(1, 2) int kdb_printf(const char *fmt, ...) { return 0; }
+@@ -156,7 +156,7 @@ static inline int kdb_register(char *cmd, kdb_func_t func, char *usage,
+ 			       char *help, short minlen) { return 0; }
+ static inline int kdb_register_repeat(char *cmd, kdb_func_t func, char *usage,
+ 				      char *help, short minlen,
+-				      kdb_repeat_t repeat) { return 0; }
++				      kdb_cmdflags_t flags) { return 0; }
+ static inline int kdb_unregister(char *cmd) { return 0; }
+ #endif	/* CONFIG_KGDB_KDB */
+ enum {
+diff --git a/kernel/debug/kdb/kdb_main.c b/kernel/debug/kdb/kdb_main.c
+index 84254a5939e6..60b12964dcab 100644
+--- a/kernel/debug/kdb/kdb_main.c
++++ b/kernel/debug/kdb/kdb_main.c
+@@ -1008,7 +1008,7 @@ int kdb_parse(const char *cmdstr)
+ 		if (result && ignore_errors && result > KDB_CMD_GO)
+ 			result = 0;
+ 		KDB_STATE_CLEAR(CMD);
+-		switch (tp->cmd_repeat) {
++		switch (tp->cmd_flags) {
+ 		case KDB_REPEAT_NONE:
+ 			argc = 0;
+ 			if (argv[0])
+@@ -2646,7 +2646,7 @@ int kdb_register_repeat(char *cmd,
+ 			char *usage,
+ 			char *help,
+ 			short minlen,
+-			kdb_repeat_t repeat)
++			kdb_cmdflags_t flags)
+ {
+ 	int i;
+ 	kdbtab_t *kp;
+@@ -2695,7 +2695,7 @@ int kdb_register_repeat(char *cmd,
+ 	kp->cmd_usage  = usage;
+ 	kp->cmd_help   = help;
+ 	kp->cmd_minlen = minlen;
+-	kp->cmd_repeat = repeat;
++	kp->cmd_flags  = flags;
+ 
+ 	return 0;
+ }
+diff --git a/kernel/debug/kdb/kdb_private.h b/kernel/debug/kdb/kdb_private.h
+index c4c46c7b26fd..eaacd1693954 100644
+--- a/kernel/debug/kdb/kdb_private.h
++++ b/kernel/debug/kdb/kdb_private.h
+@@ -174,7 +174,7 @@ typedef struct _kdbtab {
+ 	char    *cmd_help;		/* Help message for this command */
+ 	short    cmd_minlen;		/* Minimum legal # command
+ 					 * chars required */
+-	kdb_repeat_t cmd_repeat;	/* Does command auto repeat on enter? */
++	kdb_cmdflags_t cmd_flags;	/* Command behaviour flags */
+ } kdbtab_t;
+ 
+ extern int kdb_bt(int, const char **);	/* KDB display back trace */
+-- 
+2.47.3
+

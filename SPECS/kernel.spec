@@ -22,8 +22,8 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 12
-%define ciq_build_id 1
+%define ciq_patch_version 13
+%define ciq_build_id 2
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
 
@@ -595,6 +595,19 @@ Patch1076: 0050-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_disconne.patch
 Patch1077: 0051-Bluetooth-Fix-l2cap_disconnect_req-deadlock.patch
 Patch1078: 0052-Bluetooth-L2CAP-fix-bad-unlock-balance-in-l2cap_disc.patch
 Patch1079: 0053-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.13.1
+Patch1080: 0054-ipv6-Fix-out-of-bounds-access-in-ipv6_find_tlv.patch
+Patch1081: 0055-net_sched-hfsc-Fix-a-potential-UAF-in-hfsc_dequeue-t.patch
+Patch1082: 0056-libceph-fix-potential-use-after-free-in-have_mon_and.patch
+Patch1083: 0057-kdb-Remove-currently-unused-kdbtab_t-cmd_flags.patch
+Patch1084: 0058-kdb-Rename-kdb_repeat_t-to-kdb_cmdflags_t-cmd_repeat.patch
+Patch1085: 0059-kdb-Rename-kdb_register_repeat-to-kdb_register_flags.patch
+Patch1086: 0060-kdb-Use-KDB_REPEAT_-values-as-flags.patch
+Patch1087: 0061-kdb-Remove-KDB_REPEAT_NONE-flag.patch
+Patch1088: 0062-kdb-Categorize-kdb-commands-similar-to-SysRq-categor.patch
+Patch1089: 0063-kdb-Add-enable-mask-for-groups-of-commands.patch
+Patch1090: 0064-kdb-Allow-access-to-sensitive-commands-to-be-restric.patch
+Patch1091: 0065-lockdown-also-lock-down-previous-kgdb-use.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -1017,6 +1030,18 @@ ApplyOptionalPatch 0050-Bluetooth-L2CAP-Fix-use-after-free-in-l2cap_disconne.pat
 ApplyOptionalPatch 0051-Bluetooth-Fix-l2cap_disconnect_req-deadlock.patch
 ApplyOptionalPatch 0052-Bluetooth-L2CAP-fix-bad-unlock-balance-in-l2cap_disc.patch
 ApplyOptionalPatch 0053-fs-fix-UAF-GPF-bug-in-nilfs_mdt_destroy.patch
+ApplyOptionalPatch 0054-ipv6-Fix-out-of-bounds-access-in-ipv6_find_tlv.patch
+ApplyOptionalPatch 0055-net_sched-hfsc-Fix-a-potential-UAF-in-hfsc_dequeue-t.patch
+ApplyOptionalPatch 0056-libceph-fix-potential-use-after-free-in-have_mon_and.patch
+ApplyOptionalPatch 0057-kdb-Remove-currently-unused-kdbtab_t-cmd_flags.patch
+ApplyOptionalPatch 0058-kdb-Rename-kdb_repeat_t-to-kdb_cmdflags_t-cmd_repeat.patch
+ApplyOptionalPatch 0059-kdb-Rename-kdb_register_repeat-to-kdb_register_flags.patch
+ApplyOptionalPatch 0060-kdb-Use-KDB_REPEAT_-values-as-flags.patch
+ApplyOptionalPatch 0061-kdb-Remove-KDB_REPEAT_NONE-flag.patch
+ApplyOptionalPatch 0062-kdb-Categorize-kdb-commands-similar-to-SysRq-categor.patch
+ApplyOptionalPatch 0063-kdb-Add-enable-mask-for-groups-of-commands.patch
+ApplyOptionalPatch 0064-kdb-Allow-access-to-sensitive-commands-to-be-restric.patch
+ApplyOptionalPatch 0065-lockdown-also-lock-down-previous-kgdb-use.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2020,6 +2045,23 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Thu Feb 26 2026 Joanthan Maple <jmaple@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.13.2
+- Enable CONFIG_KDB_DEFAULT_ENABLE in configs (Jonathan Maple) [ciqres] {CVE-2022-21499}
+
+* Wed Feb 25 2026 Jonathan Maple <jmaple@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.13.1
+- lockdown: also lock down previous kgdb use (Jonathan Maple) [ciqres] {CVE-2022-21499}
+- kdb: Allow access to sensitive commands to be restricted by default (Jonathan Maple) [ciqres] {CVE-2022-21499}
+- kdb: Add enable mask for groups of commands (Jonathan Maple) [ciqres] {CVE-2022-21499}
+- kdb: Categorize kdb commands (similar to SysRq categorization) (Jonathan Maple) [ciqres] {CVE-2022-21499}
+- kdb: Remove KDB_REPEAT_NONE flag (Jonathan Maple) [ciqres] {CVE-2022-21499}
+- kdb: Use KDB_REPEAT_* values as flags (Jonathan Maple) [ciqres] {CVE-2022-21499}
+- kdb: Rename kdb_register_repeat() to kdb_register_flags() (Jonathan Maple) [ciqres] {CVE-2022-21499}
+- kdb: Rename kdb_repeat_t to kdb_cmdflags_t, cmd_repeat to cmd_flags (Jonathan Maple) [ciqres] {CVE-2022-21499}
+- kdb: Remove currently unused kdbtab_t->cmd_flags (Jonathan Maple) [ciqres] {CVE-2022-21499}
+- libceph: fix potential use-after-free in have_mon_and_osd_map() (Brett Mastbergen) [ciqres] {CVE-2025-68285}
+- net_sched: hfsc: Fix a potential UAF in hfsc_dequeue() too (Brett Mastbergen) [ciqres] {CVE-2025-37823}
+- ipv6: Fix out-of-bounds access in ipv6_find_tlv() (Brett Mastbergen) [ciqres] {CVE-2023-53705}
+
 * Mon Jan 05 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.12.1
 - fs: fix UAF/GPF bug in nilfs_mdt_destroy (Brett Mastbergen) [ciqres] {CVE-2022-50367}
 - Bluetooth: L2CAP: fix "bad unlock balance" in l2cap_disconnect_rsp (Brett Mastbergen) [ciqres] {CVE-2023-53297}

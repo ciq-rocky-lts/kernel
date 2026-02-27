@@ -1,0 +1,43 @@
+From c9f73fecb2b219b4d75feda6490f64bb40372c25 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Wed, 18 Feb 2026 13:49:07 -0500
+Subject: [PATCH] ipv6: Fix out-of-bounds access in ipv6_find_tlv()
+
+jira VULN-159013
+cve CVE-2023-53705
+commit-author Gavrilov Ilia <Ilia.Gavrilov@infotecs.ru>
+commit 878ecb0897f4737a4c9401f3523fd49589025671
+
+optlen is fetched without checking whether there is more than one byte to parse.
+It can lead to out-of-bounds access.
+
+Found by InfoTeCS on behalf of Linux Verification Center
+(linuxtesting.org) with SVACE.
+
+Fixes: c61a40432509 ("[IPV6]: Find option offset by type.")
+	Signed-off-by: Gavrilov Ilia <Ilia.Gavrilov@infotecs.ru>
+	Reviewed-by: Jiri Pirko <jiri@nvidia.com>
+	Reviewed-by: David Ahern <dsahern@kernel.org>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit 878ecb0897f4737a4c9401f3523fd49589025671)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/ipv6/exthdrs_core.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/net/ipv6/exthdrs_core.c b/net/ipv6/exthdrs_core.c
+index 30e8d123a8b3..67ae99a3b527 100644
+--- a/net/ipv6/exthdrs_core.c
++++ b/net/ipv6/exthdrs_core.c
+@@ -142,6 +142,8 @@ int ipv6_find_tlv(struct sk_buff *skb, int offset, int type)
+ 			optlen = 1;
+ 			break;
+ 		default:
++			if (len < 2)
++				goto bad;
+ 			optlen = nh[offset + 1] + 2;
+ 			if (optlen > len)
+ 				goto bad;
+-- 
+2.47.3
+

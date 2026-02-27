@@ -1,0 +1,175 @@
+From b9c9e8c71ecef4a7c5193d2163d2ecb6d838704e Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Tue, 17 Feb 2026 19:15:15 -0500
+Subject: [PATCH] lockdown: also lock down previous kgdb use
+
+jira VULN-1501
+cve CVE-2022-21499
+commit-author Daniel Thompson <daniel.thompson@linaro.org>
+commit eadb2f47a3ced5c64b23b90fd2a3463f63726066
+upstream-diff: Adapted to use older get_securelevel() APIs 3.10 kernel
+	uses the RHEL 7 securelevel mechanism rather than the Lockdown
+        LSM introduced in 5.4 or the kernel_is_locked_down() bridge
+        used on 4.18.0.
+
+KGDB and KDB allow read and write access to kernel memory, and thus
+should be restricted during lockdown.  An attacker with access to a
+serial port (for example, via a hypervisor console, which some cloud
+vendors provide over the network) could trigger the debugger so it is
+important that the debugger respect the lockdown mode when/if it is
+triggered.
+
+Fix this by integrating lockdown into kdb's existing permissions
+mechanism.  Unfortunately kgdb does not have any permissions mechanism
+(although it certainly could be added later) so, for now, kgdb is simply
+and brutally disabled by immediately exiting the gdb stub without taking
+any action.
+
+For lockdowns established early in the boot (e.g. the normal case) then
+this should be fine but on systems where kgdb has set breakpoints before
+the lockdown is enacted than "bad things" will happen.
+
+CVE: CVE-2022-21499
+Co-developed-by: Stephen Brennan <stephen.s.brennan@oracle.com>
+	Signed-off-by: Stephen Brennan <stephen.s.brennan@oracle.com>
+	Reviewed-by: Douglas Anderson <dianders@chromium.org>
+	Signed-off-by: Daniel Thompson <daniel.thompson@linaro.org>
+	Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+(cherry picked from commit eadb2f47a3ced5c64b23b90fd2a3463f63726066)
+	Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ kernel/debug/debug_core.c   | 24 +++++++++++++++
+ kernel/debug/kdb/kdb_main.c | 60 +++++++++++++++++++++++++++++++++++--
+ 2 files changed, 81 insertions(+), 3 deletions(-)
+
+diff --git a/kernel/debug/debug_core.c b/kernel/debug/debug_core.c
+index 334b3980ffc1..c39cf040ea60 100644
+--- a/kernel/debug/debug_core.c
++++ b/kernel/debug/debug_core.c
+@@ -50,6 +50,7 @@
+ #include <linux/smp.h>
+ #include <linux/mm.h>
+ #include <linux/rcupdate.h>
++#include <linux/security.h>
+ 
+ #include <asm/cacheflush.h>
+ #include <asm/byteorder.h>
+@@ -612,6 +613,29 @@ cpu_master_loop:
+ 				continue;
+ 			kgdb_connected = 0;
+ 		} else {
++			/*
++			 * This is a brutal way to interfere with the debugger
++			 * and prevent gdb being used to poke at kernel memory.
++			 * This could cause trouble if lockdown is applied when
++			 * there is already an active gdb session. For now the
++			 * answer is simply "don't do that". Typically lockdown
++			 * *will* be applied before the debug core gets started
++			 * so only developers using kgdb for fairly advanced
++			 * early kernel debug can be biten by this. Hopefully
++			 * they are sophisticated enough to take care of
++			 * themselves, especially with help from the lockdown
++			 * message printed on the console!
++			 */
++			if (get_securelevel() > 0) {
++				if (IS_ENABLED(CONFIG_KGDB_KDB)) {
++					/* Switch back to kdb if possible... */
++					dbg_kdb_mode = 1;
++					continue;
++				} else {
++					/* ... otherwise just bail */
++					break;
++				}
++			}
+ 			error = gdb_serial_stub(ks);
+ 		}
+ 
+diff --git a/kernel/debug/kdb/kdb_main.c b/kernel/debug/kdb/kdb_main.c
+index de0758657a22..261f88179afe 100644
+--- a/kernel/debug/kdb/kdb_main.c
++++ b/kernel/debug/kdb/kdb_main.c
+@@ -42,6 +42,7 @@
+ #include <linux/proc_fs.h>
+ #include <linux/uaccess.h>
+ #include <linux/slab.h>
++#include <linux/security.h>
+ #include "kdb_private.h"
+ 
+ #undef	MODULE_PARAM_PREFIX
+@@ -197,10 +198,60 @@ struct task_struct *kdb_curr_task(int cpu)
+ }
+ 
+ /*
+- * Check whether the flags of the current command and the permissions
+- * of the kdb console has allow a command to be run.
++ * Update the permissions flags (kdb_cmd_enabled) to match the
++ * current lockdown state.
++ *
++ * Within this function the calls to security_locked_down() are "lazy". We
++ * avoid calling them if the current value of kdb_cmd_enabled already excludes
++ * flags that might be subject to lockdown. Additionally we deliberately check
++ * the lockdown flags independently (even though read lockdown implies write
++ * lockdown) since that results in both simpler code and clearer messages to
++ * the user on first-time debugger entry.
++ *
++ * The permission masks during a read+write lockdown permits the following
++ * flags: INSPECT, SIGNAL, REBOOT (and ALWAYS_SAFE).
++ *
++ * The INSPECT commands are not blocked during lockdown because they are
++ * not arbitrary memory reads. INSPECT covers the backtrace family (sometimes
++ * forcing them to have no arguments) and lsmod. These commands do expose
++ * some kernel state but do not allow the developer seated at the console to
++ * choose what state is reported. SIGNAL and REBOOT should not be controversial,
++ * given these are allowed for root during lockdown already.
++ */
++static void kdb_check_for_lockdown(void)
++{
++	const int write_flags = KDB_ENABLE_MEM_WRITE |
++				KDB_ENABLE_REG_WRITE |
++				KDB_ENABLE_FLOW_CTRL;
++	const int read_flags = KDB_ENABLE_MEM_READ |
++			       KDB_ENABLE_REG_READ;
++
++	bool need_to_lockdown_write = false;
++	bool need_to_lockdown_read = false;
++
++	if (kdb_cmd_enabled & (KDB_ENABLE_ALL | write_flags))
++		need_to_lockdown_write = get_securelevel() > 0;
++
++	if (kdb_cmd_enabled & (KDB_ENABLE_ALL | read_flags))
++		need_to_lockdown_read = get_securelevel() > 0;
++
++	/* De-compose KDB_ENABLE_ALL if required */
++	if (need_to_lockdown_write || need_to_lockdown_read)
++		if (kdb_cmd_enabled & KDB_ENABLE_ALL)
++			kdb_cmd_enabled = KDB_ENABLE_MASK & ~KDB_ENABLE_ALL;
++
++	if (need_to_lockdown_write)
++		kdb_cmd_enabled &= ~write_flags;
++
++	if (need_to_lockdown_read)
++		kdb_cmd_enabled &= ~read_flags;
++}
++
++/*
++ * Check whether the flags of the current command, the permissions of the kdb
++ * console and the lockdown state allow a command to be run.
+  */
+-static inline bool kdb_check_flags(kdb_cmdflags_t flags, int permissions,
++static bool kdb_check_flags(kdb_cmdflags_t flags, int permissions,
+ 				   bool no_args)
+ {
+ 	/* permissions comes from userspace so needs massaging slightly */
+@@ -1178,6 +1229,9 @@ static int kdb_local(kdb_reason_t reason, int error, struct pt_regs *regs,
+ 		kdb_curr_task(raw_smp_processor_id());
+ 
+ 	KDB_DEBUG_STATE("kdb_local 1", reason);
++
++	kdb_check_for_lockdown();
++
+ 	kdb_go_count = 0;
+ 	if (reason == KDB_REASON_DEBUG) {
+ 		/* special case below */
+-- 
+2.47.3
+
