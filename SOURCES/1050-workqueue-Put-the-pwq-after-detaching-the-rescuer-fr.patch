@@ -1,0 +1,69 @@
+From a70b49039fc51eaa9498bb43ea1ae9e1175b5585 Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Thu, 12 Feb 2026 16:49:07 -0500
+Subject: [PATCH] workqueue: Put the pwq after detaching the rescuer from the
+ pool
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-161828
+cve CVE-2025-21786
+commit-author Lai Jiangshan <jiangshan.ljs@antgroup.com>
+commit e76946110137703c16423baf6ee177b751a34b7e
+
+The commit 68f83057b913("workqueue: Reap workers via kthread_stop() and
+remove detach_completion") adds code to reap the normal workers but
+mistakenly does not handle the rescuer and also removes the code waiting
+for the rescuer in put_unbound_pool(), which caused a use-after-free bug
+reported by Cheung Wall.
+
+To avoid the use-after-free bug, the pool’s reference must be held until
+the detachment is complete. Therefore, move the code that puts the pwq
+after detaching the rescuer from the pool.
+
+	Reported-by: cheung wall <zzqq0103.hey@gmail.com>
+	Cc: cheung wall <zzqq0103.hey@gmail.com>
+Link: https://lore.kernel.org/lkml/CAKHoSAvP3iQW+GwmKzWjEAOoPvzeWeoMO0Gz7Pp3_4kxt-RMoA@mail.gmail.com/
+Fixes: 68f83057b913("workqueue: Reap workers via kthread_stop() and remove detach_completion")
+	Signed-off-by: Lai Jiangshan <jiangshan.ljs@antgroup.com>
+	Signed-off-by: Tejun Heo <tj@kernel.org>
+(cherry picked from commit e76946110137703c16423baf6ee177b751a34b7e)
+	Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ kernel/workqueue.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/kernel/workqueue.c b/kernel/workqueue.c
+index dee545f4138a..9bff26c97451 100644
+--- a/kernel/workqueue.c
++++ b/kernel/workqueue.c
+@@ -3579,12 +3579,6 @@ static int rescuer_thread(void *__rescuer)
+ 			}
+ 		}
+ 
+-		/*
+-		 * Put the reference grabbed by send_mayday().  @pool won't
+-		 * go away while we're still attached to it.
+-		 */
+-		put_pwq(pwq);
+-
+ 		/*
+ 		 * Leave this pool. Notify regular workers; otherwise, we end up
+ 		 * with 0 concurrency and stalling the execution.
+@@ -3595,6 +3589,12 @@ static int rescuer_thread(void *__rescuer)
+ 
+ 		worker_detach_from_pool(rescuer);
+ 
++		/*
++		 * Put the reference grabbed by send_mayday().  @pool might
++		 * go away any time after it.
++		 */
++		put_pwq_unlocked(pwq);
++
+ 		raw_spin_lock_irq(&wq_mayday_lock);
+ 	}
+ 
+-- 
+2.47.3
+

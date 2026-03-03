@@ -1,0 +1,45 @@
+From 7e1a8340c1cc9e67c457ac2769e457146e499e54 Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Thu, 12 Feb 2026 16:50:05 -0500
+Subject: [PATCH] NFSv4/pNFS: Clear NFS_INO_LAYOUTCOMMIT in
+ pnfs_mark_layout_stateid_invalid
+
+jira VULN-171922
+cve CVE-2025-68349
+commit-author Jonathan Curley <jcurley@purestorage.com>
+commit e0f8058f2cb56de0b7572f51cd563ca5debce746
+
+Fixes a crash when layout is null during this call stack:
+
+write_inode
+    -> nfs4_write_inode
+        -> pnfs_layoutcommit_inode
+
+pnfs_set_layoutcommit relies on the lseg refcount to keep the layout
+around. Need to clear NFS_INO_LAYOUTCOMMIT otherwise we might attempt
+to reference a null layout.
+
+Fixes: fe1cf9469d7bc ("pNFS: Clear all layout segment state in pnfs_mark_layout_stateid_invalid")
+	Signed-off-by: Jonathan Curley <jcurley@purestorage.com>
+	Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>
+(cherry picked from commit e0f8058f2cb56de0b7572f51cd563ca5debce746)
+	Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ fs/nfs/pnfs.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fs/nfs/pnfs.c b/fs/nfs/pnfs.c
+index 5f582713bf05..358b04ec5867 100644
+--- a/fs/nfs/pnfs.c
++++ b/fs/nfs/pnfs.c
+@@ -466,6 +466,7 @@ pnfs_mark_layout_stateid_invalid(struct pnfs_layout_hdr *lo,
+ 	struct pnfs_layout_segment *lseg, *next;
+ 
+ 	set_bit(NFS_LAYOUT_INVALID_STID, &lo->plh_flags);
++	clear_bit(NFS_INO_LAYOUTCOMMIT, &NFS_I(lo->plh_inode)->flags);
+ 	list_for_each_entry_safe(lseg, next, &lo->plh_segs, pls_list)
+ 		pnfs_clear_lseg_state(lseg, lseg_list);
+ 	pnfs_clear_layoutreturn_info(lo);
+-- 
+2.47.3
+

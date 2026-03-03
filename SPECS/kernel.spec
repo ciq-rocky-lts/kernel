@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 4
+%define ciq_patch_version 5
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1019,6 +1019,38 @@ Patch1000031: 1031-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.patch
 Patch1000032: 1032-sctp-detect-and-prevent-references-to-a-freed-transp.patch
 Patch1000033: 1033-tls-wait-for-pending-async-decryptions-if-tls_strp_m.patch
 Patch1000034: 1034-usb-dwc3-Fix-race-condition-between-concurrent-dwc3_.patch
+#CIQ Patch Version: 570.60.1+5.1.el9_6_ciq
+Patch1000035: 1035-drm-xe-Fix-an-out-of-bounds-shift-when-invalidating-.patch
+Patch1000036: 1036-KVM-arm64-Tear-down-vGIC-on-failed-vCPU-creation.patch
+Patch1000037: 1037-ALSA-ump-Fix-buffer-overflow-at-UMP-SysEx-message-co.patch
+Patch1000038: 1038-scsi-lpfc-Avoid-potential-ndlp-use-after-free-in-dev.patch
+Patch1000039: 1039-NFS-Fix-a-race-when-updating-an-existing-write.patch
+Patch1000040: 1040-i40e-add-validation-for-ring_len-param.patch
+Patch1000041: 1041-i40e-validate-ring_len-parameter-against-hardware-sp.patch
+Patch1000042: 1042-Bluetooth-ISO-Fix-possible-UAF-on-iso_conn_free.patch
+Patch1000043: 1043-ASoC-Intel-bytcr_rt5640-Fix-invalid-quirk-input-mapp.patch
+Patch1000044: 1044-devlink-rate-Unset-parent-pointer-in-devl_rate_nodes.patch
+Patch1000045: 1045-mptcp-fix-race-condition-in-mptcp_schedule_work.patch
+Patch1000046: 1046-drm-vmwgfx-Validate-command-header-size-against-SVGA.patch
+Patch1000047: 1047-Bluetooth-hci_sync-fix-race-in-hci_cmd_sync_dequeue_.patch
+Patch1000048: 1048-NFS-Fix-potential-buffer-overflowin-nfs_sysfs_link_r.patch
+Patch1000049: 1049-sched-sch_cake-add-bounds-checks-to-host-bulk-flow-f.patch
+Patch1000050: 1050-workqueue-Put-the-pwq-after-detaching-the-rescuer-fr.patch
+Patch1000051: 1051-vrf-use-RCU-protection-in-l3mdev_l3_out.patch
+Patch1000052: 1052-io_uring-prevent-opcode-speculation.patch
+Patch1000053: 1053-RDMA-core-Fix-KASAN-slab-use-after-free-Read-in-ib_r.patch
+Patch1000054: 1054-smb-client-Fix-use-after-free-in-cifs_fill_dirent.patch
+Patch1000055: 1055-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
+Patch1000056: 1056-Bluetooth-MGMT-Fix-OOB-access-in-parse_adv_monitor_p.patch
+Patch1000057: 1057-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
+Patch1000058: 1058-libceph-fix-potential-use-after-free-in-have_mon_and.patch
+Patch1000059: 1059-net-atlantic-fix-fragment-overflow-handling-in-RX-pa.patch
+Patch1000060: 1060-NFSv4-pNFS-Clear-NFS_INO_LAYOUTCOMMIT-in-pnfs_mark_l.patch
+Patch1000061: 1061-eventpoll-don-t-decrement-ep-refcount-while-still-ho.patch
+Patch1000062: 1062-usb-core-config-Prevent-OOB-read-in-SS-endpoint-comp.patch
+Patch1000063: 1063-ALSA-usb-audio-Fix-potential-overflow-of-PCM-transfe.patch
+Patch1000064: 1064-fs-proc-fix-uaf-in-proc_readdir_de.patch
+Patch1000065: 1065-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1812,6 +1844,37 @@ ApplyOptionalPatch 1031-tcp-Don-t-call-reqsk_fastopen_remove-in-tcp_conn_req.pat
 ApplyOptionalPatch 1032-sctp-detect-and-prevent-references-to-a-freed-transp.patch
 ApplyOptionalPatch 1033-tls-wait-for-pending-async-decryptions-if-tls_strp_m.patch
 ApplyOptionalPatch 1034-usb-dwc3-Fix-race-condition-between-concurrent-dwc3_.patch
+ApplyOptionalPatch 1035-drm-xe-Fix-an-out-of-bounds-shift-when-invalidating-.patch
+ApplyOptionalPatch 1036-KVM-arm64-Tear-down-vGIC-on-failed-vCPU-creation.patch
+ApplyOptionalPatch 1037-ALSA-ump-Fix-buffer-overflow-at-UMP-SysEx-message-co.patch
+ApplyOptionalPatch 1038-scsi-lpfc-Avoid-potential-ndlp-use-after-free-in-dev.patch
+ApplyOptionalPatch 1039-NFS-Fix-a-race-when-updating-an-existing-write.patch
+ApplyOptionalPatch 1040-i40e-add-validation-for-ring_len-param.patch
+ApplyOptionalPatch 1041-i40e-validate-ring_len-parameter-against-hardware-sp.patch
+ApplyOptionalPatch 1042-Bluetooth-ISO-Fix-possible-UAF-on-iso_conn_free.patch
+ApplyOptionalPatch 1043-ASoC-Intel-bytcr_rt5640-Fix-invalid-quirk-input-mapp.patch
+ApplyOptionalPatch 1044-devlink-rate-Unset-parent-pointer-in-devl_rate_nodes.patch
+ApplyOptionalPatch 1045-mptcp-fix-race-condition-in-mptcp_schedule_work.patch
+ApplyOptionalPatch 1046-drm-vmwgfx-Validate-command-header-size-against-SVGA.patch
+ApplyOptionalPatch 1047-Bluetooth-hci_sync-fix-race-in-hci_cmd_sync_dequeue_.patch
+ApplyOptionalPatch 1048-NFS-Fix-potential-buffer-overflowin-nfs_sysfs_link_r.patch
+ApplyOptionalPatch 1049-sched-sch_cake-add-bounds-checks-to-host-bulk-flow-f.patch
+ApplyOptionalPatch 1050-workqueue-Put-the-pwq-after-detaching-the-rescuer-fr.patch
+ApplyOptionalPatch 1051-vrf-use-RCU-protection-in-l3mdev_l3_out.patch
+ApplyOptionalPatch 1052-io_uring-prevent-opcode-speculation.patch
+ApplyOptionalPatch 1053-RDMA-core-Fix-KASAN-slab-use-after-free-Read-in-ib_r.patch
+ApplyOptionalPatch 1054-smb-client-Fix-use-after-free-in-cifs_fill_dirent.patch
+ApplyOptionalPatch 1055-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
+ApplyOptionalPatch 1056-Bluetooth-MGMT-Fix-OOB-access-in-parse_adv_monitor_p.patch
+ApplyOptionalPatch 1057-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
+ApplyOptionalPatch 1058-libceph-fix-potential-use-after-free-in-have_mon_and.patch
+ApplyOptionalPatch 1059-net-atlantic-fix-fragment-overflow-handling-in-RX-pa.patch
+ApplyOptionalPatch 1060-NFSv4-pNFS-Clear-NFS_INO_LAYOUTCOMMIT-in-pnfs_mark_l.patch
+ApplyOptionalPatch 1061-eventpoll-don-t-decrement-ep-refcount-while-still-ho.patch
+ApplyOptionalPatch 1062-usb-core-config-Prevent-OOB-read-in-SS-endpoint-comp.patch
+ApplyOptionalPatch 1063-ALSA-usb-audio-Fix-potential-overflow-of-PCM-transfe.patch
+ApplyOptionalPatch 1064-fs-proc-fix-uaf-in-proc_readdir_de.patch
+ApplyOptionalPatch 1065-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2581,9 +2644,9 @@ BuildKernel() {
 
         KernelUnifiedImageDir="$RPM_BUILD_ROOT/lib/modules/$KernelVer"
         KernelUnifiedImage="$KernelUnifiedImageDir/$InstallName-virt.efi"
-    
+
         mkdir -p $KernelUnifiedImageDir
-    
+
         dracut --conf=%{SOURCE150} \
                --confdir=$(mktemp -d) \
                --verbose \
@@ -2937,6 +3000,9 @@ for dir in bpf bpf/no_alu32 bpf/cpuv4 bpf/progs; do
 	xargs -0 cp -t %{buildroot}%{_libexecdir}/kselftests/$dir || true
 done
 ln -sr  %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/no_alu32/bpftool
+
+# disable memfd:run_hugetlbfs_test.sh
+sed -i '/memfd:run_hugetlbfs_test.sh/d' %{buildroot}%{_libexecdir}/kselftests/kselftest-list.txt # Test hangs up
 
 # CKI clang does not support cpuv4 so it skips this variant
 ln -sr  %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/cpuv4/bpftool || echo "selftests/bpf: no cpuv4 variant"
@@ -3925,6 +3991,39 @@ fi
 #
 #
 %changelog
+* Thu Feb 26 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-570.60.1+5.1.el9_6_ciq
+- fbdev: Add bounds checking in bit_putcs to fix vmalloc-out-of-bounds (Jonathan Maple) [ciqres] {CVE-2025-40304}
+- fs/proc: fix uaf in proc_readdir_de() (Jonathan Maple) [ciqres] {CVE-2025-40271}
+- ALSA: usb-audio: Fix potential overflow of PCM transfer buffer (Jonathan Maple) [ciqres] {CVE-2025-40269}
+- usb: core: config: Prevent OOB read in SS endpoint companion parsing (Jonathan Maple) [ciqres] {CVE-2025-39760}
+- eventpoll: don't decrement ep refcount while still holding the ep mutex (Jonathan Maple) [ciqres] {CVE-2025-38349}
+- NFSv4/pNFS: Clear NFS_INO_LAYOUTCOMMIT in pnfs_mark_layout_stateid_invalid (Jonathan Maple) [ciqres] {CVE-2025-68349}
+- net: atlantic: fix fragment overflow handling in RX path (Jonathan Maple) [ciqres] {CVE-2025-68301}
+- libceph: fix potential use-after-free in have_mon_and_osd_map() (Jonathan Maple) [ciqres] {CVE-2025-68285}
+- fbdev: bitblit: bound-check glyph index in bit_putcs* (Jonathan Maple) [ciqres] {CVE-2025-40322}
+- Bluetooth: MGMT: Fix OOB access in parse_adv_monitor_pattern() (Jonathan Maple) [ciqres] {CVE-2025-40294}
+- vsock: Ignore signal/timeout on connect() if already established (Jonathan Maple) [ciqres] {CVE-2025-40248}
+- smb: client: Fix use-after-free in cifs_fill_dirent (Jonathan Maple) [ciqres] {CVE-2025-38051}
+- RDMA/core: Fix "KASAN: slab-use-after-free Read in ib_register_device" problem (Jonathan Maple) [ciqres] {CVE-2025-38022}
+- io_uring: prevent opcode speculation (Jonathan Maple) [ciqres] {CVE-2025-21863}
+- vrf: use RCU protection in l3mdev_l3_out() (Jonathan Maple) [ciqres] {CVE-2025-21791}
+- workqueue: Put the pwq after detaching the rescuer from the pool (Jonathan Maple) [ciqres] {CVE-2025-21786}
+- sched: sch_cake: add bounds checks to host bulk flow fairness counts (Jonathan Maple) [ciqres] {CVE-2025-21647}
+- NFS: Fix potential buffer overflowin nfs_sysfs_link_rpc_client() (Jonathan Maple) [ciqres] {CVE-2024-54456}
+- Bluetooth: hci_sync: fix race in hci_cmd_sync_dequeue_once (Jonathan Maple) [ciqres] {CVE-2025-40318}
+- drm/vmwgfx: Validate command header size against SVGA_CMD_MAX_DATASIZE (Jonathan Maple) [ciqres] {CVE-2025-40277}
+- mptcp: fix race condition in mptcp_schedule_work() (Jonathan Maple) [ciqres] {CVE-2025-40258}
+- devlink: rate: Unset parent pointer in devl_rate_nodes_destroy (Jonathan Maple) [ciqres] {CVE-2025-40251}
+- ASoC: Intel: bytcr_rt5640: Fix invalid quirk input mapping (Jonathan Maple) [ciqres] {CVE-2025-40154}
+- Bluetooth: ISO: Fix possible UAF on iso_conn_free (Jonathan Maple) [ciqres] {CVE-2025-40141}
+- i40e: validate ring_len parameter against hardware-specific values (Jonathan Maple) [ciqres] {CVE-2025-39973}
+- i40e: add validation for ring_len param (Jonathan Maple) [ciqres] {CVE-2025-39973}
+- NFS: Fix a race when updating an existing write (Jonathan Maple) [ciqres] {CVE-2025-39697}
+- scsi: lpfc: Avoid potential ndlp use-after-free in dev_loss_tmo_callbk (Jonathan Maple) [ciqres] {CVE-2025-38289}
+- ALSA: ump: Fix buffer overflow at UMP SysEx message conversion (Jonathan Maple) [ciqres] {CVE-2025-37891}
+- KVM: arm64: Tear down vGIC on failed vCPU creation (Jonathan Maple) [ciqres] {CVE-2025-37849}
+- drm/xe: Fix an out-of-bounds shift when invalidating TLB (Jonathan Maple) [ciqres] {CVE-2025-37761}
+
 * Thu Feb 05 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-570.60.1+4.1.el9_6_ciq
 - usb: dwc3: Fix race condition between concurrent dwc3_remove_requests() call paths (Brett Mastbergen) [ciqres] {CVE-2025-68287}
 - tls: wait for pending async decryptions if tls_strp_msg_hold fails (Brett Mastbergen) [ciqres] {CVE-2025-40176}
