@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 23
+%define ciq_patch_version 24
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1347,6 +1347,14 @@ Patch1000403: 0358-KVM-arm64-Tear-down-vGIC-on-failed-vCPU-creation.patch
 Patch1000404: 0359-Bluetooth-ISO-Fix-possible-UAF-on-iso_conn_free.patch
 Patch1000405: 0360-ASoC-Intel-bytcr_rt5640-Fix-invalid-quirk-input-mapp.patch
 Patch1000406: 0361-drm-vmwgfx-Validate-command-header-size-against-SVGA.patch
+#CIQ Patch Version: 284.30.1+24.1.el9_2_ciq
+Patch1000407: 0362-Bluetooth-hci_event-call-disconnect-callback-before-.patch
+Patch1000408: 0363-cifs-fix-potential-use-after-free-bugs-in-TCP_Server.patch
+Patch1000409: 0364-drm-i915-Fix-NULL-ptr-deref-by-checking-new_crtc_sta.patch
+Patch1000410: 0365-smb-client-Fix-use-after-free-in-cifs_fill_dirent.patch
+Patch1000411: 0366-mptcp-fix-race-condition-in-mptcp_schedule_work.patch
+Patch1000412: 0367-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
+Patch1000413: 0368-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2429,6 +2437,13 @@ ApplyOptionalPatch 0358-KVM-arm64-Tear-down-vGIC-on-failed-vCPU-creation.patch
 ApplyOptionalPatch 0359-Bluetooth-ISO-Fix-possible-UAF-on-iso_conn_free.patch
 ApplyOptionalPatch 0360-ASoC-Intel-bytcr_rt5640-Fix-invalid-quirk-input-mapp.patch
 ApplyOptionalPatch 0361-drm-vmwgfx-Validate-command-header-size-against-SVGA.patch
+ApplyOptionalPatch 0362-Bluetooth-hci_event-call-disconnect-callback-before-.patch
+ApplyOptionalPatch 0363-cifs-fix-potential-use-after-free-bugs-in-TCP_Server.patch
+ApplyOptionalPatch 0364-drm-i915-Fix-NULL-ptr-deref-by-checking-new_crtc_sta.patch
+ApplyOptionalPatch 0365-smb-client-Fix-use-after-free-in-cifs_fill_dirent.patch
+ApplyOptionalPatch 0366-mptcp-fix-race-condition-in-mptcp_schedule_work.patch
+ApplyOptionalPatch 0367-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
+ApplyOptionalPatch 0368-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4312,6 +4327,15 @@ fi
 #
 #
 %changelog
+* Fri Mar 06 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1+24.1.el9_2_ciq
+- fbdev: bitblit: bound-check glyph index in bit_putcs* (Shreeya Patel) [ciqres] {CVE-2025-40322}
+- fbdev: Add bounds checking in bit_putcs to fix vmalloc-out-of-bounds (Shreeya Patel) [ciqres] {CVE-2025-40304}
+- mptcp: fix race condition in mptcp_schedule_work() (Shreeya Patel) [ciqres] {CVE-2025-40258}
+- smb: client: Fix use-after-free in cifs_fill_dirent (Shreeya Patel) [ciqres] {CVE-2025-38051}
+- drm/i915: Fix NULL ptr deref by checking new_crtc_state (Shreeya Patel) [ciqres] {CVE-2023-53833}
+- cifs: fix potential use-after-free bugs in TCP_Server_Info::hostname (Shreeya Patel) [ciqres] {CVE-2023-53751}
+- Bluetooth: hci_event: call disconnect callback before deleting conn (Shreeya Patel) [ciqres] {CVE-2023-53673}
+
 * Tue Feb 17 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+23.1.el9_2_ciq
 - drm/vmwgfx: Validate command header size against SVGA_CMD_MAX_DATASIZE (Shreeya Patel) [ciqres] {CVE-2025-40277}
 - ASoC: Intel: bytcr_rt5640: Fix invalid quirk input mapping (Shreeya Patel) [ciqres] {CVE-2025-40154}
