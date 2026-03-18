@@ -1,0 +1,60 @@
+From c953093486444800fe88b82e30e5b7ec9fcc2666 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 17 Feb 2026 23:59:45 +0100
+Subject: [PATCH] NFSD: Protect against send buffer overflow in NFSv3 READ
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-155649
+cve CVE-2022-50410
+commit-author Chuck Lever <chuck.lever@oracle.com>
+commit fa6be9cc6e80ec79892ddf08a8c10cabab9baf38
+upstream-diff LTS 8.6 version of the function `nfsd3_proc_read()'
+  misses changes from 0cb4d23ae08c48f6bf3c29a8e5c4a74b8388b960,
+  cc9bcdad7773c295375e66c892c7ac00524706f2 and
+  be63bd2ac6bbf8c065a0ef6dfbea76934326c352. Preserved the logic of what
+  is assigned to `resp->count' despite the missing changes.
+
+Since before the git era, NFSD has conserved the number of pages
+held by each nfsd thread by combining the RPC receive and send
+buffers into a single array of pages. This works because there are
+no cases where an operation needs a large RPC Call message and a
+large RPC Reply at the same time.
+
+Once an RPC Call has been received, svc_process() updates
+svc_rqst::rq_res to describe the part of rq_pages that can be
+used for constructing the Reply. This means that the send buffer
+(rq_res) shrinks when the received RPC record containing the RPC
+Call is large.
+
+A client can force this shrinkage on TCP by sending a correctly-
+formed RPC Call header contained in an RPC record that is
+excessively large. The full maximum payload size cannot be
+constructed in that case.
+
+	Cc: <stable@vger.kernel.org>
+	Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+	Reviewed-by: Jeff Layton <jlayton@kernel.org>
+	Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+(cherry picked from commit fa6be9cc6e80ec79892ddf08a8c10cabab9baf38)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/nfsd/nfs3proc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fs/nfsd/nfs3proc.c b/fs/nfsd/nfs3proc.c
+index 0c217bf5f2d5..17d8d9d0175f 100644
+--- a/fs/nfsd/nfs3proc.c
++++ b/fs/nfsd/nfs3proc.c
+@@ -146,6 +146,7 @@ nfsd3_proc_read(struct svc_rqst *rqstp)
+ 	struct nfsd3_readres *resp = rqstp->rq_resp;
+ 	u32	max_blocksize = svc_max_payload(rqstp);
+ 	unsigned long cnt = min(argp->count, max_blocksize);
++	cnt = min(cnt, (unsigned long)rqstp->rq_res.buflen);
+ 
+ 	dprintk("nfsd: READ(3) %s %lu bytes at %Lu\n",
+ 				SVCFH_fmt(&argp->fh),
+-- 
+2.47.3
+

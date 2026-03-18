@@ -1,0 +1,147 @@
+From aec9826893e313df45e3bc802d483acbf61e1777 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Mon, 16 Oct 2023 14:42:50 +0200
+Subject: [PATCH] x86/sev: Check for user-space IOIO pointing to kernel space
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-4125
+cve CVE-2023-46813
+commit-author Joerg Roedel <jroedel@suse.de>
+commit 63e44bc52047f182601e7817da969a105aa1f721
+upstream-diff Added declaration of `fault_in_kernel_space()' to
+  arch/x86/include/asm/traps.h. This was necessary for the call in
+  `vc_insn_string_check()' to compile. Also changed the signature of the
+  definition of this function in arch/x86/mm/fault.c, to match the
+  introduced declaration: converted from static to global and changed
+  the return type from `int' to `bool'. These changes follow what was
+  done in FIPS 8 Compliant in the commit
+  9e41a2ac921a038e5896bcb27a6ae4c0b20d4463, and are the result of
+  ciqlts8_6 lacking the backport of
+  300638101329e8f1569115f3d7197ef5ef754a3a ("x86/mce: Decode a kernel
+  instruction to determine if it is copying from user")
+
+Check the memory operand of INS/OUTS before emulating the instruction.
+The #VC exception can get raised from user-space, but the memory operand
+can be manipulated to access kernel memory before the emulation actually
+begins and after the exception handler has run.
+
+  [ bp: Massage commit message. ]
+
+Fixes: 597cfe48212a ("x86/boot/compressed/64: Setup a GHCB-based VC Exception handler")
+	Reported-by: Tom Dohrmann <erbse.13@gmx.de>
+	Signed-off-by: Joerg Roedel <jroedel@suse.de>
+	Signed-off-by: Borislav Petkov (AMD) <bp@alien8.de>
+	Cc: <stable@kernel.org>
+(cherry picked from commit 63e44bc52047f182601e7817da969a105aa1f721)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ arch/x86/boot/compressed/sev.c |  5 +++++
+ arch/x86/include/asm/traps.h   |  3 +++
+ arch/x86/kernel/sev-shared.c   | 31 +++++++++++++++++++++++++++++--
+ arch/x86/mm/fault.c            |  2 +-
+ 4 files changed, 38 insertions(+), 3 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
+index 84e1e2cd5b9b..8249f214c9f9 100644
+--- a/arch/x86/boot/compressed/sev.c
++++ b/arch/x86/boot/compressed/sev.c
+@@ -111,6 +111,11 @@ static enum es_result vc_ioio_check(struct es_em_ctxt *ctxt, u16 port, size_t si
+ 	return ES_OK;
+ }
+ 
++static bool fault_in_kernel_space(unsigned long address)
++{
++	return false;
++}
++
+ #undef __init
+ #undef __pa
+ #define __init
+diff --git a/arch/x86/include/asm/traps.h b/arch/x86/include/asm/traps.h
+index 3577751bb631..86d0b29693ed 100644
+--- a/arch/x86/include/asm/traps.h
++++ b/arch/x86/include/asm/traps.h
+@@ -119,6 +119,9 @@ static inline int get_si_code(unsigned long condition)
+ extern int panic_on_unrecovered_nmi;
+ 
+ void math_emulate(struct math_emu_info *);
++
++bool fault_in_kernel_space(unsigned long address);
++
+ #ifndef CONFIG_X86_32
+ asmlinkage void smp_thermal_interrupt(struct pt_regs *regs);
+ asmlinkage void smp_threshold_interrupt(struct pt_regs *regs);
+diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
+index 4f333acda6f4..5d0fcbed5f68 100644
+--- a/arch/x86/kernel/sev-shared.c
++++ b/arch/x86/kernel/sev-shared.c
+@@ -224,6 +224,23 @@ void __init do_vc_no_ghcb(struct pt_regs *regs, unsigned long exit_code)
+ 	sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
+ }
+ 
++static enum es_result vc_insn_string_check(struct es_em_ctxt *ctxt,
++					   unsigned long address,
++					   bool write)
++{
++	if (user_mode(ctxt->regs) && fault_in_kernel_space(address)) {
++		ctxt->fi.vector     = X86_TRAP_PF;
++		ctxt->fi.error_code = X86_PF_USER;
++		ctxt->fi.cr2        = address;
++		if (write)
++			ctxt->fi.error_code |= X86_PF_WRITE;
++
++		return ES_EXCEPTION;
++	}
++
++	return ES_OK;
++}
++
+ static enum es_result vc_insn_string_read(struct es_em_ctxt *ctxt,
+ 					  void *src, char *buf,
+ 					  unsigned int data_size,
+@@ -231,7 +248,12 @@ static enum es_result vc_insn_string_read(struct es_em_ctxt *ctxt,
+ 					  bool backwards)
+ {
+ 	int i, b = backwards ? -1 : 1;
+-	enum es_result ret = ES_OK;
++	unsigned long address = (unsigned long)src;
++	enum es_result ret;
++
++	ret = vc_insn_string_check(ctxt, address, false);
++	if (ret != ES_OK)
++		return ret;
+ 
+ 	for (i = 0; i < count; i++) {
+ 		void *s = src + (i * data_size * b);
+@@ -252,7 +274,12 @@ static enum es_result vc_insn_string_write(struct es_em_ctxt *ctxt,
+ 					   bool backwards)
+ {
+ 	int i, s = backwards ? -1 : 1;
+-	enum es_result ret = ES_OK;
++	unsigned long address = (unsigned long)dst;
++	enum es_result ret;
++
++	ret = vc_insn_string_check(ctxt, address, true);
++	if (ret != ES_OK)
++		return ret;
+ 
+ 	for (i = 0; i < count; i++) {
+ 		void *d = dst + (i * data_size * s);
+diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
+index b63f70b6ee4c..1874124aaa69 100644
+--- a/arch/x86/mm/fault.c
++++ b/arch/x86/mm/fault.c
+@@ -1203,7 +1203,7 @@ access_error(unsigned long error_code, struct vm_area_struct *vma)
+ 	return 0;
+ }
+ 
+-static int fault_in_kernel_space(unsigned long address)
++bool fault_in_kernel_space(unsigned long address)
+ {
+ 	return address >= TASK_SIZE_MAX;
+ }
+-- 
+2.47.3
+

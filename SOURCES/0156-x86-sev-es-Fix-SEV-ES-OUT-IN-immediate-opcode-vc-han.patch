@@ -1,0 +1,57 @@
+From 2333ed81de05067e6be5a99de222601ba1378ce0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sat, 7 Feb 2026 00:48:40 +0100
+Subject: [PATCH] x86/sev-es: Fix SEV-ES OUT/IN immediate opcode vc handling
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-4125
+cve-pre CVE-2023-46813
+commit-author Peter Gonda <pgonda@google.com>
+commit a8f7e08a81708920a928664a865208fdf451c49f
+
+The IN and OUT instructions with port address as an immediate operand
+only use an 8-bit immediate (imm8). The current VC handler uses the
+entire 32-bit immediate value but these instructions only set the first
+bytes.
+
+Cast the operand to an u8 for that.
+
+ [ bp: Massage commit message. ]
+
+Fixes: 25189d08e5168 ("x86/sev-es: Add support for handling IOIO exceptions")
+	Signed-off-by: Peter Gonda <pgonda@google.com>
+	Signed-off-by: Borislav Petkov <bp@suse.de>
+	Acked-by: David Rientjes <rientjes@google.com>
+Link: https://lkml.kernel.org/r/20210105163311.221490-1-pgonda@google.com
+(cherry picked from commit a8f7e08a81708920a928664a865208fdf451c49f)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ arch/x86/kernel/sev-shared.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
+index 3d0dc64df948..78f44ac02381 100644
+--- a/arch/x86/kernel/sev-shared.c
++++ b/arch/x86/kernel/sev-shared.c
+@@ -311,14 +311,14 @@ static enum es_result vc_ioio_exitinfo(struct es_em_ctxt *ctxt, u64 *exitinfo)
+ 	case 0xe4:
+ 	case 0xe5:
+ 		*exitinfo |= IOIO_TYPE_IN;
+-		*exitinfo |= (u64)insn->immediate.value << 16;
++		*exitinfo |= (u8)insn->immediate.value << 16;
+ 		break;
+ 
+ 	/* OUT immediate opcodes */
+ 	case 0xe6:
+ 	case 0xe7:
+ 		*exitinfo |= IOIO_TYPE_OUT;
+-		*exitinfo |= (u64)insn->immediate.value << 16;
++		*exitinfo |= (u8)insn->immediate.value << 16;
+ 		break;
+ 
+ 	/* IN register opcodes */
+-- 
+2.47.3
+

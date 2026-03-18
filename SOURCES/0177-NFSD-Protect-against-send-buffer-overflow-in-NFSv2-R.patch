@@ -1,0 +1,59 @@
+From 57d3d1751c2f6b897d4818428659159c6a1246af Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 17 Feb 2026 21:36:30 +0100
+Subject: [PATCH] NFSD: Protect against send buffer overflow in NFSv2 READ
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-155649
+cve CVE-2022-50410
+commit-author Chuck Lever <chuck.lever@oracle.com>
+commit 401bc1f90874280a80b93f23be33a0e7e2d1f912
+upstream-diff The conditional before the `svc_reserve_auth()' call is
+  the equivalent of `argp->count = min_t(u32, argp->count,
+  NFSSVC_MAXBLKSIZE_V2);' in the mainline right after which the line in
+  this commit was added
+
+Since before the git era, NFSD has conserved the number of pages
+held by each nfsd thread by combining the RPC receive and send
+buffers into a single array of pages. This works because there are
+no cases where an operation needs a large RPC Call message and a
+large RPC Reply at the same time.
+
+Once an RPC Call has been received, svc_process() updates
+svc_rqst::rq_res to describe the part of rq_pages that can be
+used for constructing the Reply. This means that the send buffer
+(rq_res) shrinks when the received RPC record containing the RPC
+Call is large.
+
+A client can force this shrinkage on TCP by sending a correctly-
+formed RPC Call header contained in an RPC record that is
+excessively large. The full maximum payload size cannot be
+constructed in that case.
+
+	Cc: <stable@vger.kernel.org>
+	Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+	Reviewed-by: Jeff Layton <jlayton@kernel.org>
+	Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+(cherry picked from commit 401bc1f90874280a80b93f23be33a0e7e2d1f912)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/nfsd/nfsproc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fs/nfsd/nfsproc.c b/fs/nfsd/nfsproc.c
+index e777a8b59f3f..394eb0bb50e4 100644
+--- a/fs/nfsd/nfsproc.c
++++ b/fs/nfsd/nfsproc.c
+@@ -189,6 +189,7 @@ nfsd_proc_read(struct svc_rqst *rqstp)
+ 				argp->count);
+ 		argp->count = NFSSVC_MAXBLKSIZE_V2;
+ 	}
++	argp->count = min_t(u32, argp->count, rqstp->rq_res.buflen);
+ 	svc_reserve_auth(rqstp, (19<<2) + argp->count + 4);
+ 
+ 	resp->count = argp->count;
+-- 
+2.47.3
+

@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 20
+%define ciq_patch_version 21
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -880,6 +880,40 @@ Patch0307: 0152-RDMA-rxe-Fix-mr-map-double-free.patch
 Patch0308: 0153-mm-fix-zswap-writeback-race-condition.patch
 Patch0309: 0154-mm-zswap-fix-missing-folio-cleanup-in-writeback-race.patch
 Patch0310: 0155-lockdown-also-lock-down-previous-kgdb-use.patch
+#CIQ Patch Version: 372.32.1+21.1.el8_6_ciq
+Patch0311: 0156-x86-sev-es-Fix-SEV-ES-OUT-IN-immediate-opcode-vc-han.patch
+Patch0312: 0157-x86-sev-Disable-MMIO-emulation-from-user-mode.patch
+Patch0313: 0158-x86-sev-Check-IOBM-for-IOIO-exceptions-from-user-spa.patch
+Patch0314: 0159-x86-sev-Check-for-user-space-IOIO-pointing-to-kernel.patch
+Patch0315: 0160-wifi-mac80211-fix-potential-key-use-after-free.patch
+Patch0316: 0161-mt76-mt7921-fix-kernel-panic-by-accessing-unallocate.patch
+Patch0317: 0162-mm-memcg-revert-mm-memcg-optimize-user-context-objec.patch
+Patch0318: 0163-mm-kmem-fix-a-NULL-pointer-dereference-in-obj_stock_.patch
+Patch0319: 0164-mac80211-fix-potential-double-free-on-mesh-join.patch
+Patch0320: 0165-net-mlx5e-Check-for-NOT_READY-flag-state-after-locki.patch
+Patch0321: 0166-ipv6-Fix-out-of-bounds-access-in-ipv6_find_tlv.patch
+Patch0322: 0167-ip6_vti-fix-slab-use-after-free-in-decode_session6.patch
+Patch0323: 0168-Squashfs-check-return-result-of-sb_min_blocksize.patch
+Patch0324: 0169-squashfs-fix-memory-leak-in-squashfs_fill_super.patch
+Patch0325: 0170-atm-clip-Fix-infinite-recursive-call-of-clip_push.patch
+Patch0326: 0171-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
+Patch0327: 0172-ASoC-Intel-bytcr_rt5640-Fix-invalid-quirk-input-mapp.patch
+Patch0328: 0173-tls-fix-race-between-tx-work-scheduling-and-socket-c.patch
+Patch0329: 0174-af_unix-fix-lockdep-positive-in-sk_diag_dump_icons.patch
+Patch0330: 0175-af_unix-Fix-garbage-collector-racing-against-connect.patch
+Patch0331: 0176-af_unix-Suppress-false-positive-lockdep-splat-for-sp.patch
+Patch0332: 0177-NFSD-Protect-against-send-buffer-overflow-in-NFSv2-R.patch
+Patch0333: 0178-NFSD-Protect-against-send-buffer-overflow-in-NFSv3-R.patch
+Patch0334: 0179-mptcp-fix-race-condition-in-mptcp_schedule_work.patch
+Patch0335: 0180-drm-vmwgfx-Validate-command-header-size-against-SVGA.patch
+Patch0336: 0181-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
+Patch0337: 0182-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
+Patch0338: 0183-NFSv4-pNFS-Clear-NFS_INO_LAYOUTCOMMIT-in-pnfs_mark_l.patch
+Patch0339: 0184-net-sched-Enforce-that-teql-can-only-be-used-as-root.patch
+Patch0340: 0185-nfs-fold-nfs_page_group_lock_subrequests-into-nfs_lo.patch
+Patch0341: 0186-NFS-Fix-a-race-when-updating-an-existing-write.patch
+Patch0342: 0187-Bluetooth-hci_core-Fix-use-after-free-in-vhci_flush.patch
+Patch0343: 0188-i40e-fix-idx-validation-in-config-queues-msg.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1757,6 +1791,39 @@ ApplyOptionalPatch 0152-RDMA-rxe-Fix-mr-map-double-free.patch
 ApplyOptionalPatch 0153-mm-fix-zswap-writeback-race-condition.patch
 ApplyOptionalPatch 0154-mm-zswap-fix-missing-folio-cleanup-in-writeback-race.patch
 ApplyOptionalPatch 0155-lockdown-also-lock-down-previous-kgdb-use.patch
+ApplyOptionalPatch 0156-x86-sev-es-Fix-SEV-ES-OUT-IN-immediate-opcode-vc-han.patch
+ApplyOptionalPatch 0157-x86-sev-Disable-MMIO-emulation-from-user-mode.patch
+ApplyOptionalPatch 0158-x86-sev-Check-IOBM-for-IOIO-exceptions-from-user-spa.patch
+ApplyOptionalPatch 0159-x86-sev-Check-for-user-space-IOIO-pointing-to-kernel.patch
+ApplyOptionalPatch 0160-wifi-mac80211-fix-potential-key-use-after-free.patch
+ApplyOptionalPatch 0161-mt76-mt7921-fix-kernel-panic-by-accessing-unallocate.patch
+ApplyOptionalPatch 0162-mm-memcg-revert-mm-memcg-optimize-user-context-objec.patch
+ApplyOptionalPatch 0163-mm-kmem-fix-a-NULL-pointer-dereference-in-obj_stock_.patch
+ApplyOptionalPatch 0164-mac80211-fix-potential-double-free-on-mesh-join.patch
+ApplyOptionalPatch 0165-net-mlx5e-Check-for-NOT_READY-flag-state-after-locki.patch
+ApplyOptionalPatch 0166-ipv6-Fix-out-of-bounds-access-in-ipv6_find_tlv.patch
+ApplyOptionalPatch 0167-ip6_vti-fix-slab-use-after-free-in-decode_session6.patch
+ApplyOptionalPatch 0168-Squashfs-check-return-result-of-sb_min_blocksize.patch
+ApplyOptionalPatch 0169-squashfs-fix-memory-leak-in-squashfs_fill_super.patch
+ApplyOptionalPatch 0170-atm-clip-Fix-infinite-recursive-call-of-clip_push.patch
+ApplyOptionalPatch 0171-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
+ApplyOptionalPatch 0172-ASoC-Intel-bytcr_rt5640-Fix-invalid-quirk-input-mapp.patch
+ApplyOptionalPatch 0173-tls-fix-race-between-tx-work-scheduling-and-socket-c.patch
+ApplyOptionalPatch 0174-af_unix-fix-lockdep-positive-in-sk_diag_dump_icons.patch
+ApplyOptionalPatch 0175-af_unix-Fix-garbage-collector-racing-against-connect.patch
+ApplyOptionalPatch 0176-af_unix-Suppress-false-positive-lockdep-splat-for-sp.patch
+ApplyOptionalPatch 0177-NFSD-Protect-against-send-buffer-overflow-in-NFSv2-R.patch
+ApplyOptionalPatch 0178-NFSD-Protect-against-send-buffer-overflow-in-NFSv3-R.patch
+ApplyOptionalPatch 0179-mptcp-fix-race-condition-in-mptcp_schedule_work.patch
+ApplyOptionalPatch 0180-drm-vmwgfx-Validate-command-header-size-against-SVGA.patch
+ApplyOptionalPatch 0181-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
+ApplyOptionalPatch 0182-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
+ApplyOptionalPatch 0183-NFSv4-pNFS-Clear-NFS_INO_LAYOUTCOMMIT-in-pnfs_mark_l.patch
+ApplyOptionalPatch 0184-net-sched-Enforce-that-teql-can-only-be-used-as-root.patch
+ApplyOptionalPatch 0185-nfs-fold-nfs_page_group_lock_subrequests-into-nfs_lo.patch
+ApplyOptionalPatch 0186-NFS-Fix-a-race-when-updating-an-existing-write.patch
+ApplyOptionalPatch 0187-Bluetooth-hci_core-Fix-use-after-free-in-vhci_flush.patch
+ApplyOptionalPatch 0188-i40e-fix-idx-validation-in-config-queues-msg.patch
 
 
 # CIQ LTS patches:
@@ -3316,6 +3383,41 @@ fi
 #
 #
 %changelog
+* Fri Mar 13 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1+21.1.el8_6_ciq
+- i40e: fix idx validation in config queues msg (Marcin Wcisło) [ciqres] {CVE-2025-39971}
+- Bluetooth: hci_core: Fix use-after-free in vhci_flush() (Marcin Wcisło) [ciqres] {CVE-2025-38250}
+- NFS: Fix a race when updating an existing write (Marcin Wcisło) [ciqres] {CVE-2025-39697}
+- nfs: fold nfs_page_group_lock_subrequests into nfs_lock_and_join_requests (Marcin Wcisło) [ciqres] {CVE-2025-39697}
+- net/sched: Enforce that teql can only be used as root qdisc (CIQ Kernel Automation) [ciqres] {CVE-2026-23074}
+- NFSv4/pNFS: Clear NFS_INO_LAYOUTCOMMIT in pnfs_mark_layout_stateid_invalid (CIQ Kernel Automation) [ciqres] {CVE-2025-68349}
+- fbdev: bitblit: bound-check glyph index in bit_putcs* (CIQ Kernel Automation) [ciqres] {CVE-2025-40322}
+- fbdev: Add bounds checking in bit_putcs to fix vmalloc-out-of-bounds (CIQ Kernel Automation) [ciqres] {CVE-2025-40304}
+- drm/vmwgfx: Validate command header size against SVGA_CMD_MAX_DATASIZE (CIQ Kernel Automation) [ciqres] {CVE-2025-40277}
+- mptcp: fix race condition in mptcp_schedule_work() (CIQ Kernel Automation) [ciqres] {CVE-2025-40258}
+- NFSD: Protect against send buffer overflow in NFSv3 READ (Marcin Wcisło) [ciqres] {CVE-2022-50410}
+- NFSD: Protect against send buffer overflow in NFSv2 READ (Marcin Wcisło) [ciqres] {CVE-2022-50410}
+- af_unix: Suppress false-positive lockdep splat for spin_lock() in __unix_gc(). (Marcin Wcisło) [ciqres] {CVE-2024-26923}
+- af_unix: Fix garbage collector racing against connect() (Marcin Wcisło) [ciqres] {CVE-2024-26923}
+- af_unix: fix lockdep positive in sk_diag_dump_icons() (Marcin Wcisło) [ciqres] {CVE-2024-26923}
+- tls: fix race between tx work scheduling and socket close (Marcin Wcisło) [ciqres] {CVE-2024-26585}
+- ASoC: Intel: bytcr_rt5640: Fix invalid quirk input mapping (Roxana Nicolescu) [ciqres] {CVE-2025-40154}
+- efivarfs: Fix slab-out-of-bounds in efivarfs_d_compare (Roxana Nicolescu) [ciqres] {CVE-2025-39817}
+- atm: clip: Fix infinite recursive call of clip_push(). (Roxana Nicolescu) [ciqres] {CVE-2025-38459}
+- squashfs: fix memory leak in squashfs_fill_super (Roxana Nicolescu) [ciqres] {CVE-2025-38415}
+- Squashfs: check return result of sb_min_blocksize (Roxana Nicolescu) [ciqres] {CVE-2025-38415}
+- ip6_vti: fix slab-use-after-free in decode_session6 (Roxana Nicolescu) [ciqres] {CVE-2023-53821}
+- ipv6: Fix out-of-bounds access in ipv6_find_tlv() (Roxana Nicolescu) [ciqres] {CVE-2023-53705}
+- net/mlx5e: Check for NOT_READY flag state after locking (Roxana Nicolescu) [ciqres] {CVE-2023-53581}
+- mac80211: fix potential double free on mesh join (Roxana Nicolescu) [ciqres] {CVE-2022-49290}
+- mm: kmem: fix a NULL pointer dereference in obj_stock_flush_required() (Marcin Wcisło) [ciqres] {CVE-2023-53401}
+- mm/memcg: revert ("mm/memcg: optimize user context object stock access") (Marcin Wcisło) [ciqres] {CVE-2023-53401}
+- mt76: mt7921: fix kernel panic by accessing unallocated eeprom.data (Marcin Wcisło) [ciqres] {CVE-2023-53232}
+- wifi: mac80211: fix potential key use-after-free (Marcin Wcisło) [ciqres] {CVE-2023-52530}
+- x86/sev: Check for user-space IOIO pointing to kernel space (Marcin Wcisło) [ciqres] {CVE-2023-46813}
+- x86/sev: Check IOBM for IOIO exceptions from user-space (Marcin Wcisło) [ciqres] {CVE-2023-46813}
+- x86/sev: Disable MMIO emulation from user mode (Marcin Wcisło) [ciqres] {CVE-2023-46813}
+- x86/sev-es: Fix SEV-ES OUT/IN immediate opcode vc handling (Marcin Wcisło) [ciqres] {CVE-2023-46813}
+
 * Fri Feb 20 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+20.1.el8_6_ciq
 - lockdown: also lock down previous kgdb use (Jonathan Maple) [ciqres] {CVE-2022-21499}
 - mm: zswap: fix missing folio cleanup in writeback race path (Marcin Wcisło) [ciqres] {CVE-2024-26832}

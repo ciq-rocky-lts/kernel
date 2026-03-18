@@ -1,0 +1,196 @@
+From f0da7d1b13da72306e76707bdae91aabb06da27a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sat, 7 Feb 2026 00:49:00 +0100
+Subject: [PATCH] x86/sev: Check IOBM for IOIO exceptions from user-space
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-4125
+cve CVE-2023-46813
+commit-author Joerg Roedel <jroedel@suse.de>
+commit b9cb9c45583b911e0db71d09caa6b56469eb2bdf
+upstream-diff Definition of the `vc_ioio_check()' function in
+  arch/x86/kernel/sev.c was taken from the FIPS 8 Compliant at
+  9e41a2ac921a038e5896bcb27a6ae4c0b20d4463
+  (centos_kernel-4.18.0-523.el8), which was the first buildable revision
+  after the failed back-engineered
+  22d090c404c0d37a6404ee87ada9c393005b46ac backporting this exact same
+  commit. Just like FIPS 8, the LTS 8.6 lacks commit
+  577d5cd7e5851d3832066cd0422475fa7db2ee17 which changes `unsigned long
+  *io_bitmap_ptr' field to `struct io_bitmap *io_bitmap' in the `struct
+  thread_struct' of the x86 arch.
+
+Check the IO permission bitmap (if present) before emulating IOIO #VC
+exceptions for user-space. These permissions are checked by hardware
+already before the #VC is raised, but due to the VC-handler decoding
+race it needs to be checked again in software.
+
+Fixes: 25189d08e516 ("x86/sev-es: Add support for handling IOIO exceptions")
+	Reported-by: Tom Dohrmann <erbse.13@gmx.de>
+	Signed-off-by: Joerg Roedel <jroedel@suse.de>
+	Signed-off-by: Borislav Petkov (AMD) <bp@alien8.de>
+	Tested-by: Tom Dohrmann <erbse.13@gmx.de>
+	Cc: <stable@kernel.org>
+(cherry picked from commit b9cb9c45583b911e0db71d09caa6b56469eb2bdf)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ arch/x86/boot/compressed/sev.c |  5 +++++
+ arch/x86/kernel/sev-shared.c   | 22 +++++++++++++++-------
+ arch/x86/kernel/sev.c          | 27 +++++++++++++++++++++++++++
+ 3 files changed, 47 insertions(+), 7 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
+index 271387d7e589..84e1e2cd5b9b 100644
+--- a/arch/x86/boot/compressed/sev.c
++++ b/arch/x86/boot/compressed/sev.c
+@@ -106,6 +106,11 @@ static enum es_result vc_read_mem(struct es_em_ctxt *ctxt,
+ 	return ES_OK;
+ }
+ 
++static enum es_result vc_ioio_check(struct es_em_ctxt *ctxt, u16 port, size_t size)
++{
++	return ES_OK;
++}
++
+ #undef __init
+ #undef __pa
+ #define __init
+diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
+index 78f44ac02381..4f333acda6f4 100644
+--- a/arch/x86/kernel/sev-shared.c
++++ b/arch/x86/kernel/sev-shared.c
+@@ -288,6 +288,9 @@ static enum es_result vc_insn_string_write(struct es_em_ctxt *ctxt,
+ static enum es_result vc_ioio_exitinfo(struct es_em_ctxt *ctxt, u64 *exitinfo)
+ {
+ 	struct insn *insn = &ctxt->insn;
++	size_t size;
++	u64 port;
++
+ 	*exitinfo = 0;
+ 
+ 	switch (insn->opcode.bytes[0]) {
+@@ -296,7 +299,7 @@ static enum es_result vc_ioio_exitinfo(struct es_em_ctxt *ctxt, u64 *exitinfo)
+ 	case 0x6d:
+ 		*exitinfo |= IOIO_TYPE_INS;
+ 		*exitinfo |= IOIO_SEG_ES;
+-		*exitinfo |= (ctxt->regs->dx & 0xffff) << 16;
++		port	   = ctxt->regs->dx & 0xffff;
+ 		break;
+ 
+ 	/* OUTS opcodes */
+@@ -304,41 +307,43 @@ static enum es_result vc_ioio_exitinfo(struct es_em_ctxt *ctxt, u64 *exitinfo)
+ 	case 0x6f:
+ 		*exitinfo |= IOIO_TYPE_OUTS;
+ 		*exitinfo |= IOIO_SEG_DS;
+-		*exitinfo |= (ctxt->regs->dx & 0xffff) << 16;
++		port	   = ctxt->regs->dx & 0xffff;
+ 		break;
+ 
+ 	/* IN immediate opcodes */
+ 	case 0xe4:
+ 	case 0xe5:
+ 		*exitinfo |= IOIO_TYPE_IN;
+-		*exitinfo |= (u8)insn->immediate.value << 16;
++		port	   = (u8)insn->immediate.value & 0xffff;
+ 		break;
+ 
+ 	/* OUT immediate opcodes */
+ 	case 0xe6:
+ 	case 0xe7:
+ 		*exitinfo |= IOIO_TYPE_OUT;
+-		*exitinfo |= (u8)insn->immediate.value << 16;
++		port	   = (u8)insn->immediate.value & 0xffff;
+ 		break;
+ 
+ 	/* IN register opcodes */
+ 	case 0xec:
+ 	case 0xed:
+ 		*exitinfo |= IOIO_TYPE_IN;
+-		*exitinfo |= (ctxt->regs->dx & 0xffff) << 16;
++		port	   = ctxt->regs->dx & 0xffff;
+ 		break;
+ 
+ 	/* OUT register opcodes */
+ 	case 0xee:
+ 	case 0xef:
+ 		*exitinfo |= IOIO_TYPE_OUT;
+-		*exitinfo |= (ctxt->regs->dx & 0xffff) << 16;
++		port	   = ctxt->regs->dx & 0xffff;
+ 		break;
+ 
+ 	default:
+ 		return ES_DECODE_FAILED;
+ 	}
+ 
++	*exitinfo |= port << 16;
++
+ 	switch (insn->opcode.bytes[0]) {
+ 	case 0x6c:
+ 	case 0x6e:
+@@ -348,12 +353,15 @@ static enum es_result vc_ioio_exitinfo(struct es_em_ctxt *ctxt, u64 *exitinfo)
+ 	case 0xee:
+ 		/* Single byte opcodes */
+ 		*exitinfo |= IOIO_DATA_8;
++		size       = 1;
+ 		break;
+ 	default:
+ 		/* Length determined by instruction parsing */
+ 		*exitinfo |= (insn->opnd_bytes == 2) ? IOIO_DATA_16
+ 						     : IOIO_DATA_32;
++		size       = (insn->opnd_bytes == 2) ? 2 : 4;
+ 	}
++
+ 	switch (insn->addr_bytes) {
+ 	case 2:
+ 		*exitinfo |= IOIO_ADDR_16;
+@@ -369,7 +377,7 @@ static enum es_result vc_ioio_exitinfo(struct es_em_ctxt *ctxt, u64 *exitinfo)
+ 	if (insn_has_rep_prefix(insn))
+ 		*exitinfo |= IOIO_REP;
+ 
+-	return ES_OK;
++	return vc_ioio_check(ctxt, (u16)port, size);
+ }
+ 
+ static enum es_result vc_handle_ioio(struct ghcb *ghcb, struct es_em_ctxt *ctxt)
+diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
+index 8142810af290..8ee36445b89a 100644
+--- a/arch/x86/kernel/sev.c
++++ b/arch/x86/kernel/sev.c
+@@ -430,6 +430,33 @@ static enum es_result vc_slow_virt_to_phys(struct ghcb *ghcb, struct es_em_ctxt
+ 	return ES_OK;
+ }
+ 
++static enum es_result vc_ioio_check(struct es_em_ctxt *ctxt, u16 port, size_t size)
++{
++	BUG_ON(size > 4);
++
++	if (user_mode(ctxt->regs)) {
++		struct thread_struct *t = &current->thread;
++		unsigned long *iobm = t->io_bitmap_ptr;
++		size_t idx;
++
++		if (!iobm)
++			goto fault;
++
++		for (idx = port; idx < port + size; ++idx) {
++			if (test_bit(idx, iobm))
++				goto fault;
++		}
++	}
++
++	return ES_OK;
++
++fault:
++	ctxt->fi.vector = X86_TRAP_GP;
++	ctxt->fi.error_code = 0;
++
++	return ES_EXCEPTION;
++}
++
+ /* Include code shared with pre-decompression boot stage */
+ #include "sev-shared.c"
+ 
+-- 
+2.47.3
+

@@ -1,0 +1,56 @@
+From d13df8169c093f59def6fca0f084151232922c40 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sat, 7 Feb 2026 00:04:25 +0100
+Subject: [PATCH] x86/sev: Disable MMIO emulation from user mode
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-4125
+cve CVE-2023-46813
+commit-author Borislav Petkov (AMD) <bp@alien8.de>
+commit a37cd2a59d0cb270b1bba568fd3a3b8668b9d3ba
+upstream-diff linux-5.15.y backport
+  6797c6d09e50e7ddb1c0f8282ccfb3f1c4d63270 was used for the actual
+  (clean) cherry pick. The conflicts from the upstream are contextual
+  anyway.
+
+A virt scenario can be constructed where MMIO memory can be user memory.
+When that happens, a race condition opens between when the hardware
+raises the #VC and when the #VC handler gets to emulate the instruction.
+
+If the MOVS is replaced with a MOVS accessing kernel memory in that
+small race window, then write to kernel memory happens as the access
+checks are not done at emulation time.
+
+Disable MMIO emulation in user mode temporarily until a sensible use
+case appears and justifies properly handling the race window.
+
+Fixes: 0118b604c2c9 ("x86/sev-es: Handle MMIO String Instructions")
+	Reported-by: Tom Dohrmann <erbse.13@gmx.de>
+	Signed-off-by: Borislav Petkov (AMD) <bp@alien8.de>
+	Tested-by: Tom Dohrmann <erbse.13@gmx.de>
+	Cc: <stable@kernel.org>
+(cherry picked from commit 6797c6d09e50e7ddb1c0f8282ccfb3f1c4d63270)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ arch/x86/kernel/sev.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
+index b6d4947b2d6e..8142810af290 100644
+--- a/arch/x86/kernel/sev.c
++++ b/arch/x86/kernel/sev.c
+@@ -930,6 +930,9 @@ static enum es_result vc_handle_mmio(struct ghcb *ghcb,
+ 	enum es_result ret;
+ 	long *reg_data;
+ 
++	if (user_mode(ctxt->regs))
++		return ES_UNSUPPORTED;
++
+ 	switch (insn->opcode.bytes[0]) {
+ 	/* MMIO Write */
+ 	case 0x88:
+-- 
+2.47.3
+
