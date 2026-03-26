@@ -1,0 +1,75 @@
+From 1d2a9e2874f971450520813dc073803135bdc72f Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Tue, 24 Feb 2026 18:53:28 -0500
+Subject: [PATCH] squashfs: fix memory leak in squashfs_fill_super
+
+jira VULN-79861
+cve-bf CVE-2025-38415
+commit-author Phillip Lougher <phillip@squashfs.org.uk>
+commit b64700d41bdc4e9f82f1346c15a3678ebb91a89c
+upstream-diff Minor conflict when applying due to missing
+              0c12185728d6 ("Revert "squashfs: provide
+              backing_dev_info in order to disable read-ahead").
+              Change content is identical
+
+If sb_min_blocksize returns 0, squashfs_fill_super exits without freeing
+allocated memory (sb->s_fs_info).
+
+Fix this by moving the call to sb_min_blocksize to before memory is
+allocated.
+
+Link: https://lkml.kernel.org/r/20250811223740.110392-1-phillip@squashfs.org.uk
+Fixes: 734aa85390ea ("Squashfs: check return result of sb_min_blocksize")
+	Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>
+	Reported-by: Scott GUO <scottzhguo@tencent.com>
+Closes: https://lore.kernel.org/all/20250811061921.3807353-1-scott_gzh@163.com
+	Cc: <stable@vger.kernel.org>
+	Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+(cherry picked from commit b64700d41bdc4e9f82f1346c15a3678ebb91a89c)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ fs/squashfs/super.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/fs/squashfs/super.c b/fs/squashfs/super.c
+index 80d664267af0..2b0f2ff3eb59 100644
+--- a/fs/squashfs/super.c
++++ b/fs/squashfs/super.c
+@@ -142,7 +142,7 @@ static int squashfs_fill_super(struct super_block *sb, struct fs_context *fc)
+ 	unsigned short flags;
+ 	unsigned int fragments;
+ 	u64 lookup_table_start, xattr_id_table_start, next_table;
+-	int err;
++	int err, devblksize = sb_min_blocksize(sb, SQUASHFS_DEVBLK_SIZE);
+ 
+ 	TRACE("Entered squashfs_fill_superblock\n");
+ 
+@@ -160,6 +160,11 @@ static int squashfs_fill_super(struct super_block *sb, struct fs_context *fc)
+ 		return err;
+ 	}
+ 
++	if (!devblksize) {
++		errorf(fc, "squashfs: unable to set blocksize\n");
++		return -EINVAL;
++	}
++
+ 	sb->s_fs_info = kzalloc(sizeof(*msblk), GFP_KERNEL);
+ 	if (sb->s_fs_info == NULL) {
+ 		ERROR("Failed to allocate squashfs_sb_info\n");
+@@ -169,12 +174,7 @@ static int squashfs_fill_super(struct super_block *sb, struct fs_context *fc)
+ 
+ 	msblk->panic_on_errors = (opts->errors == Opt_errors_panic);
+ 
+-	msblk->devblksize = sb_min_blocksize(sb, SQUASHFS_DEVBLK_SIZE);
+-	if (!msblk->devblksize) {
+-		errorf(fc, "squashfs: unable to set blocksize\n");
+-		return -EINVAL;
+-	}
+-
++	msblk->devblksize = devblksize;
+ 	msblk->devblksize_log2 = ffz(~msblk->devblksize);
+ 
+ 	mutex_init(&msblk->meta_index_mutex);
+-- 
+2.47.3
+

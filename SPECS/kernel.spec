@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 15
+%define ciq_patch_version 16
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1166,6 +1166,15 @@ Patch1000161: 0141-Bluetooth-MGMT-Fix-OOB-access-in-parse_adv_monitor_p.patch
 Patch1000162: 0142-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
 Patch1000163: 0143-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
 Patch1000164: 0144-NFSv4-pNFS-Clear-NFS_INO_LAYOUTCOMMIT-in-pnfs_mark_l.patch
+#CIQ Patch Version: 427.42.1+16.1.el9_4_ciq
+Patch1000165: 0145-Squashfs-check-return-result-of-sb_min_blocksize.patch
+Patch1000166: 0146-squashfs-fix-memory-leak-in-squashfs_fill_super.patch
+Patch1000167: 0147-i40e-add-validation-for-ring_len-param.patch
+Patch1000168: 0148-i40e-validate-ring_len-parameter-against-hardware-sp.patch
+Patch1000169: 0149-iommufd-iova_bitmap-Fix-shift-out-of-bounds-in-iova_.patch
+Patch1000170: 0150-RDMA-rxe-Fix-slab-use-after-free-Read-in-rxe_queue_c.patch
+Patch1000171: 0151-exfat-fix-double-free-in-delayed_free.patch
+Patch1000172: 0152-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2083,6 +2092,14 @@ ApplyOptionalPatch 0141-Bluetooth-MGMT-Fix-OOB-access-in-parse_adv_monitor_p.pat
 ApplyOptionalPatch 0142-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
 ApplyOptionalPatch 0143-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
 ApplyOptionalPatch 0144-NFSv4-pNFS-Clear-NFS_INO_LAYOUTCOMMIT-in-pnfs_mark_l.patch
+ApplyOptionalPatch 0145-Squashfs-check-return-result-of-sb_min_blocksize.patch
+ApplyOptionalPatch 0146-squashfs-fix-memory-leak-in-squashfs_fill_super.patch
+ApplyOptionalPatch 0147-i40e-add-validation-for-ring_len-param.patch
+ApplyOptionalPatch 0148-i40e-validate-ring_len-parameter-against-hardware-sp.patch
+ApplyOptionalPatch 0149-iommufd-iova_bitmap-Fix-shift-out-of-bounds-in-iova_.patch
+ApplyOptionalPatch 0150-RDMA-rxe-Fix-slab-use-after-free-Read-in-rxe_queue_c.patch
+ApplyOptionalPatch 0151-exfat-fix-double-free-in-delayed_free.patch
+ApplyOptionalPatch 0152-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4160,6 +4177,16 @@ fi
 #
 #
 %changelog
+* Fri Mar 20 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-427.42.1+16.1.el9_4_ciq
+- ipv6: BUG() in pskb_expand_head() as part of calipso_skbuff_setattr() (CIQ Kernel Automation) [ciqres] {CVE-2025-71085}
+- exfat: fix double free in delayed_free (CIQ Kernel Automation) [ciqres] {CVE-2025-38206}
+- RDMA/rxe: Fix slab-use-after-free Read in rxe_queue_cleanup bug (CIQ Kernel Automation) [ciqres] {CVE-2025-38024}
+- iommufd/iova_bitmap: Fix shift-out-of-bounds in iova_bitmap_offset_to_index() (CIQ Kernel Automation) [ciqres] {CVE-2025-21724}
+- i40e: validate ring_len parameter against hardware-specific values (Brett Mastbergen) [ciqres] {CVE-2025-39973}
+- i40e: add validation for ring_len param (Brett Mastbergen) [ciqres] {CVE-2025-39973}
+- squashfs: fix memory leak in squashfs_fill_super (Brett Mastbergen) [ciqres] {CVE-2025-38415}
+- Squashfs: check return result of sb_min_blocksize (Brett Mastbergen) [ciqres] {CVE-2025-38415}
+
 * Mon Feb 23 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+15.1.el9_4_ciq
 - NFSv4/pNFS: Clear NFS_INO_LAYOUTCOMMIT in pnfs_mark_layout_stateid_invalid (Brett Mastbergen) [ciqres] {CVE-2025-68349}
 - fbdev: bitblit: bound-check glyph index in bit_putcs* (Brett Mastbergen) [ciqres] {CVE-2025-40322}
