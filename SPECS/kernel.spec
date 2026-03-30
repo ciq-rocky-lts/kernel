@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 24
+%define ciq_patch_version 25
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1355,6 +1355,10 @@ Patch1000410: 0365-smb-client-Fix-use-after-free-in-cifs_fill_dirent.patch
 Patch1000411: 0366-mptcp-fix-race-condition-in-mptcp_schedule_work.patch
 Patch1000412: 0367-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
 Patch1000413: 0368-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
+#CIQ Patch Version: 284.30.1+25.1.el9_2_ciq
+Patch1000414: 0369-iommufd-iova_bitmap-Fix-shift-out-of-bounds-in-iova_.patch
+Patch1000415: 0370-vsock-avoid-to-close-connected-socket-after-the-time.patch
+Patch1000416: 0371-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2444,6 +2448,9 @@ ApplyOptionalPatch 0365-smb-client-Fix-use-after-free-in-cifs_fill_dirent.patch
 ApplyOptionalPatch 0366-mptcp-fix-race-condition-in-mptcp_schedule_work.patch
 ApplyOptionalPatch 0367-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
 ApplyOptionalPatch 0368-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
+ApplyOptionalPatch 0369-iommufd-iova_bitmap-Fix-shift-out-of-bounds-in-iova_.patch
+ApplyOptionalPatch 0370-vsock-avoid-to-close-connected-socket-after-the-time.patch
+ApplyOptionalPatch 0371-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4327,6 +4334,11 @@ fi
 #
 #
 %changelog
+* Fri Mar 27 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1+25.1.el9_2_ciq
+- vsock: Ignore signal/timeout on connect() if already established (Marcin Wcisło) [ciqres] {CVE-2025-40248}
+- vsock: avoid to close connected socket after the timeout (Marcin Wcisło) [ciqres] {CVE-2025-40248}
+- iommufd/iova_bitmap: Fix shift-out-of-bounds in iova_bitmap_offset_to_index() (CIQ Kernel Automation) [ciqres] {CVE-2025-21724}
+
 * Fri Mar 06 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1+24.1.el9_2_ciq
 - fbdev: bitblit: bound-check glyph index in bit_putcs* (Shreeya Patel) [ciqres] {CVE-2025-40322}
 - fbdev: Add bounds checking in bit_putcs to fix vmalloc-out-of-bounds (Shreeya Patel) [ciqres] {CVE-2025-40304}
