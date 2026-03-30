@@ -22,8 +22,8 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 13
-%define ciq_build_id 2
+%define ciq_patch_version 14
+%define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
 
@@ -608,6 +608,8 @@ Patch1088: 0062-kdb-Categorize-kdb-commands-similar-to-SysRq-categor.patch
 Patch1089: 0063-kdb-Add-enable-mask-for-groups-of-commands.patch
 Patch1090: 0064-kdb-Allow-access-to-sensitive-commands-to-be-restric.patch
 Patch1091: 0065-lockdown-also-lock-down-previous-kgdb-use.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.14.1
+Patch1092: 0066-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -1042,6 +1044,7 @@ ApplyOptionalPatch 0062-kdb-Categorize-kdb-commands-similar-to-SysRq-categor.pat
 ApplyOptionalPatch 0063-kdb-Add-enable-mask-for-groups-of-commands.patch
 ApplyOptionalPatch 0064-kdb-Allow-access-to-sensitive-commands-to-be-restric.patch
 ApplyOptionalPatch 0065-lockdown-also-lock-down-previous-kgdb-use.patch
+ApplyOptionalPatch 0066-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2045,6 +2048,9 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Fri Mar 27 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.14.1
+- vsock: Ignore signal/timeout on connect() if already established (Marcin Wcisło) [ciqres] {CVE-2025-40248}
+
 * Thu Feb 26 2026 Joanthan Maple <jmaple@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.13.2
 - Enable CONFIG_KDB_DEFAULT_ENABLE in configs (Jonathan Maple) [ciqres] {CVE-2022-21499}
 
