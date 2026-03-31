@@ -1,0 +1,42 @@
+From 6ece02c1b6fc619a1af531a8ab9a5bbce9afb8e5 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Thu, 12 Mar 2026 11:30:19 +0000
+Subject: [PATCH] net: af_can: do not leave a dangling sk pointer in
+ can_create()
+
+jira VULN-167094
+cve CVE-2024-56603
+commit-author Ignat Korchagin <ignat@cloudflare.com>
+commit 811a7ca7320c062e15d0f5b171fe6ad8592d1434
+
+On error can_create() frees the allocated sk object, but sock_init_data()
+has already attached it to the provided sock object. This will leave a
+dangling sk pointer in the sock object and may cause use-after-free later.
+
+	Signed-off-by: Ignat Korchagin <ignat@cloudflare.com>
+	Reviewed-by: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+	Reviewed-by: Kuniyuki Iwashima <kuniyu@amazon.com>
+	Reviewed-by: Marc Kleine-Budde <mkl@pengutronix.de>
+Link: https://patch.msgid.link/20241014153808.51894-5-ignat@cloudflare.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 811a7ca7320c062e15d0f5b171fe6ad8592d1434)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/can/af_can.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/net/can/af_can.c b/net/can/af_can.c
+index 0244e5c45fec..01d7952536c1 100644
+--- a/net/can/af_can.c
++++ b/net/can/af_can.c
+@@ -171,6 +171,7 @@ static int can_create(struct net *net, struct socket *sock, int protocol,
+ 		/* release sk on errors */
+ 		sock_orphan(sk);
+ 		sock_put(sk);
++		sock->sk = NULL;
+ 	}
+ 
+  errout:
+-- 
+2.47.3
+

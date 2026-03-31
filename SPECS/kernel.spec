@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 5
+%define ciq_patch_version 6
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1051,6 +1051,22 @@ Patch1000062: 1062-usb-core-config-Prevent-OOB-read-in-SS-endpoint-comp.patch
 Patch1000063: 1063-ALSA-usb-audio-Fix-potential-overflow-of-PCM-transfe.patch
 Patch1000064: 1064-fs-proc-fix-uaf-in-proc_readdir_de.patch
 Patch1000065: 1065-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
+#CIQ Patch Version: 570.60.1+6.1.el9_6_ciq
+Patch1000066: 1066-bpf-sockmap-Avoid-using-sk_socket-after-free-when-se.patch
+Patch1000067: 1067-x86-tdx-Fix-in-kernel-MMIO-check.patch
+Patch1000068: 1068-net-af_can-do-not-leave-a-dangling-sk-pointer-in-can.patch
+Patch1000069: 1069-netfilter-nft_tunnel-fix-geneve_opt-type-confusion-a.patch
+Patch1000070: 1070-RDMA-rxe-Fix-slab-use-after-free-Read-in-rxe_queue_c.patch
+Patch1000071: 1071-dm-fix-dm_blk_report_zones.patch
+Patch1000072: 1072-dm-use-READ_ONCE-in-dm_blk_report_zones.patch
+Patch1000073: 1073-dm-fix-unlocked-test-for-dm_suspended_md.patch
+Patch1000074: 1074-drm-xe-Make-dma-fences-compliant-with-the-safe-acces.patch
+Patch1000075: 1075-RDMA-rxe-Fix-the-qp-flush-warnings-in-req.patch
+Patch1000076: 1076-exfat-fix-double-free-in-delayed_free.patch
+Patch1000077: 1077-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
+Patch1000078: 1078-svcrdma-use-rc_pageoff-for-memcpy-byte-offset.patch
+Patch1000079: 1079-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
+Patch1000080: 1080-macvlan-fix-possible-UAF-in-macvlan_forward_source.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1875,6 +1891,21 @@ ApplyOptionalPatch 1062-usb-core-config-Prevent-OOB-read-in-SS-endpoint-comp.pat
 ApplyOptionalPatch 1063-ALSA-usb-audio-Fix-potential-overflow-of-PCM-transfe.patch
 ApplyOptionalPatch 1064-fs-proc-fix-uaf-in-proc_readdir_de.patch
 ApplyOptionalPatch 1065-fbdev-Add-bounds-checking-in-bit_putcs-to-fix-vmallo.patch
+ApplyOptionalPatch 1066-bpf-sockmap-Avoid-using-sk_socket-after-free-when-se.patch
+ApplyOptionalPatch 1067-x86-tdx-Fix-in-kernel-MMIO-check.patch
+ApplyOptionalPatch 1068-net-af_can-do-not-leave-a-dangling-sk-pointer-in-can.patch
+ApplyOptionalPatch 1069-netfilter-nft_tunnel-fix-geneve_opt-type-confusion-a.patch
+ApplyOptionalPatch 1070-RDMA-rxe-Fix-slab-use-after-free-Read-in-rxe_queue_c.patch
+ApplyOptionalPatch 1071-dm-fix-dm_blk_report_zones.patch
+ApplyOptionalPatch 1072-dm-use-READ_ONCE-in-dm_blk_report_zones.patch
+ApplyOptionalPatch 1073-dm-fix-unlocked-test-for-dm_suspended_md.patch
+ApplyOptionalPatch 1074-drm-xe-Make-dma-fences-compliant-with-the-safe-acces.patch
+ApplyOptionalPatch 1075-RDMA-rxe-Fix-the-qp-flush-warnings-in-req.patch
+ApplyOptionalPatch 1076-exfat-fix-double-free-in-delayed_free.patch
+ApplyOptionalPatch 1077-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
+ApplyOptionalPatch 1078-svcrdma-use-rc_pageoff-for-memcpy-byte-offset.patch
+ApplyOptionalPatch 1079-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
+ApplyOptionalPatch 1080-macvlan-fix-possible-UAF-in-macvlan_forward_source.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -3991,6 +4022,23 @@ fi
 #
 #
 %changelog
+* Mon Mar 30 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-570.60.1+6.1.el9_6_ciq
+- macvlan: fix possible UAF in macvlan_forward_source() (CIQ Kernel Automation) [ciqres] {CVE-2026-23001}
+- ipv6: BUG() in pskb_expand_head() as part of calipso_skbuff_setattr() (CIQ Kernel Automation) [ciqres] {CVE-2025-71085}
+- svcrdma: use rc_pageoff for memcpy byte offset (CIQ Kernel Automation) [ciqres] {CVE-2025-68811}
+- sctp: avoid NULL dereference when chunk data buffer is missing (CIQ Kernel Automation) [ciqres] {CVE-2025-40240}
+- exfat: fix double free in delayed_free (CIQ Kernel Automation) [ciqres] {CVE-2025-38206}
+- RDMA/rxe: Fix the qp flush warnings in req (CIQ Kernel Automation) [ciqres] {CVE-2024-53229}
+- drm/xe: Make dma-fences compliant with the safe access rules (CIQ Kernel Automation) [ciqres] {CVE-2025-38703}
+- dm: fix unlocked test for dm_suspended_md (CIQ Kernel Automation) [ciqres] {CVE-2025-38141}
+- dm: use READ_ONCE in dm_blk_report_zones (CIQ Kernel Automation) [ciqres] {CVE-2025-38141}
+- dm: fix dm_blk_report_zones (CIQ Kernel Automation) [ciqres] {CVE-2025-38141}
+- RDMA/rxe: Fix slab-use-after-free Read in rxe_queue_cleanup bug (CIQ Kernel Automation) [ciqres] {CVE-2025-38024}
+- netfilter: nft_tunnel: fix geneve_opt type confusion addition (CIQ Kernel Automation) [ciqres] {CVE-2025-22056}
+- net: af_can: do not leave a dangling sk pointer in can_create() (CIQ Kernel Automation) [ciqres] {CVE-2024-56603}
+- x86/tdx: Fix "in-kernel MMIO" check (CIQ Kernel Automation) [ciqres] {CVE-2024-47727}
+- bpf, sockmap: Avoid using sk_socket after free when sending (CIQ Kernel Automation) [ciqres] {CVE-2025-38154}
+
 * Thu Feb 26 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-570.60.1+5.1.el9_6_ciq
 - fbdev: Add bounds checking in bit_putcs to fix vmalloc-out-of-bounds (Jonathan Maple) [ciqres] {CVE-2025-40304}
 - fs/proc: fix uaf in proc_readdir_de() (Jonathan Maple) [ciqres] {CVE-2025-40271}

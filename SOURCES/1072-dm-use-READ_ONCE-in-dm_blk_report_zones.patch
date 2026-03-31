@@ -1,0 +1,38 @@
+From 8bab604284d98819e842c2c6fdcee072e2822356 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Thu, 12 Mar 2026 11:34:41 +0000
+Subject: [PATCH] dm: use READ_ONCE in dm_blk_report_zones
+
+jira VULN-162998
+cve-bf CVE-2025-38141
+commit-author Mikulas Patocka <mpatocka@redhat.com>
+commit e9f5a55b70ae6187ab64ef2d1232ae2738e31d1f
+
+The functon dm_blk_report_zones reads md->zone_revalidate_map, however it
+may change while the function is running. Use READ_ONCE.
+
+	Signed-off-by: Mikulas Patocka <mpatocka@redhat.com>
+Fixes: 37f53a2c60d0 ("dm: fix dm_blk_report_zones")
+	Reviewed-by: Benjamin Marzinski <bmarzins@redhat.com>
+(cherry picked from commit e9f5a55b70ae6187ab64ef2d1232ae2738e31d1f)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/md/dm-zone.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/md/dm-zone.c b/drivers/md/dm-zone.c
+index 04cc36a9d5ca..32e52c1f6b17 100644
+--- a/drivers/md/dm-zone.c
++++ b/drivers/md/dm-zone.c
+@@ -56,7 +56,7 @@ int dm_blk_report_zones(struct gendisk *disk, sector_t sector,
+ {
+ 	struct mapped_device *md = disk->private_data;
+ 	struct dm_table *map;
+-	struct dm_table *zone_revalidate_map = md->zone_revalidate_map;
++	struct dm_table *zone_revalidate_map = READ_ONCE(md->zone_revalidate_map);
+ 	int srcu_idx, ret = -EIO;
+ 	bool put_table = false;
+ 
+-- 
+2.47.3
+
