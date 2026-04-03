@@ -1,0 +1,43 @@
+From 1020b8323b17c645afa6ecf140c0d4a45200082c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 11 Mar 2026 21:58:03 +0100
+Subject: [PATCH] media: uvcvideo: Avoid returning invalid controls
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-53459
+cve-pre CVE-2024-58002
+commit-author Ricardo Ribalda <ribalda@chromium.org>
+commit 414d3b49d9fd4a0bb16a13d929027847fd094f3f
+
+If the memory where ctrl_found is placed has the value of uvc_ctrl and
+__uvc_find_control does not find the control we will return an invalid
+index.
+
+Fixes: 6350d6a4ed487 ("media: uvcvideo: Set error_idx during ctrl_commit errors")
+	Signed-off-by: Ricardo Ribalda <ribalda@chromium.org>
+	Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+	Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+(cherry picked from commit 414d3b49d9fd4a0bb16a13d929027847fd094f3f)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ drivers/media/usb/uvc/uvc_ctrl.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/media/usb/uvc/uvc_ctrl.c b/drivers/media/usb/uvc/uvc_ctrl.c
+index af7f52d301c1..ee19a7cafaa3 100644
+--- a/drivers/media/usb/uvc/uvc_ctrl.c
++++ b/drivers/media/usb/uvc/uvc_ctrl.c
+@@ -1557,7 +1557,7 @@ static int uvc_ctrl_find_ctrl_idx(struct uvc_entity *entity,
+ 				  struct uvc_control *uvc_control)
+ {
+ 	struct uvc_control_mapping *mapping = NULL;
+-	struct uvc_control *ctrl_found;
++	struct uvc_control *ctrl_found = NULL;
+ 	unsigned int i;
+ 
+ 	if (!entity)
+-- 
+2.47.3
+

@@ -1,0 +1,115 @@
+From 81026fbf043acfcce950cb0f559853d89701ab36 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 20 Mar 2026 00:33:47 +0100
+Subject: [PATCH] nfsd: don't ignore the return code of svc_proc_register()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-64890
+cve CVE-2025-22026
+commit-author Jeff Layton <jlayton@kernel.org>
+commit 930b64ca0c511521f0abdd1d57ce52b2a6e3476b
+upstream-diff Ignored cherry-pick of the upstrem fix - the LTS 8.6 nfsd
+  codebase was too distinct from the upstream for auto merging to be
+  useful in any way. Backported checking of the `svc_proc_register()' exit
+  code manually:
+  fs/nfsd/stats.c
+        Modified function `nfsd_stat_init()' instead of
+        `nfsd_proc_stat_init()' because it was renamed in the
+        non-backported commit 93483ac5fec62cc1de166051b219d953bb5e4ef4.
+  fs/nfsd/stats.h
+        Like above
+  fs/nfsd/nfsctl.c
+        - Modified `init_nfsd()' where `nfsd_stat_init()' is actually used
+          in LTS 8.6 instead of `nfsd_net_init()', where this function
+          call (named `nfsd_proc_stat_init()' at that time) was moved in
+          the non-backported commit
+          93483ac5fec62cc1de166051b219d953bb5e4ef4.
+        - Ignored the `percpu_counter_destroy_many()' cleanup not
+          applicable to the `init_nfsd()' function. Included in the exit
+          path instead the `nfsd4_exit_pnfs()' call with the use of newly
+          introduced label `out_free_pnfs'.
+
+Currently, nfsd_proc_stat_init() ignores the return value of
+svc_proc_register(). If the procfile creation fails, then the kernel
+will WARN when it tries to remove the entry later.
+
+Fix nfsd_proc_stat_init() to return the same type of pointer as
+svc_proc_register(), and fix up nfsd_net_init() to check that and fail
+the nfsd_net construction if it occurs.
+
+svc_proc_register() can fail if the dentry can't be allocated, or if an
+identical dentry already exists. The second case is pretty unlikely in
+the nfsd_net construction codepath, so if this happens, return -ENOMEM.
+
+	Reported-by: syzbot+e34ad04f27991521104c@syzkaller.appspotmail.com
+Closes: https://lore.kernel.org/linux-nfs/67a47501.050a0220.19061f.05f9.GAE@google.com/
+	Cc: stable@vger.kernel.org # v6.9
+	Signed-off-by: Jeff Layton <jlayton@kernel.org>
+	Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+(cherry picked from commit 930b64ca0c511521f0abdd1d57ce52b2a6e3476b)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/nfsd/nfsctl.c | 6 +++++-
+ fs/nfsd/stats.c  | 4 ++--
+ fs/nfsd/stats.h  | 2 +-
+ 3 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/fs/nfsd/nfsctl.c b/fs/nfsd/nfsctl.c
+index 5f75d0254696..1a05e5c5d61d 100644
+--- a/fs/nfsd/nfsctl.c
++++ b/fs/nfsd/nfsctl.c
+@@ -1524,7 +1524,10 @@ static int __init init_nfsd(void)
+ 	retval = nfsd4_init_pnfs();
+ 	if (retval)
+ 		goto out_free_slabs;
+-	nfsd_stat_init();	/* Statistics */
++	if (!nfsd_stat_init()) {	/* Statistics */
++		retval = -ENOMEM;
++		goto out_free_pnfs;
++	}
+ 	retval = nfsd_drc_slab_create();
+ 	if (retval)
+ 		goto out_free_stat;
+@@ -1549,6 +1552,7 @@ static int __init init_nfsd(void)
+ 	nfsd_drc_slab_free();
+ out_free_stat:
+ 	nfsd_stat_shutdown();
++out_free_pnfs:
+ 	nfsd4_exit_pnfs();
+ out_free_slabs:
+ 	nfsd4_free_slabs();
+diff --git a/fs/nfsd/stats.c b/fs/nfsd/stats.c
+index 9bce3b913189..ccfb59a22165 100644
+--- a/fs/nfsd/stats.c
++++ b/fs/nfsd/stats.c
+@@ -91,10 +91,10 @@ static const struct file_operations nfsd_proc_fops = {
+ 	.release = single_release,
+ };
+ 
+-void
++struct proc_dir_entry *
+ nfsd_stat_init(void)
+ {
+-	svc_proc_register(&init_net, &nfsd_svcstats, &nfsd_proc_fops);
++	return svc_proc_register(&init_net, &nfsd_svcstats, &nfsd_proc_fops);
+ }
+ 
+ void
+diff --git a/fs/nfsd/stats.h b/fs/nfsd/stats.h
+index b23fdac69820..46c6e5e68cd4 100644
+--- a/fs/nfsd/stats.h
++++ b/fs/nfsd/stats.h
+@@ -38,7 +38,7 @@ struct nfsd_stats {
+ extern struct nfsd_stats	nfsdstats;
+ extern struct svc_stat		nfsd_svcstats;
+ 
+-void	nfsd_stat_init(void);
++struct proc_dir_entry *	nfsd_stat_init(void);
+ void	nfsd_stat_shutdown(void);
+ 
+ #endif /* _NFSD_STATS_H */
+-- 
+2.47.3
+

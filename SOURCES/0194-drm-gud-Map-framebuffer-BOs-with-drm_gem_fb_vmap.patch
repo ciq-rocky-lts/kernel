@@ -1,0 +1,84 @@
+From f6469a350ebff51f3ffb5325c1a43df603459bf9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 17 Mar 2026 18:44:01 +0100
+Subject: [PATCH] drm/gud: Map framebuffer BOs with drm_gem_fb_vmap()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-136703
+cve-pre CVE-2025-38449
+commit-author Thomas Zimmermann <tzimmermann@suse.de>
+commit 0029d3182969d8dc67e4fedb00d6cf50eee74670
+upstream-diff Included drm/drm_gem_framebuffer_helper.h which was
+  incorporated in 08b7ef0524f52cfd7f247270e0f95480709f210a on upstream,
+  not backported to LTS 8.6. It was needed for the newly used functions
+  `drm_gem_fb_vmap()' and `drm_gem_fb_vunmap()'
+
+Abstract the framebuffer details by mapping its BOs with a call
+to drm_gem_fb_vmap(). Unmap with drm_gem_fb_vunmap().
+
+The call to drm_gem_fb_vmap() ensures that all BOs are mapped
+correctly. Gud still only supports single-plane formats.
+
+No functional changes.
+
+	Signed-off-by: Thomas Zimmermann <tzimmermann@suse.de>
+	Acked-by: Noralf Trønnes <noralf@tronnes.org>
+	Acked-by: Sam Ravnborg <sam@ravnborg.org>
+Link: https://patchwork.freedesktop.org/patch/msgid/20210730183511.20080-5-tzimmermann@suse.de
+(cherry picked from commit 0029d3182969d8dc67e4fedb00d6cf50eee74670)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ drivers/gpu/drm/gud/gud_pipe.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/gpu/drm/gud/gud_pipe.c b/drivers/gpu/drm/gud/gud_pipe.c
+index 2f83ab6b8e61..d4f6129ebdbf 100644
+--- a/drivers/gpu/drm/gud/gud_pipe.c
++++ b/drivers/gpu/drm/gud/gud_pipe.c
+@@ -15,7 +15,8 @@
+ #include <drm/drm_format_helper.h>
+ #include <drm/drm_fourcc.h>
+ #include <drm/drm_framebuffer.h>
+-#include <drm/drm_gem_shmem_helper.h>
++#include <drm/drm_gem.h>
++#include <drm/drm_gem_framebuffer_helper.h>
+ #include <drm/drm_print.h>
+ #include <drm/drm_rect.h>
+ #include <drm/drm_simple_kms_helper.h>
+@@ -139,7 +140,7 @@ static int gud_prep_flush(struct gud_device *gdrm, struct drm_framebuffer *fb,
+ {
+ 	struct dma_buf_attachment *import_attach = fb->obj[0]->import_attach;
+ 	u8 compression = gdrm->compression;
+-	struct dma_buf_map map;
++	struct dma_buf_map map[DRM_FORMAT_MAX_PLANES];
+ 	void *vaddr, *buf;
+ 	size_t pitch, len;
+ 	int ret = 0;
+@@ -149,11 +150,11 @@ static int gud_prep_flush(struct gud_device *gdrm, struct drm_framebuffer *fb,
+ 	if (len > gdrm->bulk_len)
+ 		return -E2BIG;
+ 
+-	ret = drm_gem_shmem_vmap(fb->obj[0], &map);
++	ret = drm_gem_fb_vmap(fb, map);
+ 	if (ret)
+ 		return ret;
+ 
+-	vaddr = map.vaddr + fb->offsets[0];
++	vaddr = map[0].vaddr + fb->offsets[0];
+ 
+ 	if (import_attach) {
+ 		ret = dma_buf_begin_cpu_access(import_attach->dmabuf, DMA_FROM_DEVICE);
+@@ -215,7 +216,7 @@ static int gud_prep_flush(struct gud_device *gdrm, struct drm_framebuffer *fb,
+ 	if (import_attach)
+ 		dma_buf_end_cpu_access(import_attach->dmabuf, DMA_FROM_DEVICE);
+ vunmap:
+-	drm_gem_shmem_vunmap(fb->obj[0], &map);
++	drm_gem_fb_vunmap(fb, map);
+ 
+ 	return ret;
+ }
+-- 
+2.47.3
+

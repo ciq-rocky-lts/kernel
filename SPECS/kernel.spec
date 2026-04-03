@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 21
+%define ciq_patch_version 22
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -914,6 +914,29 @@ Patch0340: 0185-nfs-fold-nfs_page_group_lock_subrequests-into-nfs_lo.patch
 Patch0341: 0186-NFS-Fix-a-race-when-updating-an-existing-write.patch
 Patch0342: 0187-Bluetooth-hci_core-Fix-use-after-free-in-vhci_flush.patch
 Patch0343: 0188-i40e-fix-idx-validation-in-config-queues-msg.patch
+#CIQ Patch Version: 372.32.1+22.1.el8_6_ciq
+Patch0344: 0189-ALSA-usb-audio-Fix-potential-overflow-of-PCM-transfe.patch
+Patch0345: 0190-drm-gem-Provide-drm_gem_fb_-begin-end-_cpu_access-he.patch
+Patch0346: 0191-drm-Define-DRM_FORMAT_MAX_PLANES.patch
+Patch0347: 0192-drm-gem-Provide-drm_gem_fb_-vmap-vunmap.patch
+Patch0348: 0193-drm-gem-Clear-mapping-addresses-for-unused-framebuff.patch
+Patch0349: 0194-drm-gud-Map-framebuffer-BOs-with-drm_gem_fb_vmap.patch
+Patch0350: 0195-drm-vkms-Map-output-framebuffer-BOs-with-drm_gem_fb_.patch
+Patch0351: 0196-drm-gem-Provide-offset-adjusted-framebuffer-BO-mappi.patch
+Patch0352: 0197-drm-gem-Share-code-between-drm_gem_fb_-begin-end-_cp.patch
+Patch0353: 0198-drm-gem-Ignore-color-planes-that-are-unused-by-frame.patch
+Patch0354: 0199-drm-gem-Acquire-references-on-GEM-handles-for-frameb.patch
+Patch0355: 0200-drm-framebuffer-Acquire-internal-references-on-GEM-h.patch
+Patch0356: 0201-media-uvcvideo-Set-error_idx-during-ctrl_commit-erro.patch
+Patch0357: 0202-media-uvcvideo-Avoid-invalid-memory-access.patch
+Patch0358: 0203-media-uvcvideo-Avoid-returning-invalid-controls.patch
+Patch0359: 0204-media-uvcvideo-Refactor-iterators.patch
+Patch0360: 0205-media-uvcvideo-Only-save-async-fh-if-success.patch
+Patch0361: 0206-media-uvcvideo-Remove-dangling-pointers.patch
+Patch0362: 0207-vsock-remove-vsock-from-connected-table-when-connect.patch
+Patch0363: 0208-vsock-avoid-to-close-connected-socket-after-the-time.patch
+Patch0364: 0209-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
+Patch0365: 0210-nfsd-don-t-ignore-the-return-code-of-svc_proc_regist.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1824,6 +1847,28 @@ ApplyOptionalPatch 0185-nfs-fold-nfs_page_group_lock_subrequests-into-nfs_lo.pat
 ApplyOptionalPatch 0186-NFS-Fix-a-race-when-updating-an-existing-write.patch
 ApplyOptionalPatch 0187-Bluetooth-hci_core-Fix-use-after-free-in-vhci_flush.patch
 ApplyOptionalPatch 0188-i40e-fix-idx-validation-in-config-queues-msg.patch
+ApplyOptionalPatch 0189-ALSA-usb-audio-Fix-potential-overflow-of-PCM-transfe.patch
+ApplyOptionalPatch 0190-drm-gem-Provide-drm_gem_fb_-begin-end-_cpu_access-he.patch
+ApplyOptionalPatch 0191-drm-Define-DRM_FORMAT_MAX_PLANES.patch
+ApplyOptionalPatch 0192-drm-gem-Provide-drm_gem_fb_-vmap-vunmap.patch
+ApplyOptionalPatch 0193-drm-gem-Clear-mapping-addresses-for-unused-framebuff.patch
+ApplyOptionalPatch 0194-drm-gud-Map-framebuffer-BOs-with-drm_gem_fb_vmap.patch
+ApplyOptionalPatch 0195-drm-vkms-Map-output-framebuffer-BOs-with-drm_gem_fb_.patch
+ApplyOptionalPatch 0196-drm-gem-Provide-offset-adjusted-framebuffer-BO-mappi.patch
+ApplyOptionalPatch 0197-drm-gem-Share-code-between-drm_gem_fb_-begin-end-_cp.patch
+ApplyOptionalPatch 0198-drm-gem-Ignore-color-planes-that-are-unused-by-frame.patch
+ApplyOptionalPatch 0199-drm-gem-Acquire-references-on-GEM-handles-for-frameb.patch
+ApplyOptionalPatch 0200-drm-framebuffer-Acquire-internal-references-on-GEM-h.patch
+ApplyOptionalPatch 0201-media-uvcvideo-Set-error_idx-during-ctrl_commit-erro.patch
+ApplyOptionalPatch 0202-media-uvcvideo-Avoid-invalid-memory-access.patch
+ApplyOptionalPatch 0203-media-uvcvideo-Avoid-returning-invalid-controls.patch
+ApplyOptionalPatch 0204-media-uvcvideo-Refactor-iterators.patch
+ApplyOptionalPatch 0205-media-uvcvideo-Only-save-async-fh-if-success.patch
+ApplyOptionalPatch 0206-media-uvcvideo-Remove-dangling-pointers.patch
+ApplyOptionalPatch 0207-vsock-remove-vsock-from-connected-table-when-connect.patch
+ApplyOptionalPatch 0208-vsock-avoid-to-close-connected-socket-after-the-time.patch
+ApplyOptionalPatch 0209-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
+ApplyOptionalPatch 0210-nfsd-don-t-ignore-the-return-code-of-svc_proc_regist.patch
 
 
 # CIQ LTS patches:
@@ -3383,6 +3428,30 @@ fi
 #
 #
 %changelog
+* Fri Apr 03 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+22.1.el8_6_ciq
+- nfsd: don't ignore the return code of svc_proc_register() (Marcin Wcisło) [ciqres] {CVE-2025-22026}
+- vsock: Ignore signal/timeout on connect() if already established (Marcin Wcisło) [ciqres] {CVE-2025-40248}
+- vsock: avoid to close connected socket after the timeout (Marcin Wcisło) [ciqres] {CVE-2025-40248}
+- vsock: remove vsock from connected table when connect is interrupted by a signal (Marcin Wcisło) [ciqres] {CVE-2022-48786}
+- media: uvcvideo: Remove dangling pointers (Marcin Wcisło) [ciqres] {CVE-2024-58002}
+- media: uvcvideo: Only save async fh if success (Marcin Wcisło) [ciqres] {CVE-2024-58002}
+- media: uvcvideo: Refactor iterators (Marcin Wcisło) [ciqres] {CVE-2024-58002}
+- media: uvcvideo: Avoid returning invalid controls (Marcin Wcisło) [ciqres] {CVE-2024-58002}
+- media: uvcvideo: Avoid invalid memory access (Marcin Wcisło) [ciqres] {CVE-2024-58002}
+- media: uvcvideo: Set error_idx during ctrl_commit errors (Marcin Wcisło) [ciqres] {CVE-2024-58002}
+- drm/framebuffer: Acquire internal references on GEM handles (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- drm/gem: Acquire references on GEM handles for framebuffers (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- drm/gem: Ignore color planes that are unused by framebuffer format (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- drm/gem: Share code between drm_gem_fb_{begin,end}_cpu_access() (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- drm/gem: Provide offset-adjusted framebuffer BO mappings (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- drm/vkms: Map output framebuffer BOs with drm_gem_fb_vmap() (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- drm/gud: Map framebuffer BOs with drm_gem_fb_vmap() (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- drm/gem: Clear mapping addresses for unused framebuffer planes (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- drm/gem: Provide drm_gem_fb_{vmap,vunmap}() (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- drm: Define DRM_FORMAT_MAX_PLANES (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- drm/gem: Provide drm_gem_fb_{begin,end}_cpu_access() helpers (Marcin Wcisło) [ciqres] {CVE-2025-38449}
+- ALSA: usb-audio: Fix potential overflow of PCM transfer buffer (CIQ Kernel Automation) [ciqres] {CVE-2025-40269}
+
 * Fri Mar 13 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1+21.1.el8_6_ciq
 - i40e: fix idx validation in config queues msg (Marcin Wcisło) [ciqres] {CVE-2025-39971}
 - Bluetooth: hci_core: Fix use-after-free in vhci_flush() (Marcin Wcisło) [ciqres] {CVE-2025-38250}
