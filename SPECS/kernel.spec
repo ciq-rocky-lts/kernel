@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 16
+%define ciq_patch_version 17
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1175,6 +1175,16 @@ Patch1000169: 0149-iommufd-iova_bitmap-Fix-shift-out-of-bounds-in-iova_.patch
 Patch1000170: 0150-RDMA-rxe-Fix-slab-use-after-free-Read-in-rxe_queue_c.patch
 Patch1000171: 0151-exfat-fix-double-free-in-delayed_free.patch
 Patch1000172: 0152-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
+#CIQ Patch Version: 427.42.1+17.1.el9_4_ciq
+Patch1000173: 0153-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
+Patch1000174: 0154-net-smc-avoid-data-corruption-caused-by-decline.patch
+Patch1000175: 0155-ACPI-LPIT-Avoid-u32-multiplication-overflow.patch
+Patch1000176: 0156-wifi-ath9k-Fix-potential-array-index-out-of-bounds-r.patch
+Patch1000177: 0157-ACPI-extlog-fix-NULL-pointer-dereference-check.patch
+Patch1000178: 0158-hwrng-core-Fix-page-fault-dead-lock-on-mmap-ed-hwrng.patch
+Patch1000179: 0159-pstore-ram-Fix-crash-when-setting-number-of-cpus-to-.patch
+Patch1000180: 0160-s390-ptrace-handle-setting-of-fpc-register-correctly.patch
+Patch1000181: 0161-powerpc-powernv-Add-a-null-pointer-check-in-opal_eve.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2100,6 +2110,15 @@ ApplyOptionalPatch 0149-iommufd-iova_bitmap-Fix-shift-out-of-bounds-in-iova_.pat
 ApplyOptionalPatch 0150-RDMA-rxe-Fix-slab-use-after-free-Read-in-rxe_queue_c.patch
 ApplyOptionalPatch 0151-exfat-fix-double-free-in-delayed_free.patch
 ApplyOptionalPatch 0152-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
+ApplyOptionalPatch 0153-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
+ApplyOptionalPatch 0154-net-smc-avoid-data-corruption-caused-by-decline.patch
+ApplyOptionalPatch 0155-ACPI-LPIT-Avoid-u32-multiplication-overflow.patch
+ApplyOptionalPatch 0156-wifi-ath9k-Fix-potential-array-index-out-of-bounds-r.patch
+ApplyOptionalPatch 0157-ACPI-extlog-fix-NULL-pointer-dereference-check.patch
+ApplyOptionalPatch 0158-hwrng-core-Fix-page-fault-dead-lock-on-mmap-ed-hwrng.patch
+ApplyOptionalPatch 0159-pstore-ram-Fix-crash-when-setting-number-of-cpus-to-.patch
+ApplyOptionalPatch 0160-s390-ptrace-handle-setting-of-fpc-register-correctly.patch
+ApplyOptionalPatch 0161-powerpc-powernv-Add-a-null-pointer-check-in-opal_eve.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4177,6 +4196,17 @@ fi
 #
 #
 %changelog
+* Thu Apr 09 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+17.1.el9_4_ciq
+- powerpc/powernv: Add a null pointer check in opal_event_init() (CIQ Kernel Automation) [ciqres] {CVE-2023-52686}
+- s390/ptrace: handle setting of fpc register correctly (CIQ Kernel Automation) [ciqres] {CVE-2023-52598}
+- pstore/ram: Fix crash when setting number of cpus to an odd number (CIQ Kernel Automation) [ciqres] {CVE-2023-52619}
+- hwrng: core - Fix page fault dead lock on mmap-ed hwrng (CIQ Kernel Automation) [ciqres] {CVE-2023-52615}
+- ACPI: extlog: fix NULL pointer dereference check (CIQ Kernel Automation) [ciqres] {CVE-2023-52605}
+- wifi: ath9k: Fix potential array-index-out-of-bounds read in ath9k_htc_txstatus() (CIQ Kernel Automation) [ciqres] {CVE-2023-52594}
+- ACPI: LPIT: Avoid u32 multiplication overflow (CIQ Kernel Automation) [ciqres] {CVE-2023-52683}
+- net/smc: avoid data corruption caused by decline (CIQ Kernel Automation) [ciqres] {CVE-2023-52775}
+- sctp: avoid NULL dereference when chunk data buffer is missing (CIQ Kernel Automation) [ciqres] {CVE-2025-40240}
+
 * Fri Mar 20 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-427.42.1+16.1.el9_4_ciq
 - ipv6: BUG() in pskb_expand_head() as part of calipso_skbuff_setattr() (CIQ Kernel Automation) [ciqres] {CVE-2025-71085}
 - exfat: fix double free in delayed_free (CIQ Kernel Automation) [ciqres] {CVE-2025-38206}
