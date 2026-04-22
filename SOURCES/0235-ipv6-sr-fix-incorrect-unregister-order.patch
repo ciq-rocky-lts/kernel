@@ -1,0 +1,41 @@
+From c74191b851dad3b708abdf72207cec8c002d3cbd Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 13 Apr 2026 07:10:56 +0000
+Subject: [PATCH] ipv6: sr: fix incorrect unregister order
+
+jira VULN-36701
+cve-bf CVE-2024-26735
+commit-author Hangbin Liu <liuhangbin@gmail.com>
+commit 6e370a771d2985107e82d0f6174381c1acb49c20
+
+Commit 5559cea2d5aa ("ipv6: sr: fix possible use-after-free and
+null-ptr-deref") changed the register order in seg6_init(). But the
+unregister order in seg6_exit() is not updated.
+
+Fixes: 5559cea2d5aa ("ipv6: sr: fix possible use-after-free and null-ptr-deref")
+	Signed-off-by: Hangbin Liu <liuhangbin@gmail.com>
+	Reviewed-by: Sabrina Dubroca <sd@queasysnail.net>
+	Reviewed-by: David Ahern <dsahern@kernel.org>
+Link: https://lore.kernel.org/r/20240509131812.1662197-3-liuhangbin@gmail.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 6e370a771d2985107e82d0f6174381c1acb49c20)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/ipv6/seg6.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/ipv6/seg6.c b/net/ipv6/seg6.c
+index 1318fe5b5b88..48cbd7d88dfe 100644
+--- a/net/ipv6/seg6.c
++++ b/net/ipv6/seg6.c
+@@ -505,6 +505,6 @@ void seg6_exit(void)
+ #ifdef CONFIG_IPV6_SEG6_LWTUNNEL
+ 	seg6_iptunnel_exit();
+ #endif
+-	unregister_pernet_subsys(&ip6_segments_ops);
+ 	genl_unregister_family(&seg6_genl_family);
++	unregister_pernet_subsys(&ip6_segments_ops);
+ }
+-- 
+2.47.3
+

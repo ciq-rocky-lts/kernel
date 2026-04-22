@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 22
+%define ciq_patch_version 23
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -937,6 +937,34 @@ Patch0362: 0207-vsock-remove-vsock-from-connected-table-when-connect.patch
 Patch0363: 0208-vsock-avoid-to-close-connected-socket-after-the-time.patch
 Patch0364: 0209-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
 Patch0365: 0210-nfsd-don-t-ignore-the-return-code-of-svc_proc_regist.patch
+#CIQ Patch Version: 372.32.1+23.1.el8_6_ciq
+Patch0366: 0211-udp-Fix-memory-accounting-leak.patch
+Patch0367: 0212-i40e-increase-max-descriptors-for-XL710.patch
+Patch0368: 0213-i40e-add-validation-for-ring_len-param.patch
+Patch0369: 0214-i40e-validate-ring_len-parameter-against-hardware-sp.patch
+Patch0370: 0215-tcp-fix-a-signed-integer-overflow-bug-in-tcp_add_bac.patch
+Patch0371: 0216-Bluetooth-HCI-Add-proper-tracking-for-enable-status-.patch
+Patch0372: 0217-Bluetooth-Store-advertising-handle-so-it-can-be-re-e.patch
+Patch0373: 0218-Bluetooth-hci_event-call-disconnect-callback-before-.patch
+Patch0374: 0219-RDMA-rxe-Fix-slab-use-after-free-Read-in-rxe_queue_c.patch
+Patch0375: 0220-net-atm-add-lec_mutex.patch
+Patch0376: 0221-net-atm-fix-proc-net-atm-lec-handling.patch
+Patch0377: 0222-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
+Patch0378: 0223-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
+Patch0379: 0224-tcp-do-not-accept-ACK-of-bytes-we-never-sent.patch
+Patch0380: 0225-gfs2-Fix-kernel-NULL-pointer-dereference-in-gfs2_rgr.patch
+Patch0381: 0226-drm-Don-t-unref-the-same-fb-many-times-by-mistake-du.patch
+Patch0382: 0227-ext4-avoid-allocating-blocks-from-corrupted-group-in.patch
+Patch0383: 0228-ext4-avoid-allocating-blocks-from-corrupted-group-in.patch
+Patch0384: 0229-net-mlx5e-fix-a-potential-double-free-in-fs_any_crea.patch
+Patch0385: 0230-hv_netvsc-Fix-race-condition-between-netvsc_probe-an.patch
+Patch0386: 0231-dm-raid-fix-accesses-beyond-end-of-raid-member-array.patch
+Patch0387: 0232-mptcp-fix-data-re-injection-from-stale-subflow.patch
+Patch0388: 0233-wifi-iwlwifi-dbg-tlv-ensure-NUL-termination.patch
+Patch0389: 0234-ipv6-sr-fix-possible-use-after-free-and-null-ptr-der.patch
+Patch0390: 0235-ipv6-sr-fix-incorrect-unregister-order.patch
+Patch0391: 0236-Bluetooth-Avoid-potential-use-after-free-in-hci_erro.patch
+Patch0392: 0237-NFSv4.2-fix-nfs4_listxattr-kernel-BUG-at-mm-usercopy.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1869,6 +1897,33 @@ ApplyOptionalPatch 0207-vsock-remove-vsock-from-connected-table-when-connect.pat
 ApplyOptionalPatch 0208-vsock-avoid-to-close-connected-socket-after-the-time.patch
 ApplyOptionalPatch 0209-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
 ApplyOptionalPatch 0210-nfsd-don-t-ignore-the-return-code-of-svc_proc_regist.patch
+ApplyOptionalPatch 0211-udp-Fix-memory-accounting-leak.patch
+ApplyOptionalPatch 0212-i40e-increase-max-descriptors-for-XL710.patch
+ApplyOptionalPatch 0213-i40e-add-validation-for-ring_len-param.patch
+ApplyOptionalPatch 0214-i40e-validate-ring_len-parameter-against-hardware-sp.patch
+ApplyOptionalPatch 0215-tcp-fix-a-signed-integer-overflow-bug-in-tcp_add_bac.patch
+ApplyOptionalPatch 0216-Bluetooth-HCI-Add-proper-tracking-for-enable-status-.patch
+ApplyOptionalPatch 0217-Bluetooth-Store-advertising-handle-so-it-can-be-re-e.patch
+ApplyOptionalPatch 0218-Bluetooth-hci_event-call-disconnect-callback-before-.patch
+ApplyOptionalPatch 0219-RDMA-rxe-Fix-slab-use-after-free-Read-in-rxe_queue_c.patch
+ApplyOptionalPatch 0220-net-atm-add-lec_mutex.patch
+ApplyOptionalPatch 0221-net-atm-fix-proc-net-atm-lec-handling.patch
+ApplyOptionalPatch 0222-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
+ApplyOptionalPatch 0223-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
+ApplyOptionalPatch 0224-tcp-do-not-accept-ACK-of-bytes-we-never-sent.patch
+ApplyOptionalPatch 0225-gfs2-Fix-kernel-NULL-pointer-dereference-in-gfs2_rgr.patch
+ApplyOptionalPatch 0226-drm-Don-t-unref-the-same-fb-many-times-by-mistake-du.patch
+ApplyOptionalPatch 0227-ext4-avoid-allocating-blocks-from-corrupted-group-in.patch
+ApplyOptionalPatch 0228-ext4-avoid-allocating-blocks-from-corrupted-group-in.patch
+ApplyOptionalPatch 0229-net-mlx5e-fix-a-potential-double-free-in-fs_any_crea.patch
+ApplyOptionalPatch 0230-hv_netvsc-Fix-race-condition-between-netvsc_probe-an.patch
+ApplyOptionalPatch 0231-dm-raid-fix-accesses-beyond-end-of-raid-member-array.patch
+ApplyOptionalPatch 0232-mptcp-fix-data-re-injection-from-stale-subflow.patch
+ApplyOptionalPatch 0233-wifi-iwlwifi-dbg-tlv-ensure-NUL-termination.patch
+ApplyOptionalPatch 0234-ipv6-sr-fix-possible-use-after-free-and-null-ptr-der.patch
+ApplyOptionalPatch 0235-ipv6-sr-fix-incorrect-unregister-order.patch
+ApplyOptionalPatch 0236-Bluetooth-Avoid-potential-use-after-free-in-hci_erro.patch
+ApplyOptionalPatch 0237-NFSv4.2-fix-nfs4_listxattr-kernel-BUG-at-mm-usercopy.patch
 
 
 # CIQ LTS patches:
@@ -3428,6 +3483,35 @@ fi
 #
 #
 %changelog
+* Wed Apr 15 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+23.1.el8_6_ciq
+- NFSv4.2: fix nfs4_listxattr kernel BUG at mm/usercopy.c:102 (CIQ Kernel Automation) [ciqres] {CVE-2024-26870}
+- Bluetooth: Avoid potential use-after-free in hci_error_reset (CIQ Kernel Automation) [ciqres] {CVE-2024-26801}
+- ipv6: sr: fix incorrect unregister order (CIQ Kernel Automation) [ciqres] {CVE-2024-26735}
+- ipv6: sr: fix possible use-after-free and null-ptr-deref (CIQ Kernel Automation) [ciqres] {CVE-2024-26735}
+- wifi: iwlwifi: dbg-tlv: ensure NUL termination (CIQ Kernel Automation) [ciqres] {CVE-2024-35845}
+- mptcp: fix data re-injection from stale subflow (CIQ Kernel Automation) [ciqres] {CVE-2024-26826}
+- dm raid: fix accesses beyond end of raid member array (CIQ Kernel Automation) [ciqres] {CVE-2022-49674}
+- hv_netvsc: Fix race condition between netvsc_probe and netvsc_remove (CIQ Kernel Automation) [ciqres] {CVE-2024-26698}
+- net/mlx5e: fix a potential double-free in fs_any_create_groups (CIQ Kernel Automation) [ciqres] {CVE-2023-52667}
+- ext4: avoid allocating blocks from corrupted group in ext4_mb_try_best_found() (CIQ Kernel Automation) [ciqres] {CVE-2024-26773}
+- ext4: avoid allocating blocks from corrupted group in ext4_mb_find_by_goal() (CIQ Kernel Automation) [ciqres] {CVE-2024-26772}
+- drm: Don't unref the same fb many times by mistake due to deadlock handling (CIQ Kernel Automation) [ciqres] {CVE-2023-52486}
+- gfs2: Fix kernel NULL pointer dereference in gfs2_rgrp_dump (CIQ Kernel Automation) [ciqres] {CVE-2023-52448}
+- tcp: do not accept ACK of bytes we never sent (CIQ Kernel Automation) [ciqres] {CVE-2023-52881}
+- ipv6: BUG() in pskb_expand_head() as part of calipso_skbuff_setattr() (CIQ Kernel Automation) [ciqres] {CVE-2025-71085}
+- sctp: avoid NULL dereference when chunk data buffer is missing (CIQ Kernel Automation) [ciqres] {CVE-2025-40240}
+- net: atm: fix /proc/net/atm/lec handling (CIQ Kernel Automation) [ciqres] {CVE-2025-38180}
+- net: atm: add lec_mutex (Roxana Nicolescu) [ciqres] {CVE-2025-38323}
+- RDMA/rxe: Fix slab-use-after-free Read in rxe_queue_cleanup bug (CIQ Kernel Automation) [ciqres] {CVE-2025-38024}
+- Bluetooth: hci_event: call disconnect callback before deleting conn (Marcin Wcisło) [ciqres] {CVE-2023-53673}
+- Bluetooth: Store advertising handle so it can be re-enabled (Marcin Wcisło) [ciqres] {CVE-2023-53673}
+- Bluetooth: HCI: Add proper tracking for enable status of adv instances (Marcin Wcisło) [ciqres] {CVE-2023-53673}
+- tcp: fix a signed-integer-overflow bug in tcp_add_backlog() (Marcin Wcisło) [ciqres] {CVE-2022-50865}
+- i40e: validate ring_len parameter against hardware-specific values (Marcin Wcisło) [ciqres] {CVE-2025-39973}
+- i40e: add validation for ring_len param (Marcin Wcisło) [ciqres] {CVE-2025-39973}
+- i40e: increase max descriptors for XL710 (Marcin Wcisło) [ciqres] {CVE-2025-39973}
+- udp: Fix memory accounting leak. (Marcin Wcisło) [ciqres] {CVE-2025-22058}
+
 * Fri Apr 03 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+22.1.el8_6_ciq
 - nfsd: don't ignore the return code of svc_proc_register() (Marcin Wcisło) [ciqres] {CVE-2025-22026}
 - vsock: Ignore signal/timeout on connect() if already established (Marcin Wcisło) [ciqres] {CVE-2025-40248}

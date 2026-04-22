@@ -1,0 +1,51 @@
+From 6ec1e29481be90f9a830ed446689e85673fc2e02 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 21 Oct 2022 12:06:22 +0800
+Subject: [PATCH] tcp: fix a signed-integer-overflow bug in tcp_add_backlog()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-172278
+cve CVE-2022-50865
+commit-author Lu Wei <luwei32@huawei.com>
+commit ec791d8149ff60c40ad2074af3b92a39c916a03f
+upstream-diff Adapted the change to suit the codebase missing commits
+  d519f350967a60b85a574ad8aeac43f2b4384746 ("tcp: minor optimization in
+  tcp_add_backlog()") and 8265792bf8871acc2d00fd03883d830e2249d395
+  ("net: silence KCSAN warnings around sk_add_backlog() calls")
+
+The type of sk_rcvbuf and sk_sndbuf in struct sock is int, and
+in tcp_add_backlog(), the variable limit is caculated by adding
+sk_rcvbuf, sk_sndbuf and 64 * 1024, it may exceed the max value
+of int and overflow. This patch reduces the limit budget by
+halving the sndbuf to solve this issue since ACK packets are much
+smaller than the payload.
+
+Fixes: c9c3321257e1 ("tcp: add tcp_add_backlog()")
+	Signed-off-by: Lu Wei <luwei32@huawei.com>
+	Reviewed-by: Eric Dumazet <edumazet@google.com>
+	Acked-by: Kuniyuki Iwashima <kuniyu@amazon.com>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit ec791d8149ff60c40ad2074af3b92a39c916a03f)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/ipv4/tcp_ipv4.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/ipv4/tcp_ipv4.c b/net/ipv4/tcp_ipv4.c
+index bcf31b7282b2..157944a288c6 100644
+--- a/net/ipv4/tcp_ipv4.c
++++ b/net/ipv4/tcp_ipv4.c
+@@ -1690,7 +1690,7 @@ int tcp_v4_early_demux(struct sk_buff *skb)
+ 
+ bool tcp_add_backlog(struct sock *sk, struct sk_buff *skb)
+ {
+-	u32 limit = sk->sk_rcvbuf + sk->sk_sndbuf;
++	u32 limit = (u32)(sk->sk_rcvbuf) + (u32)(sk->sk_sndbuf >> 1);
+ 	u32 tail_gso_size, tail_gso_segs;
+ 	struct skb_shared_info *shinfo;
+ 	const struct tcphdr *th;
+-- 
+2.47.3
+

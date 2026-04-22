@@ -1,0 +1,43 @@
+From 3649a5df820a3ed8fb00a6e266d7aae1e0876467 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 6 Apr 2026 07:05:25 +0000
+Subject: [PATCH] net/mlx5e: fix a potential double-free in
+ fs_any_create_groups
+
+jira VULN-35386
+cve CVE-2023-52667
+commit-author Dinghao Liu <dinghao.liu@zju.edu.cn>
+commit aef855df7e1bbd5aa4484851561211500b22707e
+
+When kcalloc() for ft->g succeeds but kvzalloc() for in fails,
+fs_any_create_groups() will free ft->g. However, its caller
+fs_any_create_table() will free ft->g again through calling
+mlx5e_destroy_flow_table(), which will lead to a double-free.
+Fix this by setting ft->g to NULL in fs_any_create_groups().
+
+Fixes: 0f575c20bf06 ("net/mlx5e: Introduce Flow Steering ANY API")
+	Signed-off-by: Dinghao Liu <dinghao.liu@zju.edu.cn>
+	Reviewed-by: Tariq Toukan <tariqt@nvidia.com>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+	Signed-off-by: Saeed Mahameed <saeedm@nvidia.com>
+(cherry picked from commit aef855df7e1bbd5aa4484851561211500b22707e)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/net/ethernet/mellanox/mlx5/core/en/fs_tt_redirect.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/net/ethernet/mellanox/mlx5/core/en/fs_tt_redirect.c b/drivers/net/ethernet/mellanox/mlx5/core/en/fs_tt_redirect.c
+index 7aa25a5e29d7..a3970f062b42 100644
+--- a/drivers/net/ethernet/mellanox/mlx5/core/en/fs_tt_redirect.c
++++ b/drivers/net/ethernet/mellanox/mlx5/core/en/fs_tt_redirect.c
+@@ -434,6 +434,7 @@ static int fs_any_create_groups(struct mlx5e_flow_table *ft)
+ 	in = kvzalloc(inlen, GFP_KERNEL);
+ 	if  (!in || !ft->g) {
+ 		kfree(ft->g);
++		ft->g = NULL;
+ 		kvfree(in);
+ 		return -ENOMEM;
+ 	}
+-- 
+2.47.3
+

@@ -1,0 +1,104 @@
+From a59a9be87a3022a622deef13825a79e121d82430 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Mon, 2 Aug 2021 16:56:18 -0700
+Subject: [PATCH] Bluetooth: HCI: Add proper tracking for enable status of adv
+ instances
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-158424
+cve-pre CVE-2023-53673
+commit-author Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+commit 102793136ce9dacae77c2d1f8dd6878b480f4b95
+
+This adds a field to track if advertising instances are enabled or not
+and only clear HCI_LE_ADV flag if there is no instance left advertising.
+
+	Signed-off-by: Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+	Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+(cherry picked from commit 102793136ce9dacae77c2d1f8dd6878b480f4b95)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/net/bluetooth/hci_core.h |  1 +
+ net/bluetooth/hci_event.c        | 28 ++++++++++++++++++++++++++++
+ 2 files changed, 29 insertions(+)
+
+diff --git a/include/net/bluetooth/hci_core.h b/include/net/bluetooth/hci_core.h
+index 9893cbf493fe..e99f9ad94358 100644
+--- a/include/net/bluetooth/hci_core.h
++++ b/include/net/bluetooth/hci_core.h
+@@ -220,6 +220,7 @@ struct oob_data {
+ 
+ struct adv_info {
+ 	struct list_head list;
++	bool enabled;
+ 	bool pending;
+ 	__u8	instance;
+ 	__u32	flags;
+diff --git a/net/bluetooth/hci_event.c b/net/bluetooth/hci_event.c
+index 81d102d44c29..0308baf5b052 100644
+--- a/net/bluetooth/hci_event.c
++++ b/net/bluetooth/hci_event.c
+@@ -1277,7 +1277,9 @@ static void hci_cc_le_set_ext_adv_enable(struct hci_dev *hdev,
+ 					 struct sk_buff *skb)
+ {
+ 	struct hci_cp_le_set_ext_adv_enable *cp;
++	struct hci_cp_ext_adv_set *set;
+ 	__u8 status = *((__u8 *) skb->data);
++	struct adv_info *adv = NULL, *n;
+ 
+ 	BT_DBG("%s status 0x%2.2x", hdev->name, status);
+ 
+@@ -1288,22 +1290,48 @@ static void hci_cc_le_set_ext_adv_enable(struct hci_dev *hdev,
+ 	if (!cp)
+ 		return;
+ 
++	set = (void *)cp->data;
++
+ 	hci_dev_lock(hdev);
+ 
++	if (cp->num_of_sets)
++		adv = hci_find_adv_instance(hdev, set->handle);
++
+ 	if (cp->enable) {
+ 		struct hci_conn *conn;
+ 
+ 		hci_dev_set_flag(hdev, HCI_LE_ADV);
+ 
++		if (adv)
++			adv->enabled = true;
++
+ 		conn = hci_lookup_le_connect(hdev);
+ 		if (conn)
+ 			queue_delayed_work(hdev->workqueue,
+ 					   &conn->le_conn_timeout,
+ 					   conn->conn_timeout);
+ 	} else {
++		if (adv) {
++			adv->enabled = false;
++			/* If just one instance was disabled check if there are
++			 * any other instance enabled before clearing HCI_LE_ADV
++			 */
++			list_for_each_entry_safe(adv, n, &hdev->adv_instances,
++						 list) {
++				if (adv->enabled)
++					goto unlock;
++			}
++		} else {
++			/* All instances shall be considered disabled */
++			list_for_each_entry_safe(adv, n, &hdev->adv_instances,
++						 list)
++				adv->enabled = false;
++		}
++
+ 		hci_dev_clear_flag(hdev, HCI_LE_ADV);
+ 	}
+ 
++unlock:
+ 	hci_dev_unlock(hdev);
+ }
+ 
+-- 
+2.47.3
+

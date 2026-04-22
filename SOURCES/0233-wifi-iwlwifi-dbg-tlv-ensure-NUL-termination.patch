@@ -1,0 +1,45 @@
+From 5f80e7f308fb6111a700c76c803728c623a58a09 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 13 Apr 2026 07:08:03 +0000
+Subject: [PATCH] wifi: iwlwifi: dbg-tlv: ensure NUL termination
+
+jira VULN-43002
+cve CVE-2024-35845
+commit-author Johannes Berg <johannes.berg@intel.com>
+commit ea1d166fae14e05d49ffb0ea9fcd4658f8d3dcea
+
+The iwl_fw_ini_debug_info_tlv is used as a string, so we must
+ensure the string is terminated correctly before using it.
+
+Fixes: a9248de42464 ("iwlwifi: dbg_ini: add TLV allocation new API support")
+	Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+	Reviewed-by: Gregory Greenman <gregory.greenman@intel.com>
+	Signed-off-by: Miri Korenblit <miriam.rachel.korenblit@intel.com>
+Link: https://msgid.link/20240128084842.be15e858ee89.Ibff93429cf999eafc7b26f3eef4c055dc84984a0@changeid
+	Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+(cherry picked from commit ea1d166fae14e05d49ffb0ea9fcd4658f8d3dcea)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/net/wireless/intel/iwlwifi/iwl-dbg-tlv.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/net/wireless/intel/iwlwifi/iwl-dbg-tlv.c b/drivers/net/wireless/intel/iwlwifi/iwl-dbg-tlv.c
+index 95ff20c7cec1..6416693952c0 100644
+--- a/drivers/net/wireless/intel/iwlwifi/iwl-dbg-tlv.c
++++ b/drivers/net/wireless/intel/iwlwifi/iwl-dbg-tlv.c
+@@ -102,6 +102,12 @@ static int iwl_dbg_tlv_alloc_debug_info(struct iwl_trans *trans,
+ 	if (le32_to_cpu(tlv->length) != sizeof(*debug_info))
+ 		return -EINVAL;
+ 
++	/* we use this as a string, ensure input was NUL terminated */
++	if (strnlen(debug_info->debug_cfg_name,
++		    sizeof(debug_info->debug_cfg_name)) ==
++			sizeof(debug_info->debug_cfg_name))
++		return -EINVAL;
++
+ 	IWL_DEBUG_FW(trans, "WRT: Loading debug cfg: %s\n",
+ 		     debug_info->debug_cfg_name);
+ 
+-- 
+2.47.3
+
