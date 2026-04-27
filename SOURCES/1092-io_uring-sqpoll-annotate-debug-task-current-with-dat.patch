@@ -1,0 +1,45 @@
+From 9f80f0bfb700753b84b79d178915fc9ef8884112 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sun, 12 Apr 2026 02:10:36 +0200
+Subject: [PATCH] io_uring/sqpoll: annotate debug task == current with
+ data_race()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-162982
+cve-pre CVE-2025-38106
+commit-author Jens Axboe <axboe@kernel.dk>
+commit e4956dc7a84da074fd8dc10f7abd147f15b3ae58
+
+There's a debug check in io_sq_thread_park() checking if it's the SQPOLL
+thread itself calling park. KCSAN warns about this, as we should not be
+reading sqd->thread outside of sqd->lock.
+
+Just silence this with data_race(). The pointer isn't used for anything
+but this debug check.
+
+	Reported-by: syzbot+2b946a3fd80caf971b21@syzkaller.appspotmail.com
+	Signed-off-by: Jens Axboe <axboe@kernel.dk>
+(cherry picked from commit e4956dc7a84da074fd8dc10f7abd147f15b3ae58)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ io_uring/sqpoll.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/io_uring/sqpoll.c b/io_uring/sqpoll.c
+index 4c9f2faf3ae8..0bda5b294b44 100644
+--- a/io_uring/sqpoll.c
++++ b/io_uring/sqpoll.c
+@@ -45,7 +45,7 @@ void io_sq_thread_unpark(struct io_sq_data *sqd)
+ void io_sq_thread_park(struct io_sq_data *sqd)
+ 	__acquires(&sqd->lock)
+ {
+-	WARN_ON_ONCE(sqd->thread == current);
++	WARN_ON_ONCE(data_race(sqd->thread) == current);
+ 
+ 	atomic_inc(&sqd->park_pending);
+ 	set_bit(IO_SQ_THREAD_SHOULD_PARK, &sqd->state);
+-- 
+2.47.3
+

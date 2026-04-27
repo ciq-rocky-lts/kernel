@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 6
+%define ciq_patch_version 7
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1067,6 +1067,30 @@ Patch1000077: 1077-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
 Patch1000078: 1078-svcrdma-use-rc_pageoff-for-memcpy-byte-offset.patch
 Patch1000079: 1079-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
 Patch1000080: 1080-macvlan-fix-possible-UAF-in-macvlan_forward_source.patch
+#CIQ Patch Version: 570.60.1+7.1.el9_6_ciq
+Patch1000081: 1081-can-j1939-j1939_session_new-fix-skb-reference-counti.patch
+Patch1000082: 1082-drm-sched-Fix-potential-double-free-in-drm_sched_job.patch
+Patch1000083: 1083-mlxsw-spectrum_mr-Fix-use-after-free-when-updating-m.patch
+Patch1000084: 1084-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
+Patch1000085: 1085-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
+Patch1000086: 1086-net-atm-add-lec_mutex.patch
+Patch1000087: 1087-net-atm-fix-proc-net-atm-lec-handling.patch
+Patch1000088: 1088-netfilter-nf_tables-fix-use-after-free-in-nf_tables_.patch
+Patch1000089: 1089-iommufd-Fix-race-during-abort-for-file-descriptors.patch
+Patch1000090: 1090-page_pool-Fix-use-after-free-in-page_pool_recycle_in.patch
+Patch1000091: 1091-kernfs-Fix-UAF-in-polling-when-open-file-is-released.patch
+Patch1000092: 1092-io_uring-sqpoll-annotate-debug-task-current-with-dat.patch
+Patch1000093: 1093-io_uring-sqpoll-fix-sqpoll-error-handling-races.patch
+Patch1000094: 1094-io_uring-don-t-touch-sqd-thread-off-tw-add.patch
+Patch1000095: 1095-io_uring-simplify-the-SQPOLL-thread-check-when-cance.patch
+Patch1000096: 1096-io_uring-fix-use-after-free-of-sq-thread-in-__io_uri.patch
+Patch1000097: 1097-io_uring-consistently-use-rcu-semantics-with-sqpoll-.patch
+Patch1000098: 1098-io_uring-sqpoll-don-t-put-task_struct-on-tctx-setup-.patch
+Patch1000099: 1099-mm-damon-sysfs-cleanup-attrs-subdirs-on-context-dir-.patch
+Patch1000100: 1100-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
+Patch1000101: 1101-net-add-skb_header_pointer_careful-helper.patch
+Patch1000102: 1102-net-sched-cls_u32-use-skb_header_pointer_careful.patch
+Patch1000103: 1103-netfilter-nf_tables-fix-inverted-genmask-check-in-nf.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1906,6 +1930,29 @@ ApplyOptionalPatch 1077-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.pat
 ApplyOptionalPatch 1078-svcrdma-use-rc_pageoff-for-memcpy-byte-offset.patch
 ApplyOptionalPatch 1079-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
 ApplyOptionalPatch 1080-macvlan-fix-possible-UAF-in-macvlan_forward_source.patch
+ApplyOptionalPatch 1081-can-j1939-j1939_session_new-fix-skb-reference-counti.patch
+ApplyOptionalPatch 1082-drm-sched-Fix-potential-double-free-in-drm_sched_job.patch
+ApplyOptionalPatch 1083-mlxsw-spectrum_mr-Fix-use-after-free-when-updating-m.patch
+ApplyOptionalPatch 1084-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
+ApplyOptionalPatch 1085-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
+ApplyOptionalPatch 1086-net-atm-add-lec_mutex.patch
+ApplyOptionalPatch 1087-net-atm-fix-proc-net-atm-lec-handling.patch
+ApplyOptionalPatch 1088-netfilter-nf_tables-fix-use-after-free-in-nf_tables_.patch
+ApplyOptionalPatch 1089-iommufd-Fix-race-during-abort-for-file-descriptors.patch
+ApplyOptionalPatch 1090-page_pool-Fix-use-after-free-in-page_pool_recycle_in.patch
+ApplyOptionalPatch 1091-kernfs-Fix-UAF-in-polling-when-open-file-is-released.patch
+ApplyOptionalPatch 1092-io_uring-sqpoll-annotate-debug-task-current-with-dat.patch
+ApplyOptionalPatch 1093-io_uring-sqpoll-fix-sqpoll-error-handling-races.patch
+ApplyOptionalPatch 1094-io_uring-don-t-touch-sqd-thread-off-tw-add.patch
+ApplyOptionalPatch 1095-io_uring-simplify-the-SQPOLL-thread-check-when-cance.patch
+ApplyOptionalPatch 1096-io_uring-fix-use-after-free-of-sq-thread-in-__io_uri.patch
+ApplyOptionalPatch 1097-io_uring-consistently-use-rcu-semantics-with-sqpoll-.patch
+ApplyOptionalPatch 1098-io_uring-sqpoll-don-t-put-task_struct-on-tctx-setup-.patch
+ApplyOptionalPatch 1099-mm-damon-sysfs-cleanup-attrs-subdirs-on-context-dir-.patch
+ApplyOptionalPatch 1100-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
+ApplyOptionalPatch 1101-net-add-skb_header_pointer_careful-helper.patch
+ApplyOptionalPatch 1102-net-sched-cls_u32-use-skb_header_pointer_careful.patch
+ApplyOptionalPatch 1103-netfilter-nf_tables-fix-inverted-genmask-check-in-nf.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4022,6 +4069,31 @@ fi
 #
 #
 %changelog
+* Fri Apr 24 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+7.1.el9_6_ciq
+- netfilter: nf_tables: fix inverted genmask check in nft_map_catchall_activate() (CIQ Kernel Automation) [ciqres] {CVE-2026-23111}
+- net/sched: cls_u32: use skb_header_pointer_careful() (CIQ Kernel Automation) [ciqres] {CVE-2026-23204}
+- net: add skb_header_pointer_careful() helper (Roxana Nicolescu) [ciqres] {CVE-2026-23204}
+- scsi: target: iscsi: Fix use-after-free in iscsit_dec_session_usage_count() (CIQ Kernel Automation) [ciqres] {CVE-2026-23193}
+- mm/damon/sysfs: cleanup attrs subdirs on context dir setup failure (CIQ Kernel Automation) [ciqres] {CVE-2026-23144}
+- io_uring/sqpoll: don't put task_struct on tctx setup failure (Marcin Wcisło) [ciqres] {CVE-2025-38106}
+- io_uring: consistently use rcu semantics with sqpoll thread (Marcin Wcisło) [ciqres] {CVE-2025-38106}
+- io_uring: fix use-after-free of sq->thread in __io_uring_show_fdinfo() (Marcin Wcisło) [ciqres] {CVE-2025-38106}
+- io_uring: simplify the SQPOLL thread check when cancelling requests (Marcin Wcisło) [ciqres] {CVE-2025-38106}
+- io_uring: don't touch sqd->thread off tw add (Marcin Wcisło) [ciqres] {CVE-2025-38106}
+- io_uring/sqpoll: fix sqpoll error handling races (Marcin Wcisło) [ciqres] {CVE-2025-38106}
+- io_uring/sqpoll: annotate debug task == current with data_race() (Marcin Wcisło) [ciqres] {CVE-2025-38106}
+- kernfs: Fix UAF in polling when open file is released (Marcin Wcisło) [ciqres] {CVE-2025-39881}
+- page_pool: Fix use-after-free in page_pool_recycle_in_ring (Marcin Wcisło) [ciqres] {CVE-2025-38129}
+- iommufd: Fix race during abort for file descriptors (Marcin Wcisło) [ciqres] {CVE-2025-39966}
+- netfilter: nf_tables: fix use-after-free in nf_tables_addchain() (CIQ Kernel Automation) [ciqres] {CVE-2026-23231}
+- net: atm: fix /proc/net/atm/lec handling (CIQ Kernel Automation) [ciqres] {CVE-2025-38180}
+- net: atm: add lec_mutex (Roxana Nicolescu) [ciqres] {CVE-2025-38323}
+- macvlan: observe an RCU grace period in macvlan_common_newlink() error path (CIQ Kernel Automation) [ciqres] {CVE-2026-23273}
+- macvlan: fix error recovery in macvlan_common_newlink() (CIQ Kernel Automation) [ciqres] {CVE-2026-23209}
+- mlxsw: spectrum_mr: Fix use-after-free when updating multicast route stats (CIQ Kernel Automation) [ciqres] {CVE-2025-68800}
+- drm/sched: Fix potential double free in drm_sched_job_add_resv_dependencies (CIQ Kernel Automation) [ciqres] {CVE-2025-40096}
+- can: j1939: j1939_session_new(): fix skb reference counting (CIQ Kernel Automation) [ciqres] {CVE-2024-56645}
+
 * Mon Mar 30 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-570.60.1+6.1.el9_6_ciq
 - macvlan: fix possible UAF in macvlan_forward_source() (CIQ Kernel Automation) [ciqres] {CVE-2026-23001}
 - ipv6: BUG() in pskb_expand_head() as part of calipso_skbuff_setattr() (CIQ Kernel Automation) [ciqres] {CVE-2025-71085}
