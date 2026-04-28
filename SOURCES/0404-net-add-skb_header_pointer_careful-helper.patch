@@ -1,0 +1,54 @@
+From 824f7a467b09490a077992e605dbb22f4de65040 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Thu, 23 Apr 2026 15:51:08 +0200
+Subject: [PATCH] net: add skb_header_pointer_careful() helper
+
+jira VULN-176129
+cve-pre CVE-2026-23204
+commit-author Eric Dumazet <edumazet@google.com>
+commit 13e00fdc9236bd4d0bff4109d2983171fbcb74c4
+upstream-diff |
+	Adjusted context because skb_pointer_if_linear does not exist.
+	Introduced in 6f5a630d7c57c ("bpf, net: Introduce skb_pointer_if_linear().")
+
+This variant of skb_header_pointer() should be used in contexts
+where @offset argument is user-controlled and could be negative.
+
+Negative offsets are supported, as long as the zone starts
+between skb->head and skb->data.
+
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+Link: https://patch.msgid.link/20260128141539.3404400-2-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 13e00fdc9236bd4d0bff4109d2983171fbcb74c4)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ include/linux/skbuff.h | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/include/linux/skbuff.h b/include/linux/skbuff.h
+index 343ce45bc35c..2ef89eec3cce 100644
+--- a/include/linux/skbuff.h
++++ b/include/linux/skbuff.h
+@@ -3809,6 +3809,18 @@ skb_header_pointer(const struct sk_buff *skb, int offset, int len, void *buffer)
+ 				    skb_headlen(skb), buffer);
+ }
+ 
++/* Variant of skb_header_pointer() where @offset is user-controlled
++ * and potentially negative.
++ */
++static inline void * __must_check
++skb_header_pointer_careful(const struct sk_buff *skb, int offset,
++			   int len, void *buffer)
++{
++	if (unlikely(offset < 0 && -offset > skb_headroom(skb)))
++		return NULL;
++	return skb_header_pointer(skb, offset, len, buffer);
++}
++
+ /**
+  *	skb_needs_linearize - check if we need to linearize a given skb
+  *			      depending on the given device features.
+-- 
+2.47.3
+

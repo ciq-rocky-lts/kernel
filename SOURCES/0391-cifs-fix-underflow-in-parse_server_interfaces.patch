@@ -1,0 +1,43 @@
+From cecb73e268d786beb1a7b2d3bce59e39dd3cd3ea Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 13 Apr 2026 07:13:52 +0000
+Subject: [PATCH] cifs: fix underflow in parse_server_interfaces()
+
+jira VULN-36963
+cve CVE-2024-26828
+commit-author Dan Carpenter <dan.carpenter@linaro.org>
+commit cffe487026be13eaf37ea28b783d9638ab147204
+
+In this loop, we step through the buffer and after each item we check
+if the size_left is greater than the minimum size we need.  However,
+the problem is that "bytes_left" is type ssize_t while sizeof() is type
+size_t.  That means that because of type promotion, the comparison is
+done as an unsigned and if we have negative bytes left the loop
+continues instead of ending.
+
+Fixes: fe856be475f7 ("CIFS: parse and store info on iface queries")
+	Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+	Reviewed-by: Shyam Prasad N <sprasad@microsoft.com>
+	Signed-off-by: Steve French <stfrench@microsoft.com>
+(cherry picked from commit cffe487026be13eaf37ea28b783d9638ab147204)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ fs/cifs/smb2ops.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/cifs/smb2ops.c b/fs/cifs/smb2ops.c
+index 63f3c9036f2b..6c5bed7d6b20 100644
+--- a/fs/cifs/smb2ops.c
++++ b/fs/cifs/smb2ops.c
+@@ -545,7 +545,7 @@ parse_server_interfaces(struct network_interface_info_ioctl_rsp *buf,
+ 	}
+ 	spin_unlock(&ses->iface_lock);
+ 
+-	while (bytes_left >= sizeof(*p)) {
++	while (bytes_left >= (ssize_t)sizeof(*p)) {
+ 		memset(&tmp_iface, 0, sizeof(tmp_iface));
+ 		tmp_iface.speed = le64_to_cpu(p->LinkSpeed);
+ 		tmp_iface.rdma_capable = le32_to_cpu(p->Capability & RDMA_CAPABLE) ? 1 : 0;
+-- 
+2.47.3
+

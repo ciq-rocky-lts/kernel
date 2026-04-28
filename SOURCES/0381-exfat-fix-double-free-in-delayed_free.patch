@@ -1,0 +1,42 @@
+From f83bb13204ed1365785cb7d8862b5969802ed58a Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Thu, 9 Apr 2026 06:45:13 +0000
+Subject: [PATCH] exfat: fix double free in delayed_free
+
+jira VULN-72067
+cve CVE-2025-38206
+commit-author Namjae Jeon <linkinjeon@kernel.org>
+commit 1f3d9724e16d62c7d42c67d6613b8512f2887c22
+
+The double free could happen in the following path.
+
+exfat_create_upcase_table()
+        exfat_create_upcase_table() : return error
+        exfat_free_upcase_table() : free ->vol_utbl
+        exfat_load_default_upcase_table : return error
+     exfat_kill_sb()
+           delayed_free()
+                  exfat_free_upcase_table() <--------- double free
+This patch set ->vol_util as NULL after freeing it.
+
+	Reported-by: Jianzhou Zhao <xnxc22xnxc22@qq.com>
+	Signed-off-by: Namjae Jeon <linkinjeon@kernel.org>
+(cherry picked from commit 1f3d9724e16d62c7d42c67d6613b8512f2887c22)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ fs/exfat/nls.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fs/exfat/nls.c b/fs/exfat/nls.c
+index 314d5407a1be..a75d5fb2404c 100644
+--- a/fs/exfat/nls.c
++++ b/fs/exfat/nls.c
+@@ -804,4 +804,5 @@ int exfat_create_upcase_table(struct super_block *sb)
+ void exfat_free_upcase_table(struct exfat_sb_info *sbi)
+ {
+ 	kvfree(sbi->vol_utbl);
++	sbi->vol_utbl = NULL;
+ }
+-- 
+2.47.3
+

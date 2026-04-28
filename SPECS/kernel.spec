@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 25
+%define ciq_patch_version 26
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1359,6 +1359,43 @@ Patch1000413: 0368-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
 Patch1000414: 0369-iommufd-iova_bitmap-Fix-shift-out-of-bounds-in-iova_.patch
 Patch1000415: 0370-vsock-avoid-to-close-connected-socket-after-the-time.patch
 Patch1000416: 0371-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
+#CIQ Patch Version: 284.30.1+26.1.el9_2_ciq
+Patch1000417: 0372-wifi-rtl8xxxu-add-cancel_work_sync-for-c2hcmd_work.patch
+Patch1000418: 0373-ext4-regenerate-buddy-after-block-freeing-failed-if-.patch
+Patch1000419: 0374-ext4-avoid-allocating-blocks-from-corrupted-group-in.patch
+Patch1000420: 0375-ext4-avoid-allocating-blocks-from-corrupted-group-in.patch
+Patch1000421: 0376-net-mlx5e-fix-a-potential-double-free-in-fs_any_crea.patch
+Patch1000422: 0377-netfilter-nft_chain_filter-handle-NETDEV_UNREGISTER-.patch
+Patch1000423: 0378-tcp-add-sanity-checks-to-rx-zerocopy.patch
+Patch1000424: 0379-netfilter-nft_ct-sanitize-layer-3-and-4-protocol-num.patch
+Patch1000425: 0380-netfilter-nft_ct-fix-l3num-expectations-with-inet-ps.patch
+Patch1000426: 0381-exfat-fix-double-free-in-delayed_free.patch
+Patch1000427: 0382-net-atm-add-lec_mutex.patch
+Patch1000428: 0383-net-atm-fix-proc-net-atm-lec-handling.patch
+Patch1000429: 0384-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
+Patch1000430: 0385-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
+Patch1000431: 0386-macvlan-fix-possible-UAF-in-macvlan_forward_source.patch
+Patch1000432: 0387-hv_netvsc-Fix-race-condition-between-netvsc_probe-an.patch
+Patch1000433: 0388-mptcp-fix-data-re-injection-from-stale-subflow.patch
+Patch1000434: 0389-wifi-ath9k-delay-all-of-ath9k_wmi_event_tasklet-unti.patch
+Patch1000435: 0390-wifi-iwlwifi-dbg-tlv-ensure-NUL-termination.patch
+Patch1000436: 0391-cifs-fix-underflow-in-parse_server_interfaces.patch
+Patch1000437: 0392-bpf-Fix-racing-between-bpf_timer_cancel_and_free-and.patch
+Patch1000438: 0393-ipv6-sr-fix-possible-use-after-free-and-null-ptr-der.patch
+Patch1000439: 0394-ipv6-sr-fix-incorrect-unregister-order.patch
+Patch1000440: 0395-KVM-SVM-Flush-pages-under-kvm-lock-to-fix-UAF-in-svm.patch
+Patch1000441: 0396-ipv6-fix-potential-struct-net-leak-in-inet6_rtm_geta.patch
+Patch1000442: 0397-Bluetooth-Avoid-potential-use-after-free-in-hci_erro.patch
+Patch1000443: 0398-NFSv4.2-fix-nfs4_listxattr-kernel-BUG-at-mm-usercopy.patch
+Patch1000444: 0399-vt-fix-unicode-buffer-corruption-when-deleting-chara.patch
+Patch1000445: 0400-net-ice-Fix-potential-NULL-pointer-dereference-in-ic.patch
+Patch1000446: 0401-mac802154-fix-llsec-key-resources-release-in-mac8021.patch
+Patch1000447: 0402-mlxsw-spectrum_mr-Fix-use-after-free-when-updating-m.patch
+Patch1000448: 0403-mm-damon-sysfs-cleanup-attrs-subdirs-on-context-dir-.patch
+Patch1000449: 0404-net-add-skb_header_pointer_careful-helper.patch
+Patch1000450: 0405-net-sched-cls_u32-use-skb_header_pointer_careful.patch
+Patch1000451: 0406-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
+Patch1000452: 0407-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2451,6 +2488,42 @@ ApplyOptionalPatch 0368-fbdev-bitblit-bound-check-glyph-index-in-bit_putcs.patch
 ApplyOptionalPatch 0369-iommufd-iova_bitmap-Fix-shift-out-of-bounds-in-iova_.patch
 ApplyOptionalPatch 0370-vsock-avoid-to-close-connected-socket-after-the-time.patch
 ApplyOptionalPatch 0371-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
+ApplyOptionalPatch 0372-wifi-rtl8xxxu-add-cancel_work_sync-for-c2hcmd_work.patch
+ApplyOptionalPatch 0373-ext4-regenerate-buddy-after-block-freeing-failed-if-.patch
+ApplyOptionalPatch 0374-ext4-avoid-allocating-blocks-from-corrupted-group-in.patch
+ApplyOptionalPatch 0375-ext4-avoid-allocating-blocks-from-corrupted-group-in.patch
+ApplyOptionalPatch 0376-net-mlx5e-fix-a-potential-double-free-in-fs_any_crea.patch
+ApplyOptionalPatch 0377-netfilter-nft_chain_filter-handle-NETDEV_UNREGISTER-.patch
+ApplyOptionalPatch 0378-tcp-add-sanity-checks-to-rx-zerocopy.patch
+ApplyOptionalPatch 0379-netfilter-nft_ct-sanitize-layer-3-and-4-protocol-num.patch
+ApplyOptionalPatch 0380-netfilter-nft_ct-fix-l3num-expectations-with-inet-ps.patch
+ApplyOptionalPatch 0381-exfat-fix-double-free-in-delayed_free.patch
+ApplyOptionalPatch 0382-net-atm-add-lec_mutex.patch
+ApplyOptionalPatch 0383-net-atm-fix-proc-net-atm-lec-handling.patch
+ApplyOptionalPatch 0384-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
+ApplyOptionalPatch 0385-ipv6-BUG-in-pskb_expand_head-as-part-of-calipso_skbu.patch
+ApplyOptionalPatch 0386-macvlan-fix-possible-UAF-in-macvlan_forward_source.patch
+ApplyOptionalPatch 0387-hv_netvsc-Fix-race-condition-between-netvsc_probe-an.patch
+ApplyOptionalPatch 0388-mptcp-fix-data-re-injection-from-stale-subflow.patch
+ApplyOptionalPatch 0389-wifi-ath9k-delay-all-of-ath9k_wmi_event_tasklet-unti.patch
+ApplyOptionalPatch 0390-wifi-iwlwifi-dbg-tlv-ensure-NUL-termination.patch
+ApplyOptionalPatch 0391-cifs-fix-underflow-in-parse_server_interfaces.patch
+ApplyOptionalPatch 0392-bpf-Fix-racing-between-bpf_timer_cancel_and_free-and.patch
+ApplyOptionalPatch 0393-ipv6-sr-fix-possible-use-after-free-and-null-ptr-der.patch
+ApplyOptionalPatch 0394-ipv6-sr-fix-incorrect-unregister-order.patch
+ApplyOptionalPatch 0395-KVM-SVM-Flush-pages-under-kvm-lock-to-fix-UAF-in-svm.patch
+ApplyOptionalPatch 0396-ipv6-fix-potential-struct-net-leak-in-inet6_rtm_geta.patch
+ApplyOptionalPatch 0397-Bluetooth-Avoid-potential-use-after-free-in-hci_erro.patch
+ApplyOptionalPatch 0398-NFSv4.2-fix-nfs4_listxattr-kernel-BUG-at-mm-usercopy.patch
+ApplyOptionalPatch 0399-vt-fix-unicode-buffer-corruption-when-deleting-chara.patch
+ApplyOptionalPatch 0400-net-ice-Fix-potential-NULL-pointer-dereference-in-ic.patch
+ApplyOptionalPatch 0401-mac802154-fix-llsec-key-resources-release-in-mac8021.patch
+ApplyOptionalPatch 0402-mlxsw-spectrum_mr-Fix-use-after-free-when-updating-m.patch
+ApplyOptionalPatch 0403-mm-damon-sysfs-cleanup-attrs-subdirs-on-context-dir-.patch
+ApplyOptionalPatch 0404-net-add-skb_header_pointer_careful-helper.patch
+ApplyOptionalPatch 0405-net-sched-cls_u32-use-skb_header_pointer_careful.patch
+ApplyOptionalPatch 0406-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
+ApplyOptionalPatch 0407-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4334,6 +4407,44 @@ fi
 #
 #
 %changelog
+* Fri Apr 24 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+26.1.el9_2_ciq
+- macvlan: observe an RCU grace period in macvlan_common_newlink() error path (CIQ Kernel Automation) [ciqres] {CVE-2026-23273}
+- macvlan: fix error recovery in macvlan_common_newlink() (CIQ Kernel Automation) [ciqres] {CVE-2026-23209}
+- net/sched: cls_u32: use skb_header_pointer_careful() (CIQ Kernel Automation) [ciqres] {CVE-2026-23204}
+- net: add skb_header_pointer_careful() helper (Roxana Nicolescu) [ciqres] {CVE-2026-23204}
+- mm/damon/sysfs: cleanup attrs subdirs on context dir setup failure (CIQ Kernel Automation) [ciqres] {CVE-2026-23144}
+- mlxsw: spectrum_mr: Fix use-after-free when updating multicast route stats (CIQ Kernel Automation) [ciqres] {CVE-2025-68800}
+- mac802154: fix llsec key resources release in mac802154_llsec_key_del (CIQ Kernel Automation) [ciqres] {CVE-2024-26961}
+- net: ice: Fix potential NULL pointer dereference in ice_bridge_setlink() (CIQ Kernel Automation) [ciqres] {CVE-2024-26855}
+- vt: fix unicode buffer corruption when deleting characters (CIQ Kernel Automation) [ciqres] {CVE-2024-35823}
+- NFSv4.2: fix nfs4_listxattr kernel BUG at mm/usercopy.c:102 (CIQ Kernel Automation) [ciqres] {CVE-2024-26870}
+- Bluetooth: Avoid potential use-after-free in hci_error_reset (CIQ Kernel Automation) [ciqres] {CVE-2024-26801}
+- ipv6: fix potential "struct net" leak in inet6_rtm_getaddr() (CIQ Kernel Automation) [ciqres] {CVE-2024-27417}
+- KVM: SVM: Flush pages under kvm->lock to fix UAF in svm_register_enc_region() (CIQ Kernel Automation) [ciqres] {CVE-2024-35791}
+- ipv6: sr: fix incorrect unregister order (CIQ Kernel Automation) [ciqres] {CVE-2024-26735}
+- ipv6: sr: fix possible use-after-free and null-ptr-deref (CIQ Kernel Automation) [ciqres] {CVE-2024-26735}
+- bpf: Fix racing between bpf_timer_cancel_and_free and bpf_timer_cancel (CIQ Kernel Automation) [ciqres] {CVE-2024-26737}
+- cifs: fix underflow in parse_server_interfaces() (CIQ Kernel Automation) [ciqres] {CVE-2024-26828}
+- wifi: iwlwifi: dbg-tlv: ensure NUL termination (CIQ Kernel Automation) [ciqres] {CVE-2024-35845}
+- wifi: ath9k: delay all of ath9k_wmi_event_tasklet() until init is complete (CIQ Kernel Automation) [ciqres] {CVE-2024-26897}
+- mptcp: fix data re-injection from stale subflow (CIQ Kernel Automation) [ciqres] {CVE-2024-26826}
+- hv_netvsc: Fix race condition between netvsc_probe and netvsc_remove (CIQ Kernel Automation) [ciqres] {CVE-2024-26698}
+- macvlan: fix possible UAF in macvlan_forward_source() (CIQ Kernel Automation) [ciqres] {CVE-2026-23001}
+- ipv6: BUG() in pskb_expand_head() as part of calipso_skbuff_setattr() (CIQ Kernel Automation) [ciqres] {CVE-2025-71085}
+- sctp: avoid NULL dereference when chunk data buffer is missing (CIQ Kernel Automation) [ciqres] {CVE-2025-40240}
+- net: atm: fix /proc/net/atm/lec handling (CIQ Kernel Automation) [ciqres] {CVE-2025-38180}
+- net: atm: add lec_mutex (Roxana Nicolescu) [ciqres] {CVE-2025-38323}
+- exfat: fix double free in delayed_free (CIQ Kernel Automation) [ciqres] {CVE-2025-38206}
+- netfilter: nft_ct: fix l3num expectations with inet pseudo family (CIQ Kernel Automation) [ciqres] {CVE-2024-26673}
+- netfilter: nft_ct: sanitize layer 3 and 4 protocol number in custom expectations (CIQ Kernel Automation) [ciqres] {CVE-2024-26673}
+- tcp: add sanity checks to rx zerocopy (CIQ Kernel Automation) [ciqres] {CVE-2024-26640}
+- netfilter: nft_chain_filter: handle NETDEV_UNREGISTER for inet/ingress basechain (CIQ Kernel Automation) [ciqres] {CVE-2024-26808}
+- net/mlx5e: fix a potential double-free in fs_any_create_groups (CIQ Kernel Automation) [ciqres] {CVE-2023-52667}
+- ext4: avoid allocating blocks from corrupted group in ext4_mb_try_best_found() (CIQ Kernel Automation) [ciqres] {CVE-2024-26773}
+- ext4: avoid allocating blocks from corrupted group in ext4_mb_find_by_goal() (CIQ Kernel Automation) [ciqres] {CVE-2024-26772}
+- ext4: regenerate buddy after block freeing failed if under fc replay (CIQ Kernel Automation) [ciqres] {CVE-2024-26601}
+- wifi: rtl8xxxu: add cancel_work_sync() for c2hcmd_work (CIQ Kernel Automation) [ciqres] {CVE-2024-27052}
+
 * Fri Mar 27 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1+25.1.el9_2_ciq
 - vsock: Ignore signal/timeout on connect() if already established (Marcin Wcisło) [ciqres] {CVE-2025-40248}
 - vsock: avoid to close connected socket after the timeout (Marcin Wcisło) [ciqres] {CVE-2025-40248}

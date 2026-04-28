@@ -1,0 +1,42 @@
+From 0aebff93e87ec91c0abc33549d0638a76416a74b Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 20 Apr 2026 07:21:51 +0000
+Subject: [PATCH] net: ice: Fix potential NULL pointer dereference in
+ ice_bridge_setlink()
+
+jira VULN-37073
+cve CVE-2024-26855
+commit-author Rand Deeb <rand.sec96@gmail.com>
+commit 06e456a05d669ca30b224b8ed962421770c1496c
+
+The function ice_bridge_setlink() may encounter a NULL pointer dereference
+if nlmsg_find_attr() returns NULL and br_spec is dereferenced subsequently
+in nla_for_each_nested(). To address this issue, add a check to ensure that
+br_spec is not NULL before proceeding with the nested attribute iteration.
+
+Fixes: b1edc14a3fbf ("ice: Implement ice_bridge_getlink and ice_bridge_setlink")
+	Signed-off-by: Rand Deeb <rand.sec96@gmail.com>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+	Signed-off-by: Tony Nguyen <anthony.l.nguyen@intel.com>
+(cherry picked from commit 06e456a05d669ca30b224b8ed962421770c1496c)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/net/ethernet/intel/ice/ice_main.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/net/ethernet/intel/ice/ice_main.c b/drivers/net/ethernet/intel/ice/ice_main.c
+index 9c74c7f3a8ee..ba9b41f91dab 100644
+--- a/drivers/net/ethernet/intel/ice/ice_main.c
++++ b/drivers/net/ethernet/intel/ice/ice_main.c
+@@ -7587,6 +7587,8 @@ ice_bridge_setlink(struct net_device *dev, struct nlmsghdr *nlh,
+ 	pf_sw = pf->first_sw;
+ 	/* find the attribute in the netlink message */
+ 	br_spec = nlmsg_find_attr(nlh, sizeof(struct ifinfomsg), IFLA_AF_SPEC);
++	if (!br_spec)
++		return -EINVAL;
+ 
+ 	nla_for_each_nested(attr, br_spec, rem) {
+ 		__u16 mode;
+-- 
+2.47.3
+
