@@ -1,0 +1,48 @@
+From d0d2f2439897d00964f13d836dc8f7520a9e4e82 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 20 Apr 2026 07:07:49 +0000
+Subject: [PATCH] wifi: rtw89: fix null pointer access when abort scan
+
+jira VULN-37998
+cve CVE-2024-35946
+commit-author Po-Hao Huang <phhuang@realtek.com>
+commit 7e11a2966f51695c0af0b1f976a32d64dee243b2
+
+During cancel scan we might use vif that weren't scanning.
+Fix this by using the actual scanning vif.
+
+	Signed-off-by: Po-Hao Huang <phhuang@realtek.com>
+	Signed-off-by: Ping-Ke Shih <pkshih@realtek.com>
+	Signed-off-by: Kalle Valo <kvalo@kernel.org>
+Link: https://msgid.link/20240119081501.25223-6-pkshih@realtek.com
+(cherry picked from commit 7e11a2966f51695c0af0b1f976a32d64dee243b2)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/net/wireless/realtek/rtw89/mac80211.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/wireless/realtek/rtw89/mac80211.c b/drivers/net/wireless/realtek/rtw89/mac80211.c
+index 31d1f7891675..43db909daff9 100644
+--- a/drivers/net/wireless/realtek/rtw89/mac80211.c
++++ b/drivers/net/wireless/realtek/rtw89/mac80211.c
+@@ -427,7 +427,7 @@ static void rtw89_ops_bss_info_changed(struct ieee80211_hw *hw,
+ 			 * when disconnected by peer
+ 			 */
+ 			if (rtwdev->scanning)
+-				rtw89_hw_scan_abort(rtwdev, vif);
++				rtw89_hw_scan_abort(rtwdev, rtwdev->scan_info.scanning_vif);
+ 		}
+ 	}
+ 
+@@ -973,7 +973,7 @@ static int rtw89_ops_remain_on_channel(struct ieee80211_hw *hw,
+ 	}
+ 
+ 	if (rtwdev->scanning)
+-		rtw89_hw_scan_abort(rtwdev, vif);
++		rtw89_hw_scan_abort(rtwdev, rtwdev->scan_info.scanning_vif);
+ 
+ 	if (type == IEEE80211_ROC_TYPE_MGMT_TX)
+ 		roc->state = RTW89_ROC_MGMT;
+-- 
+2.47.3
+

@@ -1,0 +1,76 @@
+From e9e6e24ffe32bba2104b90e00cc9df20cdeb8037 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 20 Apr 2026 07:02:32 +0000
+Subject: [PATCH] ext4: regenerate buddy after block freeing failed if under fc
+ replay
+
+jira VULN-42550
+cve CVE-2024-26601
+commit-author Baokun Li <libaokun1@huawei.com>
+commit c9b528c35795b711331ed36dc3dbee90d5812d4e
+upstream-diff |
+	Removed last param when function ext4_mb_generate_buddy is called
+	in mb_regenerate_buddy, as it causing build issues. The extra param
+	is introduced in commit 5354b2af3406
+	("ext4: allow ext4_get_group_info() to fail")
+
+This mostly reverts commit 6bd97bf273bd ("ext4: remove redundant
+mb_regenerate_buddy()") and reintroduces mb_regenerate_buddy(). Based on
+code in mb_free_blocks(), fast commit replay can end up marking as free
+blocks that are already marked as such. This causes corruption of the
+buddy bitmap so we need to regenerate it in that case.
+
+	Reported-by: Jan Kara <jack@suse.cz>
+Fixes: 6bd97bf273bd ("ext4: remove redundant mb_regenerate_buddy()")
+	Signed-off-by: Baokun Li <libaokun1@huawei.com>
+	Reviewed-by: Jan Kara <jack@suse.cz>
+Link: https://lore.kernel.org/r/20240104142040.2835097-4-libaokun1@huawei.com
+	Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+(cherry picked from commit c9b528c35795b711331ed36dc3dbee90d5812d4e)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ fs/ext4/mballoc.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/fs/ext4/mballoc.c b/fs/ext4/mballoc.c
+index cd01b238eeb1..7ba8346c52e0 100644
+--- a/fs/ext4/mballoc.c
++++ b/fs/ext4/mballoc.c
+@@ -1114,6 +1114,24 @@ void ext4_mb_generate_buddy(struct super_block *sb,
+ 	atomic64_add(period, &sbi->s_mb_generation_time);
+ }
+ 
++static void mb_regenerate_buddy(struct ext4_buddy *e4b)
++{
++	int count;
++	int order = 1;
++	void *buddy;
++
++	while ((buddy = mb_find_buddy(e4b, order++, &count)))
++		mb_set_bits(buddy, 0, count);
++
++	e4b->bd_info->bb_fragments = 0;
++	memset(e4b->bd_info->bb_counters, 0,
++		sizeof(*e4b->bd_info->bb_counters) *
++		(e4b->bd_sb->s_blocksize_bits + 2));
++
++	ext4_mb_generate_buddy(e4b->bd_sb, e4b->bd_buddy,
++		e4b->bd_bitmap, e4b->bd_group);
++}
++
+ /* The buddy information is attached the buddy cache inode
+  * for convenience. The information regarding each group
+  * is loaded via ext4_mb_load_buddy. The information involve
+@@ -1791,6 +1809,8 @@ static void mb_free_blocks(struct inode *inode, struct ext4_buddy *e4b,
+ 			ext4_mark_group_bitmap_corrupted(
+ 				sb, e4b->bd_group,
+ 				EXT4_GROUP_INFO_BBITMAP_CORRUPT);
++		} else {
++			mb_regenerate_buddy(e4b);
+ 		}
+ 		goto done;
+ 	}
+-- 
+2.47.3
+

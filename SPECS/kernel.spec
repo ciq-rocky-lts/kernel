@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 17
+%define ciq_patch_version 18
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1185,6 +1185,39 @@ Patch1000178: 0158-hwrng-core-Fix-page-fault-dead-lock-on-mmap-ed-hwrng.patch
 Patch1000179: 0159-pstore-ram-Fix-crash-when-setting-number-of-cpus-to-.patch
 Patch1000180: 0160-s390-ptrace-handle-setting-of-fpc-register-correctly.patch
 Patch1000181: 0161-powerpc-powernv-Add-a-null-pointer-check-in-opal_eve.patch
+#CIQ Patch Version: 427.42.1+18.1.el9_4_ciq
+Patch1000182: 0162-net-atm-add-lec_mutex.patch
+Patch1000183: 0163-net-atm-fix-proc-net-atm-lec-handling.patch
+Patch1000184: 0164-macvlan-fix-possible-UAF-in-macvlan_forward_source.patch
+Patch1000185: 0165-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
+Patch1000186: 0166-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
+Patch1000187: 0167-PM-devfreq-Synchronize-devfreq_monitor_-start-stop.patch
+Patch1000188: 0168-dmaengine-fix-NULL-pointer-in-channel-unregistration.patch
+Patch1000189: 0169-drm-vmwgfx-Unmap-the-surface-before-resetting-it-on-.patch
+Patch1000190: 0170-drm-vmwgfx-fix-a-memleak-in-vmw_gmrid_man_get_node.patch
+Patch1000191: 0171-SUNRPC-Fix-a-suspicious-RCU-usage-warning.patch
+Patch1000192: 0172-of-Fix-double-free-in-of_parse_phandle_with_args_map.patch
+Patch1000193: 0173-of-unittest-Fix-compile-in-the-non-dynamic-case.patch
+Patch1000194: 0174-of-unittest-Fix-of_count_phandle_with_args-expected-.patch
+Patch1000195: 0175-nbd-always-initialize-struct-msghdr-completely.patch
+Patch1000196: 0176-wifi-mac80211-fix-potential-sta-link-leak.patch
+Patch1000197: 0177-wifi-mac80211-fix-race-condition-on-enabling-fast-xm.patch
+Patch1000198: 0178-ext4-regenerate-buddy-after-block-freeing-failed-if-.patch
+Patch1000199: 0179-ext4-avoid-allocating-blocks-from-corrupted-group-in.patch
+Patch1000200: 0180-net-smc-fix-illegal-rmb_desc-access-in-SMC-D-connect.patch
+Patch1000201: 0181-tcp-make-sure-init-the-accept_queue-s-spinlocks-once.patch
+Patch1000202: 0182-ipv6-init-the-accept_queue-s-spinlocks-in-inet6_crea.patch
+Patch1000203: 0183-do_sys_name_to_handle-use-kzalloc-to-fix-kernel-info.patch
+Patch1000204: 0184-tracing-Ensure-visibility-when-inserting-an-element-.patch
+Patch1000205: 0185-wifi-rtw89-fix-null-pointer-access-when-abort-scan.patch
+Patch1000206: 0186-hwmon-w83791d-Fix-NULL-pointer-dereference-by-removi.patch
+Patch1000207: 0187-hwmon-w83793-Fix-NULL-pointer-dereference-by-removin.patch
+Patch1000208: 0188-nvmem-Fix-shift-out-of-bound-UBSAN-with-byte-size-ce.patch
+Patch1000209: 0189-tty-tty_buffer-Fix-the-softlockup-issue-in-flush_to_.patch
+Patch1000210: 0190-serial-core-fix-transmit-buffer-reset-and-memleak.patch
+Patch1000211: 0191-asix-fix-uninit-value-in-asix_mdio_read.patch
+Patch1000212: 0192-um-Fix-out-of-bounds-read-in-LDT-setup.patch
+Patch1000213: 0193-net-usb-kalmia-Don-t-pass-act_len-in-usb_bulk_msg-er.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2119,6 +2152,38 @@ ApplyOptionalPatch 0158-hwrng-core-Fix-page-fault-dead-lock-on-mmap-ed-hwrng.pat
 ApplyOptionalPatch 0159-pstore-ram-Fix-crash-when-setting-number-of-cpus-to-.patch
 ApplyOptionalPatch 0160-s390-ptrace-handle-setting-of-fpc-register-correctly.patch
 ApplyOptionalPatch 0161-powerpc-powernv-Add-a-null-pointer-check-in-opal_eve.patch
+ApplyOptionalPatch 0162-net-atm-add-lec_mutex.patch
+ApplyOptionalPatch 0163-net-atm-fix-proc-net-atm-lec-handling.patch
+ApplyOptionalPatch 0164-macvlan-fix-possible-UAF-in-macvlan_forward_source.patch
+ApplyOptionalPatch 0165-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
+ApplyOptionalPatch 0166-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
+ApplyOptionalPatch 0167-PM-devfreq-Synchronize-devfreq_monitor_-start-stop.patch
+ApplyOptionalPatch 0168-dmaengine-fix-NULL-pointer-in-channel-unregistration.patch
+ApplyOptionalPatch 0169-drm-vmwgfx-Unmap-the-surface-before-resetting-it-on-.patch
+ApplyOptionalPatch 0170-drm-vmwgfx-fix-a-memleak-in-vmw_gmrid_man_get_node.patch
+ApplyOptionalPatch 0171-SUNRPC-Fix-a-suspicious-RCU-usage-warning.patch
+ApplyOptionalPatch 0172-of-Fix-double-free-in-of_parse_phandle_with_args_map.patch
+ApplyOptionalPatch 0173-of-unittest-Fix-compile-in-the-non-dynamic-case.patch
+ApplyOptionalPatch 0174-of-unittest-Fix-of_count_phandle_with_args-expected-.patch
+ApplyOptionalPatch 0175-nbd-always-initialize-struct-msghdr-completely.patch
+ApplyOptionalPatch 0176-wifi-mac80211-fix-potential-sta-link-leak.patch
+ApplyOptionalPatch 0177-wifi-mac80211-fix-race-condition-on-enabling-fast-xm.patch
+ApplyOptionalPatch 0178-ext4-regenerate-buddy-after-block-freeing-failed-if-.patch
+ApplyOptionalPatch 0179-ext4-avoid-allocating-blocks-from-corrupted-group-in.patch
+ApplyOptionalPatch 0180-net-smc-fix-illegal-rmb_desc-access-in-SMC-D-connect.patch
+ApplyOptionalPatch 0181-tcp-make-sure-init-the-accept_queue-s-spinlocks-once.patch
+ApplyOptionalPatch 0182-ipv6-init-the-accept_queue-s-spinlocks-in-inet6_crea.patch
+ApplyOptionalPatch 0183-do_sys_name_to_handle-use-kzalloc-to-fix-kernel-info.patch
+ApplyOptionalPatch 0184-tracing-Ensure-visibility-when-inserting-an-element-.patch
+ApplyOptionalPatch 0185-wifi-rtw89-fix-null-pointer-access-when-abort-scan.patch
+ApplyOptionalPatch 0186-hwmon-w83791d-Fix-NULL-pointer-dereference-by-removi.patch
+ApplyOptionalPatch 0187-hwmon-w83793-Fix-NULL-pointer-dereference-by-removin.patch
+ApplyOptionalPatch 0188-nvmem-Fix-shift-out-of-bound-UBSAN-with-byte-size-ce.patch
+ApplyOptionalPatch 0189-tty-tty_buffer-Fix-the-softlockup-issue-in-flush_to_.patch
+ApplyOptionalPatch 0190-serial-core-fix-transmit-buffer-reset-and-memleak.patch
+ApplyOptionalPatch 0191-asix-fix-uninit-value-in-asix_mdio_read.patch
+ApplyOptionalPatch 0192-um-Fix-out-of-bounds-read-in-LDT-setup.patch
+ApplyOptionalPatch 0193-net-usb-kalmia-Don-t-pass-act_len-in-usb_bulk_msg-er.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4196,6 +4261,40 @@ fi
 #
 #
 %changelog
+* Mon Apr 27 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-427.42.1+18.1.el9_4_ciq
+- net/usb: kalmia: Don't pass act_len in usb_bulk_msg error path (CIQ Kernel Automation) [ciqres] {CVE-2023-52703}
+- um: Fix out-of-bounds read in LDT setup (CIQ Kernel Automation) [ciqres] {CVE-2022-49395}
+- asix: fix uninit-value in asix_mdio_read() (CIQ Kernel Automation) [ciqres] {CVE-2021-47101}
+- serial: core: fix transmit-buffer reset and memleak (CIQ Kernel Automation) [ciqres] {CVE-2021-47527}
+- tty: tty_buffer: Fix the softlockup issue in flush_to_ldisc (CIQ Kernel Automation) [ciqres] {CVE-2021-47185}
+- nvmem: Fix shift-out-of-bound (UBSAN) with byte size cells (CIQ Kernel Automation) [ciqres] {CVE-2021-47497}
+- hwmon: (w83793) Fix NULL pointer dereference by removing unnecessary structure field (CIQ Kernel Automation) [ciqres] {CVE-2021-47384}
+- hwmon: (w83791d) Fix NULL pointer dereference by removing unnecessary structure field (CIQ Kernel Automation) [ciqres] {CVE-2021-47386}
+- wifi: rtw89: fix null pointer access when abort scan (CIQ Kernel Automation) [ciqres] {CVE-2024-35946}
+- tracing: Ensure visibility when inserting an element into tracing_map (CIQ Kernel Automation) [ciqres] {CVE-2024-26645}
+- do_sys_name_to_handle(): use kzalloc() to fix kernel-infoleak (CIQ Kernel Automation) [ciqres] {CVE-2024-26901}
+- ipv6: init the accept_queue's spinlocks in inet6_create (CIQ Kernel Automation) [ciqres] {CVE-2024-26614}
+- tcp: make sure init the accept_queue's spinlocks once (CIQ Kernel Automation) [ciqres] {CVE-2024-26614}
+- net/smc: fix illegal rmb_desc access in SMC-D connection dump (CIQ Kernel Automation) [ciqres] {CVE-2024-26615}
+- ext4: avoid allocating blocks from corrupted group in ext4_mb_find_by_goal() (CIQ Kernel Automation) [ciqres] {CVE-2024-26772}
+- ext4: regenerate buddy after block freeing failed if under fc replay (CIQ Kernel Automation) [ciqres] {CVE-2024-26601}
+- wifi: mac80211: fix race condition on enabling fast-xmit (CIQ Kernel Automation) [ciqres] {CVE-2024-26779}
+- wifi: mac80211: fix potential sta-link leak (CIQ Kernel Automation) [ciqres] {CVE-2024-35838}
+- nbd: always initialize struct msghdr completely (CIQ Kernel Automation) [ciqres] {CVE-2024-26638}
+- of: unittest: Fix of_count_phandle_with_args() expected value message (CIQ Kernel Automation) [ciqres] {CVE-2023-52679}
+- of: unittest: Fix compile in the non-dynamic case (CIQ Kernel Automation) [ciqres] {CVE-2023-52679}
+- of: Fix double free in of_parse_phandle_with_args_map (CIQ Kernel Automation) [ciqres] {CVE-2023-52679}
+- SUNRPC: Fix a suspicious RCU usage warning (CIQ Kernel Automation) [ciqres] {CVE-2023-52623}
+- drm/vmwgfx: fix a memleak in vmw_gmrid_man_get_node (CIQ Kernel Automation) [ciqres] {CVE-2023-52662}
+- drm/vmwgfx: Unmap the surface before resetting it on a plane state (CIQ Kernel Automation) [ciqres] {CVE-2023-52648}
+- dmaengine: fix NULL pointer in channel unregistration function (CIQ Kernel Automation) [ciqres] {CVE-2023-52492}
+- PM / devfreq: Synchronize devfreq_monitor_[start/stop] (CIQ Kernel Automation) [ciqres] {CVE-2023-52635}
+- macvlan: observe an RCU grace period in macvlan_common_newlink() error path (CIQ Kernel Automation) [ciqres] {CVE-2026-23273}
+- macvlan: fix error recovery in macvlan_common_newlink() (CIQ Kernel Automation) [ciqres] {CVE-2026-23209}
+- macvlan: fix possible UAF in macvlan_forward_source() (CIQ Kernel Automation) [ciqres] {CVE-2026-23001}
+- net: atm: fix /proc/net/atm/lec handling (CIQ Kernel Automation) [ciqres] {CVE-2025-38180}
+- net: atm: add lec_mutex (Roxana Nicolescu) [ciqres] {CVE-2025-38323}
+
 * Thu Apr 09 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+17.1.el9_4_ciq
 - powerpc/powernv: Add a null pointer check in opal_event_init() (CIQ Kernel Automation) [ciqres] {CVE-2023-52686}
 - s390/ptrace: handle setting of fpc register correctly (CIQ Kernel Automation) [ciqres] {CVE-2023-52598}

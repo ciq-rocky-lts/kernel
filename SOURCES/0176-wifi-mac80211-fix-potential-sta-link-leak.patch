@@ -1,0 +1,46 @@
+From 9c3aec8e06f185612506248287816ef3a9bda44b Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 13 Apr 2026 07:06:32 +0000
+Subject: [PATCH] wifi: mac80211: fix potential sta-link leak
+
+jira VULN-42986
+cve CVE-2024-35838
+commit-author Johannes Berg <johannes.berg@intel.com>
+commit b01a74b3ca6fd51b62c67733ba7c3280fa6c5d26
+
+When a station is allocated, links are added but not
+set to valid yet (e.g. during connection to an AP MLD),
+we might remove the station without ever marking links
+valid, and leak them. Fix that.
+
+Fixes: cb71f1d136a6 ("wifi: mac80211: add sta link addition/removal")
+	Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+	Reviewed-by: Ilan Peer <ilan.peer@intel.com>
+	Signed-off-by: Miri Korenblit <miriam.rachel.korenblit@intel.com>
+Link: https://msgid.link/20240111181514.6573998beaf8.I09ac2e1d41c80f82a5a616b8bd1d9d8dd709a6a6@changeid
+	Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+(cherry picked from commit b01a74b3ca6fd51b62c67733ba7c3280fa6c5d26)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/mac80211/sta_info.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/net/mac80211/sta_info.c b/net/mac80211/sta_info.c
+index 4896c745aca5..328414c469fc 100644
+--- a/net/mac80211/sta_info.c
++++ b/net/mac80211/sta_info.c
+@@ -404,7 +404,10 @@ void sta_info_free(struct ieee80211_local *local, struct sta_info *sta)
+ 	int i;
+ 
+ 	for (i = 0; i < ARRAY_SIZE(sta->link); i++) {
+-		if (!(sta->sta.valid_links & BIT(i)))
++		struct link_sta_info *link_sta;
++
++		link_sta = rcu_access_pointer(sta->link[i]);
++		if (!link_sta)
+ 			continue;
+ 
+ 		sta_remove_link(sta, i, false);
+-- 
+2.47.3
+
