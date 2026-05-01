@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 26
+%define ciq_patch_version 27
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1396,6 +1396,25 @@ Patch1000449: 0404-net-add-skb_header_pointer_careful-helper.patch
 Patch1000450: 0405-net-sched-cls_u32-use-skb_header_pointer_careful.patch
 Patch1000451: 0406-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
 Patch1000452: 0407-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
+#CIQ Patch Version: 284.30.1+27.1.el9_2_ciq
+Patch1000453: 0408-tty-Fix-out-of-bound-vmalloc-access-in-imageblit.patch
+Patch1000454: 0409-net-hns3-do-not-allow-call-hns3_nic_net_open-repeate.patch
+Patch1000455: 0410-hwmon-w83792d-Fix-NULL-pointer-dereference-by-removi.patch
+Patch1000456: 0411-hwmon-w83793-Fix-NULL-pointer-dereference-by-removin.patch
+Patch1000457: 0412-ethernet-hisilicon-hns-hns_dsaf_misc-fix-a-possible-.patch
+Patch1000458: 0413-net-amd-xgbe-Fix-skb-data-length-underflow.patch
+Patch1000459: 0414-um-Fix-out-of-bounds-read-in-LDT-setup.patch
+Patch1000460: 0415-vt-fix-memory-overlapping-when-deleting-chars-in-the.patch
+Patch1000461: 0416-crypto-af-alg-fix-NULL-pointer-dereference-in-scatte.patch
+Patch1000462: 0417-crypto-algif_aead-Revert-to-operating-out-of-place.patch
+Patch1000463: 0418-crypto-af_alg-limit-RX-SG-extraction-by-receive-buff.patch
+Patch1000464: 0419-crypto-af_alg-Fix-page-reassignment-overflow-in-af_a.patch
+Patch1000465: 0420-crypto-authencesn-reject-too-short-AAD-assoclen-8-to.patch
+Patch1000466: 0421-crypto-authencesn-Do-not-place-hiseq-at-end-of-dst-f.patch
+Patch1000467: 0422-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
+Patch1000468: 0423-crypto-authencesn-reject-short-ahash-digests-during-.patch
+Patch1000469: 0424-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
+Patch1000470: 0425-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2524,6 +2543,24 @@ ApplyOptionalPatch 0404-net-add-skb_header_pointer_careful-helper.patch
 ApplyOptionalPatch 0405-net-sched-cls_u32-use-skb_header_pointer_careful.patch
 ApplyOptionalPatch 0406-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
 ApplyOptionalPatch 0407-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
+ApplyOptionalPatch 0408-tty-Fix-out-of-bound-vmalloc-access-in-imageblit.patch
+ApplyOptionalPatch 0409-net-hns3-do-not-allow-call-hns3_nic_net_open-repeate.patch
+ApplyOptionalPatch 0410-hwmon-w83792d-Fix-NULL-pointer-dereference-by-removi.patch
+ApplyOptionalPatch 0411-hwmon-w83793-Fix-NULL-pointer-dereference-by-removin.patch
+ApplyOptionalPatch 0412-ethernet-hisilicon-hns-hns_dsaf_misc-fix-a-possible-.patch
+ApplyOptionalPatch 0413-net-amd-xgbe-Fix-skb-data-length-underflow.patch
+ApplyOptionalPatch 0414-um-Fix-out-of-bounds-read-in-LDT-setup.patch
+ApplyOptionalPatch 0415-vt-fix-memory-overlapping-when-deleting-chars-in-the.patch
+ApplyOptionalPatch 0416-crypto-af-alg-fix-NULL-pointer-dereference-in-scatte.patch
+ApplyOptionalPatch 0417-crypto-algif_aead-Revert-to-operating-out-of-place.patch
+ApplyOptionalPatch 0418-crypto-af_alg-limit-RX-SG-extraction-by-receive-buff.patch
+ApplyOptionalPatch 0419-crypto-af_alg-Fix-page-reassignment-overflow-in-af_a.patch
+ApplyOptionalPatch 0420-crypto-authencesn-reject-too-short-AAD-assoclen-8-to.patch
+ApplyOptionalPatch 0421-crypto-authencesn-Do-not-place-hiseq-at-end-of-dst-f.patch
+ApplyOptionalPatch 0422-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
+ApplyOptionalPatch 0423-crypto-authencesn-reject-short-ahash-digests-during-.patch
+ApplyOptionalPatch 0424-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
+ApplyOptionalPatch 0425-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4407,6 +4444,26 @@ fi
 #
 #
 %changelog
+* Fri May 01 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1+27.1.el9_2_ciq
+- crypto: algif_aead - snapshot IV for async AEAD requests (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: algif_aead - Fix minimum RX size check for decryption (Jonathan Maple) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - reject short ahash digests during instance creation (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - Fix src offset when decrypting in-place (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - Do not place hiseq at end of dst for out-of-place decryption (Herbert Xu) [ciqres] {CVE-2026-31431 CVE-2026-23060.}
+- crypto: authencesn - reject too-short AAD (assoclen<8) to match ESP/ESN spec (Herbert Xu) [ciqres] {CVE-2026-23060}
+- crypto: af_alg - Fix page reassignment overflow in af_alg_pull_tsgl (Herbert Xu) [ciqres] {CVE-2026-31677}
+- crypto: af_alg - limit RX SG extraction by receive buffer budget (Herbert Xu) [ciqres] {CVE-2026-31677}
+- crypto: algif_aead - Revert to operating out-of-place (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: af-alg - fix NULL pointer dereference in scatterwalk (Herbert Xu) [ciqres] {CVE-2026-31431}
+- vt: fix memory overlapping when deleting chars in the buffer (CIQ Kernel Automation) [ciqres] {CVE-2022-48627}
+- um: Fix out-of-bounds read in LDT setup (CIQ Kernel Automation) [ciqres] {CVE-2022-49395}
+- net: amd-xgbe: Fix skb data length underflow (CIQ Kernel Automation) [ciqres] {CVE-2022-48743}
+- ethernet: hisilicon: hns: hns_dsaf_misc: fix a possible array overflow in hns_dsaf_ge_srst_by_port() (CIQ Kernel Automation) [ciqres] {CVE-2021-47548}
+- hwmon: (w83793) Fix NULL pointer dereference by removing unnecessary structure field (CIQ Kernel Automation) [ciqres] {CVE-2021-47384}
+- hwmon: (w83792d) Fix NULL pointer dereference by removing unnecessary structure field (CIQ Kernel Automation) [ciqres] {CVE-2021-47385}
+- net: hns3: do not allow call hns3_nic_net_open repeatedly (CIQ Kernel Automation) [ciqres] {CVE-2021-47400}
+- tty: Fix out-of-bound vmalloc access in imageblit (CIQ Kernel Automation) [ciqres] {CVE-2021-47383}
+
 * Fri Apr 24 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+26.1.el9_2_ciq
 - macvlan: observe an RCU grace period in macvlan_common_newlink() error path (CIQ Kernel Automation) [ciqres] {CVE-2026-23273}
 - macvlan: fix error recovery in macvlan_common_newlink() (CIQ Kernel Automation) [ciqres] {CVE-2026-23209}
