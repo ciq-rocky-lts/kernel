@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 7
+%define ciq_patch_version 8
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1091,6 +1091,25 @@ Patch1000100: 1100-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
 Patch1000101: 1101-net-add-skb_header_pointer_careful-helper.patch
 Patch1000102: 1102-net-sched-cls_u32-use-skb_header_pointer_careful.patch
 Patch1000103: 1103-netfilter-nf_tables-fix-inverted-genmask-check-in-nf.patch
+#CIQ Patch Version: 570.60.1+8.1.el9_6_ciq
+Patch1000104: 1104-crypto-pcrypt-Call-crypto-layer-directly-when-padata.patch
+Patch1000105: 1105-scsi-mpi3mr-Synchronous-access-b-w-reset-and-tm-thre.patch
+Patch1000106: 1106-NFSD-fix-hang-in-nfsd4_shutdown_callback.patch
+Patch1000107: 1107-usb-xhci-Fix-isochronous-Ring-Underrun-Overrun-event.patch
+Patch1000108: 1108-ntb_hw_switchtec-Fix-shift-out-of-bounds-in-switchte.patch
+Patch1000109: 1109-drm-xe-Use-local-fence-in-error-path-of-xe_migrate_c.patch
+Patch1000110: 1110-net-openvswitch-fix-nested-key-length-validation-in-.patch
+Patch1000111: 1111-irqchip-gic-v2m-Prevent-use-after-free-of-gicv2m_get.patch
+Patch1000112: 1112-crypto-af-alg-fix-NULL-pointer-dereference-in-scatte.patch
+Patch1000113: 1113-crypto-algif_aead-Revert-to-operating-out-of-place.patch
+Patch1000114: 1114-crypto-af_alg-limit-RX-SG-extraction-by-receive-buff.patch
+Patch1000115: 1115-crypto-af_alg-Fix-page-reassignment-overflow-in-af_a.patch
+Patch1000116: 1116-crypto-authencesn-reject-too-short-AAD-assoclen-8-to.patch
+Patch1000117: 1117-crypto-authencesn-Do-not-place-hiseq-at-end-of-dst-f.patch
+Patch1000118: 1118-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
+Patch1000119: 1119-crypto-authencesn-reject-short-ahash-digests-during-.patch
+Patch1000120: 1120-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
+Patch1000121: 1121-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1953,6 +1972,24 @@ ApplyOptionalPatch 1100-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.pat
 ApplyOptionalPatch 1101-net-add-skb_header_pointer_careful-helper.patch
 ApplyOptionalPatch 1102-net-sched-cls_u32-use-skb_header_pointer_careful.patch
 ApplyOptionalPatch 1103-netfilter-nf_tables-fix-inverted-genmask-check-in-nf.patch
+ApplyOptionalPatch 1104-crypto-pcrypt-Call-crypto-layer-directly-when-padata.patch
+ApplyOptionalPatch 1105-scsi-mpi3mr-Synchronous-access-b-w-reset-and-tm-thre.patch
+ApplyOptionalPatch 1106-NFSD-fix-hang-in-nfsd4_shutdown_callback.patch
+ApplyOptionalPatch 1107-usb-xhci-Fix-isochronous-Ring-Underrun-Overrun-event.patch
+ApplyOptionalPatch 1108-ntb_hw_switchtec-Fix-shift-out-of-bounds-in-switchte.patch
+ApplyOptionalPatch 1109-drm-xe-Use-local-fence-in-error-path-of-xe_migrate_c.patch
+ApplyOptionalPatch 1110-net-openvswitch-fix-nested-key-length-validation-in-.patch
+ApplyOptionalPatch 1111-irqchip-gic-v2m-Prevent-use-after-free-of-gicv2m_get.patch
+ApplyOptionalPatch 1112-crypto-af-alg-fix-NULL-pointer-dereference-in-scatte.patch
+ApplyOptionalPatch 1113-crypto-algif_aead-Revert-to-operating-out-of-place.patch
+ApplyOptionalPatch 1114-crypto-af_alg-limit-RX-SG-extraction-by-receive-buff.patch
+ApplyOptionalPatch 1115-crypto-af_alg-Fix-page-reassignment-overflow-in-af_a.patch
+ApplyOptionalPatch 1116-crypto-authencesn-reject-too-short-AAD-assoclen-8-to.patch
+ApplyOptionalPatch 1117-crypto-authencesn-Do-not-place-hiseq-at-end-of-dst-f.patch
+ApplyOptionalPatch 1118-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
+ApplyOptionalPatch 1119-crypto-authencesn-reject-short-ahash-digests-during-.patch
+ApplyOptionalPatch 1120-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
+ApplyOptionalPatch 1121-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4069,6 +4106,26 @@ fi
 #
 #
 %changelog
+* Thu Apr 30 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+8.1.el9_6_ciq
+- crypto: algif_aead - snapshot IV for async AEAD requests (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: algif_aead - Fix minimum RX size check for decryption (Jonathan Maple) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - reject short ahash digests during instance creation (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - Fix src offset when decrypting in-place (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - Do not place hiseq at end of dst for out-of-place decryption (Herbert Xu) [ciqres] {CVE-2026-31431 CVE-2026-23060.}
+- crypto: authencesn - reject too-short AAD (assoclen<8) to match ESP/ESN spec (Herbert Xu) [ciqres] {CVE-2026-23060}
+- crypto: af_alg - Fix page reassignment overflow in af_alg_pull_tsgl (Herbert Xu) [ciqres] {CVE-2026-31677}
+- crypto: af_alg - limit RX SG extraction by receive buffer budget (Herbert Xu) [ciqres] {CVE-2026-31677}
+- crypto: algif_aead - Revert to operating out-of-place (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: af-alg - fix NULL pointer dereference in scatterwalk (Herbert Xu) [ciqres] {CVE-2026-31431}
+- irqchip/gic-v2m: Prevent use after free of gicv2m_get_fwnode() (CIQ Kernel Automation) [ciqres] {CVE-2025-37819}
+- net: openvswitch: fix nested key length validation in the set() action (CIQ Kernel Automation) [ciqres] {CVE-2025-37789}
+- drm/xe: Use local fence in error path of xe_migrate_clear (CIQ Kernel Automation) [ciqres] {CVE-2025-37869}
+- ntb_hw_switchtec: Fix shift-out-of-bounds in switchtec_ntb_mw_set_trans (CIQ Kernel Automation) [ciqres] {CVE-2023-53034}
+- usb: xhci: Fix isochronous Ring Underrun/Overrun event handling (CIQ Kernel Automation) [ciqres] {CVE-2025-37882}
+- NFSD: fix hang in nfsd4_shutdown_callback (CIQ Kernel Automation) [ciqres] {CVE-2025-21795}
+- scsi: mpi3mr: Synchronous access b/w reset and tm thread for reply queue (CIQ Kernel Automation) [ciqres] {CVE-2025-37861}
+- crypto: pcrypt - Call crypto layer directly when padata_do_parallel() return -EBUSY (CIQ Kernel Automation) [ciqres] {CVE-2024-56690}
+
 * Fri Apr 24 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+7.1.el9_6_ciq
 - netfilter: nf_tables: fix inverted genmask check in nft_map_catchall_activate() (CIQ Kernel Automation) [ciqres] {CVE-2026-23111}
 - net/sched: cls_u32: use skb_header_pointer_careful() (CIQ Kernel Automation) [ciqres] {CVE-2026-23204}
