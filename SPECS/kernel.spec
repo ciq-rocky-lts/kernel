@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 18
+%define ciq_patch_version 19
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1218,6 +1218,17 @@ Patch1000210: 0190-serial-core-fix-transmit-buffer-reset-and-memleak.patch
 Patch1000211: 0191-asix-fix-uninit-value-in-asix_mdio_read.patch
 Patch1000212: 0192-um-Fix-out-of-bounds-read-in-LDT-setup.patch
 Patch1000213: 0193-net-usb-kalmia-Don-t-pass-act_len-in-usb_bulk_msg-er.patch
+#CIQ Patch Version: 427.42.1+19.1.el9_4_ciq
+Patch1000214: 0194-crypto-af-alg-fix-NULL-pointer-dereference-in-scatte.patch
+Patch1000215: 0195-crypto-algif_aead-Revert-to-operating-out-of-place.patch
+Patch1000216: 0196-crypto-af_alg-limit-RX-SG-extraction-by-receive-buff.patch
+Patch1000217: 0197-crypto-af_alg-Fix-page-reassignment-overflow-in-af_a.patch
+Patch1000218: 0198-crypto-authencesn-reject-too-short-AAD-assoclen-8-to.patch
+Patch1000219: 0199-crypto-authencesn-Do-not-place-hiseq-at-end-of-dst-f.patch
+Patch1000220: 0200-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
+Patch1000221: 0201-crypto-authencesn-reject-short-ahash-digests-during-.patch
+Patch1000222: 0202-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
+Patch1000223: 0203-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2184,6 +2195,16 @@ ApplyOptionalPatch 0190-serial-core-fix-transmit-buffer-reset-and-memleak.patch
 ApplyOptionalPatch 0191-asix-fix-uninit-value-in-asix_mdio_read.patch
 ApplyOptionalPatch 0192-um-Fix-out-of-bounds-read-in-LDT-setup.patch
 ApplyOptionalPatch 0193-net-usb-kalmia-Don-t-pass-act_len-in-usb_bulk_msg-er.patch
+ApplyOptionalPatch 0194-crypto-af-alg-fix-NULL-pointer-dereference-in-scatte.patch
+ApplyOptionalPatch 0195-crypto-algif_aead-Revert-to-operating-out-of-place.patch
+ApplyOptionalPatch 0196-crypto-af_alg-limit-RX-SG-extraction-by-receive-buff.patch
+ApplyOptionalPatch 0197-crypto-af_alg-Fix-page-reassignment-overflow-in-af_a.patch
+ApplyOptionalPatch 0198-crypto-authencesn-reject-too-short-AAD-assoclen-8-to.patch
+ApplyOptionalPatch 0199-crypto-authencesn-Do-not-place-hiseq-at-end-of-dst-f.patch
+ApplyOptionalPatch 0200-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
+ApplyOptionalPatch 0201-crypto-authencesn-reject-short-ahash-digests-during-.patch
+ApplyOptionalPatch 0202-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
+ApplyOptionalPatch 0203-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4261,6 +4282,18 @@ fi
 #
 #
 %changelog
+* Thu Apr 30 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-427.42.1+19.1.el9_4_ciq
+- crypto: algif_aead - snapshot IV for async AEAD requests (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: algif_aead - Fix minimum RX size check for decryption (Jonathan Maple) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - reject short ahash digests during instance creation (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - Fix src offset when decrypting in-place (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - Do not place hiseq at end of dst for out-of-place decryption (Herbert Xu) [ciqres] {CVE-2026-31431 CVE-2026-23060.}
+- crypto: authencesn - reject too-short AAD (assoclen<8) to match ESP/ESN spec (Herbert Xu) [ciqres] {CVE-2026-23060}
+- crypto: af_alg - Fix page reassignment overflow in af_alg_pull_tsgl (Herbert Xu) [ciqres] {CVE-2026-31677}
+- crypto: af_alg - limit RX SG extraction by receive buffer budget (Herbert Xu) [ciqres] {CVE-2026-31677}
+- crypto: algif_aead - Revert to operating out-of-place (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: af-alg - fix NULL pointer dereference in scatterwalk (Herbert Xu) [ciqres] {CVE-2026-31431}
+
 * Mon Apr 27 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-427.42.1+18.1.el9_4_ciq
 - net/usb: kalmia: Don't pass act_len in usb_bulk_msg error path (CIQ Kernel Automation) [ciqres] {CVE-2023-52703}
 - um: Fix out-of-bounds read in LDT setup (CIQ Kernel Automation) [ciqres] {CVE-2022-49395}
