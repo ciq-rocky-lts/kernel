@@ -1,0 +1,52 @@
+From 3858c5627393eb67153e9c6b98f0368d2d8a2f39 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 20 Apr 2026 07:15:04 +0000
+Subject: [PATCH] wifi: mac80211: check/clear fast rx for non-4addr sta VLAN
+ changes
+
+jira VULN-47151
+cve CVE-2024-35789
+commit-author Felix Fietkau <nbd@nbd.name>
+commit 4f2bdb3c5e3189297e156b3ff84b140423d64685
+
+When moving a station out of a VLAN and deleting the VLAN afterwards, the
+fast_rx entry still holds a pointer to the VLAN's netdev, which can cause
+use-after-free bugs. Fix this by immediately calling ieee80211_check_fast_rx
+after the VLAN change.
+
+	Cc: stable@vger.kernel.org
+	Reported-by: ranygh@riseup.net
+	Signed-off-by: Felix Fietkau <nbd@nbd.name>
+Link: https://msgid.link/20240316074336.40442-1-nbd@nbd.name
+	Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+(cherry picked from commit 4f2bdb3c5e3189297e156b3ff84b140423d64685)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/mac80211/cfg.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/net/mac80211/cfg.c b/net/mac80211/cfg.c
+index 32755b00b7a9..95d36de4d07b 100644
+--- a/net/mac80211/cfg.c
++++ b/net/mac80211/cfg.c
+@@ -1886,15 +1886,14 @@ static int ieee80211_change_station(struct wiphy *wiphy,
+ 		}
+ 
+ 		if (sta->sdata->vif.type == NL80211_IFTYPE_AP_VLAN &&
+-		    sta->sdata->u.vlan.sta) {
+-			ieee80211_clear_fast_rx(sta);
++		    sta->sdata->u.vlan.sta)
+ 			RCU_INIT_POINTER(sta->sdata->u.vlan.sta, NULL);
+-		}
+ 
+ 		if (test_sta_flag(sta, WLAN_STA_AUTHORIZED))
+ 			ieee80211_vif_dec_num_mcast(sta->sdata);
+ 
+ 		sta->sdata = vlansdata;
++		ieee80211_check_fast_rx(sta);
+ 		ieee80211_check_fast_xmit(sta);
+ 
+ 		if (test_sta_flag(sta, WLAN_STA_AUTHORIZED)) {
+-- 
+2.47.3
+

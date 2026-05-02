@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 23
+%define ciq_patch_version 24
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -965,6 +965,42 @@ Patch0389: 0234-ipv6-sr-fix-possible-use-after-free-and-null-ptr-der.patch
 Patch0390: 0235-ipv6-sr-fix-incorrect-unregister-order.patch
 Patch0391: 0236-Bluetooth-Avoid-potential-use-after-free-in-hci_erro.patch
 Patch0392: 0237-NFSv4.2-fix-nfs4_listxattr-kernel-BUG-at-mm-usercopy.patch
+#CIQ Patch Version: 372.32.1+24.1.el8_6_ciq
+Patch0393: 0238-cifs-fix-potential-deadlock-in-direct-reclaim.patch
+Patch0394: 0239-cifs-fix-race-in-assemble_neg_contexts.patch
+Patch0395: 0240-cifs-protect-access-of-TCP_Server_Info-dstaddr-hostn.patch
+Patch0396: 0241-cifs-fix-potential-use-after-free-bugs-in-TCP_Server.patch
+Patch0397: 0242-x86-fpu-Fix-copy_xstate_to_uabi-to-copy-init-states-.patch
+Patch0398: 0243-vt-fix-unicode-buffer-corruption-when-deleting-chara.patch
+Patch0399: 0244-mac802154-fix-llsec-key-resources-release-in-mac8021.patch
+Patch0400: 0245-netfilter-nf_tables-disallow-anonymous-set-with-time.patch
+Patch0401: 0246-scsi-lpfc-Move-NPIV-s-transport-unregistration-to-af.patch
+Patch0402: 0247-wifi-mac80211-check-clear-fast-rx-for-non-4addr-sta-.patch
+Patch0403: 0248-udp-do-not-accept-non-tunnel-GSO-skbs-landing-in-a-t.patch
+Patch0404: 0249-netfilter-nf_tables-Fix-potential-data-race-in-__nft.patch
+Patch0405: 0250-smc-Use-__sk_dst_get-and-dst_dev_rcu-in-smc_clc_prfx.patch
+Patch0406: 0251-net-add-skb_header_pointer_careful-helper.patch
+Patch0407: 0252-net-sched-cls_u32-use-skb_header_pointer_careful.patch
+Patch0408: 0253-cifs-Return-correct-error-code-from-smb2_get_enc_key.patch
+Patch0409: 0254-mISDN-fix-possible-use-after-free-in-HFC_cleanup.patch
+Patch0410: 0255-mISDN-hfcpci-Fix-use-after-free-bug-in-hfcpci_softir.patch
+Patch0411: 0256-mISDN-hfcpci-Fix-warning-when-deleting-uninitialized.patch
+Patch0412: 0257-cxgb4-avoid-accessing-registers-when-clearing-filter.patch
+Patch0413: 0258-virtio-net-Add-validation-for-used-length.patch
+Patch0414: 0259-net-ti-fix-UAF-in-tlan_remove_one.patch
+Patch0415: 0260-net-qcom-emac-fix-UAF-in-emac_remove.patch
+Patch0416: 0261-net-sched-act_skbmod-Skip-non-Ethernet-packets.patch
+Patch0417: 0262-hwmon-mlxreg-fan-Return-non-zero-value-when-fan-curr.patch
+Patch0418: 0263-crypto-af-alg-fix-NULL-pointer-dereference-in-scatte.patch
+Patch0419: 0264-crypto-algif_aead-Revert-to-operating-out-of-place.patch
+Patch0420: 0265-crypto-af_alg-limit-RX-SG-extraction-by-receive-buff.patch
+Patch0421: 0266-crypto-af_alg-Fix-page-reassignment-overflow-in-af_a.patch
+Patch0422: 0267-crypto-authencesn-reject-too-short-AAD-assoclen-8-to.patch
+Patch0423: 0268-crypto-authencesn-Do-not-place-hiseq-at-end-of-dst-f.patch
+Patch0424: 0269-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
+Patch0425: 0270-crypto-authencesn-reject-short-ahash-digests-during-.patch
+Patch0426: 0271-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
+Patch0427: 0272-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1924,6 +1960,41 @@ ApplyOptionalPatch 0234-ipv6-sr-fix-possible-use-after-free-and-null-ptr-der.pat
 ApplyOptionalPatch 0235-ipv6-sr-fix-incorrect-unregister-order.patch
 ApplyOptionalPatch 0236-Bluetooth-Avoid-potential-use-after-free-in-hci_erro.patch
 ApplyOptionalPatch 0237-NFSv4.2-fix-nfs4_listxattr-kernel-BUG-at-mm-usercopy.patch
+ApplyOptionalPatch 0238-cifs-fix-potential-deadlock-in-direct-reclaim.patch
+ApplyOptionalPatch 0239-cifs-fix-race-in-assemble_neg_contexts.patch
+ApplyOptionalPatch 0240-cifs-protect-access-of-TCP_Server_Info-dstaddr-hostn.patch
+ApplyOptionalPatch 0241-cifs-fix-potential-use-after-free-bugs-in-TCP_Server.patch
+ApplyOptionalPatch 0242-x86-fpu-Fix-copy_xstate_to_uabi-to-copy-init-states-.patch
+ApplyOptionalPatch 0243-vt-fix-unicode-buffer-corruption-when-deleting-chara.patch
+ApplyOptionalPatch 0244-mac802154-fix-llsec-key-resources-release-in-mac8021.patch
+ApplyOptionalPatch 0245-netfilter-nf_tables-disallow-anonymous-set-with-time.patch
+ApplyOptionalPatch 0246-scsi-lpfc-Move-NPIV-s-transport-unregistration-to-af.patch
+ApplyOptionalPatch 0247-wifi-mac80211-check-clear-fast-rx-for-non-4addr-sta-.patch
+ApplyOptionalPatch 0248-udp-do-not-accept-non-tunnel-GSO-skbs-landing-in-a-t.patch
+ApplyOptionalPatch 0249-netfilter-nf_tables-Fix-potential-data-race-in-__nft.patch
+ApplyOptionalPatch 0250-smc-Use-__sk_dst_get-and-dst_dev_rcu-in-smc_clc_prfx.patch
+ApplyOptionalPatch 0251-net-add-skb_header_pointer_careful-helper.patch
+ApplyOptionalPatch 0252-net-sched-cls_u32-use-skb_header_pointer_careful.patch
+ApplyOptionalPatch 0253-cifs-Return-correct-error-code-from-smb2_get_enc_key.patch
+ApplyOptionalPatch 0254-mISDN-fix-possible-use-after-free-in-HFC_cleanup.patch
+ApplyOptionalPatch 0255-mISDN-hfcpci-Fix-use-after-free-bug-in-hfcpci_softir.patch
+ApplyOptionalPatch 0256-mISDN-hfcpci-Fix-warning-when-deleting-uninitialized.patch
+ApplyOptionalPatch 0257-cxgb4-avoid-accessing-registers-when-clearing-filter.patch
+ApplyOptionalPatch 0258-virtio-net-Add-validation-for-used-length.patch
+ApplyOptionalPatch 0259-net-ti-fix-UAF-in-tlan_remove_one.patch
+ApplyOptionalPatch 0260-net-qcom-emac-fix-UAF-in-emac_remove.patch
+ApplyOptionalPatch 0261-net-sched-act_skbmod-Skip-non-Ethernet-packets.patch
+ApplyOptionalPatch 0262-hwmon-mlxreg-fan-Return-non-zero-value-when-fan-curr.patch
+ApplyOptionalPatch 0263-crypto-af-alg-fix-NULL-pointer-dereference-in-scatte.patch
+ApplyOptionalPatch 0264-crypto-algif_aead-Revert-to-operating-out-of-place.patch
+ApplyOptionalPatch 0265-crypto-af_alg-limit-RX-SG-extraction-by-receive-buff.patch
+ApplyOptionalPatch 0266-crypto-af_alg-Fix-page-reassignment-overflow-in-af_a.patch
+ApplyOptionalPatch 0267-crypto-authencesn-reject-too-short-AAD-assoclen-8-to.patch
+ApplyOptionalPatch 0268-crypto-authencesn-Do-not-place-hiseq-at-end-of-dst-f.patch
+ApplyOptionalPatch 0269-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
+ApplyOptionalPatch 0270-crypto-authencesn-reject-short-ahash-digests-during-.patch
+ApplyOptionalPatch 0271-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
+ApplyOptionalPatch 0272-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
 
 
 # CIQ LTS patches:
@@ -3483,6 +3554,43 @@ fi
 #
 #
 %changelog
+* Fri May 01 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+24.1.el8_6_ciq
+- crypto: algif_aead - snapshot IV for async AEAD requests (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: algif_aead - Fix minimum RX size check for decryption (Jonathan Maple) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - reject short ahash digests during instance creation (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - Fix src offset when decrypting in-place (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: authencesn - Do not place hiseq at end of dst for out-of-place decryption (Herbert Xu) [ciqres] {CVE-2026-31431 CVE-2026-23060.}
+- crypto: authencesn - reject too-short AAD (assoclen<8) to match ESP/ESN spec (Herbert Xu) [ciqres] {CVE-2026-23060}
+- crypto: af_alg - Fix page reassignment overflow in af_alg_pull_tsgl (Herbert Xu) [ciqres] {CVE-2026-31677}
+- crypto: af_alg - limit RX SG extraction by receive buffer budget (Herbert Xu) [ciqres] {CVE-2026-31677}
+- crypto: algif_aead - Revert to operating out-of-place (Herbert Xu) [ciqres] {CVE-2026-31431}
+- crypto: af-alg - fix NULL pointer dereference in scatterwalk (Herbert Xu) [ciqres] {CVE-2026-31431}
+- hwmon: (mlxreg-fan) Return non-zero value when fan current state is enforced from sysfs (CIQ Kernel Automation) [ciqres] {CVE-2021-47393}
+- net/sched: act_skbmod: Skip non-Ethernet packets (CIQ Kernel Automation) [ciqres] {CVE-2021-47293}
+- net: qcom/emac: fix UAF in emac_remove (CIQ Kernel Automation) [ciqres] {CVE-2021-47311}
+- net: ti: fix UAF in tlan_remove_one (CIQ Kernel Automation) [ciqres] {CVE-2021-47310}
+- virtio-net: Add validation for used length (CIQ Kernel Automation) [ciqres] {CVE-2021-47352}
+- cxgb4: avoid accessing registers when clearing filters (CIQ Kernel Automation) [ciqres] {CVE-2021-47138}
+- mISDN: hfcpci: Fix warning when deleting uninitialized timer (CIQ Kernel Automation) [ciqres] {CVE-2025-39833}
+- mISDN: hfcpci: Fix use-after-free bug in hfcpci_softirq (CIQ Kernel Automation) [ciqres] {CVE-2021-47356}
+- mISDN: fix possible use-after-free in HFC_cleanup() (CIQ Kernel Automation) [ciqres] {CVE-2021-47356}
+- cifs: Return correct error code from smb2_get_enc_key (CIQ Kernel Automation) [ciqres] {CVE-2021-46960}
+- net/sched: cls_u32: use skb_header_pointer_careful() (CIQ Kernel Automation) [ciqres] {CVE-2026-23204}
+- net: add skb_header_pointer_careful() helper (Roxana Nicolescu) [ciqres] {CVE-2026-23204}
+- smc: Use __sk_dst_get() and dst_dev_rcu() in smc_clc_prfx_match(). (CIQ Kernel Automation) [ciqres] {CVE-2025-40168}
+- netfilter: nf_tables: Fix potential data-race in __nft_flowtable_type_get() (CIQ Kernel Automation) [ciqres] {CVE-2024-35898}
+- udp: do not accept non-tunnel GSO skbs landing in a tunnel (CIQ Kernel Automation) [ciqres] {CVE-2024-35884}
+- wifi: mac80211: check/clear fast rx for non-4addr sta VLAN changes (CIQ Kernel Automation) [ciqres] {CVE-2024-35789}
+- scsi: lpfc: Move NPIV's transport unregistration to after resource clean up (CIQ Kernel Automation) [ciqres] {CVE-2024-36952}
+- netfilter: nf_tables: disallow anonymous set with timeout flag (CIQ Kernel Automation) [ciqres] {CVE-2024-26642}
+- mac802154: fix llsec key resources release in mac802154_llsec_key_del (CIQ Kernel Automation) [ciqres] {CVE-2024-26961}
+- vt: fix unicode buffer corruption when deleting characters (CIQ Kernel Automation) [ciqres] {CVE-2024-35823}
+- x86/fpu: Fix copy_xstate_to_uabi() to copy init states correctly (CIQ Kernel Automation) [ciqres] {CVE-2022-50425}
+- cifs: fix potential use-after-free bugs in TCP_Server_Info::hostname (Marcin Wcisło) [ciqres] {CVE-2023-53751}
+- cifs: protect access of TCP_Server_Info::{dstaddr,hostname} (Marcin Wcisło) [ciqres] {CVE-2023-53751}
+- cifs: fix race in assemble_neg_contexts() (Marcin Wcisło) [ciqres] {CVE-2023-53751}
+- cifs: fix potential deadlock in direct reclaim (Marcin Wcisło) [ciqres] {CVE-2023-53751}
+
 * Wed Apr 15 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+23.1.el8_6_ciq
 - NFSv4.2: fix nfs4_listxattr kernel BUG at mm/usercopy.c:102 (CIQ Kernel Automation) [ciqres] {CVE-2024-26870}
 - Bluetooth: Avoid potential use-after-free in hci_error_reset (CIQ Kernel Automation) [ciqres] {CVE-2024-26801}

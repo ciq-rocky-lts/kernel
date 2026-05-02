@@ -1,0 +1,42 @@
+From defd055cef7756bd6e1dd4cd73b770229f088ce5 Mon Sep 17 00:00:00 2001
+From: Herbert Xu <herbert.xu@redhat.com>
+Date: Thu, 30 Apr 2026 19:56:24 +0800
+Subject: [PATCH] crypto: authencesn - Fix src offset when decrypting in-place
+
+jira VULN-181877
+cve-bf CVE-2026-31431
+commit-author Herbert Xu <herbert@gondor.apana.org.au>
+commit 1f48ad3b19a9dfc947868edda0bb8e48e5b5a8fa
+commit-source centos-stream-9
+
+The src SG list offset wasn't set properly when decrypting in-place,
+fix it.
+
+    Reported-by: Wolfgang Walter <linux@stwm.de>
+Fixes: e02494114ebf ("crypto: authencesn - Do not place hiseq at end of dst for out-of-place decryption")
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+---
+ crypto/authencesn.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/crypto/authencesn.c b/crypto/authencesn.c
+index 5ccca6c37faf..b4937fd2243e 100644
+--- a/crypto/authencesn.c
++++ b/crypto/authencesn.c
+@@ -281,9 +281,11 @@ static int crypto_authenc_esn_decrypt_tail(struct aead_request *req,
+ 
+ decrypt:
+ 
+-	if (src != dst)
+-		src = scatterwalk_ffwd(areq_ctx->src, src, assoclen);
+ 	dst = scatterwalk_ffwd(areq_ctx->dst, dst, assoclen);
++	if (req->src == req->dst)
++		src = dst;
++	else
++		src = scatterwalk_ffwd(areq_ctx->src, src, assoclen);
+ 
+ 	skcipher_request_set_tfm(skreq, ctx->enc);
+ 	skcipher_request_set_callback(skreq, flags,
+-- 
+2.47.3
+

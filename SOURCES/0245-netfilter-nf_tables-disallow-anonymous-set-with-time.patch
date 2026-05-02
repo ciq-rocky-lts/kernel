@@ -1,0 +1,41 @@
+From 833dfc153a5a3446474e3c3685d1e7c5bd23a2cb Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 20 Apr 2026 07:13:46 +0000
+Subject: [PATCH] netfilter: nf_tables: disallow anonymous set with timeout
+ flag
+
+jira VULN-823
+cve CVE-2024-26642
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 16603605b667b70da974bea8216c93e7db043bf1
+
+Anonymous sets are never used with timeout from userspace, reject this.
+Exception to this rule is NFT_SET_EVAL to ensure legacy meters still work.
+
+	Cc: stable@vger.kernel.org
+Fixes: 761da2935d6e ("netfilter: nf_tables: add set timeout API support")
+	Reported-by: lonial con <kongln9170@gmail.com>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 16603605b667b70da974bea8216c93e7db043bf1)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/netfilter/nf_tables_api.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index ebc4ff12f3c2..a90ee3a8e6b3 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -4080,6 +4080,9 @@ static int nf_tables_newset(struct net *net, struct sock *nlsk,
+ 		if ((flags & (NFT_SET_EVAL | NFT_SET_OBJECT)) ==
+ 			     (NFT_SET_EVAL | NFT_SET_OBJECT))
+ 			return -EOPNOTSUPP;
++		if ((flags & (NFT_SET_ANONYMOUS | NFT_SET_TIMEOUT | NFT_SET_EVAL)) ==
++			     (NFT_SET_ANONYMOUS | NFT_SET_TIMEOUT))
++			return -EOPNOTSUPP;
+ 	}
+ 
+ 	dtype = 0;
+-- 
+2.47.3
+

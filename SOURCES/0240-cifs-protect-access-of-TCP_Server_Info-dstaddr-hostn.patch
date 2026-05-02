@@ -1,0 +1,151 @@
+From cd667605eab9e7202429407fca201ba221ce6d74 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 27 Mar 2026 23:34:59 +0100
+Subject: [PATCH] cifs: protect access of TCP_Server_Info::{dstaddr,hostname}
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-169227
+cve CVE-2023-53751
+commit-author Paulo Alcantara <pc@cjr.nz>
+commit 39a154fc2d172a3a5865e5a9fa2a2983eb7a99ac
+upstream-diff Manually obtained commit. Upstream fixes appear in
+  multiple places, but they all cover only the `cifs_tree_connect()'
+  function (the CONFIG_CIFS_DFS_UPCALL=y variant) and its call tree. Same
+  goes for the backported version, taking into account the lack of a major
+  function rewrite in c88f7dcd6d6429197fc2fd87b54a894ffcd48e8e ("cifs:
+  support nested dfs links over reconnect").
+  Upstream call tree at the moment of the fix and the changes at each
+  level:
+    cifs_tree_connect()
+          Put `cifs_server_{lock/unlock}(server)' around `scnprintf(...,
+          server->hostname);' call.
+    tree_connect_dfs_target()
+          No changes.
+    __tree_connect_dfs_target()
+          Removed `extract_unc_hostname(server->hostname, ...)' call, used
+          full `server->hostname' instead of its substring `tcp_host'.
+    target_share_matches_server()
+          Put `cifs_server_{lock/unlock}(server)' around
+          `server->hostname' accesses in conditional expression and debug
+          message composition before the `match_target_ip()' call.
+    match_target_ip()
+          Put `spin_{lock/unlock}(&server->srv_lock)' around
+          `cifs_match_ipaddr(...server->dstaddr, ....)' call.
+  Backported version call tree:
+    cifs_tree_connect()
+          - Put `cifs_server_{lock/unlock}(server)' around `scnprintf(...,
+            server->hostname)' call - like in the upstream.
+          - Put `cifs_server_{lock/unlock}(server)' around
+            `server->hostname' (and its substring `tcp_host') access in
+            conditional expression and debug message composition before
+            the `match_target_ip()' call - like in the upstream. This
+            required moving the `extract_unc_hostname()' call inside the
+            loop. Unlike in the upstream it was not removed entirely,
+            opting for functional equivalence between the patched and
+            non-patched version instead of strictly preserving backported
+            commit's changes; perhaps at the time of the upstream fix the
+            equality `server->hostname' = `tcp_host' held true, allowing
+            for the reduction of `extract_unc_hostname()' call, but that
+            was not certain for the ciqlts8_6 version. If it wasn't true
+            then the commit mixed a bugfix with a functional change which
+            was simply filtered out here. Moving `extract_unc_hostname()'
+            call inside the loop did not create any algorithmic
+            inconsistencies which weren't already present (if any), merely
+            preventing them from ending in bad memory access. In the
+            upstream the value of `server->hostname' isn't saved to remain
+            constant for all loop iterations in the
+            `__tree_connect_dfs_target()' function either. A ngeligible
+            performance penalty associated with the calculation redundancy
+            was accepted given the simplicity of the fix it allowed.
+    match_target_ip()
+          Put `spin_{lock/unlock}(&cifs_tcp_ses_lock)' around the
+          `cifs_match_ipaddr(...server->dstaddr, ...)' call - like in the
+          upstream, except for the `cifs_tcp_ses_lock' instead of
+          `server->srv_lock'. The latter was introduced in the
+          non-backported commit d7d7a66aacd6fd8ca57baf08a7bac5421282f6f8
+          ("cifs: avoid use of global locks for high contention
+          data"). The same pattern of protecting `server->dstaddr' with
+          `cifs_tcp_ses_lock' can be observed in ciqlts8_6 in the
+          `reconn_set_ipaddr_from_hostname()' function.
+
+Use the appropriate locks to protect access of hostname and dstaddr
+fields in cifs_tree_connect() as they might get changed by other
+tasks.
+
+	Signed-off-by: Paulo Alcantara (SUSE) <pc@cjr.nz>
+	Reviewed-by: Enzo Matsumiya <ematsumiya@suse.de>
+	Signed-off-by: Steve French <stfrench@microsoft.com>
+(cherry picked from commit 39a154fc2d172a3a5865e5a9fa2a2983eb7a99ac)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/cifs/connect.c | 10 +++++++---
+ fs/cifs/misc.c    |  2 ++
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/fs/cifs/connect.c b/fs/cifs/connect.c
+index f74cb2bb3152..7ae8a903baf2 100644
+--- a/fs/cifs/connect.c
++++ b/fs/cifs/connect.c
+@@ -4081,7 +4081,9 @@ int cifs_tree_connect(const unsigned int xid, struct cifs_tcon *tcon, const stru
+ 
+ 	if (!tcon->dfs_path) {
+ 		if (tcon->ipc) {
++			cifs_server_lock(server);
+ 			scnprintf(tree, MAX_TREE_SIZE, "\\\\%s\\IPC$", server->hostname);
++			cifs_server_unlock(server);
+ 			rc = ops->tree_connect(xid, tcon->ses, tree, tcon, nlsc);
+ 		} else {
+ 			rc = ops->tree_connect(xid, tcon->ses, tcon->treeName, tcon, nlsc);
+@@ -4095,8 +4097,6 @@ int cifs_tree_connect(const unsigned int xid, struct cifs_tcon *tcon, const stru
+ 	isroot = ref.server_type == DFS_TYPE_ROOT;
+ 	free_dfs_info_param(&ref);
+ 
+-	extract_unc_hostname(server->hostname, &tcp_host, &tcp_host_len);
+-
+ 	for (it = dfs_cache_get_tgt_iterator(&tl); it; it = dfs_cache_get_next_tgt(&tl, it)) {
+ 		bool target_match;
+ 
+@@ -4114,10 +4114,13 @@ int cifs_tree_connect(const unsigned int xid, struct cifs_tcon *tcon, const stru
+ 
+ 		extract_unc_hostname(share, &dfs_host, &dfs_host_len);
+ 
++		cifs_server_lock(server);
++		extract_unc_hostname(server->hostname, &tcp_host, &tcp_host_len);
+ 		if (dfs_host_len != tcp_host_len
+ 		    || strncasecmp(dfs_host, tcp_host, dfs_host_len) != 0) {
+ 			cifs_dbg(FYI, "%s: %.*s doesn't match %.*s\n", __func__, (int)dfs_host_len,
+ 				 dfs_host, (int)tcp_host_len, tcp_host);
++			cifs_server_unlock(server);
+ 
+ 			rc = match_target_ip(server, dfs_host, dfs_host_len, &target_match);
+ 			if (rc) {
+@@ -4129,7 +4132,8 @@ int cifs_tree_connect(const unsigned int xid, struct cifs_tcon *tcon, const stru
+ 				cifs_dbg(FYI, "%s: skipping target\n", __func__);
+ 				continue;
+ 			}
+-		}
++		} else
++			cifs_server_unlock(server);
+ 
+ 		if (tcon->ipc) {
+ 			scnprintf(tree, MAX_TREE_SIZE, "\\\\%s\\IPC$", share);
+diff --git a/fs/cifs/misc.c b/fs/cifs/misc.c
+index 0d46f56653c2..ecf9e0f8e297 100644
+--- a/fs/cifs/misc.c
++++ b/fs/cifs/misc.c
+@@ -1123,8 +1123,10 @@ int match_target_ip(struct TCP_Server_Info *server,
+ 		goto out;
+ 	}
+ 
++	spin_lock(&cifs_tcp_ses_lock);
+ 	*result = cifs_match_ipaddr((struct sockaddr *)&server->dstaddr,
+ 				    &tipaddr);
++	spin_unlock(&cifs_tcp_ses_lock);
+ 	cifs_dbg(FYI, "%s: ip addresses match: %u\n", __func__, *result);
+ 	rc = 0;
+ 
+-- 
+2.47.3
+

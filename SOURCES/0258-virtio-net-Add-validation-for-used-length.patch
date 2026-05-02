@@ -1,0 +1,79 @@
+From 9b4f800eb25903304d02d12f13965ee7ab7f67e9 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 27 Apr 2026 07:14:40 +0000
+Subject: [PATCH] virtio-net: Add validation for used length
+
+jira VULN-63928
+cve CVE-2021-47352
+commit-author Xie Yongji <xieyongji@bytedance.com>
+commit ad993a95c508417acdeb15244109e009e50d8758
+
+This adds validation for used length (might come
+from an untrusted device) to avoid data corruption
+or loss.
+
+	Signed-off-by: Xie Yongji <xieyongji@bytedance.com>
+	Acked-by: Jason Wang <jasowang@redhat.com>
+Link: https://lore.kernel.org/r/20210531135852.113-1-xieyongji@bytedance.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit ad993a95c508417acdeb15244109e009e50d8758)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/net/virtio_net.c | 20 +++++++++++++-------
+ 1 file changed, 13 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/net/virtio_net.c b/drivers/net/virtio_net.c
+index 286124211143..eb6e6d5c27ff 100644
+--- a/drivers/net/virtio_net.c
++++ b/drivers/net/virtio_net.c
+@@ -664,6 +664,12 @@ static struct sk_buff *receive_small(struct net_device *dev,
+ 	len -= vi->hdr_len;
+ 	stats->bytes += len;
+ 
++	if (unlikely(len > GOOD_PACKET_LEN)) {
++		pr_debug("%s: rx error: len %u exceeds max size %d\n",
++			 dev->name, len, GOOD_PACKET_LEN);
++		dev->stats.rx_length_errors++;
++		goto err_len;
++	}
+ 	rcu_read_lock();
+ 	xdp_prog = rcu_dereference(rq->xdp_prog);
+ 	if (xdp_prog) {
+@@ -765,6 +771,7 @@ static struct sk_buff *receive_small(struct net_device *dev,
+ err_xdp:
+ 	rcu_read_unlock();
+ 	stats->xdp_drops++;
++err_len:
+ 	stats->drops++;
+ 	put_page(page);
+ xdp_xmit:
+@@ -818,6 +825,12 @@ static struct sk_buff *receive_mergeable(struct net_device *dev,
+ 	head_skb = NULL;
+ 	stats->bytes += len - vi->hdr_len;
+ 
++	if (unlikely(len > truesize)) {
++		pr_debug("%s: rx error: len %u exceeds truesize %lu\n",
++			 dev->name, len, (unsigned long)ctx);
++		dev->stats.rx_length_errors++;
++		goto err_skb;
++	}
+ 	rcu_read_lock();
+ 	xdp_prog = rcu_dereference(rq->xdp_prog);
+ 	if (xdp_prog) {
+@@ -942,13 +955,6 @@ static struct sk_buff *receive_mergeable(struct net_device *dev,
+ 	}
+ 	rcu_read_unlock();
+ 
+-	if (unlikely(len > truesize)) {
+-		pr_debug("%s: rx error: len %u exceeds truesize %lu\n",
+-			 dev->name, len, (unsigned long)ctx);
+-		dev->stats.rx_length_errors++;
+-		goto err_skb;
+-	}
+-
+ 	head_skb = page_to_skb(vi, rq, page, offset, len, truesize, !xdp_prog,
+ 			       metasize);
+ 	curr_skb = head_skb;
+-- 
+2.47.3
+

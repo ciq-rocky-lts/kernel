@@ -1,0 +1,42 @@
+From 9a476d6adb8a837d163b6dd468408f264c8b8a8c Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 27 Apr 2026 07:15:24 +0000
+Subject: [PATCH] net: ti: fix UAF in tlan_remove_one
+
+jira VULN-63850
+cve CVE-2021-47310
+commit-author Pavel Skripkin <paskripkin@gmail.com>
+commit 0336f8ffece62f882ab3012820965a786a983f70
+
+priv is netdev private data and it cannot be
+used after free_netdev() call. Using priv after free_netdev()
+can cause UAF bug. Fix it by moving free_netdev() at the end of the
+function.
+
+Fixes: 1e0a8b13d355 ("tlan: cancel work at remove path")
+	Signed-off-by: Pavel Skripkin <paskripkin@gmail.com>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit 0336f8ffece62f882ab3012820965a786a983f70)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/net/ethernet/ti/tlan.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/net/ethernet/ti/tlan.c b/drivers/net/ethernet/ti/tlan.c
+index fd2dba0e1792..e17a27822794 100644
+--- a/drivers/net/ethernet/ti/tlan.c
++++ b/drivers/net/ethernet/ti/tlan.c
+@@ -312,9 +312,8 @@ static void tlan_remove_one(struct pci_dev *pdev)
+ 	pci_release_regions(pdev);
+ #endif
+ 
+-	free_netdev(dev);
+-
+ 	cancel_work_sync(&priv->tlan_tqueue);
++	free_netdev(dev);
+ }
+ 
+ static void tlan_start(struct net_device *dev)
+-- 
+2.47.3
+

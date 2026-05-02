@@ -1,0 +1,46 @@
+From e42e9b57d3c6ec7dfa0c431877cddd70d1f59310 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 27 Apr 2026 07:16:07 +0000
+Subject: [PATCH] net: qcom/emac: fix UAF in emac_remove
+
+jira VULN-63828
+cve CVE-2021-47311
+commit-author Pavel Skripkin <paskripkin@gmail.com>
+commit ad297cd2db8953e2202970e9504cab247b6c7cb4
+
+adpt is netdev private data and it cannot be
+used after free_netdev() call. Using adpt after free_netdev()
+can cause UAF bug. Fix it by moving free_netdev() at the end of the
+function.
+
+Fixes: 54e19bc74f33 ("net: qcom/emac: do not use devm on internal phy pdev")
+	Signed-off-by: Pavel Skripkin <paskripkin@gmail.com>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit ad297cd2db8953e2202970e9504cab247b6c7cb4)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/net/ethernet/qualcomm/emac/emac.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/ethernet/qualcomm/emac/emac.c b/drivers/net/ethernet/qualcomm/emac/emac.c
+index 816dbd284cd9..bb54e3fbf9af 100644
+--- a/drivers/net/ethernet/qualcomm/emac/emac.c
++++ b/drivers/net/ethernet/qualcomm/emac/emac.c
+@@ -754,12 +754,13 @@ static int emac_remove(struct platform_device *pdev)
+ 
+ 	put_device(&adpt->phydev->mdio.dev);
+ 	mdiobus_unregister(adpt->mii_bus);
+-	free_netdev(netdev);
+ 
+ 	if (adpt->phy.digital)
+ 		iounmap(adpt->phy.digital);
+ 	iounmap(adpt->phy.base);
+ 
++	free_netdev(netdev);
++
+ 	return 0;
+ }
+ 
+-- 
+2.47.3
+

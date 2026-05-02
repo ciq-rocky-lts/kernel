@@ -1,0 +1,50 @@
+From ea2bc9fbadfd4d8c543ee221b48c2f0516a2a7a0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Fri, 27 Mar 2026 00:42:53 +0100
+Subject: [PATCH] cifs: fix race in assemble_neg_contexts()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-169227
+cve CVE-2023-53751
+commit-author Paulo Alcantara <pc@cjr.nz>
+commit 775e44d6d86dca400d614cbda5dab4def4951fe7
+upstream-diff Ignored the introduction of `pserver' variable, as well as
+  the usage of `hostname' local, as they were only needed in the upstream
+  because of the dual source of the server hostname, introduced in the
+  non-backported commit 9de74996a739bf0b7b5d8c260bd207ad6007442b ("smb3:
+  use netname when available on secondary channels")
+
+Serialise access of TCP_Server_Info::hostname in
+assemble_neg_contexts() by holding the server's mutex otherwise it
+might end up accessing an already-freed hostname pointer from
+cifs_reconnect() or cifs_resolve_server().
+
+	Signed-off-by: Paulo Alcantara (SUSE) <pc@cjr.nz>
+	Reviewed-by: Enzo Matsumiya <ematsumiya@suse.de>
+	Signed-off-by: Steve French <stfrench@microsoft.com>
+(cherry picked from commit 775e44d6d86dca400d614cbda5dab4def4951fe7)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/cifs/smb2pdu.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/fs/cifs/smb2pdu.c b/fs/cifs/smb2pdu.c
+index 1e1d00699bec..2eca48b9b6fc 100644
+--- a/fs/cifs/smb2pdu.c
++++ b/fs/cifs/smb2pdu.c
+@@ -549,8 +549,10 @@ assemble_neg_contexts(struct smb2_negotiate_req *req,
+ 	} else
+ 		req->NegotiateContextCount = cpu_to_le16(4);
+ 
++	cifs_server_lock(server);
+ 	ctxt_len = build_netname_ctxt((struct smb2_netname_neg_context *)pneg_ctxt,
+ 					server->hostname);
++	cifs_server_unlock(server);
+ 	*total_len += ctxt_len;
+ 	pneg_ctxt += ctxt_len;
+ 
+-- 
+2.47.3
+
