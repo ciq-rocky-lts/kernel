@@ -1,0 +1,55 @@
+From 4551d319a952d5e023019e5045883640ec55210e Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 4 May 2026 07:23:36 +0000
+Subject: [PATCH] xprtrdma: fix pointer derefs in error cases of
+ rpcrdma_ep_create
+
+jira VULN-32594
+cve CVE-2022-48773
+commit-author Dan Aloni <dan.aloni@vastdata.com>
+commit a9c10b5b3b67b3750a10c8b089b2e05f5e176e33
+
+If there are failures then we must not leave the non-NULL pointers with
+the error value, otherwise `rpcrdma_ep_destroy` gets confused and tries
+free them, resulting in an Oops.
+
+	Signed-off-by: Dan Aloni <dan.aloni@vastdata.com>
+	Acked-by: Chuck Lever <chuck.lever@oracle.com>
+	Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
+(cherry picked from commit a9c10b5b3b67b3750a10c8b089b2e05f5e176e33)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/sunrpc/xprtrdma/verbs.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/net/sunrpc/xprtrdma/verbs.c b/net/sunrpc/xprtrdma/verbs.c
+index 8742a9cf6f9b..364b279c1393 100644
+--- a/net/sunrpc/xprtrdma/verbs.c
++++ b/net/sunrpc/xprtrdma/verbs.c
+@@ -438,6 +438,7 @@ static int rpcrdma_ep_create(struct rpcrdma_xprt *r_xprt)
+ 					      IB_POLL_WORKQUEUE);
+ 	if (IS_ERR(ep->re_attr.send_cq)) {
+ 		rc = PTR_ERR(ep->re_attr.send_cq);
++		ep->re_attr.send_cq = NULL;
+ 		goto out_destroy;
+ 	}
+ 
+@@ -446,6 +447,7 @@ static int rpcrdma_ep_create(struct rpcrdma_xprt *r_xprt)
+ 					      IB_POLL_WORKQUEUE);
+ 	if (IS_ERR(ep->re_attr.recv_cq)) {
+ 		rc = PTR_ERR(ep->re_attr.recv_cq);
++		ep->re_attr.recv_cq = NULL;
+ 		goto out_destroy;
+ 	}
+ 	ep->re_receive_count = 0;
+@@ -484,6 +486,7 @@ static int rpcrdma_ep_create(struct rpcrdma_xprt *r_xprt)
+ 	ep->re_pd = ib_alloc_pd(device, 0);
+ 	if (IS_ERR(ep->re_pd)) {
+ 		rc = PTR_ERR(ep->re_pd);
++		ep->re_pd = NULL;
+ 		goto out_destroy;
+ 	}
+ 
+-- 
+2.47.3
+

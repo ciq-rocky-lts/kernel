@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 24
+%define ciq_patch_version 25
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1001,6 +1001,17 @@ Patch0424: 0269-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
 Patch0425: 0270-crypto-authencesn-reject-short-ahash-digests-during-.patch
 Patch0426: 0271-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
 Patch0427: 0272-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
+#CIQ Patch Version: 372.32.1+25.1.el8_6_ciq
+Patch0428: 0273-hwmon-w83792d-Fix-NULL-pointer-dereference-by-removi.patch
+Patch0429: 0274-isdn-mISDN-Fix-sleeping-function-called-from-invalid.patch
+Patch0430: 0275-ethernet-hisilicon-hns-hns_dsaf_misc-fix-a-possible-.patch
+Patch0431: 0276-veth-ensure-skb-entering-GRO-are-not-cloned.patch
+Patch0432: 0277-net-amd-xgbe-Fix-skb-data-length-underflow.patch
+Patch0433: 0278-perf-Fix-list-corruption-in-perf_cgroup_switch.patch
+Patch0434: 0279-xprtrdma-fix-pointer-derefs-in-error-cases-of-rpcrdm.patch
+Patch0435: 0280-KVM-x86-nSVM-fix-potential-NULL-derefernce-on-nested.patch
+Patch0436: 0281-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
+Patch0437: 0282-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1995,6 +2006,16 @@ ApplyOptionalPatch 0269-crypto-authencesn-Fix-src-offset-when-decrypting-in-.pat
 ApplyOptionalPatch 0270-crypto-authencesn-reject-short-ahash-digests-during-.patch
 ApplyOptionalPatch 0271-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
 ApplyOptionalPatch 0272-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
+ApplyOptionalPatch 0273-hwmon-w83792d-Fix-NULL-pointer-dereference-by-removi.patch
+ApplyOptionalPatch 0274-isdn-mISDN-Fix-sleeping-function-called-from-invalid.patch
+ApplyOptionalPatch 0275-ethernet-hisilicon-hns-hns_dsaf_misc-fix-a-possible-.patch
+ApplyOptionalPatch 0276-veth-ensure-skb-entering-GRO-are-not-cloned.patch
+ApplyOptionalPatch 0277-net-amd-xgbe-Fix-skb-data-length-underflow.patch
+ApplyOptionalPatch 0278-perf-Fix-list-corruption-in-perf_cgroup_switch.patch
+ApplyOptionalPatch 0279-xprtrdma-fix-pointer-derefs-in-error-cases-of-rpcrdm.patch
+ApplyOptionalPatch 0280-KVM-x86-nSVM-fix-potential-NULL-derefernce-on-nested.patch
+ApplyOptionalPatch 0281-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
+ApplyOptionalPatch 0282-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 
 
 # CIQ LTS patches:
@@ -3554,6 +3575,18 @@ fi
 #
 #
 %changelog
+* Fri May 08 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1+25.1.el8_6_ciq
+- xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
+- scsi: target: iscsi: Fix use-after-free in iscsit_dec_session_usage_count() (Roxana Nicolescu) [ciqres] {CVE-2026-23193}
+- KVM: x86: nSVM: fix potential NULL derefernce on nested migration (CIQ Kernel Automation) [ciqres] {CVE-2022-48793}
+- xprtrdma: fix pointer derefs in error cases of rpcrdma_ep_create (CIQ Kernel Automation) [ciqres] {CVE-2022-48773}
+- perf: Fix list corruption in perf_cgroup_switch() (CIQ Kernel Automation) [ciqres] {CVE-2022-48799}
+- net: amd-xgbe: Fix skb data length underflow (CIQ Kernel Automation) [ciqres] {CVE-2022-48743}
+- veth: ensure skb entering GRO are not cloned. (CIQ Kernel Automation) [ciqres] {CVE-2021-47099}
+- ethernet: hisilicon: hns: hns_dsaf_misc: fix a possible array overflow in hns_dsaf_ge_srst_by_port() (CIQ Kernel Automation) [ciqres] {CVE-2021-47548}
+- isdn: mISDN: Fix sleeping function called from invalid context (CIQ Kernel Automation) [ciqres] {CVE-2021-47468}
+- hwmon: (w83792d) Fix NULL pointer dereference by removing unnecessary structure field (CIQ Kernel Automation) [ciqres] {CVE-2021-47385}
+
 * Fri May 01 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+24.1.el8_6_ciq
 - crypto: algif_aead - snapshot IV for async AEAD requests (Herbert Xu) [ciqres] {CVE-2026-31431}
 - crypto: algif_aead - Fix minimum RX size check for decryption (Jonathan Maple) [ciqres] {CVE-2026-31431}
