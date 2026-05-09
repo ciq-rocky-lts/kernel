@@ -1,0 +1,64 @@
+From 2d8dcb1e515ffca5cb076b6b02b184c70b71a4f6 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Wed, 6 May 2026 10:39:45 +0200
+Subject: [PATCH] ext4: remove unused return value of __mb_check_buddy
+
+jira VULN-157086
+cve-bf CVE-2023-53503
+commit-author Kemeng Shi <shikemeng@huaweicloud.com>
+commit 133de5a0d8f8e32b34feaa8beae7a189482f1856
+
+Remove unused return value of __mb_check_buddy.
+
+	Signed-off-by: Kemeng Shi <shikemeng@huaweicloud.com>
+	Reviewed-by: Jan Kara <jack@suse.cz>
+Link: https://lore.kernel.org/r/20240105092102.496631-2-shikemeng@huaweicloud.com
+	Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+(cherry picked from commit 133de5a0d8f8e32b34feaa8beae7a189482f1856)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ fs/ext4/mballoc.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/fs/ext4/mballoc.c b/fs/ext4/mballoc.c
+index c8c1ebe72afa..f3c3ba826f75 100644
+--- a/fs/ext4/mballoc.c
++++ b/fs/ext4/mballoc.c
+@@ -665,7 +665,7 @@ do {									\
+ 	}								\
+ } while (0)
+ 
+-static int __mb_check_buddy(struct ext4_buddy *e4b, char *file,
++static void __mb_check_buddy(struct ext4_buddy *e4b, char *file,
+ 				const char *function, int line)
+ {
+ 	struct super_block *sb = e4b->bd_sb;
+@@ -684,7 +684,7 @@ static int __mb_check_buddy(struct ext4_buddy *e4b, char *file,
+ 	void *buddy2;
+ 
+ 	if (e4b->bd_info->bb_check_counter++ % 10)
+-		return 0;
++		return;
+ 
+ 	while (order > 1) {
+ 		buddy = mb_find_buddy(e4b, order, &max);
+@@ -746,7 +746,7 @@ static int __mb_check_buddy(struct ext4_buddy *e4b, char *file,
+ 
+ 	grp = ext4_get_group_info(sb, e4b->bd_group);
+ 	if (!grp)
+-		return NULL;
++		return;
+ 	list_for_each(cur, &grp->bb_prealloc_list) {
+ 		ext4_group_t groupnr;
+ 		struct ext4_prealloc_space *pa;
+@@ -756,7 +756,6 @@ static int __mb_check_buddy(struct ext4_buddy *e4b, char *file,
+ 		for (i = 0; i < pa->pa_len; i++)
+ 			MB_CHECK_ASSERT(mb_test_bit(k + i, buddy));
+ 	}
+-	return 0;
+ }
+ #undef MB_CHECK_ASSERT
+ #define mb_check_buddy(e4b) __mb_check_buddy(e4b,	\
+-- 
+2.47.3
+

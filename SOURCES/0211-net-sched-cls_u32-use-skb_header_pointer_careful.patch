@@ -1,0 +1,72 @@
+From 3981cce0d0acf9737a5c522ec9fae62b622d1504 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Thu, 30 Apr 2026 07:10:09 +0000
+Subject: [PATCH] net/sched: cls_u32: use skb_header_pointer_careful()
+
+jira VULN-176130
+cve CVE-2026-23204
+commit-author Eric Dumazet <edumazet@google.com>
+commit cabd1a976375780dabab888784e356f574bbaed8
+
+skb_header_pointer() does not fully validate negative @offset values.
+
+Use skb_header_pointer_careful() instead.
+
+GangMin Kim provided a report and a repro fooling u32_classify():
+
+BUG: KASAN: slab-out-of-bounds in u32_classify+0x1180/0x11b0
+net/sched/cls_u32.c:221
+
+Fixes: fbc2e7d9cf49 ("cls_u32: use skb_header_pointer() to dereference data safely")
+	Reported-by: GangMin Kim <km.kim1503@gmail.com>
+Closes: https://lore.kernel.org/netdev/CANn89iJkyUZ=mAzLzC4GdcAgLuPnUoivdLaOs6B9rq5_erj76w@mail.gmail.com/T/
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+Link: https://patch.msgid.link/20260128141539.3404400-3-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit cabd1a976375780dabab888784e356f574bbaed8)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/sched/cls_u32.c | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/net/sched/cls_u32.c b/net/sched/cls_u32.c
+index da4c179a4d41..40e7efabe235 100644
+--- a/net/sched/cls_u32.c
++++ b/net/sched/cls_u32.c
+@@ -151,10 +151,8 @@ TC_INDIRECT_SCOPE int u32_classify(struct sk_buff *skb,
+ 			int toff = off + key->off + (off2 & key->offmask);
+ 			__be32 *data, hdata;
+ 
+-			if (skb_headroom(skb) + toff > INT_MAX)
+-				goto out;
+-
+-			data = skb_header_pointer(skb, toff, 4, &hdata);
++			data = skb_header_pointer_careful(skb, toff, 4,
++							  &hdata);
+ 			if (!data)
+ 				goto out;
+ 			if ((*data ^ key->val) & key->mask) {
+@@ -204,8 +202,9 @@ TC_INDIRECT_SCOPE int u32_classify(struct sk_buff *skb,
+ 		if (ht->divisor) {
+ 			__be32 *data, hdata;
+ 
+-			data = skb_header_pointer(skb, off + n->sel.hoff, 4,
+-						  &hdata);
++			data = skb_header_pointer_careful(skb,
++							  off + n->sel.hoff,
++							  4, &hdata);
+ 			if (!data)
+ 				goto out;
+ 			sel = ht->divisor & u32_hash_fold(*data, &n->sel,
+@@ -219,7 +218,7 @@ TC_INDIRECT_SCOPE int u32_classify(struct sk_buff *skb,
+ 			if (n->sel.flags & TC_U32_VAROFFSET) {
+ 				__be16 *data, hdata;
+ 
+-				data = skb_header_pointer(skb,
++				data = skb_header_pointer_careful(skb,
+ 							  off + n->sel.offoff,
+ 							  2, &hdata);
+ 				if (!data)
+-- 
+2.47.3
+

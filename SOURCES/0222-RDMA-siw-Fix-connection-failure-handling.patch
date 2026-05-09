@@ -1,0 +1,78 @@
+From fb78beddd42197ef1f5b7d0ae069cd9c83b91fe3 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 4 May 2026 07:24:10 +0000
+Subject: [PATCH] RDMA/siw: Fix connection failure handling
+
+jira VULN-35016
+cve CVE-2023-52513
+commit-author Bernard Metzler <bmt@zurich.ibm.com>
+commit 53a3f777049771496f791504e7dc8ef017cba590
+
+In case immediate MPA request processing fails, the newly
+created endpoint unlinks the listening endpoint and is
+ready to be dropped. This special case was not handled
+correctly by the code handling the later TCP socket close,
+causing a NULL dereference crash in siw_cm_work_handler()
+when dereferencing a NULL listener. We now also cancel
+the useless MPA timeout, if immediate MPA request
+processing fails.
+
+This patch furthermore simplifies MPA processing in general:
+Scheduling a useless TCP socket read in sk_data_ready() upcall
+is now surpressed, if the socket is already moved out of
+TCP_ESTABLISHED state.
+
+Fixes: 6c52fdc244b5 ("rdma/siw: connection management")
+	Signed-off-by: Bernard Metzler <bmt@zurich.ibm.com>
+Link: https://lore.kernel.org/r/20230905145822.446263-1-bmt@zurich.ibm.com
+	Signed-off-by: Leon Romanovsky <leon@kernel.org>
+(cherry picked from commit 53a3f777049771496f791504e7dc8ef017cba590)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/infiniband/sw/siw/siw_cm.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/infiniband/sw/siw/siw_cm.c b/drivers/infiniband/sw/siw/siw_cm.c
+index da530c0404da..cb9e083a1073 100644
+--- a/drivers/infiniband/sw/siw/siw_cm.c
++++ b/drivers/infiniband/sw/siw/siw_cm.c
+@@ -976,6 +976,7 @@ static void siw_accept_newconn(struct siw_cep *cep)
+ 			siw_cep_put(cep);
+ 			new_cep->listen_cep = NULL;
+ 			if (rv) {
++				siw_cancel_mpatimer(new_cep);
+ 				siw_cep_set_free(new_cep);
+ 				goto error;
+ 			}
+@@ -1100,9 +1101,12 @@ static void siw_cm_work_handler(struct work_struct *w)
+ 				/*
+ 				 * Socket close before MPA request received.
+ 				 */
+-				siw_dbg_cep(cep, "no mpareq: drop listener\n");
+-				siw_cep_put(cep->listen_cep);
+-				cep->listen_cep = NULL;
++				if (cep->listen_cep) {
++					siw_dbg_cep(cep,
++						"no mpareq: drop listener\n");
++					siw_cep_put(cep->listen_cep);
++					cep->listen_cep = NULL;
++				}
+ 			}
+ 		}
+ 		release_cep = 1;
+@@ -1227,7 +1231,11 @@ static void siw_cm_llp_data_ready(struct sock *sk)
+ 	if (!cep)
+ 		goto out;
+ 
+-	siw_dbg_cep(cep, "state: %d\n", cep->state);
++	siw_dbg_cep(cep, "cep state: %d, socket state %d\n",
++		    cep->state, sk->sk_state);
++
++	if (sk->sk_state != TCP_ESTABLISHED)
++		goto out;
+ 
+ 	switch (cep->state) {
+ 	case SIW_EPSTATE_RDMA_MODE:
+-- 
+2.47.3
+

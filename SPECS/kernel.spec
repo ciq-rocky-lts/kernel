@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 19
+%define ciq_patch_version 20
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1229,6 +1229,32 @@ Patch1000220: 0200-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
 Patch1000221: 0201-crypto-authencesn-reject-short-ahash-digests-during-.patch
 Patch1000222: 0202-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
 Patch1000223: 0203-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
+#CIQ Patch Version: 427.42.1+20.1.el9_4_ciq
+Patch1000224: 0204-nfsd-fix-heap-overflow-in-NFSv4.0-LOCK-replay-cache.patch
+Patch1000225: 0205-x86-tdx-Fix-in-kernel-MMIO-check.patch
+Patch1000226: 0206-page_pool-Fix-use-after-free-in-page_pool_recycle_in.patch
+Patch1000227: 0207-mlxsw-spectrum_mr-Fix-use-after-free-when-updating-m.patch
+Patch1000228: 0208-mm-damon-sysfs-cleanup-attrs-subdirs-on-context-dir-.patch
+Patch1000229: 0209-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
+Patch1000230: 0210-net-add-skb_header_pointer_careful-helper.patch
+Patch1000231: 0211-net-sched-cls_u32-use-skb_header_pointer_careful.patch
+Patch1000232: 0212-netfilter-nf_tables-fix-inverted-genmask-check-in-nf.patch
+Patch1000233: 0213-mmc-sdio-fix-possible-resource-leaks-in-some-error-p.patch
+Patch1000234: 0214-rcu-tasks-Avoid-pr_info-with-spin-lock-in-cblist_ini.patch
+Patch1000235: 0215-ext4-allow-ext4_get_group_info-to-fail.patch
+Patch1000236: 0216-ext4-correct-grp-validation-in-ext4_mb_good_group.patch
+Patch1000237: 0217-ext4-drop-the-call-to-ext4_error-from-ext4_get_group.patch
+Patch1000238: 0218-ext4-remove-unused-return-value-of-__mb_check_buddy.patch
+Patch1000239: 0219-net-nsh-Use-correct-mac_offset-to-unwind-gso-skb-in-.patch
+Patch1000240: 0220-i2c-core-Run-atomic-i2c-xfer-when-preemptible.patch
+Patch1000241: 0221-i2c-core-Fix-atomic-xfer-check-for-non-preempt-confi.patch
+Patch1000242: 0222-RDMA-siw-Fix-connection-failure-handling.patch
+Patch1000243: 0223-perf-core-Bail-out-early-if-the-request-AUX-area-is-.patch
+Patch1000244: 0224-atl1c-Work-around-the-DMA-RX-overflow-issue.patch
+Patch1000245: 0225-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+Patch1000246: 0226-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
+Patch1000247: 0227-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
+Patch1000248: 0228-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2205,6 +2231,31 @@ ApplyOptionalPatch 0200-crypto-authencesn-Fix-src-offset-when-decrypting-in-.pat
 ApplyOptionalPatch 0201-crypto-authencesn-reject-short-ahash-digests-during-.patch
 ApplyOptionalPatch 0202-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
 ApplyOptionalPatch 0203-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
+ApplyOptionalPatch 0204-nfsd-fix-heap-overflow-in-NFSv4.0-LOCK-replay-cache.patch
+ApplyOptionalPatch 0205-x86-tdx-Fix-in-kernel-MMIO-check.patch
+ApplyOptionalPatch 0206-page_pool-Fix-use-after-free-in-page_pool_recycle_in.patch
+ApplyOptionalPatch 0207-mlxsw-spectrum_mr-Fix-use-after-free-when-updating-m.patch
+ApplyOptionalPatch 0208-mm-damon-sysfs-cleanup-attrs-subdirs-on-context-dir-.patch
+ApplyOptionalPatch 0209-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
+ApplyOptionalPatch 0210-net-add-skb_header_pointer_careful-helper.patch
+ApplyOptionalPatch 0211-net-sched-cls_u32-use-skb_header_pointer_careful.patch
+ApplyOptionalPatch 0212-netfilter-nf_tables-fix-inverted-genmask-check-in-nf.patch
+ApplyOptionalPatch 0213-mmc-sdio-fix-possible-resource-leaks-in-some-error-p.patch
+ApplyOptionalPatch 0214-rcu-tasks-Avoid-pr_info-with-spin-lock-in-cblist_ini.patch
+ApplyOptionalPatch 0215-ext4-allow-ext4_get_group_info-to-fail.patch
+ApplyOptionalPatch 0216-ext4-correct-grp-validation-in-ext4_mb_good_group.patch
+ApplyOptionalPatch 0217-ext4-drop-the-call-to-ext4_error-from-ext4_get_group.patch
+ApplyOptionalPatch 0218-ext4-remove-unused-return-value-of-__mb_check_buddy.patch
+ApplyOptionalPatch 0219-net-nsh-Use-correct-mac_offset-to-unwind-gso-skb-in-.patch
+ApplyOptionalPatch 0220-i2c-core-Run-atomic-i2c-xfer-when-preemptible.patch
+ApplyOptionalPatch 0221-i2c-core-Fix-atomic-xfer-check-for-non-preempt-confi.patch
+ApplyOptionalPatch 0222-RDMA-siw-Fix-connection-failure-handling.patch
+ApplyOptionalPatch 0223-perf-core-Bail-out-early-if-the-request-AUX-area-is-.patch
+ApplyOptionalPatch 0224-atl1c-Work-around-the-DMA-RX-overflow-issue.patch
+ApplyOptionalPatch 0225-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+ApplyOptionalPatch 0226-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
+ApplyOptionalPatch 0227-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
+ApplyOptionalPatch 0228-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4282,6 +4333,33 @@ fi
 #
 #
 %changelog
+* Fri May 08 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-427.42.1+20.1.el9_4_ciq
+- rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
+- rxrpc: Fix rxrpc_input_call_event() to only unshare DATA packets (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
+- rxrpc: Fix potential UAF after skb_unshare() failure (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
+- xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
+- atl1c: Work around the DMA RX overflow issue (CIQ Kernel Automation) [ciqres] {CVE-2023-52834}
+- perf/core: Bail out early if the request AUX area is out of bound (CIQ Kernel Automation) [ciqres] {CVE-2023-52835}
+- RDMA/siw: Fix connection failure handling (CIQ Kernel Automation) [ciqres] {CVE-2023-52513}
+- i2c: core: Fix atomic xfer check for non-preempt config (CIQ Kernel Automation) [ciqres] {CVE-2023-52791}
+- i2c: core: Run atomic i2c xfer when !preemptible (CIQ Kernel Automation) [ciqres] {CVE-2023-52791}
+- net: nsh: Use correct mac_offset to unwind gso skb in nsh_gso_segment() (CIQ Kernel Automation) [ciqres] {CVE-2023-54114}
+- ext4: remove unused return value of __mb_check_buddy (Roxana Nicolescu) [ciqres] {CVE-2023-53503}
+- ext4: drop the call to ext4_error() from ext4_get_group_info() (CIQ Kernel Automation) [ciqres] {CVE-2023-53503}
+- ext4: correct grp validation in ext4_mb_good_group (CIQ Kernel Automation) [ciqres] {CVE-2023-53861}
+- ext4: allow ext4_get_group_info() to fail (CIQ Kernel Automation) [ciqres] {CVE-2023-53503}
+- rcu-tasks: Avoid pr_info() with spin lock in cblist_init_generic() (CIQ Kernel Automation) [ciqres] {CVE-2023-53558}
+- mmc: sdio: fix possible resource leaks in some error paths (CIQ Kernel Automation) [ciqres] {CVE-2023-52730}
+- netfilter: nf_tables: fix inverted genmask check in nft_map_catchall_activate() (CIQ Kernel Automation) [ciqres] {CVE-2026-23111}
+- net/sched: cls_u32: use skb_header_pointer_careful() (CIQ Kernel Automation) [ciqres] {CVE-2026-23204}
+- net: add skb_header_pointer_careful() helper (Roxana Nicolescu) [ciqres] {CVE-2026-23204}
+- scsi: target: iscsi: Fix use-after-free in iscsit_dec_session_usage_count() (CIQ Kernel Automation) [ciqres] {CVE-2026-23193}
+- mm/damon/sysfs: cleanup attrs subdirs on context dir setup failure (CIQ Kernel Automation) [ciqres] {CVE-2026-23144}
+- mlxsw: spectrum_mr: Fix use-after-free when updating multicast route stats (CIQ Kernel Automation) [ciqres] {CVE-2025-68800}
+- page_pool: Fix use-after-free in page_pool_recycle_in_ring (Marcin Wcisło) [ciqres] {CVE-2025-38129}
+- x86/tdx: Fix "in-kernel MMIO" check (Marcin Wcisło) [ciqres] {CVE-2024-47727}
+- nfsd: fix heap overflow in NFSv4.0 LOCK replay cache (Marcin Wcisło) [ciqres] {CVE-2026-31402}
+
 * Thu Apr 30 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-427.42.1+19.1.el9_4_ciq
 - crypto: algif_aead - snapshot IV for async AEAD requests (Herbert Xu) [ciqres] {CVE-2026-31431}
 - crypto: algif_aead - Fix minimum RX size check for decryption (Jonathan Maple) [ciqres] {CVE-2026-31431}

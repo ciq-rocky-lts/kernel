@@ -1,0 +1,40 @@
+From 7ca24126fe6dda809bea13cac2385d6907e9f3f6 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 4 May 2026 07:19:58 +0000
+Subject: [PATCH] ext4: correct grp validation in ext4_mb_good_group
+
+jira VULN-169012
+cve CVE-2023-53861
+commit-author Kemeng Shi <shikemeng@huaweicloud.com>
+commit a9ce5993a0f5c0887c8a1b4ffa3b8046fbcfdc93
+
+Group corruption check will access memory of grp and will trigger kernel
+crash if grp is NULL. So do NULL check before corruption check.
+
+Fixes: 5354b2af3406 ("ext4: allow ext4_get_group_info() to fail")
+	Signed-off-by: Kemeng Shi <shikemeng@huaweicloud.com>
+	Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+Link: https://lore.kernel.org/r/20230801143204.2284343-2-shikemeng@huaweicloud.com
+	Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+(cherry picked from commit a9ce5993a0f5c0887c8a1b4ffa3b8046fbcfdc93)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ fs/ext4/mballoc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/ext4/mballoc.c b/fs/ext4/mballoc.c
+index 09d6bc59e9ee..c8c1ebe72afa 100644
+--- a/fs/ext4/mballoc.c
++++ b/fs/ext4/mballoc.c
+@@ -2439,7 +2439,7 @@ static bool ext4_mb_good_group(struct ext4_allocation_context *ac,
+ 
+ 	BUG_ON(cr < 0 || cr >= 4);
+ 
+-	if (unlikely(EXT4_MB_GRP_BBITMAP_CORRUPT(grp) || !grp))
++	if (unlikely(!grp || EXT4_MB_GRP_BBITMAP_CORRUPT(grp)))
+ 		return false;
+ 
+ 	free = grp->bb_free;
+-- 
+2.47.3
+
