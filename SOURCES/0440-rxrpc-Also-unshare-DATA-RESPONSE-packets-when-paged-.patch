@@ -1,0 +1,53 @@
+From ff384b8ca4447a0f73e090dbdad6bbe68c87d848 Mon Sep 17 00:00:00 2001
+From: Sultan Alsawaf <sultan@ciq.com>
+Date: Thu, 7 May 2026 20:53:10 -0700
+Subject: [PATCH] rxrpc: Also unshare DATA/RESPONSE packets when paged frags
+ are present
+
+cve CVE-2026-43500
+commit-author Hyunwoo Kim <imv4bel@gmail.com>
+commit -
+commit-source https://lore.kernel.org/all/afKV2zGR6rrelPC7@v4bel
+upstream-diff |
+	The conn_event.c hunk is dropped entirely. Upstream wraps the
+	conn->security->verify_response() call inside a new
+	rxrpc_verify_response() function that copies non-linear skbs before
+	in-place decryption. This kernel doesn't have that wrapper; the
+	security op is called directly from rxrpc_process_event(), so there
+	is no call site to patch. The call_event.c hunk applies as-is.
+
+The DATA-packet handler in rxrpc_input_call_event() and the RESPONSE
+handler in rxrpc_verify_response() copy the skb to a linear one before
+calling into the security ops only when skb_cloned() is true.  An skb
+that is not cloned but still carries paged fragments (skb->data_len != 0)
+falls through to the in-place decryption path, which binds the frag
+pages directly into the AEAD/skcipher SGL via skb_to_sgvec().
+
+Extend the gate so that any skb with non-linear data is also copied,
+ensuring the security handler always operates on a fully linear skb.
+The OOM/trace handling already in place is reused.
+
+Fixes: d0d5c0cd1e71 ("rxrpc: Use skb_unshare() rather than skb_cow_data()")
+	Signed-off-by: Hyunwoo Kim <imv4bel@gmail.com>
+(cherry picked from commit 544687651fe57721c5e4e76380ed8ef8fdfdc98b)
+	Signed-off-by: Sultan Alsawaf <sultan@ciq.com>
+---
+ net/rxrpc/call_event.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/rxrpc/call_event.c b/net/rxrpc/call_event.c
+index 0e0b1c55c038..ac0540048c15 100644
+--- a/net/rxrpc/call_event.c
++++ b/net/rxrpc/call_event.c
+@@ -403,7 +403,7 @@ bool rxrpc_input_call_event(struct rxrpc_call *call, struct sk_buff *skb)
+ 
+ 		if (sp->hdr.type == RXRPC_PACKET_TYPE_DATA &&
+ 		    sp->hdr.securityIndex != 0 &&
+-		    skb_cloned(skb)) {
++		    (skb_cloned(skb) || skb->data_len)) {
+ 			/* Unshare the packet so that it can be
+ 			 * modified by in-place decryption.
+ 			 */
+-- 
+2.47.3
+

@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 27
+%define ciq_patch_version 28
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1415,6 +1415,22 @@ Patch1000467: 0422-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
 Patch1000468: 0423-crypto-authencesn-reject-short-ahash-digests-during-.patch
 Patch1000469: 0424-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
 Patch1000470: 0425-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
+#CIQ Patch Version: 284.30.1+28.1.el9_2_ciq
+Patch1000471: 0426-net-genl-fix-error-path-memory-leak-in-policy-dumpin.patch
+Patch1000472: 0427-objtool-Fix-SEGFAULT.patch
+Patch1000473: 0428-EDAC-i10nm-fix-refcount-leak-in-pci_get_dev_wrapper.patch
+Patch1000474: 0429-Bluetooth-hci_conn-Fix-crash-on-hci_create_cis_sync.patch
+Patch1000475: 0430-bpf-sockmap-Don-t-let-sock_map_-close-destroy-unhash.patch
+Patch1000476: 0431-sock_map-avoid-race-between-sock_map_close-and-sk_ps.patch
+Patch1000477: 0432-bpf-sockmap-Avoid-using-sk_socket-after-free-when-se.patch
+Patch1000478: 0433-cgroup-cpuset-Fix-wrong-check-in-update_parent_subpa.patch
+Patch1000479: 0434-scsi-ses-Fix-slab-out-of-bounds-in-ses_enclosure_dat.patch
+Patch1000480: 0435-scsi-ses-Fix-slab-out-of-bounds-in-ses_intf_remove.patch
+Patch1000481: 0436-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
+Patch1000482: 0437-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+Patch1000483: 0438-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
+Patch1000484: 0439-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
+Patch1000485: 0440-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2561,6 +2577,21 @@ ApplyOptionalPatch 0422-crypto-authencesn-Fix-src-offset-when-decrypting-in-.pat
 ApplyOptionalPatch 0423-crypto-authencesn-reject-short-ahash-digests-during-.patch
 ApplyOptionalPatch 0424-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
 ApplyOptionalPatch 0425-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
+ApplyOptionalPatch 0426-net-genl-fix-error-path-memory-leak-in-policy-dumpin.patch
+ApplyOptionalPatch 0427-objtool-Fix-SEGFAULT.patch
+ApplyOptionalPatch 0428-EDAC-i10nm-fix-refcount-leak-in-pci_get_dev_wrapper.patch
+ApplyOptionalPatch 0429-Bluetooth-hci_conn-Fix-crash-on-hci_create_cis_sync.patch
+ApplyOptionalPatch 0430-bpf-sockmap-Don-t-let-sock_map_-close-destroy-unhash.patch
+ApplyOptionalPatch 0431-sock_map-avoid-race-between-sock_map_close-and-sk_ps.patch
+ApplyOptionalPatch 0432-bpf-sockmap-Avoid-using-sk_socket-after-free-when-se.patch
+ApplyOptionalPatch 0433-cgroup-cpuset-Fix-wrong-check-in-update_parent_subpa.patch
+ApplyOptionalPatch 0434-scsi-ses-Fix-slab-out-of-bounds-in-ses_enclosure_dat.patch
+ApplyOptionalPatch 0435-scsi-ses-Fix-slab-out-of-bounds-in-ses_intf_remove.patch
+ApplyOptionalPatch 0436-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
+ApplyOptionalPatch 0437-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+ApplyOptionalPatch 0438-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
+ApplyOptionalPatch 0439-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
+ApplyOptionalPatch 0440-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4444,6 +4475,23 @@ fi
 #
 #
 %changelog
+* Fri May 08 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+28.1.el9_2_ciq
+- rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
+- rxrpc: Fix rxrpc_input_call_event() to only unshare DATA packets (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
+- rxrpc: Fix potential UAF after skb_unshare() failure (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
+- xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
+- scsi: target: iscsi: Fix use-after-free in iscsit_dec_session_usage_count() (Roxana Nicolescu) [ciqres] {CVE-2026-23193}
+- scsi: ses: Fix slab-out-of-bounds in ses_intf_remove() (CIQ Kernel Automation) [ciqres] {CVE-2023-53521}
+- scsi: ses: Fix slab-out-of-bounds in ses_enclosure_data_process() (CIQ Kernel Automation) [ciqres] {CVE-2023-53803}
+- cgroup/cpuset: Fix wrong check in update_parent_subparts_cpumask() (CIQ Kernel Automation) [ciqres] {CVE-2023-52942}
+- bpf, sockmap: Avoid using sk_socket after free when sending (CIQ Kernel Automation) [ciqres] {CVE-2025-38154}
+- sock_map: avoid race between sock_map_close and sk_psock_put (CIQ Kernel Automation) [ciqres] {CVE-2024-39500}
+- bpf, sockmap: Don't let sock_map_{close,destroy,unhash} call itself (CIQ Kernel Automation) [ciqres] {CVE-2023-52735}
+- Bluetooth: hci_conn: Fix crash on hci_create_cis_sync (CIQ Kernel Automation) [ciqres] {CVE-2022-50447}
+- EDAC/i10nm: fix refcount leak in pci_get_dev_wrapper() (CIQ Kernel Automation) [ciqres] {CVE-2022-50645}
+- objtool: Fix SEGFAULT (CIQ Kernel Automation) [ciqres] {CVE-2022-50879}
+- net: genl: fix error path memory leak in policy dumping (CIQ Kernel Automation) [ciqres] {CVE-2022-50042}
+
 * Fri May 01 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1+27.1.el9_2_ciq
 - crypto: algif_aead - snapshot IV for async AEAD requests (Herbert Xu) [ciqres] {CVE-2026-31431}
 - crypto: algif_aead - Fix minimum RX size check for decryption (Jonathan Maple) [ciqres] {CVE-2026-31431}

@@ -1,0 +1,43 @@
+From f70b4a018b4fea885de07f07f9e795ad90fc48d4 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 4 May 2026 07:20:12 +0000
+Subject: [PATCH] objtool: Fix SEGFAULT
+
+jira VULN-173009
+cve CVE-2022-50879
+commit-author Christophe Leroy <christophe.leroy@csgroup.eu>
+commit efb11fdb3e1a9f694fa12b70b21e69e55ec59c36
+
+find_insn() will return NULL in case of failure. Check insn in order
+to avoid a kernel Oops for NULL pointer dereference.
+
+	Tested-by: Naveen N. Rao <naveen.n.rao@linux.vnet.ibm.com>
+	Reviewed-by: Naveen N. Rao <naveen.n.rao@linux.vnet.ibm.com>
+	Acked-by: Josh Poimboeuf <jpoimboe@kernel.org>
+	Acked-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+	Signed-off-by: Christophe Leroy <christophe.leroy@csgroup.eu>
+	Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Link: https://lore.kernel.org/r/20221114175754.1131267-9-sv@linux.ibm.com
+
+(cherry picked from commit efb11fdb3e1a9f694fa12b70b21e69e55ec59c36)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ tools/objtool/check.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/objtool/check.c b/tools/objtool/check.c
+index 7d884a9952b1..509275e56943 100644
+--- a/tools/objtool/check.c
++++ b/tools/objtool/check.c
+@@ -204,7 +204,7 @@ static bool __dead_end_function(struct objtool_file *file, struct symbol *func,
+ 		return false;
+ 
+ 	insn = find_insn(file, func->sec, func->offset);
+-	if (!insn->func)
++	if (!insn || !insn->func)
+ 		return false;
+ 
+ 	func_for_each_insn(file, func, insn) {
+-- 
+2.47.3
+

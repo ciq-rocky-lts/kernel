@@ -1,0 +1,45 @@
+From 86d094c11e26e061ba9510250b62a829bc260d9f Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 4 May 2026 07:25:44 +0000
+Subject: [PATCH] scsi: ses: Fix slab-out-of-bounds in ses_intf_remove()
+
+jira VULN-157177
+cve CVE-2023-53521
+commit-author Tomas Henzl <thenzl@redhat.com>
+commit 578797f0c8cbc2e3ec5fc0dab87087b4c7073686
+
+A fix for:
+
+BUG: KASAN: slab-out-of-bounds in ses_intf_remove+0x23f/0x270 [ses]
+Read of size 8 at addr ffff88a10d32e5d8 by task rmmod/12013
+
+When edev->components is zero, accessing edev->component[0] members is
+wrong.
+
+Link: https://lore.kernel.org/r/20230202162451.15346-5-thenzl@redhat.com
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Tomas Henzl <thenzl@redhat.com>
+	Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+(cherry picked from commit 578797f0c8cbc2e3ec5fc0dab87087b4c7073686)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/scsi/ses.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/scsi/ses.c b/drivers/scsi/ses.c
+index a492f669939c..3ff193e6508c 100644
+--- a/drivers/scsi/ses.c
++++ b/drivers/scsi/ses.c
+@@ -833,7 +833,8 @@ static void ses_intf_remove_enclosure(struct scsi_device *sdev)
+ 	kfree(ses_dev->page2);
+ 	kfree(ses_dev);
+ 
+-	kfree(edev->component[0].scratch);
++	if (edev->components)
++		kfree(edev->component[0].scratch);
+ 
+ 	put_device(&edev->edev);
+ 	enclosure_unregister(edev);
+-- 
+2.47.3
+
