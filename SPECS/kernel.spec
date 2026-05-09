@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 8
+%define ciq_patch_version 9
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1110,6 +1110,25 @@ Patch1000118: 1118-crypto-authencesn-Fix-src-offset-when-decrypting-in-.patch
 Patch1000119: 1119-crypto-authencesn-reject-short-ahash-digests-during-.patch
 Patch1000120: 1120-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
 Patch1000121: 1121-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
+#CIQ Patch Version: 570.60.1+9.1.el9_6_ciq
+Patch1000122: 1122-Bluetooth-MGMT-Protect-mgmt_pending-list-with-its-ow.patch
+Patch1000123: 1123-Bluetooth-MGMT-set_mesh-update-LE-scan-interval-and-.patch
+Patch1000124: 1124-Bluetooth-hci_sync-fix-set_local_name-race-condition.patch
+Patch1000125: 1125-Bluetooth-MGMT-Fix-possible-UAFs.patch
+Patch1000126: 1126-Bluetooth-MGMT-fix-crash-in-set_mesh_sync-and-set_me.patch
+Patch1000127: 1127-Bluetooth-hci_sock-Prevent-race-in-socket-write-iter.patch
+Patch1000128: 1128-Bluetooth-MGMT-Fix-memory-leak-in-set_ssp_complete.patch
+Patch1000129: 1129-Bluetooth-MGMT-Fix-list-corruption-and-UAF-in-comman.patch
+Patch1000130: 1130-Bluetooth-MGMT-Fix-dangling-pointer-on-mgmt_add_adv_.patch
+Patch1000131: 1131-net-sched-mqprio-fix-stack-out-of-bounds-write-in-tc.patch
+Patch1000132: 1132-HID-multitouch-fix-slab-out-of-bounds-access-in-mt_r.patch
+Patch1000133: 1133-can-j1939-implement-NETDEV_UNREGISTER-notification-h.patch
+Patch1000134: 1134-can-j1939-make-j1939_sk_bind-fail-if-device-is-no-lo.patch
+Patch1000135: 1135-can-j1939-add-missing-calls-in-NETDEV_UNREGISTER-not.patch
+Patch1000136: 1136-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
+Patch1000137: 1137-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
+Patch1000138: 1138-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
+Patch1000139: 1139-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1990,6 +2009,24 @@ ApplyOptionalPatch 1118-crypto-authencesn-Fix-src-offset-when-decrypting-in-.pat
 ApplyOptionalPatch 1119-crypto-authencesn-reject-short-ahash-digests-during-.patch
 ApplyOptionalPatch 1120-crypto-algif_aead-Fix-minimum-RX-size-check-for-decr.patch
 ApplyOptionalPatch 1121-crypto-algif_aead-snapshot-IV-for-async-AEAD-request.patch
+ApplyOptionalPatch 1122-Bluetooth-MGMT-Protect-mgmt_pending-list-with-its-ow.patch
+ApplyOptionalPatch 1123-Bluetooth-MGMT-set_mesh-update-LE-scan-interval-and-.patch
+ApplyOptionalPatch 1124-Bluetooth-hci_sync-fix-set_local_name-race-condition.patch
+ApplyOptionalPatch 1125-Bluetooth-MGMT-Fix-possible-UAFs.patch
+ApplyOptionalPatch 1126-Bluetooth-MGMT-fix-crash-in-set_mesh_sync-and-set_me.patch
+ApplyOptionalPatch 1127-Bluetooth-hci_sock-Prevent-race-in-socket-write-iter.patch
+ApplyOptionalPatch 1128-Bluetooth-MGMT-Fix-memory-leak-in-set_ssp_complete.patch
+ApplyOptionalPatch 1129-Bluetooth-MGMT-Fix-list-corruption-and-UAF-in-comman.patch
+ApplyOptionalPatch 1130-Bluetooth-MGMT-Fix-dangling-pointer-on-mgmt_add_adv_.patch
+ApplyOptionalPatch 1131-net-sched-mqprio-fix-stack-out-of-bounds-write-in-tc.patch
+ApplyOptionalPatch 1132-HID-multitouch-fix-slab-out-of-bounds-access-in-mt_r.patch
+ApplyOptionalPatch 1133-can-j1939-implement-NETDEV_UNREGISTER-notification-h.patch
+ApplyOptionalPatch 1134-can-j1939-make-j1939_sk_bind-fail-if-device-is-no-lo.patch
+ApplyOptionalPatch 1135-can-j1939-add-missing-calls-in-NETDEV_UNREGISTER-not.patch
+ApplyOptionalPatch 1136-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
+ApplyOptionalPatch 1137-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
+ApplyOptionalPatch 1138-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
+ApplyOptionalPatch 1139-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4106,6 +4143,26 @@ fi
 #
 #
 %changelog
+* Fri May 08 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+9.1.el9_6_ciq
+- xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
+- rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
+- rxrpc: Fix rxrpc_input_call_event() to only unshare DATA packets (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
+- rxrpc: Fix potential UAF after skb_unshare() failure (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
+- can: j1939: add missing calls in NETDEV_UNREGISTER notification handler (CIQ Kernel Automation) [ciqres] {CVE-2025-39925}
+- can: j1939: make j1939_sk_bind() fail if device is no longer registered (CIQ Kernel Automation) [ciqres] {CVE-2025-39925}
+- can: j1939: implement NETDEV_UNREGISTER notification handler (CIQ Kernel Automation) [ciqres] {CVE-2025-39925}
+- HID: multitouch: fix slab out-of-bounds access in mt_report_fixup() (CIQ Kernel Automation) [ciqres] {CVE-2025-39806}
+- net/sched: mqprio: fix stack out-of-bounds write in tc entry parsing (CIQ Kernel Automation) [ciqres] {CVE-2025-38568}
+- Bluetooth: MGMT: Fix dangling pointer on mgmt_add_adv_patterns_monitor_complete (Marcin Wcisło) [ciqres] {CVE-2026-31511}
+- Bluetooth: MGMT: Fix list corruption and UAF in command complete handlers (Marcin Wcisło) [ciqres] {CVE-2025-39981}
+- Bluetooth: MGMT: Fix memory leak in set_ssp_complete (Marcin Wcisło) [ciqres] {CVE-2026-23151}
+- Bluetooth: hci_sock: Prevent race in socket write iter and sock bind (Marcin Wcisło) [ciqres] {CVE-2025-68305}
+- Bluetooth: MGMT: fix crash in set_mesh_sync and set_mesh_complete (Marcin Wcisło) [ciqres] {CVE-2025-40213}
+- Bluetooth: MGMT: Fix possible UAFs (Marcin Wcisło) [ciqres] {CVE-2025-39981}
+- Bluetooth: hci_sync: fix set_local_name race condition (Marcin Wcisło) [ciqres] {CVE-2025-39981}
+- Bluetooth: MGMT: set_mesh: update LE scan interval and window (Marcin Wcisło) [ciqres] {CVE-2025-39981}
+- Bluetooth: MGMT: Protect mgmt_pending list with its own lock (Marcin Wcisło) [ciqres] {CVE-2025-38117}
+
 * Thu Apr 30 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+8.1.el9_6_ciq
 - crypto: algif_aead - snapshot IV for async AEAD requests (Herbert Xu) [ciqres] {CVE-2026-31431}
 - crypto: algif_aead - Fix minimum RX size check for decryption (Jonathan Maple) [ciqres] {CVE-2026-31431}

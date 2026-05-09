@@ -1,0 +1,69 @@
+From d16d54b67caf6518626e409cfb8a74ff89e604f4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 21 Jan 2026 13:29:26 +0800
+Subject: [PATCH] Bluetooth: MGMT: Fix memory leak in set_ssp_complete
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-176260
+cve CVE-2026-23151
+commit-author Jianpeng Chang <jianpeng.chang.cn@windriver.com>
+commit 1b9c17fd0a7fdcbe69ec5d6fe8e50bc5ed7f01f2
+commit 4db19bfd320f2124c820d3456aeae3953095ea8e
+
+Fix memory leak in set_ssp_complete() where mgmt_pending_cmd structures
+are not freed after being removed from the pending list.
+
+Commit 302a1f674c00 ("Bluetooth: MGMT: Fix possible UAFs") replaced
+mgmt_pending_foreach() calls with individual command handling but missed
+adding mgmt_pending_free() calls in both error and success paths of
+set_ssp_complete(). Other completion functions like set_le_complete()
+were fixed correctly in the same commit.
+
+This causes a memory leak of the mgmt_pending_cmd structure and its
+associated parameter data for each SSP command that completes.
+
+Add the missing mgmt_pending_free(cmd) calls in both code paths to fix
+the memory leak. Also fix the same issue in set_advertising_complete().
+
+Fixes: 302a1f674c00 ("Bluetooth: MGMT: Fix possible UAFs")
+	Signed-off-by: Jianpeng Chang <jianpeng.chang.cn@windriver.com>
+	Signed-off-by: Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+(cherry picked from commit 1b9c17fd0a7fdcbe69ec5d6fe8e50bc5ed7f01f2)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/bluetooth/mgmt.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/net/bluetooth/mgmt.c b/net/bluetooth/mgmt.c
+index c5e9661eba7e..6a3bdd52218b 100644
+--- a/net/bluetooth/mgmt.c
++++ b/net/bluetooth/mgmt.c
+@@ -1942,6 +1942,7 @@ static void set_ssp_complete(struct hci_dev *hdev, void *data, int err)
+ 		}
+ 
+ 		mgmt_cmd_status(cmd->sk, cmd->hdev->id, cmd->opcode, mgmt_err);
++		mgmt_pending_free(cmd);
+ 		return;
+ 	}
+ 
+@@ -1960,6 +1961,7 @@ static void set_ssp_complete(struct hci_dev *hdev, void *data, int err)
+ 		sock_put(match.sk);
+ 
+ 	hci_update_eir_sync(hdev);
++	mgmt_pending_free(cmd);
+ }
+ 
+ static int set_ssp_sync(struct hci_dev *hdev, void *data)
+@@ -6461,6 +6463,7 @@ static void set_advertising_complete(struct hci_dev *hdev, void *data, int err)
+ 		hci_dev_clear_flag(hdev, HCI_ADVERTISING);
+ 
+ 	settings_rsp(cmd, &match);
++	mgmt_pending_free(cmd);
+ 
+ 	new_settings(hdev, match.sk);
+ 
+-- 
+2.47.3
+
