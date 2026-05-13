@@ -1,0 +1,55 @@
+From 0b97ffa5db36eabd319458b2ae29d273a6616d67 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Thu, 23 Apr 2026 14:45:28 +0000
+Subject: [PATCH] scsi: target: iscsi: Fix use-after-free in
+ iscsit_dec_session_usage_count()
+
+jira VULN-176310
+cve CVE-2026-23193
+commit-author Maurizio Lombardi <mlombard@redhat.com>
+commit 84dc6037390b8607c5551047d3970336cb51ba9a
+
+In iscsit_dec_session_usage_count(), the function calls complete() while
+holding the sess->session_usage_lock. Similar to the connection usage count
+logic, the waiter signaled by complete() (e.g., in the session release
+path) may wake up and free the iscsit_session structure immediately.
+
+This creates a race condition where the current thread may attempt to
+execute spin_unlock_bh() on a session structure that has already been
+deallocated, resulting in a KASAN slab-use-after-free.
+
+To resolve this, release the session_usage_lock before calling complete()
+to ensure all dereferences of the sess pointer are finished before the
+waiter is allowed to proceed with deallocation.
+
+	Signed-off-by: Maurizio Lombardi <mlombard@redhat.com>
+	Reported-by: Zhaojuan Guo <zguo@redhat.com>
+	Reviewed-by: Mike Christie <michael.christie@oracle.com>
+Link: https://patch.msgid.link/20260112165352.138606-3-mlombard@redhat.com
+	Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+(cherry picked from commit 84dc6037390b8607c5551047d3970336cb51ba9a)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/target/iscsi/iscsi_target_util.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/target/iscsi/iscsi_target_util.c b/drivers/target/iscsi/iscsi_target_util.c
+index 5368a30509d5..6d2cb56595b1 100644
+--- a/drivers/target/iscsi/iscsi_target_util.c
++++ b/drivers/target/iscsi/iscsi_target_util.c
+@@ -775,8 +775,11 @@ void iscsit_dec_session_usage_count(struct iscsi_session *sess)
+ 	spin_lock_bh(&sess->session_usage_lock);
+ 	sess->session_usage_count--;
+ 
+-	if (!sess->session_usage_count && sess->session_waiting_on_uc)
++	if (!sess->session_usage_count && sess->session_waiting_on_uc) {
++		spin_unlock_bh(&sess->session_usage_lock);
+ 		complete(&sess->session_waiting_on_uc_comp);
++		return;
++	}
+ 
+ 	spin_unlock_bh(&sess->session_usage_lock);
+ }
+-- 
+2.47.3
+

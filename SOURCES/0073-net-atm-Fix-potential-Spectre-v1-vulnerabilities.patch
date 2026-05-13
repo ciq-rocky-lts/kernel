@@ -1,0 +1,60 @@
+From 5209c7f7ff07c4404a37306050fa6f7de8b41e60 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Wed, 29 Apr 2026 15:41:12 +0200
+Subject: [PATCH] net: atm: Fix potential Spectre v1 vulnerabilities
+
+jira VULN-72435
+cve-pre CVE-2025-38323
+commit-author Gustavo A. R. Silva <gustavo@embeddedor.com>
+commit 899537b73557aafbdd11050b501cf54b4f5c45af
+
+arg is controlled by user-space, hence leading to a potential
+exploitation of the Spectre variant 1 vulnerability.
+
+This issue was detected with the help of Smatch:
+
+net/atm/lec.c:715 lec_mcast_attach() warn: potential spectre issue 'dev_lec' [r] (local cap)
+
+Fix this by sanitizing arg before using it to index dev_lec.
+
+Notice that given that speculation windows are large, the policy is
+to kill the speculation on the first load and not worry if it can be
+completed with a dependent load/store [1].
+
+[1] https://lore.kernel.org/lkml/20180423164740.GY17484@dhcp22.suse.cz/
+
+	Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit 899537b73557aafbdd11050b501cf54b4f5c45af)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ net/atm/lec.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/net/atm/lec.c b/net/atm/lec.c
+index f36eb5fc734c..6f917b781f7d 100644
+--- a/net/atm/lec.c
++++ b/net/atm/lec.c
+@@ -720,7 +720,10 @@ static int lec_vcc_attach(struct atm_vcc *vcc, void __user *arg)
+ 
+ static int lec_mcast_attach(struct atm_vcc *vcc, int arg)
+ {
+-	if (arg < 0 || arg >= MAX_LEC_ITF || !dev_lec[arg])
++	if (arg < 0 || arg >= MAX_LEC_ITF)
++		return -EINVAL;
++	arg = array_index_nospec(arg, MAX_LEC_ITF);
++	if (!dev_lec[arg])
+ 		return -EINVAL;
+ 	vcc->proto_data = dev_lec[arg];
+ 	return lec_mcast_make(netdev_priv(dev_lec[arg]), vcc);
+@@ -738,6 +741,7 @@ static int lecd_attach(struct atm_vcc *vcc, int arg)
+ 		i = arg;
+ 	if (arg >= MAX_LEC_ITF)
+ 		return -EINVAL;
++	i = array_index_nospec(arg, MAX_LEC_ITF);
+ 	if (!dev_lec[i]) {
+ 		int size;
+ 
+-- 
+2.47.3
+

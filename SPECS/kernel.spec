@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 14
+%define ciq_patch_version 15
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -610,6 +610,22 @@ Patch1090: 0064-kdb-Allow-access-to-sensitive-commands-to-be-restric.patch
 Patch1091: 0065-lockdown-also-lock-down-previous-kgdb-use.patch
 #CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.14.1
 Patch1092: 0066-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.15.1
+Patch1093: 0067-scsi-ses-Fix-possible-desc_ptr-out-of-bounds-accesse.patch
+Patch1094: 0068-RDMA-rxe-Fix-slab-use-after-free-Read-in-rxe_queue_c.patch
+Patch1095: 0069-atm-clip-Fix-infinite-recursive-call-of-clip_push.patch
+Patch1096: 0070-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
+Patch1097: 0071-NFSv4-pNFS-Clear-NFS_INO_LAYOUTCOMMIT-in-pnfs_mark_l.patch
+Patch1098: 0072-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
+Patch1099: 0073-net-atm-Fix-potential-Spectre-v1-vulnerabilities.patch
+Patch1100: 0074-net-atm-add-lec_mutex.patch
+Patch1101: 0075-net-atm-fix-proc-net-atm-lec-handling.patch
+Patch1102: 0076-Squashfs-check-return-result-of-sb_min_blocksize.patch
+Patch1103: 0077-squashfs-fix-memory-leak-in-squashfs_fill_super.patch
+Patch1104: 0078-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
+Patch1105: 0079-net-sched-Enforce-that-teql-can-only-be-used-as-root.patch
+Patch1106: 0080-net-add-skb_header_pointer_careful-helper.patch
+Patch1107: 0081-net-sched-cls_u32-use-skb_header_pointer_careful.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -1045,6 +1061,21 @@ ApplyOptionalPatch 0063-kdb-Add-enable-mask-for-groups-of-commands.patch
 ApplyOptionalPatch 0064-kdb-Allow-access-to-sensitive-commands-to-be-restric.patch
 ApplyOptionalPatch 0065-lockdown-also-lock-down-previous-kgdb-use.patch
 ApplyOptionalPatch 0066-vsock-Ignore-signal-timeout-on-connect-if-already-es.patch
+ApplyOptionalPatch 0067-scsi-ses-Fix-possible-desc_ptr-out-of-bounds-accesse.patch
+ApplyOptionalPatch 0068-RDMA-rxe-Fix-slab-use-after-free-Read-in-rxe_queue_c.patch
+ApplyOptionalPatch 0069-atm-clip-Fix-infinite-recursive-call-of-clip_push.patch
+ApplyOptionalPatch 0070-efivarfs-Fix-slab-out-of-bounds-in-efivarfs_d_compar.patch
+ApplyOptionalPatch 0071-NFSv4-pNFS-Clear-NFS_INO_LAYOUTCOMMIT-in-pnfs_mark_l.patch
+ApplyOptionalPatch 0072-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
+ApplyOptionalPatch 0073-net-atm-Fix-potential-Spectre-v1-vulnerabilities.patch
+ApplyOptionalPatch 0074-net-atm-add-lec_mutex.patch
+ApplyOptionalPatch 0075-net-atm-fix-proc-net-atm-lec-handling.patch
+ApplyOptionalPatch 0076-Squashfs-check-return-result-of-sb_min_blocksize.patch
+ApplyOptionalPatch 0077-squashfs-fix-memory-leak-in-squashfs_fill_super.patch
+ApplyOptionalPatch 0078-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
+ApplyOptionalPatch 0079-net-sched-Enforce-that-teql-can-only-be-used-as-root.patch
+ApplyOptionalPatch 0080-net-add-skb_header_pointer_careful-helper.patch
+ApplyOptionalPatch 0081-net-sched-cls_u32-use-skb_header_pointer_careful.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2048,6 +2079,23 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Thu May 07 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.15.1
+- net/sched: cls_u32: use skb_header_pointer_careful() (Roxana Nicolescu) [ciqres] {CVE-2026-23204}
+- net: add skb_header_pointer_careful() helper (Roxana Nicolescu) [ciqres] {CVE-2026-23204}
+- net/sched: Enforce that teql can only be used as root qdisc (Roxana Nicolescu) [ciqres] {CVE-2026-23074}
+- scsi: target: iscsi: Fix use-after-free in iscsit_dec_conn_usage_count() (Roxana Nicolescu) [ciqres] {CVE-2026-23216}
+- squashfs: fix memory leak in squashfs_fill_super (Roxana Nicolescu) [ciqres] {CVE-2025-38415}
+- Squashfs: check return result of sb_min_blocksize (Roxana Nicolescu) [ciqres] {CVE-2025-38415}
+- net: atm: fix /proc/net/atm/lec handling (Roxana Nicolescu) [ciqres] {CVE-2025-38180}
+- net: atm: add lec_mutex (Roxana Nicolescu) [ciqres] {CVE-2025-38323}
+- net: atm: Fix potential Spectre v1 vulnerabilities (Roxana Nicolescu) [ciqres] {CVE-2025-38323}
+- scsi: target: iscsi: Fix use-after-free in iscsit_dec_session_usage_count() (CIQ Kernel Automation) [ciqres] {CVE-2026-23193}
+- NFSv4/pNFS: Clear NFS_INO_LAYOUTCOMMIT in pnfs_mark_layout_stateid_invalid (CIQ Kernel Automation) [ciqres] {CVE-2025-68349}
+- efivarfs: Fix slab-out-of-bounds in efivarfs_d_compare (CIQ Kernel Automation) [ciqres] {CVE-2025-39817}
+- atm: clip: Fix infinite recursive call of clip_push(). (CIQ Kernel Automation) [ciqres] {CVE-2025-38459}
+- RDMA/rxe: Fix slab-use-after-free Read in rxe_queue_cleanup bug (CIQ Kernel Automation) [ciqres] {CVE-2025-38024}
+- scsi: ses: Fix possible desc_ptr out-of-bounds accesses (CIQ Kernel Automation) [ciqres] {CVE-2023-53675}
+
 * Fri Mar 27 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.14.1
 - vsock: Ignore signal/timeout on connect() if already established (Marcin Wcisło) [ciqres] {CVE-2025-40248}
 
