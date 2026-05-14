@@ -1,0 +1,73 @@
+From 8787ee97ffe78c4799ddc420bc2052577d96a3d8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 14 Apr 2026 01:04:05 +0200
+Subject: [PATCH] squashfs: fix memory leak in squashfs_fill_super
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-163295
+cve-bf CVE-2025-38415
+commit-author Phillip Lougher <phillip@squashfs.org.uk>
+commit b64700d41bdc4e9f82f1346c15a3678ebb91a89c
+upstream-diff Had to maneuver around the code deleted in the non-
+  backported commit 0c12185728d602c27cd12a845249e7f37197f71f ('Revert
+  "squashfs: provide backing_dev_info in order to disable read-ahead"')
+
+If sb_min_blocksize returns 0, squashfs_fill_super exits without freeing
+allocated memory (sb->s_fs_info).
+
+Fix this by moving the call to sb_min_blocksize to before memory is
+allocated.
+
+Link: https://lkml.kernel.org/r/20250811223740.110392-1-phillip@squashfs.org.uk
+Fixes: 734aa85390ea ("Squashfs: check return result of sb_min_blocksize")
+	Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>
+	Reported-by: Scott GUO <scottzhguo@tencent.com>
+Closes: https://lore.kernel.org/all/20250811061921.3807353-1-scott_gzh@163.com
+	Cc: <stable@vger.kernel.org>
+	Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+(cherry picked from commit b64700d41bdc4e9f82f1346c15a3678ebb91a89c)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/squashfs/super.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/fs/squashfs/super.c b/fs/squashfs/super.c
+index 80d664267af0..9efeb7d5f543 100644
+--- a/fs/squashfs/super.c
++++ b/fs/squashfs/super.c
+@@ -142,10 +142,15 @@ static int squashfs_fill_super(struct super_block *sb, struct fs_context *fc)
+ 	unsigned short flags;
+ 	unsigned int fragments;
+ 	u64 lookup_table_start, xattr_id_table_start, next_table;
+-	int err;
++	int err, devblksize = sb_min_blocksize(sb, SQUASHFS_DEVBLK_SIZE);
+ 
+ 	TRACE("Entered squashfs_fill_superblock\n");
+ 
++	if (!devblksize) {
++		errorf(fc, "squashfs: unable to set blocksize\n");
++		return -EINVAL;
++	}
++
+ 	/*
+ 	 * squashfs provides 'backing_dev_info' in order to disable read-ahead. For
+ 	 * squashfs, I/O is not deferred, it is done immediately in read_folio,
+@@ -169,12 +174,7 @@ static int squashfs_fill_super(struct super_block *sb, struct fs_context *fc)
+ 
+ 	msblk->panic_on_errors = (opts->errors == Opt_errors_panic);
+ 
+-	msblk->devblksize = sb_min_blocksize(sb, SQUASHFS_DEVBLK_SIZE);
+-	if (!msblk->devblksize) {
+-		errorf(fc, "squashfs: unable to set blocksize\n");
+-		return -EINVAL;
+-	}
+-
++	msblk->devblksize = devblksize;
+ 	msblk->devblksize_log2 = ffz(~msblk->devblksize);
+ 
+ 	mutex_init(&msblk->meta_index_mutex);
+-- 
+2.47.3
+

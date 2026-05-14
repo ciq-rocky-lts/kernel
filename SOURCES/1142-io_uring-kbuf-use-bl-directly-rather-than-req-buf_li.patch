@@ -1,0 +1,43 @@
+From f8bf170cc6ea61b10bffdc822ab78983f88eb969 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Thu, 8 Aug 2024 10:33:16 -0600
+Subject: [PATCH] io_uring/kbuf: use 'bl' directly rather than req->buf_list
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-163643
+cve-pre CVE-2025-38730
+commit-author Jens Axboe <axboe@kernel.dk>
+commit 03e02e8f95fee0f45124976993ed2121e2369a12
+
+req->buf_list is assigned higher up and is safe to use as we remain
+within a locked region, as is the 'bl' variable itself from which it
+was assigned. To improve readability, use 'bl' directly rather than
+get it from the io_kiocb, if we need to increment the head directly
+in the buffer selection path. This makes it readily apparent that
+it's the same io_buffer_list being used.
+
+	Signed-off-by: Jens Axboe <axboe@kernel.dk>
+(cherry picked from commit 03e02e8f95fee0f45124976993ed2121e2369a12)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ io_uring/kbuf.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/io_uring/kbuf.c b/io_uring/kbuf.c
+index bdfa30b38321..05c85b6b9689 100644
+--- a/io_uring/kbuf.c
++++ b/io_uring/kbuf.c
+@@ -298,7 +298,7 @@ int io_buffers_select(struct io_kiocb *req, struct buf_sel_arg *arg,
+ 		 */
+ 		if (ret > 0) {
+ 			req->flags |= REQ_F_BL_NO_RECYCLE;
+-			req->buf_list->head += ret;
++			bl->head += ret;
+ 		}
+ 	} else {
+ 		ret = io_provided_buffers_select(req, &arg->out_len, bl, arg->iovs);
+-- 
+2.47.3
+

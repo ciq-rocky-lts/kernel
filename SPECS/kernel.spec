@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 9
+%define ciq_patch_version 10
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1129,6 +1129,23 @@ Patch1000136: 1136-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
 Patch1000137: 1137-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
 Patch1000138: 1138-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
 Patch1000139: 1139-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+#CIQ Patch Version: 570.60.1+10.1.el9_6_ciq
+Patch1000140: 1140-Squashfs-check-return-result-of-sb_min_blocksize.patch
+Patch1000141: 1141-squashfs-fix-memory-leak-in-squashfs_fill_super.patch
+Patch1000142: 1142-io_uring-kbuf-use-bl-directly-rather-than-req-buf_li.patch
+Patch1000143: 1143-io_uring-kbuf-add-io_kbuf_commit-helper.patch
+Patch1000144: 1144-io_uring-net-commit-partial-buffers-on-retry.patch
+Patch1000145: 1145-smb-client-let-recv_done-verify-data_offset-data_len.patch
+Patch1000146: 1146-net-bridge-mcast-re-implement-br_multicast_-enable-d.patch
+Patch1000147: 1147-net-bridge-mcast-update-multicast-contex-when-vlan-s.patch
+Patch1000148: 1148-bridge-mcast-Fix-use-after-free-during-router-port-c.patch
+Patch1000149: 1149-scsi-qla2xxx-Fix-improper-freeing-of-purex-item.patch
+Patch1000150: 1150-RDMA-umad-Reject-negative-data_len-in-ib_umad_write.patch
+Patch1000151: 1151-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
+Patch1000152: 1152-can-raw-fix-ro-uniq-use-after-free-in-raw_rcv.patch
+Patch1000153: 1153-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
+Patch1000154: 1154-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+Patch1000155: 1155-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2027,6 +2044,22 @@ ApplyOptionalPatch 1136-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
 ApplyOptionalPatch 1137-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
 ApplyOptionalPatch 1138-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
 ApplyOptionalPatch 1139-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+ApplyOptionalPatch 1140-Squashfs-check-return-result-of-sb_min_blocksize.patch
+ApplyOptionalPatch 1141-squashfs-fix-memory-leak-in-squashfs_fill_super.patch
+ApplyOptionalPatch 1142-io_uring-kbuf-use-bl-directly-rather-than-req-buf_li.patch
+ApplyOptionalPatch 1143-io_uring-kbuf-add-io_kbuf_commit-helper.patch
+ApplyOptionalPatch 1144-io_uring-net-commit-partial-buffers-on-retry.patch
+ApplyOptionalPatch 1145-smb-client-let-recv_done-verify-data_offset-data_len.patch
+ApplyOptionalPatch 1146-net-bridge-mcast-re-implement-br_multicast_-enable-d.patch
+ApplyOptionalPatch 1147-net-bridge-mcast-update-multicast-contex-when-vlan-s.patch
+ApplyOptionalPatch 1148-bridge-mcast-Fix-use-after-free-during-router-port-c.patch
+ApplyOptionalPatch 1149-scsi-qla2xxx-Fix-improper-freeing-of-purex-item.patch
+ApplyOptionalPatch 1150-RDMA-umad-Reject-negative-data_len-in-ib_umad_write.patch
+ApplyOptionalPatch 1151-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
+ApplyOptionalPatch 1152-can-raw-fix-ro-uniq-use-after-free-in-raw_rcv.patch
+ApplyOptionalPatch 1153-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
+ApplyOptionalPatch 1154-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+ApplyOptionalPatch 1155-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4143,6 +4176,24 @@ fi
 #
 #
 %changelog
+* Thu May 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+10.1.el9_6_ciq
+- net: skbuff: propagate shared-frag marker through frag-transfer helpers (Brett Mastbergen) [ciqres] {CVE-2026-46300}
+- xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
+- Revert "xfrm: esp: avoid in-place decrypt on shared skb frags" (Jonathan Maple) [ciqres]
+- can: raw: fix ro->uniq use-after-free in raw_rcv() (CIQ Kernel Automation) [ciqres] {CVE-2026-31532}
+- KVM: x86/mmu: Drop/zap existing present SPTE even when creating an MMIO SPTE (CIQ Kernel Automation) [ciqres] {CVE-2026-23401}
+- RDMA/umad: Reject negative data_len in ib_umad_write (CIQ Kernel Automation) [ciqres] {CVE-2026-23243}
+- scsi: qla2xxx: Fix improper freeing of purex item (CIQ Kernel Automation) [ciqres] {CVE-2025-68741}
+- bridge: mcast: Fix use-after-free during router port configuration (Marcin Wcisło) [ciqres] {CVE-2025-38248}
+- net: bridge: mcast: update multicast contex when vlan state is changed (Marcin Wcisło) [ciqres] {CVE-2025-38248}
+- net: bridge: mcast: re-implement br_multicast_{enable, disable}_port functions (Marcin Wcisło) [ciqres] {CVE-2025-38248}
+- smb: client: let recv_done verify data_offset, data_length and remaining_data_length (Marcin Wcisło) [ciqres] {CVE-2025-39933}
+- io_uring/net: commit partial buffers on retry (Marcin Wcisło) [ciqres] {CVE-2025-38730}
+- io_uring/kbuf: add io_kbuf_commit() helper (Marcin Wcisło) [ciqres] {CVE-2025-38730}
+- io_uring/kbuf: use 'bl' directly rather than req->buf_list (Marcin Wcisło) [ciqres] {CVE-2025-38730}
+- squashfs: fix memory leak in squashfs_fill_super (Marcin Wcisło) [ciqres] {CVE-2025-38415}
+- Squashfs: check return result of sb_min_blocksize (Marcin Wcisło) [ciqres] {CVE-2025-38415}
+
 * Fri May 08 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+9.1.el9_6_ciq
 - xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
 - rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present (Sultan Alsawaf) [ciqres] {CVE-2026-43500}

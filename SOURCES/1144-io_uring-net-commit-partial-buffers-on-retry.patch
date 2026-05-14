@@ -1,0 +1,138 @@
+From 48f2beed4a9eb5e29df53bb30e46ee329a2aaa03 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 12 Aug 2025 08:30:11 -0600
+Subject: [PATCH] io_uring/net: commit partial buffers on retry
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-163643
+cve CVE-2025-38730
+commit-author Jens Axboe <axboe@kernel.dk>
+commit 41b70df5b38bc80967d2e0ed55cc3c3896bba781
+upstream-diff |
+  - In the `io_net_kbuf_recyle()' function
+    - Used `-EAGAIN' as the return value instead of `IOU_RETRY', which was
+      defined in the upstream as `-EAGAIN' anyway (see non-backported
+      7a9dcb05f5501b07a2ef7d0ef743f4f17e9f3055 ("io_uring: return -EAGAIN
+      to continue multishot")).
+    - Omitted the `len' argument in the `io_kbuf_commit()' call. The
+      upstream patch uses the extended version of this function, defined
+      in ae98dbf43d755b4e111fcd086e53939bef3e9a1a ("io_uring/kbuf: add
+      support for incremental buffer consumption"), which was compound
+      with the introduction of new feature. Original version is enough for
+      this patch - see the solution of CVE-2025-38730 in rocky9_7.
+  - Resolved conflict in the `io_recvmsg()' function where `return
+    IOU_RETRY' was expected instead of `return -EAGAIN'.
+
+Ring provided buffers are potentially only valid within the single
+execution context in which they were acquired. io_uring deals with this
+and invalidates them on retry. But on the networking side, if
+MSG_WAITALL is set, or if the socket is of the streaming type and too
+little was processed, then it will hang on to the buffer rather than
+recycle or commit it. This is problematic for two reasons:
+
+1) If someone unregisters the provided buffer ring before a later retry,
+   then the req->buf_list will no longer be valid.
+
+2) If multiple sockers are using the same buffer group, then multiple
+   receives can consume the same memory. This can cause data corruption
+   in the application, as either receive could land in the same
+   userspace buffer.
+
+Fix this by disallowing partial retries from pinning a provided buffer
+across multiple executions, if ring provided buffers are used.
+
+	Cc: stable@vger.kernel.org
+	Reported-by: pt x <superman.xpt@gmail.com>
+Fixes: c56e022c0a27 ("io_uring: add support for user mapped provided buffer ring")
+	Signed-off-by: Jens Axboe <axboe@kernel.dk>
+(cherry picked from commit 41b70df5b38bc80967d2e0ed55cc3c3896bba781)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ io_uring/net.c | 27 +++++++++++++++------------
+ 1 file changed, 15 insertions(+), 12 deletions(-)
+
+diff --git a/io_uring/net.c b/io_uring/net.c
+index d81896885b69..f061df04e976 100644
+--- a/io_uring/net.c
++++ b/io_uring/net.c
+@@ -478,6 +478,15 @@ static int io_bundle_nbufs(struct io_async_msghdr *kmsg, int ret)
+ 	return nbufs;
+ }
+ 
++static int io_net_kbuf_recyle(struct io_kiocb *req,
++			      struct io_async_msghdr *kmsg, int len)
++{
++	req->flags |= REQ_F_BL_NO_RECYCLE;
++	if (req->flags & REQ_F_BUFFERS_COMMIT)
++		io_kbuf_commit(req, req->buf_list, io_bundle_nbufs(kmsg, len));
++	return -EAGAIN;
++}
++
+ static inline bool io_send_finish(struct io_kiocb *req, int *ret,
+ 				  struct io_async_msghdr *kmsg,
+ 				  unsigned issue_flags)
+@@ -546,8 +555,7 @@ int io_sendmsg(struct io_kiocb *req, unsigned int issue_flags)
+ 			kmsg->msg.msg_controllen = 0;
+ 			kmsg->msg.msg_control = NULL;
+ 			sr->done_io += ret;
+-			req->flags |= REQ_F_BL_NO_RECYCLE;
+-			return -EAGAIN;
++			return io_net_kbuf_recyle(req, kmsg, ret);
+ 		}
+ 		if (ret == -ERESTARTSYS)
+ 			ret = -EINTR;
+@@ -635,8 +643,7 @@ int io_send(struct io_kiocb *req, unsigned int issue_flags)
+ 			sr->len -= ret;
+ 			sr->buf += ret;
+ 			sr->done_io += ret;
+-			req->flags |= REQ_F_BL_NO_RECYCLE;
+-			return -EAGAIN;
++			return io_net_kbuf_recyle(req, kmsg, ret);
+ 		}
+ 		if (ret == -ERESTARTSYS)
+ 			ret = -EINTR;
+@@ -1018,8 +1025,7 @@ int io_recvmsg(struct io_kiocb *req, unsigned int issue_flags)
+ 		}
+ 		if (ret > 0 && io_net_retry(sock, flags)) {
+ 			sr->done_io += ret;
+-			req->flags |= REQ_F_BL_NO_RECYCLE;
+-			return -EAGAIN;
++			return io_net_kbuf_recyle(req, kmsg, ret);
+ 		}
+ 		if (ret == -ERESTARTSYS)
+ 			ret = -EINTR;
+@@ -1158,8 +1164,7 @@ int io_recv(struct io_kiocb *req, unsigned int issue_flags)
+ 			sr->len -= ret;
+ 			sr->buf += ret;
+ 			sr->done_io += ret;
+-			req->flags |= REQ_F_BL_NO_RECYCLE;
+-			return -EAGAIN;
++			return io_net_kbuf_recyle(req, kmsg, ret);
+ 		}
+ 		if (ret == -ERESTARTSYS)
+ 			ret = -EINTR;
+@@ -1395,8 +1400,7 @@ int io_send_zc(struct io_kiocb *req, unsigned int issue_flags)
+ 			zc->len -= ret;
+ 			zc->buf += ret;
+ 			zc->done_io += ret;
+-			req->flags |= REQ_F_BL_NO_RECYCLE;
+-			return -EAGAIN;
++			return io_net_kbuf_recyle(req, kmsg, ret);
+ 		}
+ 		if (ret == -ERESTARTSYS)
+ 			ret = -EINTR;
+@@ -1455,8 +1459,7 @@ int io_sendmsg_zc(struct io_kiocb *req, unsigned int issue_flags)
+ 
+ 		if (ret > 0 && io_net_retry(sock, flags)) {
+ 			sr->done_io += ret;
+-			req->flags |= REQ_F_BL_NO_RECYCLE;
+-			return -EAGAIN;
++			return io_net_kbuf_recyle(req, kmsg, ret);
+ 		}
+ 		if (ret == -ERESTARTSYS)
+ 			ret = -EINTR;
+-- 
+2.47.3
+

@@ -1,0 +1,87 @@
+From d385aa8bc3e7ce36b0c8dfc1d4cca683104cb6bd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 10 Sep 2025 11:49:05 +0200
+Subject: [PATCH] smb: client: let recv_done verify data_offset, data_length
+ and remaining_data_length
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-161396
+cve CVE-2025-39933
+commit-author Stefan Metzmacher <metze@samba.org>
+commit f57e53ea252363234f86674db475839e5b87102e
+upstream-diff |
+  - Ignored the extraction of `sc->parameters' into the local variable
+    `sp'. In the upstream it was only needed to get
+    `max_fragmented_recv_size', which in ciqlts9_6 can be found in the
+    `smbd_connection' struct, saved in the `info' variable. Used direct
+    access `info->max_fragmented_recv_size' where needed. (On upstream the
+    field was moved to `smbdirect_socket_parameters' struct in the
+    non-backported commit cc55f65dd352bdb7bdf8db1c36fb348c294c3b66 ("smb:
+    client: make use of common smbdirect_socket_parameters")).
+  - The offset of `padding' is calculated for the `smbd_data_transfer'
+    struct instead of `smbdirect_data_transfer'. Semantically it's the
+    same struct, just renamed (introduced in
+    00fab6cf323fa5850e6cbe283b23e605e6e97912 ("smb: smbdirect: add
+    smbdirect_pdu.h with protocol definitions"), swapped with
+    `smbd_data_transfer' in 64946d5be665ddac6b5bf11f5b5ff319aae0f4c6
+    ("smb: client: make use of common smbdirect_pdu.h"))
+
+This is inspired by the related server fixes.
+
+	Cc: Tom Talpey <tom@talpey.com>
+	Cc: Long Li <longli@microsoft.com>
+	Cc: linux-cifs@vger.kernel.org
+	Cc: samba-technical@lists.samba.org
+	Reviewed-by: Namjae Jeon <linkinjeon@kernel.org>
+Fixes: f198186aa9bb ("CIFS: SMBD: Establish SMB Direct connection")
+	Signed-off-by: Stefan Metzmacher <metze@samba.org>
+	Signed-off-by: Steve French <stfrench@microsoft.com>
+(cherry picked from commit f57e53ea252363234f86674db475839e5b87102e)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/smb/client/smbdirect.c | 19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/fs/smb/client/smbdirect.c b/fs/smb/client/smbdirect.c
+index e2e0c9b2c66b..7bdb54367bc4 100644
+--- a/fs/smb/client/smbdirect.c
++++ b/fs/smb/client/smbdirect.c
+@@ -446,7 +446,9 @@ static void recv_done(struct ib_cq *cq, struct ib_wc *wc)
+ 	struct smbd_response *response =
+ 		container_of(wc->wr_cqe, struct smbd_response, cqe);
+ 	struct smbd_connection *info = response->info;
+-	int data_length = 0;
++	u32 data_offset = 0;
++	u32 data_length = 0;
++	u32 remaining_data_length = 0;
+ 
+ 	log_rdma_recv(INFO, "response=0x%p type=%d wc status=%d wc opcode %d byte_len=%d pkey_index=%u\n",
+ 		      response, response->type, wc->status, wc->opcode,
+@@ -478,7 +480,22 @@ static void recv_done(struct ib_cq *cq, struct ib_wc *wc)
+ 	/* SMBD data transfer packet */
+ 	case SMBD_TRANSFER_DATA:
+ 		data_transfer = smbd_response_payload(response);
++
++		if (wc->byte_len <
++		    offsetof(struct smbd_data_transfer, padding))
++			goto error;
++
++		remaining_data_length = le32_to_cpu(data_transfer->remaining_data_length);
++		data_offset = le32_to_cpu(data_transfer->data_offset);
+ 		data_length = le32_to_cpu(data_transfer->data_length);
++		if (wc->byte_len < data_offset ||
++		    (u64)wc->byte_len < (u64)data_offset + data_length)
++			goto error;
++
++		if (remaining_data_length > info->max_fragmented_recv_size ||
++		    data_length > info->max_fragmented_recv_size ||
++		    (u64)remaining_data_length + (u64)data_length > (u64)info->max_fragmented_recv_size)
++			goto error;
+ 
+ 		/*
+ 		 * If this is a packet with data playload place the data in
+-- 
+2.47.3
+
