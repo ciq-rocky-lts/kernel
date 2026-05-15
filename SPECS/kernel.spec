@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 28
+%define ciq_patch_version 29
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1431,6 +1431,10 @@ Patch1000482: 0437-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 Patch1000483: 0438-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
 Patch1000484: 0439-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
 Patch1000485: 0440-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
+#CIQ Patch Version: 284.30.1+29.1.el9_2_ciq
+Patch1000486: 0441-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
+Patch1000487: 0442-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+Patch1000488: 0443-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2592,6 +2596,9 @@ ApplyOptionalPatch 0437-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patc
 ApplyOptionalPatch 0438-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
 ApplyOptionalPatch 0439-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
 ApplyOptionalPatch 0440-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
+ApplyOptionalPatch 0441-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
+ApplyOptionalPatch 0442-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+ApplyOptionalPatch 0443-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4475,6 +4482,11 @@ fi
 #
 #
 %changelog
+* Thu May 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+29.1.el9_2_ciq
+- net: skbuff: propagate shared-frag marker through frag-transfer helpers (Brett Mastbergen) [ciqres] {CVE-2026-46300}
+- xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
+- Revert "xfrm: esp: avoid in-place decrypt on shared skb frags" (Jonathan Maple) [ciqres]
+
 * Fri May 08 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+28.1.el9_2_ciq
 - rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
 - rxrpc: Fix rxrpc_input_call_event() to only unshare DATA packets (Sultan Alsawaf) [ciqres] {CVE-2026-43500}

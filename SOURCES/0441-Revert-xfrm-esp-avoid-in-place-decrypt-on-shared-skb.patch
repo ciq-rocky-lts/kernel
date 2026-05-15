@@ -1,0 +1,43 @@
+From d2f6155d6fbe93cdbe2a73dba1b5e7ce5af5449c Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jonathan.l.maple@gmail.com>
+Date: Wed, 13 May 2026 20:26:56 -0400
+Subject: [PATCH] Revert "xfrm: esp: avoid in-place decrypt on shared skb
+ frags"
+
+This reverts commit bb274cc6f4e7d1bbc82408f875d5fa190f66fadd.
+---
+ net/ipv4/esp4.c      | 3 +--
+ net/ipv4/ip_output.c | 3 ---
+ 2 files changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/net/ipv4/esp4.c b/net/ipv4/esp4.c
+index 4646d9b32a91..d37be9dd398f 100644
+--- a/net/ipv4/esp4.c
++++ b/net/ipv4/esp4.c
+@@ -918,8 +918,7 @@ static int esp_input(struct xfrm_state *x, struct sk_buff *skb)
+ 			nfrags = 1;
+ 
+ 			goto skip_cow;
+-		} else if (!skb_has_frag_list(skb) &&
+-			   !skb_has_shared_frag(skb)) {
++		} else if (!skb_has_frag_list(skb)) {
+ 			nfrags = skb_shinfo(skb)->nr_frags;
+ 			nfrags++;
+ 
+diff --git a/net/ipv4/ip_output.c b/net/ipv4/ip_output.c
+index 8820bddf285e..2623bb727815 100644
+--- a/net/ipv4/ip_output.c
++++ b/net/ipv4/ip_output.c
+@@ -1438,9 +1438,6 @@ ssize_t	ip_append_page(struct sock *sk, struct flowi4 *fl4, struct page *page,
+ 			goto error;
+ 		}
+ 
+-		if (!(flags & MSG_NO_SHARED_FRAGS))
+-			skb_shinfo(skb)->flags |= SKBFL_SHARED_FRAG;
+-
+ 		if (skb->ip_summed == CHECKSUM_NONE) {
+ 			__wsum csum;
+ 			csum = csum_page(page, offset, len);
+-- 
+2.47.3
+
