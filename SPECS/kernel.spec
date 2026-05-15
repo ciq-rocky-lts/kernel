@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 20
+%define ciq_patch_version 21
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1255,6 +1255,12 @@ Patch1000245: 0225-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 Patch1000246: 0226-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
 Patch1000247: 0227-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
 Patch1000248: 0228-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
+#CIQ Patch Version: 427.42.1+21.1.el9_4_ciq
+Patch1000249: 0229-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
+Patch1000250: 0230-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+Patch1000251: 0231-net-skbuff-propagate-shared-frag-marker-through-frag.patch
+Patch1000252: 0232-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
+Patch1000253: 0233-can-raw-fix-ro-uniq-use-after-free-in-raw_rcv.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2256,6 +2262,11 @@ ApplyOptionalPatch 0225-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patc
 ApplyOptionalPatch 0226-rxrpc-Fix-potential-UAF-after-skb_unshare-failure.patch
 ApplyOptionalPatch 0227-rxrpc-Fix-rxrpc_input_call_event-to-only-unshare-DAT.patch
 ApplyOptionalPatch 0228-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
+ApplyOptionalPatch 0229-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
+ApplyOptionalPatch 0230-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+ApplyOptionalPatch 0231-net-skbuff-propagate-shared-frag-marker-through-frag.patch
+ApplyOptionalPatch 0232-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
+ApplyOptionalPatch 0233-can-raw-fix-ro-uniq-use-after-free-in-raw_rcv.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4333,6 +4344,13 @@ fi
 #
 #
 %changelog
+* Thu May 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+21.1.el9_4_ciq
+- can: raw: fix ro->uniq use-after-free in raw_rcv() (CIQ Kernel Automation) [ciqres] {CVE-2026-31532}
+- KVM: x86/mmu: Drop/zap existing present SPTE even when creating an MMIO SPTE (CIQ Kernel Automation) [ciqres] {CVE-2026-23401}
+- net: skbuff: propagate shared-frag marker through frag-transfer helpers (Brett Mastbergen) [ciqres] {CVE-2026-46300}
+- xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
+- Revert "xfrm: esp: avoid in-place decrypt on shared skb frags" (Jonathan Maple) [ciqres]
+
 * Fri May 08 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-427.42.1+20.1.el9_4_ciq
 - rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
 - rxrpc: Fix rxrpc_input_call_event() to only unshare DATA packets (Sultan Alsawaf) [ciqres] {CVE-2026-43500}
