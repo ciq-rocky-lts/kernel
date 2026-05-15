@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 25
+%define ciq_patch_version 26
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1012,6 +1012,18 @@ Patch0434: 0279-xprtrdma-fix-pointer-derefs-in-error-cases-of-rpcrdm.patch
 Patch0435: 0280-KVM-x86-nSVM-fix-potential-NULL-derefernce-on-nested.patch
 Patch0436: 0281-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
 Patch0437: 0282-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+#CIQ Patch Version: 372.32.1+26.1.el8_6_ciq
+Patch0438: 0283-um-Fix-out-of-bounds-read-in-LDT-setup.patch
+Patch0439: 0284-netfilter-nf_tables-do-not-allow-SET_ID-to-refer-to-.patch
+Patch0440: 0285-ipv6-sr-fix-out-of-bounds-read-when-setting-HMAC-dat.patch
+Patch0441: 0286-nvme-tcp-fix-UAF-when-detecting-digest-errors.patch
+Patch0442: 0287-ALSA-usb-audio-Fix-an-out-of-bounds-bug-in-__snd_usb.patch
+Patch0443: 0288-scsi-mpt3sas-Fix-use-after-free-warning.patch
+Patch0444: 0289-mm-slub-fix-to-return-errno-if-kmalloc-fails.patch
+Patch0445: 0290-sctp-handle-the-error-returned-from-sctp_auth_asoc_i.patch
+Patch0446: 0291-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
+Patch0447: 0292-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+Patch0448: 0293-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2016,6 +2028,17 @@ ApplyOptionalPatch 0279-xprtrdma-fix-pointer-derefs-in-error-cases-of-rpcrdm.pat
 ApplyOptionalPatch 0280-KVM-x86-nSVM-fix-potential-NULL-derefernce-on-nested.patch
 ApplyOptionalPatch 0281-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_s.patch
 ApplyOptionalPatch 0282-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+ApplyOptionalPatch 0283-um-Fix-out-of-bounds-read-in-LDT-setup.patch
+ApplyOptionalPatch 0284-netfilter-nf_tables-do-not-allow-SET_ID-to-refer-to-.patch
+ApplyOptionalPatch 0285-ipv6-sr-fix-out-of-bounds-read-when-setting-HMAC-dat.patch
+ApplyOptionalPatch 0286-nvme-tcp-fix-UAF-when-detecting-digest-errors.patch
+ApplyOptionalPatch 0287-ALSA-usb-audio-Fix-an-out-of-bounds-bug-in-__snd_usb.patch
+ApplyOptionalPatch 0288-scsi-mpt3sas-Fix-use-after-free-warning.patch
+ApplyOptionalPatch 0289-mm-slub-fix-to-return-errno-if-kmalloc-fails.patch
+ApplyOptionalPatch 0290-sctp-handle-the-error-returned-from-sctp_auth_asoc_i.patch
+ApplyOptionalPatch 0291-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
+ApplyOptionalPatch 0292-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
+ApplyOptionalPatch 0293-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 
 
 # CIQ LTS patches:
@@ -3575,6 +3598,19 @@ fi
 #
 #
 %changelog
+* Thu May 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+26.1.el8_6_ciq
+- net: skbuff: propagate shared-frag marker through frag-transfer helpers (Brett Mastbergen) [ciqres] {CVE-2026-46300}
+- xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
+- Revert "xfrm: esp: avoid in-place decrypt on shared skb frags" (Jonathan Maple) [ciqres]
+- sctp: handle the error returned from sctp_auth_asoc_init_active_key (CIQ Kernel Automation) [ciqres] {CVE-2022-50243}
+- mm/slub: fix to return errno if kmalloc() fails (CIQ Kernel Automation) [ciqres] {CVE-2022-48659}
+- scsi: mpt3sas: Fix use-after-free warning (CIQ Kernel Automation) [ciqres] {CVE-2022-48695}
+- ALSA: usb-audio: Fix an out-of-bounds bug in __snd_usb_parse_audio_interface() (CIQ Kernel Automation) [ciqres] {CVE-2022-48701}
+- nvme-tcp: fix UAF when detecting digest errors (CIQ Kernel Automation) [ciqres] {CVE-2022-48686}
+- ipv6: sr: fix out-of-bounds read when setting HMAC data. (CIQ Kernel Automation) [ciqres] {CVE-2022-48687}
+- netfilter: nf_tables: do not allow SET_ID to refer to another table (CIQ Kernel Automation) [ciqres] {CVE-2022-50213}
+- um: Fix out-of-bounds read in LDT setup (CIQ Kernel Automation) [ciqres] {CVE-2022-49395}
+
 * Fri May 08 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1+25.1.el8_6_ciq
 - xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
 - scsi: target: iscsi: Fix use-after-free in iscsit_dec_session_usage_count() (Roxana Nicolescu) [ciqres] {CVE-2026-23193}
