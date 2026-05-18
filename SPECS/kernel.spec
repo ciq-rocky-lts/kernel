@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 21
+%define ciq_patch_version 22
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1261,6 +1261,8 @@ Patch1000250: 0230-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 Patch1000251: 0231-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 Patch1000252: 0232-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
 Patch1000253: 0233-can-raw-fix-ro-uniq-use-after-free-in-raw_rcv.patch
+#CIQ Patch Version: 427.42.1+22.1.el9_4_ciq
+Patch1000254: 0234-ptrace-slightly-saner-get_dumpable-logic.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2267,6 +2269,7 @@ ApplyOptionalPatch 0230-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patc
 ApplyOptionalPatch 0231-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 ApplyOptionalPatch 0232-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
 ApplyOptionalPatch 0233-can-raw-fix-ro-uniq-use-after-free-in-raw_rcv.patch
+ApplyOptionalPatch 0234-ptrace-slightly-saner-get_dumpable-logic.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4344,6 +4347,9 @@ fi
 #
 #
 %changelog
+* Mon May 18 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-427.42.1+22.1.el9_4_ciq
+- ptrace: slightly saner 'get_dumpable()' logic (Roxana Nicolescu) [ciqres] {CVE-2026-46333}
+
 * Thu May 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+21.1.el9_4_ciq
 - can: raw: fix ro->uniq use-after-free in raw_rcv() (CIQ Kernel Automation) [ciqres] {CVE-2026-31532}
 - KVM: x86/mmu: Drop/zap existing present SPTE even when creating an MMIO SPTE (CIQ Kernel Automation) [ciqres] {CVE-2026-23401}
