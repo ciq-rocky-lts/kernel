@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 29
+%define ciq_patch_version 30
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1435,6 +1435,8 @@ Patch1000485: 0440-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.patch
 Patch1000486: 0441-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
 Patch1000487: 0442-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 Patch1000488: 0443-net-skbuff-propagate-shared-frag-marker-through-frag.patch
+#CIQ Patch Version: 284.30.1+30.1.el9_2_ciq
+Patch1000489: 0444-ptrace-slightly-saner-get_dumpable-logic.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2599,6 +2601,7 @@ ApplyOptionalPatch 0440-rxrpc-Also-unshare-DATA-RESPONSE-packets-when-paged-.pat
 ApplyOptionalPatch 0441-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
 ApplyOptionalPatch 0442-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 ApplyOptionalPatch 0443-net-skbuff-propagate-shared-frag-marker-through-frag.patch
+ApplyOptionalPatch 0444-ptrace-slightly-saner-get_dumpable-logic.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4482,6 +4485,9 @@ fi
 #
 #
 %changelog
+* Mon May 18 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1+30.1.el9_2_ciq
+- ptrace: slightly saner 'get_dumpable()' logic (Roxana Nicolescu) [ciqres] {CVE-2026-46333}
+
 * Thu May 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+29.1.el9_2_ciq
 - net: skbuff: propagate shared-frag marker through frag-transfer helpers (Brett Mastbergen) [ciqres] {CVE-2026-46300}
 - xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
