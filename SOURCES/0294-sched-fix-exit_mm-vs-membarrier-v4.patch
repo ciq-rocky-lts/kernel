@@ -1,0 +1,141 @@
+From f6c38420a1a507245c12b36a83f780e0242a4745 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Fri, 15 May 2026 16:05:06 +0200
+Subject: [PATCH] sched: fix exit_mm vs membarrier (v4)
+
+jira VULN-185427
+cve-pre CVE-2026-46333
+commit-author Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
+commit 5bc78502322a5e4eef3f1b2a2813751dc6434143
+
+exit_mm should issue memory barriers after user-space memory accesses,
+before clearing current->mm, to order user-space memory accesses
+performed prior to exit_mm before clearing tsk->mm, which has the
+effect of skipping the membarrier private expedited IPIs.
+
+exit_mm should also update the runqueue's membarrier_state so
+membarrier global expedited IPIs are not sent when they are not
+needed.
+
+The membarrier system call can be issued concurrently with do_exit
+if we have thread groups created with CLONE_VM but not CLONE_THREAD.
+
+Here is the scenario I have in mind:
+
+Two thread groups are created, A and B. Thread group B is created by
+issuing clone from group A with flag CLONE_VM set, but not CLONE_THREAD.
+Let's assume we have a single thread within each thread group (Thread A
+and Thread B).
+
+The AFAIU we can have:
+
+Userspace variables:
+
+int x = 0, y = 0;
+
+CPU 0                   CPU 1
+Thread A                Thread B
+(in thread group A)     (in thread group B)
+
+x = 1
+barrier()
+y = 1
+exit()
+exit_mm()
+current->mm = NULL;
+                        r1 = load y
+                        membarrier()
+                          skips CPU 0 (no IPI) because its current mm is NULL
+                        r2 = load x
+                        BUG_ON(r1 == 1 && r2 == 0)
+
+	Signed-off-by: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
+	Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+Link: https://lkml.kernel.org/r/20201020134715.13909-2-mathieu.desnoyers@efficios.com
+(cherry picked from commit 5bc78502322a5e4eef3f1b2a2813751dc6434143)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ include/linux/sched/mm.h  |  5 +++++
+ kernel/exit.c             | 16 +++++++++++++++-
+ kernel/sched/membarrier.c | 12 ++++++++++++
+ 3 files changed, 32 insertions(+), 1 deletion(-)
+
+diff --git a/include/linux/sched/mm.h b/include/linux/sched/mm.h
+index 90a82a903c06..8391cac2dcaa 100644
+--- a/include/linux/sched/mm.h
++++ b/include/linux/sched/mm.h
+@@ -389,6 +389,8 @@ static inline void membarrier_mm_sync_core_before_usermode(struct mm_struct *mm)
+ 
+ extern void membarrier_exec_mmap(struct mm_struct *mm);
+ 
++extern void membarrier_update_current_mm(struct mm_struct *next_mm);
++
+ #else
+ #ifdef CONFIG_ARCH_HAS_MEMBARRIER_CALLBACKS
+ static inline void membarrier_arch_switch_mm(struct mm_struct *prev,
+@@ -403,6 +405,9 @@ static inline void membarrier_exec_mmap(struct mm_struct *mm)
+ static inline void membarrier_mm_sync_core_before_usermode(struct mm_struct *mm)
+ {
+ }
++static inline void membarrier_update_current_mm(struct mm_struct *next_mm)
++{
++}
+ #endif
+ 
+ #endif /* _LINUX_SCHED_MM_H */
+diff --git a/kernel/exit.c b/kernel/exit.c
+index 5f1519daf3ff..7cce37ad2670 100644
+--- a/kernel/exit.c
++++ b/kernel/exit.c
+@@ -482,10 +482,24 @@ static void exit_mm(void)
+ 	BUG_ON(mm != current->active_mm);
+ 	/* more a memory barrier than a real lock */
+ 	task_lock(current);
++	/*
++	 * When a thread stops operating on an address space, the loop
++	 * in membarrier_private_expedited() may not observe that
++	 * tsk->mm, and the loop in membarrier_global_expedited() may
++	 * not observe a MEMBARRIER_STATE_GLOBAL_EXPEDITED
++	 * rq->membarrier_state, so those would not issue an IPI.
++	 * Membarrier requires a memory barrier after accessing
++	 * user-space memory, before clearing tsk->mm or the
++	 * rq->membarrier_state.
++	 */
++	smp_mb__after_spinlock();
++	local_irq_disable();
+ 	current->mm = NULL;
+-	mmap_read_unlock(mm);
++	membarrier_update_current_mm(NULL);
+ 	enter_lazy_tlb(mm, current);
++	local_irq_enable();
+ 	task_unlock(current);
++	mmap_read_unlock(mm);
+ 	mm_update_next_owner(mm);
+ 	mmput(mm);
+ 	if (test_thread_flag(TIF_MEMDIE))
+diff --git a/kernel/sched/membarrier.c b/kernel/sched/membarrier.c
+index 0b829d32dc5a..4f71571c49d6 100644
+--- a/kernel/sched/membarrier.c
++++ b/kernel/sched/membarrier.c
+@@ -72,6 +72,18 @@ void membarrier_exec_mmap(struct mm_struct *mm)
+ 	this_cpu_write(runqueues.membarrier_state, 0);
+ }
+ 
++void membarrier_update_current_mm(struct mm_struct *next_mm)
++{
++	struct rq *rq = this_rq();
++	int membarrier_state = 0;
++
++	if (next_mm)
++		membarrier_state = atomic_read(&next_mm->membarrier_state);
++	if (READ_ONCE(rq->membarrier_state) == membarrier_state)
++		return;
++	WRITE_ONCE(rq->membarrier_state, membarrier_state);
++}
++
+ static int membarrier_global_expedited(void)
+ {
+ 	int cpu;
+-- 
+2.47.3
+

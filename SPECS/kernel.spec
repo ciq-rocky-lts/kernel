@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 26
+%define ciq_patch_version 27
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1024,6 +1024,9 @@ Patch0445: 0290-sctp-handle-the-error-returned-from-sctp_auth_asoc_i.patch
 Patch0446: 0291-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
 Patch0447: 0292-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 Patch0448: 0293-net-skbuff-propagate-shared-frag-marker-through-frag.patch
+#CIQ Patch Version: 372.32.1+27.1.el8_6_ciq
+Patch0449: 0294-sched-fix-exit_mm-vs-membarrier-v4.patch
+Patch0450: 0295-ptrace-slightly-saner-get_dumpable-logic.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2039,6 +2042,8 @@ ApplyOptionalPatch 0290-sctp-handle-the-error-returned-from-sctp_auth_asoc_i.pat
 ApplyOptionalPatch 0291-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.patch
 ApplyOptionalPatch 0292-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 ApplyOptionalPatch 0293-net-skbuff-propagate-shared-frag-marker-through-frag.patch
+ApplyOptionalPatch 0294-sched-fix-exit_mm-vs-membarrier-v4.patch
+ApplyOptionalPatch 0295-ptrace-slightly-saner-get_dumpable-logic.patch
 
 
 # CIQ LTS patches:
@@ -3598,6 +3603,10 @@ fi
 #
 #
 %changelog
+* Mon May 18 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1+27.1.el8_6_ciq
+- ptrace: slightly saner 'get_dumpable()' logic (Roxana Nicolescu) [ciqres] {CVE-2026-46333}
+- sched: fix exit_mm vs membarrier (v4) (Roxana Nicolescu) [ciqres] {CVE-2026-46333}
+
 * Thu May 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+26.1.el8_6_ciq
 - net: skbuff: propagate shared-frag marker through frag-transfer helpers (Brett Mastbergen) [ciqres] {CVE-2026-46300}
 - xfrm: esp: avoid in-place decrypt on shared skb frags (Jonathan Maple) [ciqres] {CVE-2026-43284}
