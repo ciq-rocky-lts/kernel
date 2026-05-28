@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 11
+%define ciq_patch_version 12
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1148,6 +1148,9 @@ Patch1000154: 1154-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 Patch1000155: 1155-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 #CIQ Patch Version: 570.60.1+11.1.el9_6_ciq
 Patch1000156: 1156-ptrace-slightly-saner-get_dumpable-logic.patch
+#CIQ Patch Version: 570.60.1+12.1.el9_6_ciq
+Patch1000157: 1157-net-gro-don-t-merge-zcopy-skbs.patch
+Patch1000158: 1158-smb-client-reject-userspace-cifs.spnego-descriptions.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2063,6 +2066,8 @@ ApplyOptionalPatch 1153-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.pat
 ApplyOptionalPatch 1154-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 ApplyOptionalPatch 1155-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 ApplyOptionalPatch 1156-ptrace-slightly-saner-get_dumpable-logic.patch
+ApplyOptionalPatch 1157-net-gro-don-t-merge-zcopy-skbs.patch
+ApplyOptionalPatch 1158-smb-client-reject-userspace-cifs.spnego-descriptions.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4179,6 +4184,10 @@ fi
 #
 #
 %changelog
+* Tue May 26 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+12.1.el9_6_ciq
+- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres]
+- net: gro: don't merge zcopy skbs (Sabrina Dubroca) [ciqres]
+
 * Mon May 18 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-570.60.1+11.1.el9_6_ciq
 - ptrace: slightly saner 'get_dumpable()' logic (Roxana Nicolescu) [ciqres] {CVE-2026-46333}
 
