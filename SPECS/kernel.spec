@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 15
+%define ciq_patch_version 16
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -626,6 +626,11 @@ Patch1104: 0078-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
 Patch1105: 0079-net-sched-Enforce-that-teql-can-only-be-used-as-root.patch
 Patch1106: 0080-net-add-skb_header_pointer_careful-helper.patch
 Patch1107: 0081-net-sched-cls_u32-use-skb_header_pointer_careful.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.16.1
+Patch1108: 0082-ALSA-usb-audio-Fix-an-out-of-bounds-bug-in-__snd_usb.patch
+Patch1109: 0083-media-uvcvideo-Fix-double-free-in-error-path.patch
+Patch1110: 0084-HID-intel-ish-hid-Fix-use-after-free-issue-in-ishtp_.patch
+Patch1111: 0085-smb-client-reject-userspace-cifs.spnego-descriptions.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -1076,6 +1081,10 @@ ApplyOptionalPatch 0078-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.pat
 ApplyOptionalPatch 0079-net-sched-Enforce-that-teql-can-only-be-used-as-root.patch
 ApplyOptionalPatch 0080-net-add-skb_header_pointer_careful-helper.patch
 ApplyOptionalPatch 0081-net-sched-cls_u32-use-skb_header_pointer_careful.patch
+ApplyOptionalPatch 0082-ALSA-usb-audio-Fix-an-out-of-bounds-bug-in-__snd_usb.patch
+ApplyOptionalPatch 0083-media-uvcvideo-Fix-double-free-in-error-path.patch
+ApplyOptionalPatch 0084-HID-intel-ish-hid-Fix-use-after-free-issue-in-ishtp_.patch
+ApplyOptionalPatch 0085-smb-client-reject-userspace-cifs.spnego-descriptions.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2079,6 +2088,12 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Tue May 26 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.16.1
+- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres]
+- HID: intel-ish-hid: Fix use-after-free issue in ishtp_hid_remove() (CIQ Kernel Automation) [ciqres] {CVE-2025-21928}
+- media: uvcvideo: Fix double free in error path (CIQ Kernel Automation) [ciqres] {CVE-2024-57980}
+- ALSA: usb-audio: Fix an out-of-bounds bug in __snd_usb_parse_audio_interface() (CIQ Kernel Automation) [ciqres] {CVE-2022-48701}
+
 * Thu May 07 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.15.1
 - net/sched: cls_u32: use skb_header_pointer_careful() (Roxana Nicolescu) [ciqres] {CVE-2026-23204}
 - net: add skb_header_pointer_careful() helper (Roxana Nicolescu) [ciqres] {CVE-2026-23204}

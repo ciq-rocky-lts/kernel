@@ -1,0 +1,42 @@
+From 6a4b3d8f3bbdd118bb8315ecf15b9b77b460ff4e Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 11 May 2026 07:27:50 +0000
+Subject: [PATCH] ALSA: usb-audio: Fix an out-of-bounds bug in
+ __snd_usb_parse_audio_interface()
+
+jira VULN-34180
+cve CVE-2022-48701
+commit-author Dongxiang Ke <kdx.glider@gmail.com>
+commit e53f47f6c1a56d2af728909f1cb894da6b43d9bf
+
+There may be a bad USB audio device with a USB ID of (0x04fa, 0x4201) and
+the number of it's interfaces less than 4, an out-of-bounds read bug occurs
+when parsing the interface descriptor for this device.
+
+Fix this by checking the number of interfaces.
+
+	Signed-off-by: Dongxiang Ke <kdx.glider@gmail.com>
+Link: https://lore.kernel.org/r/20220906024928.10951-1-kdx.glider@gmail.com
+	Signed-off-by: Takashi Iwai <tiwai@suse.de>
+(cherry picked from commit e53f47f6c1a56d2af728909f1cb894da6b43d9bf)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ sound/usb/stream.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sound/usb/stream.c b/sound/usb/stream.c
+index 3a9e5777ba60..3548640eb0d4 100644
+--- a/sound/usb/stream.c
++++ b/sound/usb/stream.c
+@@ -1131,7 +1131,7 @@ static int __snd_usb_parse_audio_interface(struct snd_usb_audio *chip,
+ 	 * Dallas DS4201 workaround: It presents 5 altsettings, but the last
+ 	 * one misses syncpipe, and does not produce any sound.
+ 	 */
+-	if (chip->usb_id == USB_ID(0x04fa, 0x4201))
++	if (chip->usb_id == USB_ID(0x04fa, 0x4201) && num >= 4)
+ 		num = 4;
+ 
+ 	for (i = 0; i < num; i++) {
+-- 
+2.47.3
+
