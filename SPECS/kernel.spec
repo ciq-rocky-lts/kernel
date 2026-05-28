@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 22
+%define ciq_patch_version 23
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1263,6 +1263,17 @@ Patch1000252: 0232-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
 Patch1000253: 0233-can-raw-fix-ro-uniq-use-after-free-in-raw_rcv.patch
 #CIQ Patch Version: 427.42.1+22.1.el9_4_ciq
 Patch1000254: 0234-ptrace-slightly-saner-get_dumpable-logic.patch
+#CIQ Patch Version: 427.42.1+23.1.el9_4_ciq
+Patch1000255: 0235-usb-typec-tcpm-Fix-NULL-pointer-dereference-in-tcpm_.patch
+Patch1000256: 0236-Input-synaptics-rmi4-fix-use-after-free-in-rmi_unreg.patch
+Patch1000257: 0237-virtio-blk-fix-implicit-overflow-on-virtio_max_dma_s.patch
+Patch1000258: 0238-SUNRPC-Fix-RPC-client-cleaned-up-the-freed-pipefs-de.patch
+Patch1000259: 0239-wifi-rt2x00-restart-beacon-queue-when-hardware-reset.patch
+Patch1000260: 0240-pwm-Fix-double-shift-bug.patch
+Patch1000261: 0241-bonding-stop-the-device-in-bond_setup_by_slave.patch
+Patch1000262: 0242-usb-config-fix-iteration-issue-in-usb_get_bos_descri.patch
+Patch1000263: 0243-net-gro-don-t-merge-zcopy-skbs.patch
+Patch1000264: 0244-smb-client-reject-userspace-cifs.spnego-descriptions.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2270,6 +2281,16 @@ ApplyOptionalPatch 0231-net-skbuff-propagate-shared-frag-marker-through-frag.pat
 ApplyOptionalPatch 0232-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
 ApplyOptionalPatch 0233-can-raw-fix-ro-uniq-use-after-free-in-raw_rcv.patch
 ApplyOptionalPatch 0234-ptrace-slightly-saner-get_dumpable-logic.patch
+ApplyOptionalPatch 0235-usb-typec-tcpm-Fix-NULL-pointer-dereference-in-tcpm_.patch
+ApplyOptionalPatch 0236-Input-synaptics-rmi4-fix-use-after-free-in-rmi_unreg.patch
+ApplyOptionalPatch 0237-virtio-blk-fix-implicit-overflow-on-virtio_max_dma_s.patch
+ApplyOptionalPatch 0238-SUNRPC-Fix-RPC-client-cleaned-up-the-freed-pipefs-de.patch
+ApplyOptionalPatch 0239-wifi-rt2x00-restart-beacon-queue-when-hardware-reset.patch
+ApplyOptionalPatch 0240-pwm-Fix-double-shift-bug.patch
+ApplyOptionalPatch 0241-bonding-stop-the-device-in-bond_setup_by_slave.patch
+ApplyOptionalPatch 0242-usb-config-fix-iteration-issue-in-usb_get_bos_descri.patch
+ApplyOptionalPatch 0243-net-gro-don-t-merge-zcopy-skbs.patch
+ApplyOptionalPatch 0244-smb-client-reject-userspace-cifs.spnego-descriptions.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4347,6 +4368,18 @@ fi
 #
 #
 %changelog
+* Tue May 26 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+23.1.el9_4_ciq
+- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres]
+- net: gro: don't merge zcopy skbs (Sabrina Dubroca) [ciqres]
+- usb: config: fix iteration issue in 'usb_get_bos_descriptor()' (CIQ Kernel Automation) [ciqres] {CVE-2023-52781}
+- bonding: stop the device in bond_setup_by_slave() (CIQ Kernel Automation) [ciqres] {CVE-2023-52784}
+- pwm: Fix double shift bug (CIQ Kernel Automation) [ciqres] {CVE-2023-52756}
+- wifi: rt2x00: restart beacon queue when hardware reset (CIQ Kernel Automation) [ciqres] {CVE-2023-52595}
+- SUNRPC: Fix RPC client cleaned up the freed pipefs dentries (CIQ Kernel Automation) [ciqres] {CVE-2023-52803}
+- virtio-blk: fix implicit overflow on virtio_max_dma_size (CIQ Kernel Automation) [ciqres] {CVE-2023-52762}
+- Input: synaptics-rmi4 - fix use after free in rmi_unregister_function() (CIQ Kernel Automation) [ciqres] {CVE-2023-52840}
+- usb: typec: tcpm: Fix NULL pointer dereference in tcpm_pd_svdm() (CIQ Kernel Automation) [ciqres] {CVE-2023-52877}
+
 * Mon May 18 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-427.42.1+22.1.el9_4_ciq
 - ptrace: slightly saner 'get_dumpable()' logic (Roxana Nicolescu) [ciqres] {CVE-2026-46333}
 
