@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 30
+%define ciq_patch_version 31
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1437,6 +1437,24 @@ Patch1000487: 0442-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 Patch1000488: 0443-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 #CIQ Patch Version: 284.30.1+30.1.el9_2_ciq
 Patch1000489: 0444-ptrace-slightly-saner-get_dumpable-logic.patch
+#CIQ Patch Version: 284.30.1+31.1.el9_2_ciq
+Patch1000490: 0445-blk-cgroup-Reinit-blkg_iostat_set-after-clearing-in-.patch
+Patch1000491: 0446-vxlan-Fix-nexthop-hash-size.patch
+Patch1000492: 0447-tty-n_gsm-require-CAP_NET_ADMIN-to-attach-N_GSM0710-.patch
+Patch1000493: 0448-mm-slab_common-fix-slab_caches-list-corruption-after.patch
+Patch1000494: 0449-Bluetooth-Fix-support-for-Read-Local-Supported-Codec.patch
+Patch1000495: 0450-Bluetooth-hci_codec-Fix-leaking-content-of-local_cod.patch
+Patch1000496: 0451-scsi-ibmvfc-Remove-BUG_ON-in-the-case-of-an-empty-ev.patch
+Patch1000497: 0452-scsi-libfc-Fix-potential-NULL-pointer-dereference-in.patch
+Patch1000498: 0453-perf-x86-intel-uncore-Fix-NULL-pointer-dereference-i.patch
+Patch1000499: 0454-tcp-do-not-accept-ACK-of-bytes-we-never-sent.patch
+Patch1000500: 0455-pstore-ram-Fix-crash-when-setting-number-of-cpus-to-.patch
+Patch1000501: 0456-block-add-check-that-partition-length-needs-to-be-al.patch
+Patch1000502: 0457-gfs2-Fix-kernel-NULL-pointer-dereference-in-gfs2_rgr.patch
+Patch1000503: 0458-wifi-ath10k-fix-NULL-pointer-dereference-in-ath10k_w.patch
+Patch1000504: 0459-PM-devfreq-Synchronize-devfreq_monitor_-start-stop.patch
+Patch1000505: 0460-blk-mq-fix-IO-hang-from-sbitmap-wakeup-race.patch
+Patch1000506: 0461-smb-client-reject-userspace-cifs.spnego-descriptions.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2602,6 +2620,23 @@ ApplyOptionalPatch 0441-Revert-xfrm-esp-avoid-in-place-decrypt-on-shared-skb.pat
 ApplyOptionalPatch 0442-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patch
 ApplyOptionalPatch 0443-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 ApplyOptionalPatch 0444-ptrace-slightly-saner-get_dumpable-logic.patch
+ApplyOptionalPatch 0445-blk-cgroup-Reinit-blkg_iostat_set-after-clearing-in-.patch
+ApplyOptionalPatch 0446-vxlan-Fix-nexthop-hash-size.patch
+ApplyOptionalPatch 0447-tty-n_gsm-require-CAP_NET_ADMIN-to-attach-N_GSM0710-.patch
+ApplyOptionalPatch 0448-mm-slab_common-fix-slab_caches-list-corruption-after.patch
+ApplyOptionalPatch 0449-Bluetooth-Fix-support-for-Read-Local-Supported-Codec.patch
+ApplyOptionalPatch 0450-Bluetooth-hci_codec-Fix-leaking-content-of-local_cod.patch
+ApplyOptionalPatch 0451-scsi-ibmvfc-Remove-BUG_ON-in-the-case-of-an-empty-ev.patch
+ApplyOptionalPatch 0452-scsi-libfc-Fix-potential-NULL-pointer-dereference-in.patch
+ApplyOptionalPatch 0453-perf-x86-intel-uncore-Fix-NULL-pointer-dereference-i.patch
+ApplyOptionalPatch 0454-tcp-do-not-accept-ACK-of-bytes-we-never-sent.patch
+ApplyOptionalPatch 0455-pstore-ram-Fix-crash-when-setting-number-of-cpus-to-.patch
+ApplyOptionalPatch 0456-block-add-check-that-partition-length-needs-to-be-al.patch
+ApplyOptionalPatch 0457-gfs2-Fix-kernel-NULL-pointer-dereference-in-gfs2_rgr.patch
+ApplyOptionalPatch 0458-wifi-ath10k-fix-NULL-pointer-dereference-in-ath10k_w.patch
+ApplyOptionalPatch 0459-PM-devfreq-Synchronize-devfreq_monitor_-start-stop.patch
+ApplyOptionalPatch 0460-blk-mq-fix-IO-hang-from-sbitmap-wakeup-race.patch
+ApplyOptionalPatch 0461-smb-client-reject-userspace-cifs.spnego-descriptions.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4485,6 +4520,25 @@ fi
 #
 #
 %changelog
+* Tue May 26 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+31.1.el9_2_ciq
+- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres]
+- blk-mq: fix IO hang from sbitmap wakeup race (CIQ Kernel Automation) [ciqres] {CVE-2024-26671}
+- PM / devfreq: Synchronize devfreq_monitor_[start/stop] (CIQ Kernel Automation) [ciqres] {CVE-2023-52635}
+- wifi: ath10k: fix NULL pointer dereference in ath10k_wmi_tlv_op_pull_mgmt_tx_compl_ev() (CIQ Kernel Automation) [ciqres] {CVE-2023-52651}
+- gfs2: Fix kernel NULL pointer dereference in gfs2_rgrp_dump (CIQ Kernel Automation) [ciqres] {CVE-2023-52448}
+- block: add check that partition length needs to be aligned with block size (CIQ Kernel Automation) [ciqres] {CVE-2023-52458}
+- pstore/ram: Fix crash when setting number of cpus to an odd number (CIQ Kernel Automation) [ciqres] {CVE-2023-52619}
+- tcp: do not accept ACK of bytes we never sent (CIQ Kernel Automation) [ciqres] {CVE-2023-52881}
+- perf/x86/intel/uncore: Fix NULL pointer dereference issue in upi_fill_topology() (CIQ Kernel Automation) [ciqres] {CVE-2023-52450}
+- scsi: libfc: Fix potential NULL pointer dereference in fc_lport_ptp_setup() (CIQ Kernel Automation) [ciqres] {CVE-2023-52809}
+- scsi: ibmvfc: Remove BUG_ON in the case of an empty event pool (CIQ Kernel Automation) [ciqres] {CVE-2023-52811}
+- Bluetooth: hci_codec: Fix leaking content of local_codecs (CIQ Kernel Automation) [ciqres] {CVE-2023-52518}
+- Bluetooth: Fix support for Read Local Supported Codecs V2 (Roxana Nicolescu) [ciqres] {CVE-2023-52518}
+- mm/slab_common: fix slab_caches list corruption after kmem_cache_destroy() (CIQ Kernel Automation) [ciqres] {CVE-2023-52562}
+- tty: n_gsm: require CAP_NET_ADMIN to attach N_GSM0710 ldisc (CIQ Kernel Automation) [ciqres] {CVE-2023-52880}
+- vxlan: Fix nexthop hash size (CIQ Kernel Automation) [ciqres] {CVE-2023-53192}
+- blk-cgroup: Reinit blkg_iostat_set after clearing in blkcg_reset_stats() (CIQ Kernel Automation) [ciqres] {CVE-2023-53421}
+
 * Mon May 18 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-284.30.1+30.1.el9_2_ciq
 - ptrace: slightly saner 'get_dumpable()' logic (Roxana Nicolescu) [ciqres] {CVE-2026-46333}
 
