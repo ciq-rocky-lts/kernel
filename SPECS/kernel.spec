@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 27
+%define ciq_patch_version 28
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1027,6 +1027,17 @@ Patch0448: 0293-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 #CIQ Patch Version: 372.32.1+27.1.el8_6_ciq
 Patch0449: 0294-sched-fix-exit_mm-vs-membarrier-v4.patch
 Patch0450: 0295-ptrace-slightly-saner-get_dumpable-logic.patch
+#CIQ Patch Version: 372.32.1+28.1.el8_6_ciq
+Patch0451: 0296-Bluetooth-L2CAP-Fix-memory-leak-in-vhci_write.patch
+Patch0452: 0297-perf-x86-intel-uncore-Fix-reference-count-leak-in-hs.patch
+Patch0453: 0298-perf-x86-intel-uncore-Fix-reference-count-leak-in-sn.patch
+Patch0454: 0299-media-dvb-usb-az6027-fix-null-ptr-deref-in-az6027_i2.patch
+Patch0455: 0300-RDMA-mlx5-Fix-mlx5_ib_get_hw_stats-when-used-for-dev.patch
+Patch0456: 0301-HID-betop-check-shape-of-output-reports.patch
+Patch0457: 0302-media-usb-siano-Fix-use-after-free-bugs-caused-by-do.patch
+Patch0458: 0303-media-usb-siano-Fix-warning-due-to-null-work_func_t-.patch
+Patch0459: 0304-iavf-Fix-use-after-free-in-free_netdev.patch
+Patch0460: 0305-smb-client-reject-userspace-cifs.spnego-descriptions.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2044,6 +2055,16 @@ ApplyOptionalPatch 0292-xfrm-esp-avoid-in-place-decrypt-on-shared-skb-frags.patc
 ApplyOptionalPatch 0293-net-skbuff-propagate-shared-frag-marker-through-frag.patch
 ApplyOptionalPatch 0294-sched-fix-exit_mm-vs-membarrier-v4.patch
 ApplyOptionalPatch 0295-ptrace-slightly-saner-get_dumpable-logic.patch
+ApplyOptionalPatch 0296-Bluetooth-L2CAP-Fix-memory-leak-in-vhci_write.patch
+ApplyOptionalPatch 0297-perf-x86-intel-uncore-Fix-reference-count-leak-in-hs.patch
+ApplyOptionalPatch 0298-perf-x86-intel-uncore-Fix-reference-count-leak-in-sn.patch
+ApplyOptionalPatch 0299-media-dvb-usb-az6027-fix-null-ptr-deref-in-az6027_i2.patch
+ApplyOptionalPatch 0300-RDMA-mlx5-Fix-mlx5_ib_get_hw_stats-when-used-for-dev.patch
+ApplyOptionalPatch 0301-HID-betop-check-shape-of-output-reports.patch
+ApplyOptionalPatch 0302-media-usb-siano-Fix-use-after-free-bugs-caused-by-do.patch
+ApplyOptionalPatch 0303-media-usb-siano-Fix-warning-due-to-null-work_func_t-.patch
+ApplyOptionalPatch 0304-iavf-Fix-use-after-free-in-free_netdev.patch
+ApplyOptionalPatch 0305-smb-client-reject-userspace-cifs.spnego-descriptions.patch
 
 
 # CIQ LTS patches:
@@ -3603,6 +3624,18 @@ fi
 #
 #
 %changelog
+* Tue May 26 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+28.1.el8_6_ciq
+- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres]
+- iavf: Fix use-after-free in free_netdev (CIQ Kernel Automation) [ciqres] {CVE-2023-53556}
+- media: usb: siano: Fix warning due to null work_func_t function pointer (CIQ Kernel Automation) [ciqres] {CVE-2023-54270}
+- media: usb: siano: Fix use after free bugs caused by do_submit_urb (CIQ Kernel Automation) [ciqres] {CVE-2023-54270}
+- HID: betop: check shape of output reports (CIQ Kernel Automation) [ciqres] {CVE-2023-53015}
+- RDMA/mlx5: Fix mlx5_ib_get_hw_stats when used for device (CIQ Kernel Automation) [ciqres] {CVE-2023-53393}
+- media: dvb-usb: az6027: fix null-ptr-deref in az6027_i2c_xfer() (CIQ Kernel Automation) [ciqres] {CVE-2022-50272}
+- perf/x86/intel/uncore: Fix reference count leak in snr_uncore_mmio_map() (CIQ Kernel Automation) [ciqres] {CVE-2022-50615}
+- perf/x86/intel/uncore: Fix reference count leak in hswep_has_limit_sbox() (CIQ Kernel Automation) [ciqres] {CVE-2022-50318}
+- Bluetooth: L2CAP: Fix memory leak in vhci_write (CIQ Kernel Automation) [ciqres] {CVE-2022-49908}
+
 * Mon May 18 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1+27.1.el8_6_ciq
 - ptrace: slightly saner 'get_dumpable()' logic (Roxana Nicolescu) [ciqres] {CVE-2026-46333}
 - sched: fix exit_mm vs membarrier (v4) (Roxana Nicolescu) [ciqres] {CVE-2026-46333}
