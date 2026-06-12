@@ -1,0 +1,47 @@
+From e0047cb8c74dd9a648322372adfd07f51dcd5577 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 8 Jun 2026 08:05:55 +0000
+Subject: [PATCH] nfp: flower: handle acti_netdevs allocation failure
+
+jira VULN-37723
+cve CVE-2024-27046
+commit-author Duoming Zhou <duoming@zju.edu.cn>
+commit 84e95149bd341705f0eca6a7fcb955c548805002
+
+The kmalloc_array() in nfp_fl_lag_do_work() will return null, if
+the physical memory has run out. As a result, if we dereference
+the acti_netdevs, the null pointer dereference bugs will happen.
+
+This patch adds a check to judge whether allocation failure occurs.
+If it happens, the delayed work will be rescheduled and try again.
+
+Fixes: bb9a8d031140 ("nfp: flower: monitor and offload LAG groups")
+	Signed-off-by: Duoming Zhou <duoming@zju.edu.cn>
+	Reviewed-by: Louis Peens <louis.peens@corigine.com>
+Link: https://lore.kernel.org/r/20240308142540.9674-1-duoming@zju.edu.cn
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 84e95149bd341705f0eca6a7fcb955c548805002)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/net/ethernet/netronome/nfp/flower/lag_conf.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/net/ethernet/netronome/nfp/flower/lag_conf.c b/drivers/net/ethernet/netronome/nfp/flower/lag_conf.c
+index ede90e086b28..0d26fc1223ea 100644
+--- a/drivers/net/ethernet/netronome/nfp/flower/lag_conf.c
++++ b/drivers/net/ethernet/netronome/nfp/flower/lag_conf.c
+@@ -308,6 +308,11 @@ static void nfp_fl_lag_do_work(struct work_struct *work)
+ 
+ 		acti_netdevs = kmalloc_array(entry->slave_cnt,
+ 					     sizeof(*acti_netdevs), GFP_KERNEL);
++		if (!acti_netdevs) {
++			schedule_delayed_work(&lag->work,
++					      NFP_FL_LAG_DELAY);
++			continue;
++		}
+ 
+ 		/* Include sanity check in the loop. It may be that a bond has
+ 		 * changed between processing the last notification and the
+-- 
+2.47.3
+

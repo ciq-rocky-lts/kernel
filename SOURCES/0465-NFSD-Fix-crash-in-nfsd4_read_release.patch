@@ -1,0 +1,48 @@
+From 15f65a1929657ba27e934a16fb2cd6c8b3915a23 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 30 Sep 2025 10:05:20 -0400
+Subject: [PATCH] NFSD: Fix crash in nfsd4_read_release()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-161290
+cve CVE-2025-40324
+commit-author Chuck Lever <chuck.lever@oracle.com>
+commit abb1f08a2121dd270193746e43b2a9373db9ad84
+
+When tracing is enabled, the trace_nfsd_read_done trace point
+crashes during the pynfs read.testNoFh test.
+
+Fixes: 15a8b55dbb1b ("nfsd: call op_release, even when op_func returns an error")
+	Cc: stable@vger.kernel.org
+	Reviewed-by: Jeff Layton <jlayton@kernel.org>
+	Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+(cherry picked from commit abb1f08a2121dd270193746e43b2a9373db9ad84)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/nfsd/nfs4proc.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/fs/nfsd/nfs4proc.c b/fs/nfsd/nfs4proc.c
+index 1666ac21987e..a307c7b998db 100644
+--- a/fs/nfsd/nfs4proc.c
++++ b/fs/nfsd/nfs4proc.c
+@@ -961,10 +961,11 @@ nfsd4_read(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
+ static void
+ nfsd4_read_release(union nfsd4_op_u *u)
+ {
+-	if (u->read.rd_nf)
++	if (u->read.rd_nf) {
++		trace_nfsd_read_done(u->read.rd_rqstp, u->read.rd_fhp,
++				     u->read.rd_offset, u->read.rd_length);
+ 		nfsd_file_put(u->read.rd_nf);
+-	trace_nfsd_read_done(u->read.rd_rqstp, u->read.rd_fhp,
+-			     u->read.rd_offset, u->read.rd_length);
++	}
+ }
+ 
+ static __be32
+-- 
+2.47.3
+

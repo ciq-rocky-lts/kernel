@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 31
+%define ciq_patch_version 32
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1455,6 +1455,46 @@ Patch1000503: 0458-wifi-ath10k-fix-NULL-pointer-dereference-in-ath10k_w.patch
 Patch1000504: 0459-PM-devfreq-Synchronize-devfreq_monitor_-start-stop.patch
 Patch1000505: 0460-blk-mq-fix-IO-hang-from-sbitmap-wakeup-race.patch
 Patch1000506: 0461-smb-client-reject-userspace-cifs.spnego-descriptions.patch
+#CIQ Patch Version: 284.30.1+32.1.el9_2_ciq
+Patch1000507: 0462-RDMA-umad-Reject-negative-data_len-in-ib_umad_write.patch
+Patch1000508: 0463-can-raw-fix-ro-uniq-use-after-free-in-raw_rcv.patch
+Patch1000509: 0464-nfsd-call-op_release-even-when-op_func-returns-an-er.patch
+Patch1000510: 0465-NFSD-Fix-crash-in-nfsd4_read_release.patch
+Patch1000511: 0466-nfsd-fix-heap-overflow-in-NFSv4.0-LOCK-replay-cache.patch
+Patch1000512: 0467-netfilter-nf_tables-disallow-anonymous-set-with-time.patch
+Patch1000513: 0468-scsi-qla2xxx-Fix-command-flush-on-cable-pull.patch
+Patch1000514: 0469-scsi-lpfc-Release-hbalock-before-calling-lpfc_worker.patch
+Patch1000515: 0470-scsi-lpfc-Move-NPIV-s-transport-unregistration-to-af.patch
+Patch1000516: 0471-nfp-flower-handle-acti_netdevs-allocation-failure.patch
+Patch1000517: 0472-dm-call-the-resume-method-on-internal-suspend.patch
+Patch1000518: 0473-octeontx2-af-Use-separate-handlers-for-interrupts.patch
+Patch1000519: 0474-netfilter-nf_tables-do-not-compare-internal-table-fl.patch
+Patch1000520: 0475-netfilter-nf_tables-fix-inverted-genmask-check-in-nf.patch
+Patch1000521: 0476-net-sched-fix-ordering-of-qlen-adjustment.patch
+Patch1000522: 0477-net-sched-Make-cake_enqueue-return-NET_XMIT_CN-when-.patch
+Patch1000523: 0478-net-sched-sch_cake-Fix-incorrect-qlen-reduction-in-c.patch
+Patch1000524: 0479-ipv6-icmp-clear-skb2-cb-in-ip6_err_gen_icmpv6_unreac.patch
+Patch1000525: 0480-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
+Patch1000526: 0481-arm64-cputype-Add-MIDR_CORTEX_A76AE.patch
+Patch1000527: 0482-arm64-cputype-Add-Cortex-X1C-definitions.patch
+Patch1000528: 0483-arm64-cputype-Add-Cortex-X3-definitions.patch
+Patch1000529: 0484-arm64-Add-Neoverse-V2-part.patch
+Patch1000530: 0485-arm64-cputype-Add-Cortex-A720-definitions.patch
+Patch1000531: 0486-arm64-cputype-Add-Cortex-X4-definitions.patch
+Patch1000532: 0487-arm64-cputype-Add-Neoverse-V3-definitions.patch
+Patch1000533: 0488-arm64-cputype-Add-Cortex-X925-definitions.patch
+Patch1000534: 0489-arm64-Subscribe-Microsoft-Azure-Cobalt-100-to-ARM-Ne.patch
+Patch1000535: 0490-arm64-cputype-Add-Cortex-A725-definitions.patch
+Patch1000536: 0491-arm64-cputype-Add-Cortex-A720AE-definitions.patch
+Patch1000537: 0492-arm64-cputype-Add-Neoverse-N3-definitions.patch
+Patch1000538: 0493-arm64-cputype-Add-Neoverse-V3AE-definitions.patch
+Patch1000539: 0494-arm64-cputype-Add-C1-Pro-definitions.patch
+Patch1000540: 0495-arm64-cputype-Add-NVIDIA-Olympus-definitions.patch
+Patch1000541: 0496-arm64-cputype-Add-C1-Ultra-definitions.patch
+Patch1000542: 0497-arm64-cputype-Add-C1-Premium-definitions.patch
+Patch1000543: 0498-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
+Patch1000544: 0499-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
+Patch1000545: 0500-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2637,6 +2677,45 @@ ApplyOptionalPatch 0458-wifi-ath10k-fix-NULL-pointer-dereference-in-ath10k_w.pat
 ApplyOptionalPatch 0459-PM-devfreq-Synchronize-devfreq_monitor_-start-stop.patch
 ApplyOptionalPatch 0460-blk-mq-fix-IO-hang-from-sbitmap-wakeup-race.patch
 ApplyOptionalPatch 0461-smb-client-reject-userspace-cifs.spnego-descriptions.patch
+ApplyOptionalPatch 0462-RDMA-umad-Reject-negative-data_len-in-ib_umad_write.patch
+ApplyOptionalPatch 0463-can-raw-fix-ro-uniq-use-after-free-in-raw_rcv.patch
+ApplyOptionalPatch 0464-nfsd-call-op_release-even-when-op_func-returns-an-er.patch
+ApplyOptionalPatch 0465-NFSD-Fix-crash-in-nfsd4_read_release.patch
+ApplyOptionalPatch 0466-nfsd-fix-heap-overflow-in-NFSv4.0-LOCK-replay-cache.patch
+ApplyOptionalPatch 0467-netfilter-nf_tables-disallow-anonymous-set-with-time.patch
+ApplyOptionalPatch 0468-scsi-qla2xxx-Fix-command-flush-on-cable-pull.patch
+ApplyOptionalPatch 0469-scsi-lpfc-Release-hbalock-before-calling-lpfc_worker.patch
+ApplyOptionalPatch 0470-scsi-lpfc-Move-NPIV-s-transport-unregistration-to-af.patch
+ApplyOptionalPatch 0471-nfp-flower-handle-acti_netdevs-allocation-failure.patch
+ApplyOptionalPatch 0472-dm-call-the-resume-method-on-internal-suspend.patch
+ApplyOptionalPatch 0473-octeontx2-af-Use-separate-handlers-for-interrupts.patch
+ApplyOptionalPatch 0474-netfilter-nf_tables-do-not-compare-internal-table-fl.patch
+ApplyOptionalPatch 0475-netfilter-nf_tables-fix-inverted-genmask-check-in-nf.patch
+ApplyOptionalPatch 0476-net-sched-fix-ordering-of-qlen-adjustment.patch
+ApplyOptionalPatch 0477-net-sched-Make-cake_enqueue-return-NET_XMIT_CN-when-.patch
+ApplyOptionalPatch 0478-net-sched-sch_cake-Fix-incorrect-qlen-reduction-in-c.patch
+ApplyOptionalPatch 0479-ipv6-icmp-clear-skb2-cb-in-ip6_err_gen_icmpv6_unreac.patch
+ApplyOptionalPatch 0480-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
+ApplyOptionalPatch 0481-arm64-cputype-Add-MIDR_CORTEX_A76AE.patch
+ApplyOptionalPatch 0482-arm64-cputype-Add-Cortex-X1C-definitions.patch
+ApplyOptionalPatch 0483-arm64-cputype-Add-Cortex-X3-definitions.patch
+ApplyOptionalPatch 0484-arm64-Add-Neoverse-V2-part.patch
+ApplyOptionalPatch 0485-arm64-cputype-Add-Cortex-A720-definitions.patch
+ApplyOptionalPatch 0486-arm64-cputype-Add-Cortex-X4-definitions.patch
+ApplyOptionalPatch 0487-arm64-cputype-Add-Neoverse-V3-definitions.patch
+ApplyOptionalPatch 0488-arm64-cputype-Add-Cortex-X925-definitions.patch
+ApplyOptionalPatch 0489-arm64-Subscribe-Microsoft-Azure-Cobalt-100-to-ARM-Ne.patch
+ApplyOptionalPatch 0490-arm64-cputype-Add-Cortex-A725-definitions.patch
+ApplyOptionalPatch 0491-arm64-cputype-Add-Cortex-A720AE-definitions.patch
+ApplyOptionalPatch 0492-arm64-cputype-Add-Neoverse-N3-definitions.patch
+ApplyOptionalPatch 0493-arm64-cputype-Add-Neoverse-V3AE-definitions.patch
+ApplyOptionalPatch 0494-arm64-cputype-Add-C1-Pro-definitions.patch
+ApplyOptionalPatch 0495-arm64-cputype-Add-NVIDIA-Olympus-definitions.patch
+ApplyOptionalPatch 0496-arm64-cputype-Add-C1-Ultra-definitions.patch
+ApplyOptionalPatch 0497-arm64-cputype-Add-C1-Premium-definitions.patch
+ApplyOptionalPatch 0498-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
+ApplyOptionalPatch 0499-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
+ApplyOptionalPatch 0500-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4520,8 +4599,49 @@ fi
 #
 #
 %changelog
+* Thu Jun 11 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+32.1.el9_2_ciq
+- arm64: errata: Mitigate TLBI errata on Microsoft Azure Cobalt 100 CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: errata: Mitigate TLBI errata on NVIDIA Olympus CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: errata: Mitigate TLBI errata on various Arm CPUs (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Premium definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Ultra definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add NVIDIA Olympus definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Pro definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Neoverse-V3AE definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Neoverse-N3 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-A720AE definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-A725 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: Subscribe Microsoft Azure Cobalt 100 to ARM Neoverse N2 errata (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X925 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Neoverse-V3 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X4 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-A720 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: Add Neoverse-V2 part (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X3 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X1C definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add MIDR_CORTEX_A76AE (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- ip6_tunnel: clear skb2->cb[] in ip4ip6_err() (CIQ Kernel Automation) [ciqres] {CVE-2026-43037}
+- ipv6: icmp: clear skb2->cb[] in ip6_err_gen_icmpv6_unreach() (CIQ Kernel Automation) [ciqres] {CVE-2026-43038}
+- net/sched: sch_cake: Fix incorrect qlen reduction in cake_drop (Roxana Nicolescu) [ciqres] {CVE-2025-68325}
+- net/sched: Make cake_enqueue return NET_XMIT_CN when past buffer_limit (CIQ Kernel Automation) [ciqres] {CVE-2025-39766}
+- net: sched: fix ordering of qlen adjustment (Roxana Nicolescu) [ciqres] {CVE-2024-53164}
+- netfilter: nf_tables: fix inverted genmask check in nft_map_catchall_activate() (Brett Mastbergen) [ciqres] {CVE-2026-23111}
+- netfilter: nf_tables: do not compare internal table flags on updates (CIQ Kernel Automation) [ciqres] {CVE-2024-27065}
+- octeontx2-af: Use separate handlers for interrupts (CIQ Kernel Automation) [ciqres] {CVE-2024-27030}
+- dm: call the resume method on internal suspend (CIQ Kernel Automation) [ciqres] {CVE-2024-26880}
+- nfp: flower: handle acti_netdevs allocation failure (CIQ Kernel Automation) [ciqres] {CVE-2024-27046}
+- scsi: lpfc: Move NPIV's transport unregistration to after resource clean up (CIQ Kernel Automation) [ciqres] {CVE-2024-36952}
+- scsi: lpfc: Release hbalock before calling lpfc_worker_wake_up() (CIQ Kernel Automation) [ciqres] {CVE-2024-36924}
+- scsi: qla2xxx: Fix command flush on cable pull (CIQ Kernel Automation) [ciqres] {CVE-2024-26931}
+- netfilter: nf_tables: disallow anonymous set with timeout flag (CIQ Kernel Automation) [ciqres] {CVE-2024-26642}
+- nfsd: fix heap overflow in NFSv4.0 LOCK replay cache (Marcin Wcisło) [ciqres] {CVE-2026-31402}
+- NFSD: Fix crash in nfsd4_read_release() (Marcin Wcisło) [ciqres] {CVE-2025-40324}
+- nfsd: call op_release, even when op_func returns an error (Marcin Wcisło) [ciqres] {CVE-2023-53241}
+- can: raw: fix ro->uniq use-after-free in raw_rcv() (CIQ Kernel Automation) [ciqres] {CVE-2026-31532}
+- RDMA/umad: Reject negative data_len in ib_umad_write (CIQ Kernel Automation) [ciqres] {CVE-2026-23243}
+
 * Tue May 26 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+31.1.el9_2_ciq
-- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres]
+- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres] {CVE-2026-46243}
 - blk-mq: fix IO hang from sbitmap wakeup race (CIQ Kernel Automation) [ciqres] {CVE-2024-26671}
 - PM / devfreq: Synchronize devfreq_monitor_[start/stop] (CIQ Kernel Automation) [ciqres] {CVE-2023-52635}
 - wifi: ath10k: fix NULL pointer dereference in ath10k_wmi_tlv_op_pull_mgmt_tx_compl_ev() (CIQ Kernel Automation) [ciqres] {CVE-2023-52651}
