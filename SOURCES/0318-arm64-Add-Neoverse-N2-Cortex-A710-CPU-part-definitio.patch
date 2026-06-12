@@ -1,0 +1,51 @@
+From b7ba13e67713ea5881146689eb6b063ab0ebd5be Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Wed, 10 Jun 2026 18:41:38 -0400
+Subject: [PATCH] arm64: Add Neoverse-N2, Cortex-A710 CPU part definition
+
+jira VULN-187519
+cve-pre CVE-2025-10263
+commit-author Suzuki K Poulose <suzuki.poulose@arm.com>
+commit 2d0d656700d67239a57afaf617439143d8dac9be
+
+Add the CPU Partnumbers for the new Arm designs.
+
+	Cc: Catalin Marinas <catalin.marinas@arm.com>
+	Cc: Mark Rutland <mark.rutland@arm.com>
+	Cc: Will Deacon <will@kernel.org>
+	Acked-by: Catalin Marinas <catalin.marinas@arm.com>
+	Reviewed-by: Anshuman Khandual <anshuman.khandual@arm.com>
+	Signed-off-by: Suzuki K Poulose <suzuki.poulose@arm.com>
+Link: https://lore.kernel.org/r/20211019163153.3692640-2-suzuki.poulose@arm.com
+	Signed-off-by: Will Deacon <will@kernel.org>
+(cherry picked from commit 2d0d656700d67239a57afaf617439143d8dac9be)
+	Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ arch/arm64/include/asm/cputype.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
+index d9b37bc26bfd..f4f8a6a2f47d 100644
+--- a/arch/arm64/include/asm/cputype.h
++++ b/arch/arm64/include/asm/cputype.h
+@@ -91,6 +91,8 @@
+ #define ARM_CPU_PART_CORTEX_A76		0xD0B
+ #define ARM_CPU_PART_NEOVERSE_N1	0xD0C
+ #define ARM_CPU_PART_CORTEX_A77		0xD0D
++#define ARM_CPU_PART_CORTEX_A710	0xD47
++#define ARM_CPU_PART_NEOVERSE_N2	0xD49
+ 
+ #define APM_CPU_PART_POTENZA		0x000
+ 
+@@ -122,6 +124,8 @@
+ #define MIDR_CORTEX_A76	MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A76)
+ #define MIDR_NEOVERSE_N1 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_N1)
+ #define MIDR_CORTEX_A77	MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A77)
++#define MIDR_CORTEX_A710 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A710)
++#define MIDR_NEOVERSE_N2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_N2)
+ #define MIDR_THUNDERX	MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX)
+ #define MIDR_THUNDERX_81XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_81XX)
+ #define MIDR_THUNDERX_83XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_83XX)
+-- 
+2.47.3
+

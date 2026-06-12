@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 28
+%define ciq_patch_version 29
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1038,6 +1038,42 @@ Patch0457: 0302-media-usb-siano-Fix-use-after-free-bugs-caused-by-do.patch
 Patch0458: 0303-media-usb-siano-Fix-warning-due-to-null-work_func_t-.patch
 Patch0459: 0304-iavf-Fix-use-after-free-in-free_netdev.patch
 Patch0460: 0305-smb-client-reject-userspace-cifs.spnego-descriptions.patch
+#CIQ Patch Version: 372.32.1+29.1.el8_6_ciq
+Patch0461: 0306-nfsd-fix-heap-overflow-in-NFSv4.0-LOCK-replay-cache.patch
+Patch0462: 0307-scsi-qla2xxx-Fix-off-by-one-in-qla_edif_app_getstats.patch
+Patch0463: 0308-ipv6-fix-race-condition-between-ipv6_get_ifaddr-and-.patch
+Patch0464: 0309-net-mlx5-Properly-link-new-fs-rules-into-the-tree.patch
+Patch0465: 0310-net-ena-Fix-incorrect-descriptor-free-behavior.patch
+Patch0466: 0311-fs-sysfs-Fix-reference-leak-in-sysfs_break_active_pr.patch
+Patch0467: 0312-wifi-nl80211-don-t-free-NULL-coalescing-rule.patch
+Patch0468: 0313-mlxsw-spectrum_acl_tcam-Fix-memory-leak-when-canceli.patch
+Patch0469: 0314-netfilter-nf_tables-honor-table-dormant-flag-from-ne.patch
+Patch0470: 0315-ipv6-icmp-clear-skb2-cb-in-ip6_err_gen_icmpv6_unreac.patch
+Patch0471: 0316-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
+Patch0472: 0317-arm64-Add-part-number-for-Arm-Cortex-A77.patch
+Patch0473: 0318-arm64-Add-Neoverse-N2-Cortex-A710-CPU-part-definitio.patch
+Patch0474: 0319-arm64-Add-Cortex-X2-CPU-part-definition.patch
+Patch0475: 0320-arm64-Mitigate-spectre-style-branch-history-side-cha.patch
+Patch0476: 0321-arm64-Add-Cortex-A510-CPU-part-definition.patch
+Patch0477: 0322-arm64-Add-part-number-for-Arm-Cortex-A78AE.patch
+Patch0478: 0323-arm64-Add-Neoverse-V2-part.patch
+Patch0479: 0324-clocksource-drivers-arm_arch_timer-Work-around-broke.patch
+Patch0480: 0325-clocksource-drivers-arm_arch_timer-limit-XGene-1-wor.patch
+Patch0481: 0326-clocksource-drivers-arm_arch_timer-Fix-XGene-1-TVAL-.patch
+Patch0482: 0327-arm64-cputype-Add-Cortex-X4-definitions.patch
+Patch0483: 0328-arm64-cputype-Add-Neoverse-V3-definitions.patch
+Patch0484: 0329-arm64-cputype-Add-Cortex-X3-definitions.patch
+Patch0485: 0330-arm64-cputype-Add-Cortex-X925-definitions.patch
+Patch0486: 0331-arm64-cputype-Add-Cortex-X1C-definitions.patch
+Patch0487: 0332-arm64-cputype-Add-MIDR_CORTEX_A76AE.patch
+Patch0488: 0333-arm64-cputype-Add-Neoverse-V3AE-definitions.patch
+Patch0489: 0334-arm64-cputype-Add-C1-Ultra-definitions.patch
+Patch0490: 0335-arm64-cputype-Add-C1-Premium-definitions.patch
+Patch0491: 0336-arm64-cputype-Add-NVIDIA-Olympus-definitions.patch
+Patch0492: 0337-arm64-Subscribe-Microsoft-Azure-Cobalt-100-to-ARM-Ne.patch
+Patch0493: 0338-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
+Patch0494: 0339-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
+Patch0495: 0340-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2065,6 +2101,41 @@ ApplyOptionalPatch 0302-media-usb-siano-Fix-use-after-free-bugs-caused-by-do.pat
 ApplyOptionalPatch 0303-media-usb-siano-Fix-warning-due-to-null-work_func_t-.patch
 ApplyOptionalPatch 0304-iavf-Fix-use-after-free-in-free_netdev.patch
 ApplyOptionalPatch 0305-smb-client-reject-userspace-cifs.spnego-descriptions.patch
+ApplyOptionalPatch 0306-nfsd-fix-heap-overflow-in-NFSv4.0-LOCK-replay-cache.patch
+ApplyOptionalPatch 0307-scsi-qla2xxx-Fix-off-by-one-in-qla_edif_app_getstats.patch
+ApplyOptionalPatch 0308-ipv6-fix-race-condition-between-ipv6_get_ifaddr-and-.patch
+ApplyOptionalPatch 0309-net-mlx5-Properly-link-new-fs-rules-into-the-tree.patch
+ApplyOptionalPatch 0310-net-ena-Fix-incorrect-descriptor-free-behavior.patch
+ApplyOptionalPatch 0311-fs-sysfs-Fix-reference-leak-in-sysfs_break_active_pr.patch
+ApplyOptionalPatch 0312-wifi-nl80211-don-t-free-NULL-coalescing-rule.patch
+ApplyOptionalPatch 0313-mlxsw-spectrum_acl_tcam-Fix-memory-leak-when-canceli.patch
+ApplyOptionalPatch 0314-netfilter-nf_tables-honor-table-dormant-flag-from-ne.patch
+ApplyOptionalPatch 0315-ipv6-icmp-clear-skb2-cb-in-ip6_err_gen_icmpv6_unreac.patch
+ApplyOptionalPatch 0316-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
+ApplyOptionalPatch 0317-arm64-Add-part-number-for-Arm-Cortex-A77.patch
+ApplyOptionalPatch 0318-arm64-Add-Neoverse-N2-Cortex-A710-CPU-part-definitio.patch
+ApplyOptionalPatch 0319-arm64-Add-Cortex-X2-CPU-part-definition.patch
+ApplyOptionalPatch 0320-arm64-Mitigate-spectre-style-branch-history-side-cha.patch
+ApplyOptionalPatch 0321-arm64-Add-Cortex-A510-CPU-part-definition.patch
+ApplyOptionalPatch 0322-arm64-Add-part-number-for-Arm-Cortex-A78AE.patch
+ApplyOptionalPatch 0323-arm64-Add-Neoverse-V2-part.patch
+ApplyOptionalPatch 0324-clocksource-drivers-arm_arch_timer-Work-around-broke.patch
+ApplyOptionalPatch 0325-clocksource-drivers-arm_arch_timer-limit-XGene-1-wor.patch
+ApplyOptionalPatch 0326-clocksource-drivers-arm_arch_timer-Fix-XGene-1-TVAL-.patch
+ApplyOptionalPatch 0327-arm64-cputype-Add-Cortex-X4-definitions.patch
+ApplyOptionalPatch 0328-arm64-cputype-Add-Neoverse-V3-definitions.patch
+ApplyOptionalPatch 0329-arm64-cputype-Add-Cortex-X3-definitions.patch
+ApplyOptionalPatch 0330-arm64-cputype-Add-Cortex-X925-definitions.patch
+ApplyOptionalPatch 0331-arm64-cputype-Add-Cortex-X1C-definitions.patch
+ApplyOptionalPatch 0332-arm64-cputype-Add-MIDR_CORTEX_A76AE.patch
+ApplyOptionalPatch 0333-arm64-cputype-Add-Neoverse-V3AE-definitions.patch
+ApplyOptionalPatch 0334-arm64-cputype-Add-C1-Ultra-definitions.patch
+ApplyOptionalPatch 0335-arm64-cputype-Add-C1-Premium-definitions.patch
+ApplyOptionalPatch 0336-arm64-cputype-Add-NVIDIA-Olympus-definitions.patch
+ApplyOptionalPatch 0337-arm64-Subscribe-Microsoft-Azure-Cobalt-100-to-ARM-Ne.patch
+ApplyOptionalPatch 0338-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
+ApplyOptionalPatch 0339-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
+ApplyOptionalPatch 0340-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
 
 
 # CIQ LTS patches:
@@ -3624,8 +3695,45 @@ fi
 #
 #
 %changelog
+* Fri Jun 12 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1+29.1.el8_6_ciq
+- arm64: errata: Mitigate TLBI errata on Microsoft Azure Cobalt 100 CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: errata: Mitigate TLBI errata on NVIDIA Olympus CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: errata: Mitigate TLBI errata on various Arm CPUs (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: Subscribe Microsoft Azure Cobalt 100 to ARM Neoverse N2 errata (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add NVIDIA Olympus definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Premium definitions (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Ultra definitions (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Neoverse-V3AE definitions (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add MIDR_CORTEX_A76AE (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X1C definitions (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X925 definitions (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X3 definitions (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Neoverse-V3 definitions (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X4 definitions (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- clocksource/drivers/arm_arch_timer: Fix XGene-1 TVAL register math error (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- clocksource/drivers/arm_arch_timer: limit XGene-1 workaround (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- clocksource/drivers/arm_arch_timer: Work around broken CVAL implementations (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: Add Neoverse-V2 part (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: Add part number for Arm Cortex-A78AE (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: Add Cortex-A510 CPU part definition (Roxana Nicolescu) [ciqres] {CVE-2025-10263}
+- arm64: Mitigate spectre style branch history side channels (Roxana Nicolescu) [ciqres] {CVE-2025-10263}
+- arm64: Add Cortex-X2 CPU part definition (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: Add Neoverse-N2, Cortex-A710 CPU part definition (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- arm64: Add part number for Arm Cortex-A77 (Jonathan Maple) [ciqres] {CVE-2025-10263}
+- ip6_tunnel: clear skb2->cb[] in ip4ip6_err() (Brett Mastbergen) [ciqres] {CVE-2026-43037}
+- ipv6: icmp: clear skb2->cb[] in ip6_err_gen_icmpv6_unreach() (Brett Mastbergen) [ciqres] {CVE-2026-43038}
+- netfilter: nf_tables: honor table dormant flag from netdev release event path (CIQ Kernel Automation) [ciqres] {CVE-2024-36005}
+- mlxsw: spectrum_acl_tcam: Fix memory leak when canceling rehash work (CIQ Kernel Automation) [ciqres] {CVE-2024-35852}
+- wifi: nl80211: don't free NULL coalescing rule (CIQ Kernel Automation) [ciqres] {CVE-2024-36941}
+- fs: sysfs: Fix reference leak in sysfs_break_active_protection() (CIQ Kernel Automation) [ciqres] {CVE-2024-26993}
+- net: ena: Fix incorrect descriptor free behavior (CIQ Kernel Automation) [ciqres] {CVE-2024-35958}
+- net/mlx5: Properly link new fs rules into the tree (CIQ Kernel Automation) [ciqres] {CVE-2024-35960}
+- ipv6: fix race condition between ipv6_get_ifaddr and ipv6_del_addr (CIQ Kernel Automation) [ciqres] {CVE-2024-35969}
+- scsi: qla2xxx: Fix off by one in qla_edif_app_getstats() (CIQ Kernel Automation) [ciqres] {CVE-2024-36025}
+- nfsd: fix heap overflow in NFSv4.0 LOCK replay cache (Marcin Wcisło) [ciqres] {CVE-2026-31402}
+
 * Tue May 26 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+28.1.el8_6_ciq
-- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres]
+- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres] {CVE-2026-46243}
 - iavf: Fix use-after-free in free_netdev (CIQ Kernel Automation) [ciqres] {CVE-2023-53556}
 - media: usb: siano: Fix warning due to null work_func_t function pointer (CIQ Kernel Automation) [ciqres] {CVE-2023-54270}
 - media: usb: siano: Fix use after free bugs caused by do_submit_urb (CIQ Kernel Automation) [ciqres] {CVE-2023-54270}

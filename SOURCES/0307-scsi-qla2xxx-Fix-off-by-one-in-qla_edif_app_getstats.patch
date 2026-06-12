@@ -1,0 +1,41 @@
+From 57b5848c62c5a0773905246cfd32ca875608a15d Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 8 Jun 2026 07:58:43 +0000
+Subject: [PATCH] scsi: qla2xxx: Fix off by one in qla_edif_app_getstats()
+
+jira VULN-5282
+cve CVE-2024-36025
+commit-author Dan Carpenter <dan.carpenter@linaro.org>
+commit 4406e4176f47177f5e51b4cc7e6a7a2ff3dbfbbd
+
+The app_reply->elem[] array is allocated earlier in this function and it
+has app_req.num_ports elements.  Thus this > comparison needs to be >= to
+prevent memory corruption.
+
+Fixes: 7878f22a2e03 ("scsi: qla2xxx: edif: Add getfcinfo and statistic bsgs")
+	Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+Link: https://lore.kernel.org/r/5c125b2f-92dd-412b-9b6f-fc3a3207bd60@moroto.mountain
+	Reviewed-by: Himanshu Madhani <himanshu.madhani@oracle.com>
+	Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+(cherry picked from commit 4406e4176f47177f5e51b4cc7e6a7a2ff3dbfbbd)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/scsi/qla2xxx/qla_edif.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/scsi/qla2xxx/qla_edif.c b/drivers/scsi/qla2xxx/qla_edif.c
+index ad746c62f0d4..36a5d8e054c5 100644
+--- a/drivers/scsi/qla2xxx/qla_edif.c
++++ b/drivers/scsi/qla2xxx/qla_edif.c
+@@ -1034,7 +1034,7 @@ qla_edif_app_getstats(scsi_qla_host_t *vha, struct bsg_job *bsg_job)
+ 
+ 		list_for_each_entry_safe(fcport, tf, &vha->vp_fcports, list) {
+ 			if (fcport->edif.enable) {
+-				if (pcnt > app_req.num_ports)
++				if (pcnt >= app_req.num_ports)
+ 					break;
+ 
+ 				app_reply->elem[pcnt].rekey_count =
+-- 
+2.47.3
+

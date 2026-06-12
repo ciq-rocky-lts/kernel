@@ -1,0 +1,60 @@
+From ef31ae1c2511550c374b81c5067a04fb456abd09 Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Wed, 10 Jun 2026 20:23:45 -0400
+Subject: [PATCH] arm64: cputype: Add C1-Ultra definitions
+
+jira VULN-187519
+cve-pre CVE-2025-10263
+commit-author Mark Rutland <mark.rutland@arm.com>
+commit -
+commit-source-sha 60349e64a6c65f9f0aa118af711b3c7e137f07ff
+commit-source arm64
+upstream-diff Context due to missing
+  fd2ff5f - arm64: cputype: Add Cortex-X925 definitions
+  9ef54a3 - arm64: cputype: Add Cortex-A725 definitions
+  f38c2c3 - arm64: cputype: Add Cortex-A720AE definitions
+  9247257 - arm64: cputype: Add Neoverse-N3 definitions
+  2c99561 - arm64: cputype: Add C1-Pro definitions
+
+Add cputype definitions for C1-Ultra. These will be used for errata
+detection in subsequent patches.
+
+These values can be found in the C1-Ultra TRM:
+
+  https://developer.arm.com/documentation/108014/0100/
+
+... in section A.5.1 ("MIDR_EL1, Main ID Register").
+
+	Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+	Cc: Catalin Marinas <catalin.marinas@arm.com>
+	Cc: Will Deacon <will@kernel.org>
+	Signed-off-by: Will Deacon <will@kernel.org>
+(cherry picked from commit 60349e64a6c65f9f0aa118af711b3c7e137f07ff)
+	Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ arch/arm64/include/asm/cputype.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
+index ad6050e4636d..f09462fb05a8 100644
+--- a/arch/arm64/include/asm/cputype.h
++++ b/arch/arm64/include/asm/cputype.h
+@@ -108,6 +108,7 @@
+ #define ARM_CPU_PART_NEOVERSE_V3AE	0xD83
+ #define ARM_CPU_PART_NEOVERSE_V3	0xD84
+ #define ARM_CPU_PART_CORTEX_X925	0xD85
++#define ARM_CPU_PART_C1_ULTRA		0xD8C
+ 
+ #define APM_CPU_PART_XGENE		0x000
+ #define APM_CPU_VAR_POTENZA		0x00
+@@ -157,6 +158,7 @@
+ #define MIDR_NEOVERSE_V3AE	MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_V3AE)
+ #define MIDR_NEOVERSE_V3 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_V3)
+ #define MIDR_CORTEX_X925 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X925)
++#define MIDR_C1_ULTRA MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_C1_ULTRA)
+ #define MIDR_THUNDERX	MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX)
+ #define MIDR_THUNDERX_81XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_81XX)
+ #define MIDR_THUNDERX_83XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_83XX)
+-- 
+2.47.3
+

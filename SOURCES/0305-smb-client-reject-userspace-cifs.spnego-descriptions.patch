@@ -3,7 +3,8 @@ From: Shreeya Patel <spatel@ciq.com>
 Date: Tue, 26 May 2026 08:21:54 +0000
 Subject: [PATCH] smb: client: reject userspace cifs.spnego descriptions
 
-cve CVE-Pending
+jira VULN-186857
+cve CVE-2026-46243
 commit-author Asim Viladi Oglu Manizada <manizada@pm.me>
 commit 3da1fdf4efbc490041eb4f836bf596201203f8f2
 upstream-diff |

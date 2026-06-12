@@ -1,0 +1,52 @@
+From cf6e44ee7145e8e780b66ce07da7b6be816a81b0 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Fri, 12 Jun 2026 12:13:34 +0200
+Subject: [PATCH] arm64: Add Cortex-A510 CPU part definition
+
+jira VULN-187519
+cve-pre CVE-2025-10263
+commit-author James Morse <james.morse@arm.com>
+commit 53960faf2b731dd2f9ed6e1334634b8ba6286850
+upstream-diff | Context adjustement
+
+Add the CPU Partnumbers for the new Arm designs.
+
+	Cc: Catalin Marinas <catalin.marinas@arm.com>
+	Cc: Will Deacon <will@kernel.org>
+	Cc: Suzuki Poulose <suzuki.poulose@arm.com>
+	Cc: linux-arm-kernel@lists.infradead.org
+	Cc: linux-kernel@vger.kernel.org
+	Reviewed-by: Suzuki K Poulose <suzuki.poulose@arm.com>
+	Acked-by: Catalin Marinas <catalin.marinas@arm.com>
+	Signed-off-by: Anshuman Khandual <anshuman.khandual@arm.com>
+Link: https://lore.kernel.org/r/1643120437-14352-2-git-send-email-anshuman.khandual@arm.com
+	Signed-off-by: Mathieu Poirier <mathieu.poirier@linaro.org>
+(cherry picked from commit 53960faf2b731dd2f9ed6e1334634b8ba6286850)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ arch/arm64/include/asm/cputype.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
+index 1948ceef201e..e41c2f3cd606 100644
+--- a/arch/arm64/include/asm/cputype.h
++++ b/arch/arm64/include/asm/cputype.h
+@@ -94,6 +94,7 @@
+ #define ARM_CPU_PART_NEOVERSE_V1	0xD40
+ #define ARM_CPU_PART_CORTEX_A78		0xD41
+ #define ARM_CPU_PART_CORTEX_X1		0xD44
++#define ARM_CPU_PART_CORTEX_A510	0xD46
+ #define ARM_CPU_PART_CORTEX_A710	0xD47
+ #define ARM_CPU_PART_CORTEX_X2		0xD48
+ #define ARM_CPU_PART_NEOVERSE_N2	0xD49
+@@ -132,6 +133,7 @@
+ #define MIDR_NEOVERSE_V1 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_V1)
+ #define MIDR_CORTEX_A78 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A78)
+ #define MIDR_CORTEX_X1 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X1)
++#define MIDR_CORTEX_A510 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A510)
+ #define MIDR_CORTEX_A710 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A710)
+ #define MIDR_CORTEX_X2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X2)
+ #define MIDR_NEOVERSE_N2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_N2)
+-- 
+2.47.3
+
