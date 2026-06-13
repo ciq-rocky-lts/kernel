@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 16
+%define ciq_patch_version 17
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -631,6 +631,14 @@ Patch1108: 0082-ALSA-usb-audio-Fix-an-out-of-bounds-bug-in-__snd_usb.patch
 Patch1109: 0083-media-uvcvideo-Fix-double-free-in-error-path.patch
 Patch1110: 0084-HID-intel-ish-hid-Fix-use-after-free-issue-in-ishtp_.patch
 Patch1111: 0085-smb-client-reject-userspace-cifs.spnego-descriptions.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.17.1
+Patch1112: 0086-i40e-fix-idx-validation-in-config-queues-msg.patch
+Patch1113: 0087-i40e-increase-max-descriptors-for-XL710.patch
+Patch1114: 0088-i40e-add-validation-for-ring_len-param.patch
+Patch1115: 0089-i40e-validate-ring_len-parameter-against-hardware-sp.patch
+Patch1116: 0090-sctp-linearize-cloned-gso-packets-in-sctp_rcv.patch
+Patch1117: 0091-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
+Patch1118: 0092-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -1085,6 +1093,13 @@ ApplyOptionalPatch 0082-ALSA-usb-audio-Fix-an-out-of-bounds-bug-in-__snd_usb.pat
 ApplyOptionalPatch 0083-media-uvcvideo-Fix-double-free-in-error-path.patch
 ApplyOptionalPatch 0084-HID-intel-ish-hid-Fix-use-after-free-issue-in-ishtp_.patch
 ApplyOptionalPatch 0085-smb-client-reject-userspace-cifs.spnego-descriptions.patch
+ApplyOptionalPatch 0086-i40e-fix-idx-validation-in-config-queues-msg.patch
+ApplyOptionalPatch 0087-i40e-increase-max-descriptors-for-XL710.patch
+ApplyOptionalPatch 0088-i40e-add-validation-for-ring_len-param.patch
+ApplyOptionalPatch 0089-i40e-validate-ring_len-parameter-against-hardware-sp.patch
+ApplyOptionalPatch 0090-sctp-linearize-cloned-gso-packets-in-sctp_rcv.patch
+ApplyOptionalPatch 0091-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
+ApplyOptionalPatch 0092-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2088,8 +2103,17 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Thu Jun 11 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.17.1
+- ip6_tunnel: clear skb2->cb[] in ip4ip6_err() (Brett Mastbergen) [ciqres] {CVE-2026-43037}
+- tcp: Clear tcp_sk(sk)->fastopen_rsk in tcp_disconnect(). (Marcin Wcisło) [ciqres] {CVE-2025-39955}
+- sctp: linearize cloned gso packets in sctp_rcv (Marcin Wcisło) [ciqres] {CVE-2025-38718}
+- i40e: validate ring_len parameter against hardware-specific values (Marcin Wcisło) [ciqres] {CVE-2025-39973}
+- i40e: add validation for ring_len param (Marcin Wcisło) [ciqres] {CVE-2025-39973}
+- i40e: increase max descriptors for XL710 (Marcin Wcisło) [ciqres] {CVE-2025-39973}
+- i40e: fix idx validation in config queues msg (Marcin Wcisło) [ciqres] {CVE-2025-39971}
+
 * Tue May 26 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.16.1
-- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres]
+- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres] {CVE-2026-46243}
 - HID: intel-ish-hid: Fix use-after-free issue in ishtp_hid_remove() (CIQ Kernel Automation) [ciqres] {CVE-2025-21928}
 - media: uvcvideo: Fix double free in error path (CIQ Kernel Automation) [ciqres] {CVE-2024-57980}
 - ALSA: usb-audio: Fix an out-of-bounds bug in __snd_usb_parse_audio_interface() (CIQ Kernel Automation) [ciqres] {CVE-2022-48701}

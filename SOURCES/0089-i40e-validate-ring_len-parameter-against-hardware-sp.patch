@@ -1,0 +1,109 @@
+From 39707da63c3098def108bacf3c9713305d62adfc Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 20 May 2026 00:42:54 +0200
+Subject: [PATCH] i40e: validate ring_len parameter against hardware-specific
+ values
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-158762
+cve-bf CVE-2025-39973
+commit-author Gregory Herrero <gregory.herrero@oracle.com>
+commit 69942834215323cd9131db557091b4dec43f19c5
+upstream-diff Context conflict resolved in
+  drivers/net/ethernet/intel/i40e/i40e.h
+
+The maximum number of descriptors supported by the hardware is
+hardware-dependent and can be retrieved using
+i40e_get_max_num_descriptors(). Move this function to a shared header
+and use it when checking for valid ring_len parameter rather than using
+hardcoded value.
+
+By fixing an over-acceptance issue, behavior change could be seen where
+ring_len could now be rejected while configuring rx and tx queues if its
+size is larger than the hardware-dependent maximum number of
+descriptors.
+
+Fixes: 55d225670def ("i40e: add validation for ring_len param")
+	Signed-off-by: Gregory Herrero <gregory.herrero@oracle.com>
+	Tested-by: Rafal Romanowski <rafal.romanowski@intel.com>
+	Reviewed-by: Aleksandr Loktionov <aleksandr.loktionov@intel.com>
+	Signed-off-by: Tony Nguyen <anthony.l.nguyen@intel.com>
+(cherry picked from commit 69942834215323cd9131db557091b4dec43f19c5)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ drivers/net/ethernet/intel/i40e/i40e.h             | 12 ++++++++++++
+ drivers/net/ethernet/intel/i40e/i40e_ethtool.c     | 12 ------------
+ drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c |  4 ++--
+ 3 files changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/net/ethernet/intel/i40e/i40e.h b/drivers/net/ethernet/intel/i40e/i40e.h
+index 11fadfa35219..cfe1632fcedf 100644
+--- a/drivers/net/ethernet/intel/i40e/i40e.h
++++ b/drivers/net/ethernet/intel/i40e/i40e.h
+@@ -1109,4 +1109,16 @@ int i40e_add_del_cloud_filter(struct i40e_vsi *vsi,
+ int i40e_add_del_cloud_filter_big_buf(struct i40e_vsi *vsi,
+ 				      struct i40e_cloud_filter *filter,
+ 				      bool add);
++
++static inline u32 i40e_get_max_num_descriptors(const struct i40e_pf *pf)
++{
++	const struct i40e_hw *hw = &pf->hw;
++
++	switch (hw->mac.type) {
++	case I40E_MAC_XL710:
++		return I40E_MAX_NUM_DESCRIPTORS_XL710;
++	default:
++		return I40E_MAX_NUM_DESCRIPTORS;
++	}
++}
+ #endif /* _I40E_H_ */
+diff --git a/drivers/net/ethernet/intel/i40e/i40e_ethtool.c b/drivers/net/ethernet/intel/i40e/i40e_ethtool.c
+index fcef918e34d8..9f624b754dce 100644
+--- a/drivers/net/ethernet/intel/i40e/i40e_ethtool.c
++++ b/drivers/net/ethernet/intel/i40e/i40e_ethtool.c
+@@ -1904,18 +1904,6 @@ static void i40e_get_drvinfo(struct net_device *netdev,
+ 		drvinfo->n_priv_flags += I40E_GL_PRIV_FLAGS_STR_LEN;
+ }
+ 
+-static u32 i40e_get_max_num_descriptors(struct i40e_pf *pf)
+-{
+-	struct i40e_hw *hw = &pf->hw;
+-
+-	switch (hw->mac.type) {
+-	case I40E_MAC_XL710:
+-		return I40E_MAX_NUM_DESCRIPTORS_XL710;
+-	default:
+-		return I40E_MAX_NUM_DESCRIPTORS;
+-	}
+-}
+-
+ static void i40e_get_ringparam(struct net_device *netdev,
+ 			       struct ethtool_ringparam *ring)
+ {
+diff --git a/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c b/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c
+index fcbbd7d8674c..16d33ce98eeb 100644
+--- a/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c
++++ b/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c
+@@ -565,7 +565,7 @@ static int i40e_config_vsi_tx_queue(struct i40e_vf *vf, u16 vsi_id,
+ 
+ 	/* ring_len has to be multiple of 8 */
+ 	if (!IS_ALIGNED(info->ring_len, 8) ||
+-	    info->ring_len > I40E_MAX_NUM_DESCRIPTORS_XL710) {
++	    info->ring_len > i40e_get_max_num_descriptors(pf)) {
+ 		ret = -EINVAL;
+ 		goto error_context;
+ 	}
+@@ -638,7 +638,7 @@ static int i40e_config_vsi_rx_queue(struct i40e_vf *vf, u16 vsi_id,
+ 
+ 	/* ring_len has to be multiple of 32 */
+ 	if (!IS_ALIGNED(info->ring_len, 32) ||
+-	    info->ring_len > I40E_MAX_NUM_DESCRIPTORS_XL710) {
++	    info->ring_len > i40e_get_max_num_descriptors(pf)) {
+ 		ret = -EINVAL;
+ 		goto error_param;
+ 	}
+-- 
+2.47.3
+

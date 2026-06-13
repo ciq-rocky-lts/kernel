@@ -1,0 +1,57 @@
+From aaf20042d724f708d2393e74782affc0d09790e3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 13 Aug 2025 12:45:13 +0200
+Subject: [PATCH] i40e: fix idx validation in config queues msg
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-158746
+cve CVE-2025-39971
+commit-author Lukasz Czapnik <lukasz.czapnik@intel.com>
+commit f1ad24c5abe1eaef69158bac1405a74b3c365115
+upstream-diff Context conflict resolved (missing commit
+  230f3d53a5477bf8b04e649dca67da85635cd1eb ("i40e: remove i40e_status"))
+
+Ensure idx is within range of active/initialized TCs when iterating over
+vf->ch[idx] in i40e_vc_config_queues_msg().
+
+Fixes: c27eac48160d ("i40e: Enable ADq and create queue channel/s on VF")
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Lukasz Czapnik <lukasz.czapnik@intel.com>
+	Reviewed-by: Aleksandr Loktionov <aleksandr.loktionov@intel.com>
+	Signed-off-by: Przemek Kitszel <przemyslaw.kitszel@intel.com>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+	Tested-by: Kamakshi Nellore <nellorex.kamakshi@intel.com> (A Contingent Worker at Intel)
+	Signed-off-by: Tony Nguyen <anthony.l.nguyen@intel.com>
+(cherry picked from commit f1ad24c5abe1eaef69158bac1405a74b3c365115)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c b/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c
+index f8f158c7025b..e52b4eb6a862 100644
+--- a/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c
++++ b/drivers/net/ethernet/intel/i40e/i40e_virtchnl_pf.c
+@@ -2204,7 +2204,7 @@ static int i40e_vc_config_queues_msg(struct i40e_vf *vf, u8 *msg)
+ 		}
+ 
+ 		if (vf->adq_enabled) {
+-			if (idx >= ARRAY_SIZE(vf->ch)) {
++			if (idx >= vf->num_tc) {
+ 				aq_ret = I40E_ERR_NO_AVAILABLE_VSI;
+ 				goto error_param;
+ 			}
+@@ -2225,7 +2225,7 @@ static int i40e_vc_config_queues_msg(struct i40e_vf *vf, u8 *msg)
+ 		 * to its appropriate VSIs based on TC mapping
+ 		 */
+ 		if (vf->adq_enabled) {
+-			if (idx >= ARRAY_SIZE(vf->ch)) {
++			if (idx >= vf->num_tc) {
+ 				aq_ret = I40E_ERR_NO_AVAILABLE_VSI;
+ 				goto error_param;
+ 			}
+-- 
+2.47.3
+
