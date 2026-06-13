@@ -170,7 +170,7 @@ Summary: The Linux kernel
 %define tarfile_release 5.14.0-427.42.1.el9_4
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 23
+%define ciq_patch_version 24
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_4_ciq
@@ -1274,6 +1274,53 @@ Patch1000261: 0241-bonding-stop-the-device-in-bond_setup_by_slave.patch
 Patch1000262: 0242-usb-config-fix-iteration-issue-in-usb_get_bos_descri.patch
 Patch1000263: 0243-net-gro-don-t-merge-zcopy-skbs.patch
 Patch1000264: 0244-smb-client-reject-userspace-cifs.spnego-descriptions.patch
+#CIQ Patch Version: 427.42.1+24.1.el9_4_ciq
+Patch1000265: 0245-net-sched-Make-cake_enqueue-return-NET_XMIT_CN-when-.patch
+Patch1000266: 0246-net-sched-sch_cake-Fix-incorrect-qlen-reduction-in-c.patch
+Patch1000267: 0247-nbd-defer-config-unlock-in-nbd_genl_connect.patch
+Patch1000268: 0248-scsi-qla2xxx-Fix-improper-freeing-of-purex-item.patch
+Patch1000269: 0249-net-sched-Only-allow-act_ct-to-bind-to-clsact-ingres.patch
+Patch1000270: 0250-net-bridge-mcast-re-implement-br_multicast_-enable-d.patch
+Patch1000271: 0251-net-bridge-mcast-update-multicast-contex-when-vlan-s.patch
+Patch1000272: 0252-bridge-mcast-Fix-use-after-free-during-router-port-c.patch
+Patch1000273: 0253-NFS-Use-the-correct-commit-info-in-nfs_join_page_gro.patch
+Patch1000274: 0254-nfs-fold-nfs_page_group_lock_subrequests-into-nfs_lo.patch
+Patch1000275: 0255-NFS-Fix-a-race-when-updating-an-existing-write.patch
+Patch1000276: 0256-net-mlx5e-fix-a-double-free-in-arfs_create_groups.patch
+Patch1000277: 0257-HID-i2c-hid-of-fix-NULL-deref-on-failed-power-up.patch
+Patch1000278: 0258-xhci-process-isoc-TD-properly-when-there-was-a-trans.patch
+Patch1000279: 0259-xhci-handle-isoc-Babble-and-Buffer-Overrun-events-pr.patch
+Patch1000280: 0260-x86-fpu-Stop-relying-on-userspace-for-info-to-fault-.patch
+Patch1000281: 0261-drm-vmwgfx-Fix-the-lifetime-of-the-bo-cursor-memory.patch
+Patch1000282: 0262-RDMA-mlx5-Fix-fortify-source-warning-while-accessing.patch
+Patch1000283: 0263-nvme-fc-do-not-wait-in-vain-when-unloading-module.patch
+Patch1000284: 0264-VMCI-Fix-memcpy-run-time-warning-in-dg_dispatch_as_h.patch
+Patch1000285: 0265-arm64-cputype-Add-MIDR_CORTEX_A76AE.patch
+Patch1000286: 0266-arm64-cputype-Add-Cortex-X1C-definitions.patch
+Patch1000287: 0267-arm64-cputype-Add-Cortex-X3-definitions.patch
+Patch1000288: 0268-arm64-Add-Neoverse-V2-part.patch
+Patch1000289: 0269-arm64-cputype-Add-Cortex-A720-definitions.patch
+Patch1000290: 0270-arm64-cputype-Add-Cortex-X4-definitions.patch
+Patch1000291: 0271-arm64-cputype-Add-Neoverse-V3-definitions.patch
+Patch1000292: 0272-arm64-cputype-Add-Cortex-X925-definitions.patch
+Patch1000293: 0273-arm64-Subscribe-Microsoft-Azure-Cobalt-100-to-ARM-Ne.patch
+Patch1000294: 0274-arm64-cputype-Add-Cortex-A725-definitions.patch
+Patch1000295: 0275-arm64-cputype-Add-Cortex-A720AE-definitions.patch
+Patch1000296: 0276-arm64-cputype-Add-Neoverse-N3-definitions.patch
+Patch1000297: 0277-arm64-cputype-Add-Neoverse-V3AE-definitions.patch
+Patch1000298: 0278-arm64-cputype-Add-C1-Pro-definitions.patch
+Patch1000299: 0279-arm64-cputype-Add-NVIDIA-Olympus-definitions.patch
+Patch1000300: 0280-arm64-cputype-Add-C1-Ultra-definitions.patch
+Patch1000301: 0281-arm64-cputype-Add-C1-Premium-definitions.patch
+Patch1000302: 0282-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
+Patch1000303: 0283-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
+Patch1000304: 0284-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
+Patch1000305: 0285-crypto-asymmetric_keys-prevent-overflow-in-asymmetri.patch
+Patch1000306: 0286-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
+Patch1000307: 0287-ipv6-icmp-clear-skb2-cb-in-ip6_err_gen_icmpv6_unreac.patch
+Patch1000308: 0288-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
+Patch1000309: 0289-wifi-brcmfmac-validate-bsscfg-indices-in-IF-events.patch
+Patch1000310: 0290-netfilter-ip6t_eui64-reject-invalid-MAC-header-for-a.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2291,6 +2338,52 @@ ApplyOptionalPatch 0241-bonding-stop-the-device-in-bond_setup_by_slave.patch
 ApplyOptionalPatch 0242-usb-config-fix-iteration-issue-in-usb_get_bos_descri.patch
 ApplyOptionalPatch 0243-net-gro-don-t-merge-zcopy-skbs.patch
 ApplyOptionalPatch 0244-smb-client-reject-userspace-cifs.spnego-descriptions.patch
+ApplyOptionalPatch 0245-net-sched-Make-cake_enqueue-return-NET_XMIT_CN-when-.patch
+ApplyOptionalPatch 0246-net-sched-sch_cake-Fix-incorrect-qlen-reduction-in-c.patch
+ApplyOptionalPatch 0247-nbd-defer-config-unlock-in-nbd_genl_connect.patch
+ApplyOptionalPatch 0248-scsi-qla2xxx-Fix-improper-freeing-of-purex-item.patch
+ApplyOptionalPatch 0249-net-sched-Only-allow-act_ct-to-bind-to-clsact-ingres.patch
+ApplyOptionalPatch 0250-net-bridge-mcast-re-implement-br_multicast_-enable-d.patch
+ApplyOptionalPatch 0251-net-bridge-mcast-update-multicast-contex-when-vlan-s.patch
+ApplyOptionalPatch 0252-bridge-mcast-Fix-use-after-free-during-router-port-c.patch
+ApplyOptionalPatch 0253-NFS-Use-the-correct-commit-info-in-nfs_join_page_gro.patch
+ApplyOptionalPatch 0254-nfs-fold-nfs_page_group_lock_subrequests-into-nfs_lo.patch
+ApplyOptionalPatch 0255-NFS-Fix-a-race-when-updating-an-existing-write.patch
+ApplyOptionalPatch 0256-net-mlx5e-fix-a-double-free-in-arfs_create_groups.patch
+ApplyOptionalPatch 0257-HID-i2c-hid-of-fix-NULL-deref-on-failed-power-up.patch
+ApplyOptionalPatch 0258-xhci-process-isoc-TD-properly-when-there-was-a-trans.patch
+ApplyOptionalPatch 0259-xhci-handle-isoc-Babble-and-Buffer-Overrun-events-pr.patch
+ApplyOptionalPatch 0260-x86-fpu-Stop-relying-on-userspace-for-info-to-fault-.patch
+ApplyOptionalPatch 0261-drm-vmwgfx-Fix-the-lifetime-of-the-bo-cursor-memory.patch
+ApplyOptionalPatch 0262-RDMA-mlx5-Fix-fortify-source-warning-while-accessing.patch
+ApplyOptionalPatch 0263-nvme-fc-do-not-wait-in-vain-when-unloading-module.patch
+ApplyOptionalPatch 0264-VMCI-Fix-memcpy-run-time-warning-in-dg_dispatch_as_h.patch
+ApplyOptionalPatch 0265-arm64-cputype-Add-MIDR_CORTEX_A76AE.patch
+ApplyOptionalPatch 0266-arm64-cputype-Add-Cortex-X1C-definitions.patch
+ApplyOptionalPatch 0267-arm64-cputype-Add-Cortex-X3-definitions.patch
+ApplyOptionalPatch 0268-arm64-Add-Neoverse-V2-part.patch
+ApplyOptionalPatch 0269-arm64-cputype-Add-Cortex-A720-definitions.patch
+ApplyOptionalPatch 0270-arm64-cputype-Add-Cortex-X4-definitions.patch
+ApplyOptionalPatch 0271-arm64-cputype-Add-Neoverse-V3-definitions.patch
+ApplyOptionalPatch 0272-arm64-cputype-Add-Cortex-X925-definitions.patch
+ApplyOptionalPatch 0273-arm64-Subscribe-Microsoft-Azure-Cobalt-100-to-ARM-Ne.patch
+ApplyOptionalPatch 0274-arm64-cputype-Add-Cortex-A725-definitions.patch
+ApplyOptionalPatch 0275-arm64-cputype-Add-Cortex-A720AE-definitions.patch
+ApplyOptionalPatch 0276-arm64-cputype-Add-Neoverse-N3-definitions.patch
+ApplyOptionalPatch 0277-arm64-cputype-Add-Neoverse-V3AE-definitions.patch
+ApplyOptionalPatch 0278-arm64-cputype-Add-C1-Pro-definitions.patch
+ApplyOptionalPatch 0279-arm64-cputype-Add-NVIDIA-Olympus-definitions.patch
+ApplyOptionalPatch 0280-arm64-cputype-Add-C1-Ultra-definitions.patch
+ApplyOptionalPatch 0281-arm64-cputype-Add-C1-Premium-definitions.patch
+ApplyOptionalPatch 0282-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
+ApplyOptionalPatch 0283-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
+ApplyOptionalPatch 0284-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
+ApplyOptionalPatch 0285-crypto-asymmetric_keys-prevent-overflow-in-asymmetri.patch
+ApplyOptionalPatch 0286-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
+ApplyOptionalPatch 0287-ipv6-icmp-clear-skb2-cb-in-ip6_err_gen_icmpv6_unreac.patch
+ApplyOptionalPatch 0288-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
+ApplyOptionalPatch 0289-wifi-brcmfmac-validate-bsscfg-indices-in-IF-events.patch
+ApplyOptionalPatch 0290-netfilter-ip6t_eui64-reject-invalid-MAC-header-for-a.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4368,8 +4461,56 @@ fi
 #
 #
 %changelog
+* Thu Jun 11 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-427.42.1+24.1.el9_4_ciq
+- netfilter: ip6t_eui64: reject invalid MAC header for all packets (CIQ Kernel Automation) [ciqres] {CVE-2026-31685}
+- wifi: brcmfmac: validate bsscfg indices in IF events (CIQ Kernel Automation) [ciqres] {CVE-2026-43110}
+- ip6_tunnel: clear skb2->cb[] in ip4ip6_err() (CIQ Kernel Automation) [ciqres] {CVE-2026-43037}
+- ipv6: icmp: clear skb2->cb[] in ip6_err_gen_icmpv6_unreach() (CIQ Kernel Automation) [ciqres] {CVE-2026-43038}
+- scsi: target: iscsi: Fix use-after-free in iscsit_dec_conn_usage_count() (CIQ Kernel Automation) [ciqres] {CVE-2026-23216}
+- crypto: asymmetric_keys - prevent overflow in asymmetric_key_generate_id (CIQ Kernel Automation) [ciqres] {CVE-2025-68724}
+- arm64: errata: Mitigate TLBI errata on Microsoft Azure Cobalt 100 CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: errata: Mitigate TLBI errata on NVIDIA Olympus CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: errata: Mitigate TLBI errata on various Arm CPUs (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Premium definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Ultra definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add NVIDIA Olympus definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Pro definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Neoverse-V3AE definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Neoverse-N3 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-A720AE definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-A725 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: Subscribe Microsoft Azure Cobalt 100 to ARM Neoverse N2 errata (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X925 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Neoverse-V3 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X4 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-A720 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: Add Neoverse-V2 part (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X3 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-X1C definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add MIDR_CORTEX_A76AE (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- VMCI: Fix memcpy() run-time warning in dg_dispatch_as_host() (CIQ Kernel Automation) [ciqres] {CVE-2024-35944}
+- nvme-fc: do not wait in vain when unloading module (CIQ Kernel Automation) [ciqres] {CVE-2024-26846}
+- RDMA/mlx5: Fix fortify source warning while accessing Eth segment (CIQ Kernel Automation) [ciqres] {CVE-2024-26907}
+- drm/vmwgfx: Fix the lifetime of the bo cursor memory (CIQ Kernel Automation) [ciqres] {CVE-2024-35810}
+- x86/fpu: Stop relying on userspace for info to fault in xsave buffer (CIQ Kernel Automation) [ciqres] {CVE-2024-26603}
+- xhci: handle isoc Babble and Buffer Overrun events properly (CIQ Kernel Automation) [ciqres] {CVE-2024-26659}
+- xhci: process isoc TD properly when there was a transaction error mid TD. (Roxana Nicolescu) [ciqres] {CVE-2024-26659}
+- HID: i2c-hid-of: fix NULL-deref on failed power up (CIQ Kernel Automation) [ciqres] {CVE-2024-26717}
+- net/mlx5e: fix a double-free in arfs_create_groups (CIQ Kernel Automation) [ciqres] {CVE-2024-35835}
+- NFS: Fix a race when updating an existing write (Marcin Wcisło) [ciqres] {CVE-2025-39697}
+- nfs: fold nfs_page_group_lock_subrequests into nfs_lock_and_join_requests (Marcin Wcisło) [ciqres] {CVE-2025-39697}
+- NFS: Use the correct commit info in nfs_join_page_group() (Marcin Wcisło) [ciqres] {CVE-2025-39697}
+- bridge: mcast: Fix use-after-free during router port configuration (Marcin Wcisło) [ciqres] {CVE-2025-38248}
+- net: bridge: mcast: update multicast contex when vlan state is changed (Marcin Wcisło) [ciqres] {CVE-2025-38248}
+- net: bridge: mcast: re-implement br_multicast_{enable, disable}_port functions (Marcin Wcisło) [ciqres] {CVE-2025-38248}
+- net/sched: Only allow act_ct to bind to clsact/ingress qdiscs and shared blocks (CIQ Kernel Automation) [ciqres] {CVE-2026-23270}
+- scsi: qla2xxx: Fix improper freeing of purex item (CIQ Kernel Automation) [ciqres] {CVE-2025-68741}
+- nbd: defer config unlock in nbd_genl_connect (CIQ Kernel Automation) [ciqres] {CVE-2025-68366}
+- net/sched: sch_cake: Fix incorrect qlen reduction in cake_drop (CIQ Kernel Automation) [ciqres] {CVE-2025-68325}
+- net/sched: Make cake_enqueue return NET_XMIT_CN when past buffer_limit (CIQ Kernel Automation) [ciqres] {CVE-2025-39766}
+
 * Tue May 26 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-427.42.1+23.1.el9_4_ciq
-- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres]
+- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres] {CVE-2026-46243}
 - net: gro: don't merge zcopy skbs (Sabrina Dubroca) [ciqres]
 - usb: config: fix iteration issue in 'usb_get_bos_descriptor()' (CIQ Kernel Automation) [ciqres] {CVE-2023-52781}
 - bonding: stop the device in bond_setup_by_slave() (CIQ Kernel Automation) [ciqres] {CVE-2023-52784}

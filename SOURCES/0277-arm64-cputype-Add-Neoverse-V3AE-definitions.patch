@@ -1,0 +1,54 @@
+From 9f70a7c4c7134fc66fe89eb291dd7a9435eb0a68 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Wed, 10 Jun 2026 19:36:19 -0400
+Subject: [PATCH] arm64: cputype: Add Neoverse-V3AE definitions
+
+jira VULN-187522
+cve-pre CVE-2025-10263
+commit-author Mark Rutland <mark.rutland@arm.com>
+commit 3bbf004c4808e2c3241e5c1ad6cc102f38a03c39
+
+Add cputype definitions for Neoverse-V3AE. These will be used for errata
+detection in subsequent patches.
+
+These values can be found in the Neoverse-V3AE TRM:
+
+  https://developer.arm.com/documentation/SDEN-2615521/9-0/
+
+... in section A.6.1 ("MIDR_EL1, Main ID Register").
+
+	Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+	Cc: James Morse <james.morse@arm.com>
+	Cc: Will Deacon <will@kernel.org>
+	Cc: Catalin Marinas <catalin.marinas@arm.com>
+	Signed-off-by: Ryan Roberts <ryan.roberts@arm.com>
+	Signed-off-by: Will Deacon <will@kernel.org>
+(cherry picked from commit 3bbf004c4808e2c3241e5c1ad6cc102f38a03c39)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ arch/arm64/include/asm/cputype.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
+index e73e5aa37622..c7d977170fa7 100644
+--- a/arch/arm64/include/asm/cputype.h
++++ b/arch/arm64/include/asm/cputype.h
+@@ -85,6 +85,7 @@
+ #define ARM_CPU_PART_CORTEX_A520	0xD80
+ #define ARM_CPU_PART_CORTEX_A720	0xD81
+ #define ARM_CPU_PART_CORTEX_X4		0xD82
++#define ARM_CPU_PART_NEOVERSE_V3AE	0xD83
+ #define ARM_CPU_PART_NEOVERSE_V3	0xD84
+ #define ARM_CPU_PART_CORTEX_X925	0xD85
+ #define ARM_CPU_PART_CORTEX_A725	0xD87
+@@ -176,6 +177,7 @@
+ #define MIDR_NEOVERSE_V2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_V2)
+ #define MIDR_CORTEX_A720 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A720)
+ #define MIDR_CORTEX_X4 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X4)
++#define MIDR_NEOVERSE_V3AE	MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_V3AE)
+ #define MIDR_NEOVERSE_V3 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_V3)
+ #define MIDR_CORTEX_X925 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X925)
+ #define MIDR_CORTEX_A725 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A725)
+-- 
+2.47.3
+

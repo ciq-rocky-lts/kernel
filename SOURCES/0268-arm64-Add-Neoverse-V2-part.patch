@@ -1,0 +1,45 @@
+From 0b0550c95944c76b9596a981b02feff05288e5a6 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Wed, 10 Jun 2026 19:36:18 -0400
+Subject: [PATCH] arm64: Add Neoverse-V2 part
+
+jira VULN-187522
+cve-pre CVE-2025-10263
+commit-author Besar Wicaksono <bwicaksono@nvidia.com>
+commit f4d9d9dcc70b96b5e5d7801bd5fbf8491b07b13d
+
+Add the part number and MIDR for Neoverse-V2
+
+	Signed-off-by: Besar Wicaksono <bwicaksono@nvidia.com>
+	Reviewed-by: James Clark <james.clark@arm.com>
+Link: https://lore.kernel.org/r/20240109192310.16234-2-bwicaksono@nvidia.com
+	Signed-off-by: Will Deacon <will@kernel.org>
+(cherry picked from commit f4d9d9dcc70b96b5e5d7801bd5fbf8491b07b13d)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ arch/arm64/include/asm/cputype.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
+index b8806fe3e294..54a5f79e9ec1 100644
+--- a/arch/arm64/include/asm/cputype.h
++++ b/arch/arm64/include/asm/cputype.h
+@@ -88,6 +88,7 @@
+ #define ARM_CPU_PART_NEOVERSE_N2	0xD49
+ #define ARM_CPU_PART_CORTEX_A78C	0xD4B
+ #define ARM_CPU_PART_CORTEX_X3		0xD4E
++#define ARM_CPU_PART_NEOVERSE_V2	0xD4F
+ 
+ #define APM_CPU_PART_XGENE		0x000
+ #define APM_CPU_VAR_POTENZA		0x00
+@@ -162,6 +163,7 @@
+ #define MIDR_NEOVERSE_N2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_N2)
+ #define MIDR_CORTEX_A78C	MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A78C)
+ #define MIDR_CORTEX_X3 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X3)
++#define MIDR_NEOVERSE_V2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_V2)
+ #define MIDR_THUNDERX	MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX)
+ #define MIDR_THUNDERX_81XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_81XX)
+ #define MIDR_THUNDERX_83XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_83XX)
+-- 
+2.47.3
+
