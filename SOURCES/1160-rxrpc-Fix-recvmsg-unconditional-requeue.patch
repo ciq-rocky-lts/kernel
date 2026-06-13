@@ -1,0 +1,126 @@
+From 87ab54b911a7f218c7aa9e08b9552c28057c7c2c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Thu, 26 Feb 2026 16:23:46 +0800
+Subject: [PATCH] rxrpc: Fix recvmsg() unconditional requeue
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-175573
+cve CVE-2026-23066
+commit-author David Howells <dhowells@redhat.com>
+commit 2c28769a51deb6022d7fbd499987e237a01dd63a
+upstream-diff Used linux-6.12.y backport
+  cf969bddd6e69c5777fa89dc88402204e72f312a as the basis, which, unlike
+  the upstream, produces no conflicts in net/rxrpc/recvmsg.c and only
+  trivial conflicts in include/trace/events/rxrpc.h. The contentious
+  commit is the non-backported a2ea9a9072607c2fd6442bd1ffb4dbdbf882aed7
+  ("Use irq-disabling spinlocks between app and I/O thread"), which
+  changes spin_lock()/spin_unlock() pairs to
+  spin_lock_irq()/spin_unlock_irq(). Spin locks are used in the CVE fix
+  which makes the upstream version incompatible. Linux 6.12 doesn't have
+  this commit backported either which makes it better suited for LTS
+  9.6. Conflicts left in include/trace/events/rxrpc.h are just a matter
+  of putting the newly defined trace points in a correct place on the
+  alphabetically-ordered list.
+
+If rxrpc_recvmsg() fails because MSG_DONTWAIT was specified but the call at
+the front of the recvmsg queue already has its mutex locked, it requeues
+the call - whether or not the call is already queued.  The call may be on
+the queue because MSG_PEEK was also passed and so the call was not dequeued
+or because the I/O thread requeued it.
+
+The unconditional requeue may then corrupt the recvmsg queue, leading to
+things like UAFs or refcount underruns.
+
+Fix this by only requeuing the call if it isn't already on the queue - and
+moving it to the front if it is already queued.  If we don't queue it, we
+have to put the ref we obtained by dequeuing it.
+
+Also, MSG_PEEK doesn't dequeue the call so shouldn't call
+rxrpc_notify_socket() for the call if we didn't use up all the data on the
+queue, so fix that also.
+
+Fixes: 540b1c48c37a ("rxrpc: Fix deadlock between call creation and sendmsg/recvmsg")
+	Reported-by: Faith <faith@zellic.io>
+	Reported-by: Pumpkin Chang <pumpkin@devco.re>
+	Signed-off-by: David Howells <dhowells@redhat.com>
+	Acked-by: Marc Dionne <marc.dionne@auristor.com>
+cc: Nir Ohfeld <niro@wiz.io>
+cc: Willy Tarreau <w@1wt.eu>
+cc: Simon Horman <horms@kernel.org>
+cc: linux-afs@lists.infradead.org
+cc: stable@kernel.org
+Link: https://patch.msgid.link/95163.1768428203@warthog.procyon.org.uk
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit cf969bddd6e69c5777fa89dc88402204e72f312a)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/trace/events/rxrpc.h |  4 ++++
+ net/rxrpc/recvmsg.c          | 19 +++++++++++++++----
+ 2 files changed, 19 insertions(+), 4 deletions(-)
+
+diff --git a/include/trace/events/rxrpc.h b/include/trace/events/rxrpc.h
+index c6ddc82a68c9..8bd45d063328 100644
+--- a/include/trace/events/rxrpc.h
++++ b/include/trace/events/rxrpc.h
+@@ -273,6 +273,7 @@
+ 	EM(rxrpc_call_put_kernel,		"PUT kernel  ") \
+ 	EM(rxrpc_call_put_poke,			"PUT poke    ") \
+ 	EM(rxrpc_call_put_recvmsg,		"PUT recvmsg ") \
++	EM(rxrpc_call_put_recvmsg_peek_nowait,	"PUT peek-nwt") \
+ 	EM(rxrpc_call_put_release_sock,		"PUT rls-sock") \
+ 	EM(rxrpc_call_put_release_sock_tba,	"PUT rls-sk-a") \
+ 	EM(rxrpc_call_put_sendmsg,		"PUT sendmsg ") \
+@@ -287,6 +288,9 @@
+ 	EM(rxrpc_call_see_disconnected,		"SEE disconn ") \
+ 	EM(rxrpc_call_see_distribute_error,	"SEE dist-err") \
+ 	EM(rxrpc_call_see_input,		"SEE input   ") \
++	EM(rxrpc_call_see_recvmsg_requeue,	"SEE recv-rqu") \
++	EM(rxrpc_call_see_recvmsg_requeue_first, "SEE recv-rqF") \
++	EM(rxrpc_call_see_recvmsg_requeue_move,	"SEE recv-rqM") \
+ 	EM(rxrpc_call_see_release,		"SEE release ") \
+ 	EM(rxrpc_call_see_userid_exists,	"SEE u-exists") \
+ 	E_(rxrpc_call_see_zap,			"SEE zap     ")
+diff --git a/net/rxrpc/recvmsg.c b/net/rxrpc/recvmsg.c
+index a482f88c5fc5..84801946237e 100644
+--- a/net/rxrpc/recvmsg.c
++++ b/net/rxrpc/recvmsg.c
+@@ -415,7 +415,8 @@ int rxrpc_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
+ 	if (rxrpc_call_has_failed(call))
+ 		goto call_failed;
+ 
+-	if (!skb_queue_empty(&call->recvmsg_queue))
++	if (!(flags & MSG_PEEK) &&
++	    !skb_queue_empty(&call->recvmsg_queue))
+ 		rxrpc_notify_socket(call);
+ 	goto not_yet_complete;
+ 
+@@ -446,11 +447,21 @@ int rxrpc_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
+ error_requeue_call:
+ 	if (!(flags & MSG_PEEK)) {
+ 		spin_lock(&rx->recvmsg_lock);
+-		list_add(&call->recvmsg_link, &rx->recvmsg_q);
+-		spin_unlock(&rx->recvmsg_lock);
++		if (list_empty(&call->recvmsg_link)) {
++			list_add(&call->recvmsg_link, &rx->recvmsg_q);
++			rxrpc_see_call(call, rxrpc_call_see_recvmsg_requeue);
++			spin_unlock(&rx->recvmsg_lock);
++		} else if (list_is_first(&call->recvmsg_link, &rx->recvmsg_q)) {
++			spin_unlock(&rx->recvmsg_lock);
++			rxrpc_put_call(call, rxrpc_call_see_recvmsg_requeue_first);
++		} else {
++			list_move(&call->recvmsg_link, &rx->recvmsg_q);
++			spin_unlock(&rx->recvmsg_lock);
++			rxrpc_put_call(call, rxrpc_call_see_recvmsg_requeue_move);
++		}
+ 		trace_rxrpc_recvmsg(call_debug_id, rxrpc_recvmsg_requeue, 0);
+ 	} else {
+-		rxrpc_put_call(call, rxrpc_call_put_recvmsg);
++		rxrpc_put_call(call, rxrpc_call_put_recvmsg_peek_nowait);
+ 	}
+ error_no_call:
+ 	release_sock(&rx->sk);
+-- 
+2.51.0
+

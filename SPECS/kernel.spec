@@ -171,8 +171,8 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 12
-%define ciq_build_id 1
+%define ciq_patch_version 14
+%define ciq_build_id 2
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
 
@@ -1151,6 +1151,39 @@ Patch1000156: 1156-ptrace-slightly-saner-get_dumpable-logic.patch
 #CIQ Patch Version: 570.60.1+12.1.el9_6_ciq
 Patch1000157: 1157-net-gro-don-t-merge-zcopy-skbs.patch
 Patch1000158: 1158-smb-client-reject-userspace-cifs.spnego-descriptions.patch
+#CIQ Patch Version: 570.60.1+14.1.el9_6_ciq
+Patch1000159: 1159-nfsd-fix-heap-overflow-in-NFSv4.0-LOCK-replay-cache.patch
+Patch1000160: 1160-rxrpc-Fix-recvmsg-unconditional-requeue.patch
+Patch1000161: 1161-migrate-correct-lock-ordering-for-hugetlb-file-folio.patch
+Patch1000162: 1162-bonding-fix-use-after-free-due-to-enslave-fail-after.patch
+Patch1000163: 1163-proc-use-the-same-treatment-to-check-proc_lseek-as-o.patch
+Patch1000164: 1164-proc-fix-missing-pde_set_flags-for-net-proc-files.patch
+Patch1000165: 1165-proc-fix-type-confusion-in-pde_set_flags.patch
+Patch1000166: 1166-net-sched-Make-cake_enqueue-return-NET_XMIT_CN-when-.patch
+Patch1000167: 1167-net-sched-sch_cake-Fix-incorrect-qlen-reduction-in-c.patch
+Patch1000168: 1168-nbd-defer-config-unlock-in-nbd_genl_connect.patch
+Patch1000169: 1169-md-bitmap-fix-GPF-in-write_page-caused-by-resize-rac.patch
+Patch1000170: 1170-net-sched-Only-allow-act_ct-to-bind-to-clsact-ingres.patch
+Patch1000171: 1171-netfilter-nf_tables-release-flowtable-after-rcu-grac.patch
+Patch1000172: 1172-ipv6-icmp-clear-skb2-cb-in-ip6_err_gen_icmpv6_unreac.patch
+Patch1000173: 1173-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
+Patch1000174: 1174-KVM-arm64-vgic-its-Drop-the-translation-cache-refere.patch
+Patch1000175: 1175-KVM-arm64-Fix-nested-S2-MMU-structures-reallocation.patch
+Patch1000176: 1176-KVM-arm64-Reassign-nested_mmus-array-behind-mmu_lock.patch
+Patch1000177: 1177-usbip-validate-number_of_packets-in-usbip_pack_ret_s.patch
+Patch1000178: 1178-netfilter-ip6t_eui64-reject-invalid-MAC-header-for-a.patch
+Patch1000179: 1179-arm64-cputype-Add-MIDR_CORTEX_A76AE.patch
+Patch1000180: 1180-arm64-cputype-Add-Cortex-A725-definitions.patch
+Patch1000181: 1181-arm64-cputype-Add-Cortex-A720AE-definitions.patch
+Patch1000182: 1182-arm64-cputype-Add-Neoverse-N3-definitions.patch
+Patch1000183: 1183-arm64-cputype-Add-Neoverse-V3AE-definitions.patch
+Patch1000184: 1184-arm64-cputype-Add-C1-Pro-definitions.patch
+Patch1000185: 1185-arm64-cputype-Add-NVIDIA-Olympus-definitions.patch
+Patch1000186: 1186-arm64-cputype-Add-C1-Ultra-definitions.patch
+Patch1000187: 1187-arm64-cputype-Add-C1-Premium-definitions.patch
+Patch1000188: 1188-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
+Patch1000189: 1189-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
+Patch1000190: 1190-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2068,6 +2101,38 @@ ApplyOptionalPatch 1155-net-skbuff-propagate-shared-frag-marker-through-frag.pat
 ApplyOptionalPatch 1156-ptrace-slightly-saner-get_dumpable-logic.patch
 ApplyOptionalPatch 1157-net-gro-don-t-merge-zcopy-skbs.patch
 ApplyOptionalPatch 1158-smb-client-reject-userspace-cifs.spnego-descriptions.patch
+ApplyOptionalPatch 1159-nfsd-fix-heap-overflow-in-NFSv4.0-LOCK-replay-cache.patch
+ApplyOptionalPatch 1160-rxrpc-Fix-recvmsg-unconditional-requeue.patch
+ApplyOptionalPatch 1161-migrate-correct-lock-ordering-for-hugetlb-file-folio.patch
+ApplyOptionalPatch 1162-bonding-fix-use-after-free-due-to-enslave-fail-after.patch
+ApplyOptionalPatch 1163-proc-use-the-same-treatment-to-check-proc_lseek-as-o.patch
+ApplyOptionalPatch 1164-proc-fix-missing-pde_set_flags-for-net-proc-files.patch
+ApplyOptionalPatch 1165-proc-fix-type-confusion-in-pde_set_flags.patch
+ApplyOptionalPatch 1166-net-sched-Make-cake_enqueue-return-NET_XMIT_CN-when-.patch
+ApplyOptionalPatch 1167-net-sched-sch_cake-Fix-incorrect-qlen-reduction-in-c.patch
+ApplyOptionalPatch 1168-nbd-defer-config-unlock-in-nbd_genl_connect.patch
+ApplyOptionalPatch 1169-md-bitmap-fix-GPF-in-write_page-caused-by-resize-rac.patch
+ApplyOptionalPatch 1170-net-sched-Only-allow-act_ct-to-bind-to-clsact-ingres.patch
+ApplyOptionalPatch 1171-netfilter-nf_tables-release-flowtable-after-rcu-grac.patch
+ApplyOptionalPatch 1172-ipv6-icmp-clear-skb2-cb-in-ip6_err_gen_icmpv6_unreac.patch
+ApplyOptionalPatch 1173-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
+ApplyOptionalPatch 1174-KVM-arm64-vgic-its-Drop-the-translation-cache-refere.patch
+ApplyOptionalPatch 1175-KVM-arm64-Fix-nested-S2-MMU-structures-reallocation.patch
+ApplyOptionalPatch 1176-KVM-arm64-Reassign-nested_mmus-array-behind-mmu_lock.patch
+ApplyOptionalPatch 1177-usbip-validate-number_of_packets-in-usbip_pack_ret_s.patch
+ApplyOptionalPatch 1178-netfilter-ip6t_eui64-reject-invalid-MAC-header-for-a.patch
+ApplyOptionalPatch 1179-arm64-cputype-Add-MIDR_CORTEX_A76AE.patch
+ApplyOptionalPatch 1180-arm64-cputype-Add-Cortex-A725-definitions.patch
+ApplyOptionalPatch 1181-arm64-cputype-Add-Cortex-A720AE-definitions.patch
+ApplyOptionalPatch 1182-arm64-cputype-Add-Neoverse-N3-definitions.patch
+ApplyOptionalPatch 1183-arm64-cputype-Add-Neoverse-V3AE-definitions.patch
+ApplyOptionalPatch 1184-arm64-cputype-Add-C1-Pro-definitions.patch
+ApplyOptionalPatch 1185-arm64-cputype-Add-NVIDIA-Olympus-definitions.patch
+ApplyOptionalPatch 1186-arm64-cputype-Add-C1-Ultra-definitions.patch
+ApplyOptionalPatch 1187-arm64-cputype-Add-C1-Premium-definitions.patch
+ApplyOptionalPatch 1188-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
+ApplyOptionalPatch 1189-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
+ApplyOptionalPatch 1190-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4184,8 +4249,45 @@ fi
 #
 #
 %changelog
+* Thu Jun 11 2026 Shreeya Patel <spatel@ciq.com> - 5.14.0-570.60.1+14.2.el9_6_ciq
+- arm64: configs: Enable CONFIG_ARM64_ERRATUM_4118414 for aarch64 [ciqres] {CVE-2025-10263}
+
+* Thu Jun 11 2026 Shreeya Patel <spatel@ciq.com> - 5.14.0-570.60.1+14.1.el9_6_ciq
+- arm64: errata: Mitigate TLBI errata on Microsoft Azure Cobalt 100 CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: errata: Mitigate TLBI errata on NVIDIA Olympus CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: errata: Mitigate TLBI errata on various Arm CPUs (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Premium definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Ultra definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add NVIDIA Olympus definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add C1-Pro definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Neoverse-V3AE definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Neoverse-N3 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-A720AE definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add Cortex-A725 definitions (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- arm64: cputype: Add MIDR_CORTEX_A76AE (Brett Mastbergen) [ciqres] {CVE-2025-10263}
+- netfilter: ip6t_eui64: reject invalid MAC header for all packets (CIQ Kernel Automation) [ciqres] {CVE-2026-31685}
+- usbip: validate number_of_packets in usbip_pack_ret_submit() (CIQ Kernel Automation) [ciqres] {CVE-2026-31607}
+- KVM: arm64: Reassign nested_mmus array behind mmu_lock (Jonathan Maple) [ciqres] {CVE-2026-46317}
+- KVM: arm64: Fix nested S2 MMU structures reallocation (Jonathan Maple) [ciqres] {CVE-2026-46317}
+- KVM: arm64: vgic-its: Drop the translation cache reference only for the erased entry (Jonathan Maple) [ciqres] {CVE-2026-46316}
+- ip6_tunnel: clear skb2->cb[] in ip4ip6_err() (CIQ Kernel Automation) [ciqres] {CVE-2026-43037}
+- ipv6: icmp: clear skb2->cb[] in ip6_err_gen_icmpv6_unreach() (CIQ Kernel Automation) [ciqres] {CVE-2026-43038}
+- netfilter: nf_tables: release flowtable after rcu grace period on error (CIQ Kernel Automation) [ciqres] {CVE-2026-23392}
+- net/sched: Only allow act_ct to bind to clsact/ingress qdiscs and shared blocks (CIQ Kernel Automation) [ciqres] {CVE-2026-23270}
+- md/bitmap: fix GPF in write_page caused by resize race (CIQ Kernel Automation) [ciqres] {CVE-2026-43163}
+- nbd: defer config unlock in nbd_genl_connect (CIQ Kernel Automation) [ciqres] {CVE-2025-68366}
+- net/sched: sch_cake: Fix incorrect qlen reduction in cake_drop (CIQ Kernel Automation) [ciqres] {CVE-2025-68325}
+- net/sched: Make cake_enqueue return NET_XMIT_CN when past buffer_limit (CIQ Kernel Automation) [ciqres] {CVE-2025-39766}
+- proc: fix type confusion in pde_set_flags() (CIQ Kernel Automation) [ciqres] {CVE-2025-38653}
+- proc: fix missing pde_set_flags() for net proc files (CIQ Kernel Automation) [ciqres] {CVE-2025-38653}
+- proc: use the same treatment to check proc_lseek as ones for proc_read_iter et.al (CIQ Kernel Automation) [ciqres] {CVE-2025-38653}
+- bonding: fix use-after-free due to enslave fail after slave array update (Marcin Wcisło) [ciqres] {CVE-2026-23171}
+- migrate: correct lock ordering for hugetlb file folios (Marcin Wcisło) [ciqres] {CVE-2026-23097}
+- rxrpc: Fix recvmsg() unconditional requeue (Marcin Wcisło) [ciqres] {CVE-2026-23066}
+- nfsd: fix heap overflow in NFSv4.0 LOCK replay cache (Marcin Wcisło) [ciqres] {CVE-2026-31402}
+
 * Tue May 26 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+12.1.el9_6_ciq
-- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres]
+- smb: client: reject userspace cifs.spnego descriptions (Shreeya Patel) [ciqres] {CVE-2026-46243}
 - net: gro: don't merge zcopy skbs (Sabrina Dubroca) [ciqres]
 
 * Mon May 18 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 5.14.0-570.60.1+11.1.el9_6_ciq

@@ -1,0 +1,85 @@
+From 35f3384d263a91db236d9659af2ae6ba15cc3c86 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Tue, 9 Jun 2026 18:40:44 -0500
+Subject: [PATCH] arm64: errata: Mitigate TLBI errata on NVIDIA Olympus CPU
+
+jira VULN-187523
+cve CVE-2025-10263
+commit-author Shanker Donthineni <sdonthineni@nvidia.com>
+commit -
+commit-source-sha ec7216f92e4ebd485b1c6dc6aa3f6064b71a5768
+commit-source arm64
+
+NVIDIA Olympus cores are affected by the TLBI completion issue tracked as
+CVE-2025-10263. The existing ARM64_ERRATUM_4118414 handling already uses
+ARM64_WORKAROUND_REPEAT_TLBI to issue an additional broadcast TLBI;DSB
+sequence and ensure affected memory write effects are globally observed.
+
+Add MIDR_NVIDIA_OLYMPUS to the repeat-TLBI match list so the same
+mitigation is enabled on affected Olympus systems. Also document the
+NVIDIA Olympus erratum in the arm64 silicon errata table and list it in
+the Kconfig help text.
+
+	Signed-off-by: Shanker Donthineni <sdonthineni@nvidia.com>
+	Cc: Catalin Marinas <catalin.marinas@arm.com>
+	Cc: Will Deacon <will@kernel.org>
+	Cc: Mark Rutland <mark.rutland@arm.com>
+	Acked-by: Mark Rutland <mark.rutland@arm.com>
+	Signed-off-by: Will Deacon <will@kernel.org>
+(cherry picked from commit ec7216f92e4ebd485b1c6dc6aa3f6064b71a5768)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ Documentation/arm64/silicon-errata.rst | 2 ++
+ arch/arm64/Kconfig                     | 3 ++-
+ arch/arm64/kernel/cpu_errata.c         | 1 +
+ 3 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/arm64/silicon-errata.rst b/Documentation/arm64/silicon-errata.rst
+index 9d01dbd438d4..9b2f228a6f78 100644
+--- a/Documentation/arm64/silicon-errata.rst
++++ b/Documentation/arm64/silicon-errata.rst
+@@ -265,6 +265,8 @@ stable kernels.
+ +----------------+-----------------+-----------------+-----------------------------+
+ | NVIDIA         | Carmel Core     | N/A             | NVIDIA_CARMEL_CNP_ERRATUM   |
+ +----------------+-----------------+-----------------+-----------------------------+
++| NVIDIA         | Olympus core    | T410-OLY-1029   | ARM64_ERRATUM_4118414       |
+++----------------+-----------------+-----------------+-----------------------------+
+ | NVIDIA         | T241 GICv3/4.x  | T241-FABRIC-4   | N/A                         |
+ +----------------+-----------------+-----------------+-----------------------------+
+ +----------------+-----------------+-----------------+-----------------------------+
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index ba8f66febaad..873d5080bd4b 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -1069,7 +1069,7 @@ config ARM64_ERRATUM_3194386
+ 	  If unsure, say Y.
+ 
+ config ARM64_ERRATUM_4118414
+-	bool "Cortex-*/Neoverse-*/C1-*: Completion of affected memory accesses might not be guaranteed by completion of a TLBI"
++	bool "Various: Completion of affected memory accesses might not be guaranteed by completion of a TLBI"
+ 	default y
+ 	select ARM64_WORKAROUND_REPEAT_TLBI
+ 	help
+@@ -1096,6 +1096,7 @@ config ARM64_ERRATUM_4118414
+ 	  * ARM Neoverse-V2 erratum 4193787
+ 	  * ARM Neoverse-V3 erratum 4193784
+ 	  * ARM Neoverse-V3AE erratum 4193784
++	  * NVIDIA Olympus erratum T410-OLY-1029
+ 
+ 	  On affected cores, some memory accesses might not be completed by
+ 	  broadcast TLB invalidation.
+diff --git a/arch/arm64/kernel/cpu_errata.c b/arch/arm64/kernel/cpu_errata.c
+index 1fc5fbabad09..bef0edc4db09 100644
+--- a/arch/arm64/kernel/cpu_errata.c
++++ b/arch/arm64/kernel/cpu_errata.c
+@@ -249,6 +249,7 @@ static const struct arm64_cpu_capabilities arm64_repeat_tlbi_list[] = {
+ 			MIDR_ALL_VERSIONS(MIDR_NEOVERSE_V2),
+ 			MIDR_ALL_VERSIONS(MIDR_NEOVERSE_V3),
+ 			MIDR_ALL_VERSIONS(MIDR_NEOVERSE_V3AE),
++			MIDR_ALL_VERSIONS(MIDR_NVIDIA_OLYMPUS),
+ 			{}
+ 		})),
+ 	},
+-- 
+2.51.0
+
