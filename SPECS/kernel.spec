@@ -171,8 +171,8 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 14
-%define ciq_build_id 2
+%define ciq_patch_version 15
+%define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
 
@@ -1184,6 +1184,19 @@ Patch1000187: 1187-arm64-cputype-Add-C1-Premium-definitions.patch
 Patch1000188: 1188-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
 Patch1000189: 1189-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
 Patch1000190: 1190-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
+#CIQ Patch Version: 570.60.1+15.1.el9_6_ciq
+Patch1000191: 1191-crypto-asymmetric_keys-prevent-overflow-in-asymmetri.patch
+Patch1000192: 1192-iommu-disable-SVA-when-CONFIG_X86-is-set.patch
+Patch1000193: 1193-libceph-make-decode_pool-more-resilient-against-corr.patch
+Patch1000194: 1194-libceph-prevent-potential-out-of-bounds-reads-in-han.patch
+Patch1000195: 1195-libceph-replace-overzealous-BUG_ON-in-osdmap_apply_i.patch
+Patch1000196: 1196-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
+Patch1000197: 1197-netfilter-xt_tcpmss-check-remaining-length-before-re.patch
+Patch1000198: 1198-netfilter-nf_conntrack_h323-check-for-zero-length-in.patch
+Patch1000199: 1199-wifi-brcmfmac-validate-bsscfg-indices-in-IF-events.patch
+Patch1000200: 1200-crypto-rng-Skip-leading-zero-length-iovec-segments.patch
+Patch1000201: 1201-crypto-rng-Fix-spurious-EFAULT-when-the-destination-.patch
+Patch1000202: 1202-Revert-mm-gup-reintroduce-pin_user_pages_fast_only.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2133,6 +2146,18 @@ ApplyOptionalPatch 1187-arm64-cputype-Add-C1-Premium-definitions.patch
 ApplyOptionalPatch 1188-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
 ApplyOptionalPatch 1189-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
 ApplyOptionalPatch 1190-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
+ApplyOptionalPatch 1191-crypto-asymmetric_keys-prevent-overflow-in-asymmetri.patch
+ApplyOptionalPatch 1192-iommu-disable-SVA-when-CONFIG_X86-is-set.patch
+ApplyOptionalPatch 1193-libceph-make-decode_pool-more-resilient-against-corr.patch
+ApplyOptionalPatch 1194-libceph-prevent-potential-out-of-bounds-reads-in-han.patch
+ApplyOptionalPatch 1195-libceph-replace-overzealous-BUG_ON-in-osdmap_apply_i.patch
+ApplyOptionalPatch 1196-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
+ApplyOptionalPatch 1197-netfilter-xt_tcpmss-check-remaining-length-before-re.patch
+ApplyOptionalPatch 1198-netfilter-nf_conntrack_h323-check-for-zero-length-in.patch
+ApplyOptionalPatch 1199-wifi-brcmfmac-validate-bsscfg-indices-in-IF-events.patch
+ApplyOptionalPatch 1200-crypto-rng-Skip-leading-zero-length-iovec-segments.patch
+ApplyOptionalPatch 1201-crypto-rng-Fix-spurious-EFAULT-when-the-destination-.patch
+ApplyOptionalPatch 1202-Revert-mm-gup-reintroduce-pin_user_pages_fast_only.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4249,6 +4274,20 @@ fi
 #
 #
 %changelog
+* Tue Jun 23 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+15.1.el9_6_ciq
+- Revert "mm/gup: reintroduce pin_user_pages_fast_only()" (Sultan Alsawaf) [ciqres]
+- crypto: rng - Fix spurious EFAULT when the destination PTE is zapped (Sultan Alsawaf) [ciqres]
+- crypto: rng - Skip leading zero-length iovec segments (Sultan Alsawaf) [ciqres]
+- wifi: brcmfmac: validate bsscfg indices in IF events (CIQ Kernel Automation) [ciqres] {CVE-2026-43110}
+- netfilter: nf_conntrack_h323: check for zero length in DecodeQ931() (CIQ Kernel Automation) [ciqres] {CVE-2026-23455}
+- netfilter: xt_tcpmss: check remaining length before reading optlen (CIQ Kernel Automation) [ciqres] {CVE-2026-43190}
+- scsi: target: iscsi: Fix use-after-free in iscsit_dec_conn_usage_count() (CIQ Kernel Automation) [ciqres] {CVE-2026-23216}
+- libceph: replace overzealous BUG_ON in osdmap_apply_incremental() (CIQ Kernel Automation) [ciqres] {CVE-2026-22990}
+- libceph: prevent potential out-of-bounds reads in handle_auth_done() (CIQ Kernel Automation) [ciqres] {CVE-2026-22984}
+- libceph: make decode_pool() more resilient against corrupted osdmaps (CIQ Kernel Automation) [ciqres] {CVE-2025-71116}
+- iommu: disable SVA when CONFIG_X86 is set (CIQ Kernel Automation) [ciqres] {CVE-2025-71089}
+- crypto: asymmetric_keys - prevent overflow in asymmetric_key_generate_id (CIQ Kernel Automation) [ciqres] {CVE-2025-68724}
+
 * Thu Jun 11 2026 Shreeya Patel <spatel@ciq.com> - 5.14.0-570.60.1+14.2.el9_6_ciq
 - arm64: configs: Enable CONFIG_ARM64_ERRATUM_4118414 for aarch64 [ciqres] {CVE-2025-10263}
 

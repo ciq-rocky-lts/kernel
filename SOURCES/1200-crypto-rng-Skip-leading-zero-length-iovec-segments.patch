@@ -1,0 +1,56 @@
+From 63a6e5ad201e86cd87a500b90a15f553092c0b0e Mon Sep 17 00:00:00 2001
+From: Sultan Alsawaf <sultan@ciq.com>
+Date: Mon, 22 Jun 2026 18:40:11 -0700
+Subject: [PATCH] crypto: rng - Skip leading zero-length iovec segments
+
+The fast per-CPU DRBG path computes its initial user destination address
+straight from the iov_iter. For an ITER_IOVEC iter it reads iter_iov_addr()
+and iter_iov_len() of the current segment, but when the iovec leads with
+one or more zero-length segments, the current segment is one of those empty
+entries. iter_iov_addr() then hands back the base of an empty segment,
+which is whatever userspace put there: its base can be NULL or some other
+unwritable address, since a zero-length segment is never actually touched.
+
+Right after the setup, that address is prefaulted, and on a bogus base it
+fails. A failed prefault on the very first address is treated as fatal, so
+the whole read bails out to -EFAULT even though there are perfectly good
+non-empty segments later in the iovec. This is reachable with something as
+simple as readv() on /dev/urandom where the first iovec entry is {NULL, 0}.
+
+Fix it by advancing the iterator by zero before reading the first address.
+The iovec advance loop walks past every leading empty segment and stops at
+the first non-empty one, and there's guaranteed to be such a segment
+because iov_iter_count() is nonzero at this point. Empty segments that crop
+up mid-stream are already skipped by the per-copy advance, so this only
+needs to run once during setup.
+
+Assisted-by: Claude:claude-opus-4-8
+Signed-off-by: Sultan Alsawaf <sultan@ciq.com>
+---
+ crypto/rng.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/crypto/rng.c b/crypto/rng.c
+index 011a51049258..8024df3d24d3 100644
+--- a/crypto/rng.c
++++ b/crypto/rng.c
+@@ -439,6 +439,16 @@ static ssize_t crypto_devrandom_read_iter(struct iov_iter *iter, bool reseed)
+ 			uaddr = iter->ubuf + iter->iov_offset;
+ 			ulen = iov_iter_count(iter);
+ 		} else if (iter_is_iovec(iter)) {
++			/*
++			 * Skip any leading zero-length segments first, since
++			 * uaddr would otherwise point at an empty segment's
++			 * base (which may be NULL or unwritable). Advancing by
++			 * zero walks past every leading empty segment (the
++			 * iovec advance loop stops at the first non-empty one),
++			 * and there's guaranteed to be a non-empty one because
++			 * iov_iter_count() is nonzero above.
++			 */
++			iov_iter_advance(iter, 0);
+ 			uaddr = iter_iov_addr(iter);
+ 			ulen = iter_iov_len(iter);
+ 		} else {
+-- 
+2.52.0
+
