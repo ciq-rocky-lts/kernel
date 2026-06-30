@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 15
+%define ciq_patch_version 16
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1197,6 +1197,21 @@ Patch1000199: 1199-wifi-brcmfmac-validate-bsscfg-indices-in-IF-events.patch
 Patch1000200: 1200-crypto-rng-Skip-leading-zero-length-iovec-segments.patch
 Patch1000201: 1201-crypto-rng-Fix-spurious-EFAULT-when-the-destination-.patch
 Patch1000202: 1202-Revert-mm-gup-reintroduce-pin_user_pages_fast_only.patch
+#CIQ Patch Version: 570.60.1+16.1.el9_6_ciq
+Patch1000203: 1203-smc-Fix-use-after-free-in-__pnet_find_base_ndev.patch
+Patch1000204: 1204-smc-Use-__sk_dst_get-and-dst_dev_rcu-in-smc_clc_prfx.patch
+Patch1000205: 1205-libceph-reset-sparse-read-state-in-osd_fault.patch
+Patch1000206: 1206-RDMA-iwcm-Fix-workqueue-list-corruption-by-removing-.patch
+Patch1000207: 1207-xfs-fix-freemap-adjustments-when-adding-xattrs-to-le.patch
+Patch1000208: 1208-wifi-mac80211-use-safe-list-iteration-in-radar-detec.patch
+Patch1000209: 1209-net-bonding-fix-use-after-free-in-bond_xmit_broadcas.patch
+Patch1000210: 1210-cifs-fix-incorrect-validation-for-num_aces-field-of-.patch
+Patch1000211: 1211-cifs-add-validation-check-for-the-fields-in-smb_aces.patch
+Patch1000212: 1212-smb-client-validate-the-whole-DACL-before-rewriting-.patch
+Patch1000213: 1213-smb-client-require-a-full-NFS-mode-SID-before-readin.patch
+Patch1000214: 1214-smb-client-use-kzalloc-to-zero-initialize-security-d.patch
+Patch1000215: 1215-smb-client-validate-dacloffset-before-building-DACL-.patch
+Patch1000216: 1216-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2158,6 +2173,20 @@ ApplyOptionalPatch 1199-wifi-brcmfmac-validate-bsscfg-indices-in-IF-events.patch
 ApplyOptionalPatch 1200-crypto-rng-Skip-leading-zero-length-iovec-segments.patch
 ApplyOptionalPatch 1201-crypto-rng-Fix-spurious-EFAULT-when-the-destination-.patch
 ApplyOptionalPatch 1202-Revert-mm-gup-reintroduce-pin_user_pages_fast_only.patch
+ApplyOptionalPatch 1203-smc-Fix-use-after-free-in-__pnet_find_base_ndev.patch
+ApplyOptionalPatch 1204-smc-Use-__sk_dst_get-and-dst_dev_rcu-in-smc_clc_prfx.patch
+ApplyOptionalPatch 1205-libceph-reset-sparse-read-state-in-osd_fault.patch
+ApplyOptionalPatch 1206-RDMA-iwcm-Fix-workqueue-list-corruption-by-removing-.patch
+ApplyOptionalPatch 1207-xfs-fix-freemap-adjustments-when-adding-xattrs-to-le.patch
+ApplyOptionalPatch 1208-wifi-mac80211-use-safe-list-iteration-in-radar-detec.patch
+ApplyOptionalPatch 1209-net-bonding-fix-use-after-free-in-bond_xmit_broadcas.patch
+ApplyOptionalPatch 1210-cifs-fix-incorrect-validation-for-num_aces-field-of-.patch
+ApplyOptionalPatch 1211-cifs-add-validation-check-for-the-fields-in-smb_aces.patch
+ApplyOptionalPatch 1212-smb-client-validate-the-whole-DACL-before-rewriting-.patch
+ApplyOptionalPatch 1213-smb-client-require-a-full-NFS-mode-SID-before-readin.patch
+ApplyOptionalPatch 1214-smb-client-use-kzalloc-to-zero-initialize-security-d.patch
+ApplyOptionalPatch 1215-smb-client-validate-dacloffset-before-building-DACL-.patch
+ApplyOptionalPatch 1216-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4274,6 +4303,22 @@ fi
 #
 #
 %changelog
+* Mon Jun 29 2026 Shreeya Patel <spatel@ciq.com> - 5.14.0-570.60.1+16.1.el9_6_ciq
+- net/sched: fix pedit partial COW leading to page cache corruption (Brett Mastbergen) [ciqres] {CVE-2026-46331}
+- smb: client: validate dacloffset before building DACL pointers (Marcin Wcisło) [ciqres] {CVE-2026-46195}
+- smb: client: use kzalloc to zero-initialize security descriptor buffer (Marcin Wcisło) [ciqres] {CVE-2026-46139}
+- smb: client: require a full NFS mode SID before reading mode bits (Marcin Wcisło) [ciqres] {CVE-2026-43350}
+- smb: client: validate the whole DACL before rewriting it in cifsacl (Marcin Wcisło) [ciqres] {CVE-2026-31709}
+- cifs: add validation check for the fields in smb_aces (Marcin Wcisło) [ciqres] {CVE-2026-31709}
+- cifs: fix incorrect validation for num_aces field of smb_acl (Marcin Wcisło) [ciqres] {CVE-2026-31709}
+- net: bonding: fix use-after-free in bond_xmit_broadcast() (Marcin Wcisło) [ciqres] {CVE-2026-31419}
+- wifi: mac80211: use safe list iteration in radar detect work (CIQ Kernel Automation) [ciqres] {CVE-2026-46166}
+- xfs: fix freemap adjustments when adding xattrs to leaf blocks (CIQ Kernel Automation) [ciqres] {CVE-2026-43158}
+- RDMA/iwcm: Fix workqueue list corruption by removing work_list (CIQ Kernel Automation) [ciqres] {CVE-2026-45898}
+- libceph: reset sparse-read state in osd_fault() (CIQ Kernel Automation) [ciqres] {CVE-2026-23136}
+- smc: Use __sk_dst_get() and dst_dev_rcu() in smc_clc_prfx_match(). (CIQ Kernel Automation) [ciqres] {CVE-2025-40168}
+- smc: Fix use-after-free in __pnet_find_base_ndev(). (CIQ Kernel Automation) [ciqres] {CVE-2025-40064}
+
 * Tue Jun 23 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+15.1.el9_6_ciq
 - Revert "mm/gup: reintroduce pin_user_pages_fast_only()" (Sultan Alsawaf) [ciqres]
 - crypto: rng - Fix spurious EFAULT when the destination PTE is zapped (Sultan Alsawaf) [ciqres]
