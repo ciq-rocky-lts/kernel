@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 32
+%define ciq_patch_version 33
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1495,6 +1495,52 @@ Patch1000542: 0497-arm64-cputype-Add-C1-Premium-definitions.patch
 Patch1000543: 0498-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
 Patch1000544: 0499-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
 Patch1000545: 0500-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
+#CIQ Patch Version: 284.30.1+33.1.el9_2_ciq
+Patch1000546: 0501-kprobes-x86-Use-copy_from_kernel_nofault-to-read-fro.patch
+Patch1000547: 0502-wifi-mac80211-check-clear-fast-rx-for-non-4addr-sta-.patch
+Patch1000548: 0503-scsi-mpi3mr-Avoid-memcpy-field-spanning-write-WARNIN.patch
+Patch1000549: 0504-i40e-fix-vf-may-be-used-uninitialized-in-this-functi.patch
+Patch1000550: 0505-xen-netfront-Add-missing-skb_mark_for_recycle.patch
+Patch1000551: 0506-gro-fix-ownership-transfer.patch
+Patch1000552: 0507-net-fix-memory-leak-in-skb_segment_list-for-GRO-pack.patch
+Patch1000553: 0508-mlxbf_gige-stop-interface-during-shutdown.patch
+Patch1000554: 0509-netfilter-nf_tables-Fix-potential-data-race-in-__nft.patch
+Patch1000555: 0510-scsi-qla2xxx-Fix-off-by-one-in-qla_edif_app_getstats.patch
+Patch1000556: 0511-drm-client-Fully-protect-modes-with-dev-mode_config..patch
+Patch1000557: 0512-ipv6-fix-race-condition-between-ipv6_get_ifaddr-and-.patch
+Patch1000558: 0513-net-mlx5-Properly-link-new-fs-rules-into-the-tree.patch
+Patch1000559: 0514-net-ena-Fix-incorrect-descriptor-free-behavior.patch
+Patch1000560: 0515-netfilter-nf_tables-Fix-potential-data-race-in-__nft.patch
+Patch1000561: 0516-netfilter-flowtable-validate-pppoe-header.patch
+Patch1000562: 0517-netfilter-flowtable-account-for-Ethernet-header-in-n.patch
+Patch1000563: 0518-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
+Patch1000564: 0519-crypto-asymmetric_keys-prevent-overflow-in-asymmetri.patch
+Patch1000565: 0520-nbd-defer-config-unlock-in-nbd_genl_connect.patch
+Patch1000566: 0521-libceph-make-decode_pool-more-resilient-against-corr.patch
+Patch1000567: 0522-libceph-prevent-potential-out-of-bounds-reads-in-han.patch
+Patch1000568: 0523-libceph-replace-overzealous-BUG_ON-in-osdmap_apply_i.patch
+Patch1000569: 0524-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
+Patch1000570: 0525-netfilter-xt_tcpmss-check-remaining-length-before-re.patch
+Patch1000571: 0526-xfs-fix-freemap-adjustments-when-adding-xattrs-to-le.patch
+Patch1000572: 0527-net-sched-act_pedit-use-NLA_POLICY-for-parsing-ex-ke.patch
+Patch1000573: 0528-net-sched-transition-act_pedit-to-rcu-and-percpu-sta.patch
+Patch1000574: 0529-net-sched-simplify-tcf_pedit_act.patch
+Patch1000575: 0530-net-sched-act_pedit-remove-extra-check-for-key-type.patch
+Patch1000576: 0531-net-sched-act_pedit-check-static-offsets-a-priori.patch
+Patch1000577: 0532-net-sched-act_pedit-rate-limit-datapath-messages.patch
+Patch1000578: 0533-net-sched-act_pedit-Parse-L3-Header-for-L4-offset.patch
+Patch1000579: 0534-net-sched-act_pedit-free-pedit-keys-on-bail-from-off.patch
+Patch1000580: 0535-net-sched-act_pedit-fix-action-bind-logic.patch
+Patch1000581: 0536-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
+Patch1000582: 0537-fs-sysfs-Fix-reference-leak-in-sysfs_break_active_pr.patch
+Patch1000583: 0538-cpufreq-exit-callback-is-optional.patch
+Patch1000584: 0539-nouveau-fix-instmem-race-condition-around-ptr-stores.patch
+Patch1000585: 0540-cppc_cpufreq-Fix-possible-null-pointer-dereference.patch
+Patch1000586: 0541-cpufreq-cppc-Fix-invalid-return-value-in-.get-callba.patch
+Patch1000587: 0542-wifi-nl80211-don-t-free-NULL-coalescing-rule.patch
+Patch1000588: 0543-icmp-prevent-possible-NULL-dereferences-from-icmp_bu.patch
+Patch1000589: 0544-scsi-qedi-Fix-crash-while-reading-debugfs-attribute.patch
+Patch1000590: 0545-mlxsw-spectrum_acl_tcam-Fix-memory-leak-when-canceli.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2716,6 +2762,51 @@ ApplyOptionalPatch 0497-arm64-cputype-Add-C1-Premium-definitions.patch
 ApplyOptionalPatch 0498-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
 ApplyOptionalPatch 0499-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
 ApplyOptionalPatch 0500-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
+ApplyOptionalPatch 0501-kprobes-x86-Use-copy_from_kernel_nofault-to-read-fro.patch
+ApplyOptionalPatch 0502-wifi-mac80211-check-clear-fast-rx-for-non-4addr-sta-.patch
+ApplyOptionalPatch 0503-scsi-mpi3mr-Avoid-memcpy-field-spanning-write-WARNIN.patch
+ApplyOptionalPatch 0504-i40e-fix-vf-may-be-used-uninitialized-in-this-functi.patch
+ApplyOptionalPatch 0505-xen-netfront-Add-missing-skb_mark_for_recycle.patch
+ApplyOptionalPatch 0506-gro-fix-ownership-transfer.patch
+ApplyOptionalPatch 0507-net-fix-memory-leak-in-skb_segment_list-for-GRO-pack.patch
+ApplyOptionalPatch 0508-mlxbf_gige-stop-interface-during-shutdown.patch
+ApplyOptionalPatch 0509-netfilter-nf_tables-Fix-potential-data-race-in-__nft.patch
+ApplyOptionalPatch 0510-scsi-qla2xxx-Fix-off-by-one-in-qla_edif_app_getstats.patch
+ApplyOptionalPatch 0511-drm-client-Fully-protect-modes-with-dev-mode_config..patch
+ApplyOptionalPatch 0512-ipv6-fix-race-condition-between-ipv6_get_ifaddr-and-.patch
+ApplyOptionalPatch 0513-net-mlx5-Properly-link-new-fs-rules-into-the-tree.patch
+ApplyOptionalPatch 0514-net-ena-Fix-incorrect-descriptor-free-behavior.patch
+ApplyOptionalPatch 0515-netfilter-nf_tables-Fix-potential-data-race-in-__nft.patch
+ApplyOptionalPatch 0516-netfilter-flowtable-validate-pppoe-header.patch
+ApplyOptionalPatch 0517-netfilter-flowtable-account-for-Ethernet-header-in-n.patch
+ApplyOptionalPatch 0518-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
+ApplyOptionalPatch 0519-crypto-asymmetric_keys-prevent-overflow-in-asymmetri.patch
+ApplyOptionalPatch 0520-nbd-defer-config-unlock-in-nbd_genl_connect.patch
+ApplyOptionalPatch 0521-libceph-make-decode_pool-more-resilient-against-corr.patch
+ApplyOptionalPatch 0522-libceph-prevent-potential-out-of-bounds-reads-in-han.patch
+ApplyOptionalPatch 0523-libceph-replace-overzealous-BUG_ON-in-osdmap_apply_i.patch
+ApplyOptionalPatch 0524-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
+ApplyOptionalPatch 0525-netfilter-xt_tcpmss-check-remaining-length-before-re.patch
+ApplyOptionalPatch 0526-xfs-fix-freemap-adjustments-when-adding-xattrs-to-le.patch
+ApplyOptionalPatch 0527-net-sched-act_pedit-use-NLA_POLICY-for-parsing-ex-ke.patch
+ApplyOptionalPatch 0528-net-sched-transition-act_pedit-to-rcu-and-percpu-sta.patch
+ApplyOptionalPatch 0529-net-sched-simplify-tcf_pedit_act.patch
+ApplyOptionalPatch 0530-net-sched-act_pedit-remove-extra-check-for-key-type.patch
+ApplyOptionalPatch 0531-net-sched-act_pedit-check-static-offsets-a-priori.patch
+ApplyOptionalPatch 0532-net-sched-act_pedit-rate-limit-datapath-messages.patch
+ApplyOptionalPatch 0533-net-sched-act_pedit-Parse-L3-Header-for-L4-offset.patch
+ApplyOptionalPatch 0534-net-sched-act_pedit-free-pedit-keys-on-bail-from-off.patch
+ApplyOptionalPatch 0535-net-sched-act_pedit-fix-action-bind-logic.patch
+ApplyOptionalPatch 0536-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
+ApplyOptionalPatch 0537-fs-sysfs-Fix-reference-leak-in-sysfs_break_active_pr.patch
+ApplyOptionalPatch 0538-cpufreq-exit-callback-is-optional.patch
+ApplyOptionalPatch 0539-nouveau-fix-instmem-race-condition-around-ptr-stores.patch
+ApplyOptionalPatch 0540-cppc_cpufreq-Fix-possible-null-pointer-dereference.patch
+ApplyOptionalPatch 0541-cpufreq-cppc-Fix-invalid-return-value-in-.get-callba.patch
+ApplyOptionalPatch 0542-wifi-nl80211-don-t-free-NULL-coalescing-rule.patch
+ApplyOptionalPatch 0543-icmp-prevent-possible-NULL-dereferences-from-icmp_bu.patch
+ApplyOptionalPatch 0544-scsi-qedi-Fix-crash-while-reading-debugfs-attribute.patch
+ApplyOptionalPatch 0545-mlxsw-spectrum_acl_tcam-Fix-memory-leak-when-canceli.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4599,6 +4690,53 @@ fi
 #
 #
 %changelog
+* Mon Jun 29 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+33.1.el9_2_ciq
+- mlxsw: spectrum_acl_tcam: Fix memory leak when canceling rehash work (CIQ Kernel Automation) [ciqres] {CVE-2024-35852}
+- scsi: qedi: Fix crash while reading debugfs attribute (CIQ Kernel Automation) [ciqres] {CVE-2024-40978}
+- icmp: prevent possible NULL dereferences from icmp_build_probe() (CIQ Kernel Automation) [ciqres] {CVE-2024-35857}
+- wifi: nl80211: don't free NULL coalescing rule (CIQ Kernel Automation) [ciqres] {CVE-2024-36941}
+- cpufreq: cppc: Fix invalid return value in .get() callback (CIQ Kernel Automation) [ciqres] {CVE-2024-38573}
+- cppc_cpufreq: Fix possible null pointer dereference (CIQ Kernel Automation) [ciqres] {CVE-2024-38573}
+- nouveau: fix instmem race condition around ptr stores (CIQ Kernel Automation) [ciqres] {CVE-2024-26984}
+- cpufreq: exit() callback is optional (CIQ Kernel Automation) [ciqres] {CVE-2024-38615}
+- fs: sysfs: Fix reference leak in sysfs_break_active_protection() (CIQ Kernel Automation) [ciqres] {CVE-2024-26993}
+- net/sched: fix pedit partial COW leading to page cache corruption (Rajat Gupta) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: fix action bind logic (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: free pedit keys on bail from offset check (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: Parse L3 Header for L4 offset (Max Tottenham) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: rate limit datapath messages (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: check static offsets a priori (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: remove extra check for key type (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: simplify tcf_pedit_act (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: transition act_pedit to rcu and percpu stats (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: use NLA_POLICY for parsing 'ex' keys (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- xfs: fix freemap adjustments when adding xattrs to leaf blocks (CIQ Kernel Automation) [ciqres] {CVE-2026-43158}
+- netfilter: xt_tcpmss: check remaining length before reading optlen (CIQ Kernel Automation) [ciqres] {CVE-2026-43190}
+- scsi: target: iscsi: Fix use-after-free in iscsit_dec_conn_usage_count() (CIQ Kernel Automation) [ciqres] {CVE-2026-23216}
+- libceph: replace overzealous BUG_ON in osdmap_apply_incremental() (CIQ Kernel Automation) [ciqres] {CVE-2026-22990}
+- libceph: prevent potential out-of-bounds reads in handle_auth_done() (CIQ Kernel Automation) [ciqres] {CVE-2026-22984}
+- libceph: make decode_pool() more resilient against corrupted osdmaps (CIQ Kernel Automation) [ciqres] {CVE-2025-71116}
+- nbd: defer config unlock in nbd_genl_connect (CIQ Kernel Automation) [ciqres] {CVE-2025-68366}
+- crypto: asymmetric_keys - prevent overflow in asymmetric_key_generate_id (CIQ Kernel Automation) [ciqres] {CVE-2025-68724}
+- KVM: x86/mmu: Drop/zap existing present SPTE even when creating an MMIO SPTE (Marcin Wcisło) [ciqres] {CVE-2026-23401}
+- netfilter: flowtable: account for Ethernet header in nf_flow_pppoe_proto() (CIQ Kernel Automation) [ciqres] {CVE-2025-38441}
+- netfilter: flowtable: validate pppoe header (CIQ Kernel Automation) [ciqres] {CVE-2024-27016}
+- netfilter: nf_tables: Fix potential data-race in __nft_expr_type_get() (CIQ Kernel Automation) [ciqres] {CVE-2024-27020}
+- net: ena: Fix incorrect descriptor free behavior (CIQ Kernel Automation) [ciqres] {CVE-2024-35958}
+- net/mlx5: Properly link new fs rules into the tree (CIQ Kernel Automation) [ciqres] {CVE-2024-35960}
+- ipv6: fix race condition between ipv6_get_ifaddr and ipv6_del_addr (CIQ Kernel Automation) [ciqres] {CVE-2024-35969}
+- drm/client: Fully protect modes[] with dev->mode_config.mutex (CIQ Kernel Automation) [ciqres] {CVE-2024-35950}
+- scsi: qla2xxx: Fix off by one in qla_edif_app_getstats() (CIQ Kernel Automation) [ciqres] {CVE-2024-36025}
+- netfilter: nf_tables: Fix potential data-race in __nft_flowtable_type_get() (CIQ Kernel Automation) [ciqres] {CVE-2024-35898}
+- mlxbf_gige: stop interface during shutdown (CIQ Kernel Automation) [ciqres] {CVE-2024-35885}
+- net: fix memory leak in skb_segment_list for GRO packets (CIQ Kernel Automation) [ciqres] {CVE-2026-22979}
+- gro: fix ownership transfer (CIQ Kernel Automation) [ciqres] {CVE-2024-35890}
+- xen-netfront: Add missing skb_mark_for_recycle (CIQ Kernel Automation) [ciqres] {CVE-2024-27393}
+- i40e: fix vf may be used uninitialized in this function warning (CIQ Kernel Automation) [ciqres] {CVE-2024-36020}
+- scsi: mpi3mr: Avoid memcpy field-spanning write WARNING (CIQ Kernel Automation) [ciqres] {CVE-2024-36920}
+- wifi: mac80211: check/clear fast rx for non-4addr sta VLAN changes (CIQ Kernel Automation) [ciqres] {CVE-2024-35789}
+- kprobes/x86: Use copy_from_kernel_nofault() to read from unsafe address (CIQ Kernel Automation) [ciqres] {CVE-2024-26946}
+
 * Thu Jun 11 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+32.1.el9_2_ciq
 - arm64: errata: Mitigate TLBI errata on Microsoft Azure Cobalt 100 CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}
 - arm64: errata: Mitigate TLBI errata on NVIDIA Olympus CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}

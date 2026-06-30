@@ -1,0 +1,54 @@
+From 8d605080169a39c5556a755e7ebd9c480f0a4a86 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 29 Jun 2026 08:06:03 +0000
+Subject: [PATCH] cpufreq: cppc: Fix invalid return value in .get() callback
+
+jira VULN-5484
+cve-bf CVE-2024-38573
+commit-author Marc Zyngier <maz@kernel.org>
+commit 2b8e6b58889c672e1ae3601d9b2b070be4dc2fbc
+upstream-diff Also fix hisi_cppc_cpufreq_get_rate() which still
+              exists in this kernel but was removed upstream before
+              this fix was written (removed by ea1829d4d413b).
+
+Returning a negative error code in a function with an unsigned
+return type is a pretty bad idea. It is probably worse when the
+justification for the change is "our static analisys tool found it".
+
+Fixes: cf7de25878a1 ("cppc_cpufreq: Fix possible null pointer dereference")
+	Signed-off-by: Marc Zyngier <maz@kernel.org>
+	Cc: "Rafael J. Wysocki" <rafael@kernel.org>
+	Cc: Viresh Kumar <viresh.kumar@linaro.org>
+	Reviewed-by: Lifeng Zheng <zhenglifeng1@huawei.com>
+	Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+(cherry picked from commit 2b8e6b58889c672e1ae3601d9b2b070be4dc2fbc)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/cpufreq/cppc_cpufreq.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/cpufreq/cppc_cpufreq.c b/drivers/cpufreq/cppc_cpufreq.c
+index 68109bcab89e..6c3f4e1e4569 100644
+--- a/drivers/cpufreq/cppc_cpufreq.c
++++ b/drivers/cpufreq/cppc_cpufreq.c
+@@ -845,7 +845,7 @@ static unsigned int cppc_cpufreq_get_rate(unsigned int cpu)
+ 	int ret;
+ 
+ 	if (!policy)
+-		return -ENODEV;
++		return 0;
+ 
+ 	cpu_data = policy->driver_data;
+ 
+@@ -933,7 +933,7 @@ static unsigned int hisi_cppc_cpufreq_get_rate(unsigned int cpu)
+ 	int ret;
+ 
+ 	if (!policy)
+-		return -ENODEV;
++		return 0;
+ 
+ 	cpu_data = policy->driver_data;
+ 
+-- 
+2.52.0
+

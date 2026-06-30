@@ -1,0 +1,66 @@
+From f31d0e9627a0d5599026516846a9b204fbe26ee5 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 22 Jun 2026 08:19:57 +0000
+Subject: [PATCH] netfilter: nf_tables: Fix potential data-race in
+ __nft_flowtable_type_get()
+
+jira VULN-37860
+cve CVE-2024-35898
+commit-author Ziyang Xuan <william.xuanziyang@huawei.com>
+commit 24225011d81b471acc0e1e315b7d9905459a6304
+
+nft_unregister_flowtable_type() within nf_flow_inet_module_exit() can
+concurrent with __nft_flowtable_type_get() within nf_tables_newflowtable().
+And thhere is not any protection when iterate over nf_tables_flowtables
+list in __nft_flowtable_type_get(). Therefore, there is pertential
+data-race of nf_tables_flowtables list entry.
+
+Use list_for_each_entry_rcu() to iterate over nf_tables_flowtables list
+in __nft_flowtable_type_get(), and use rcu_read_lock() in the caller
+nft_flowtable_type_get() to protect the entire type query process.
+
+Fixes: 3b49e2e94e6e ("netfilter: nf_tables: add flow table netlink frontend")
+	Signed-off-by: Ziyang Xuan <william.xuanziyang@huawei.com>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 24225011d81b471acc0e1e315b7d9905459a6304)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/netfilter/nf_tables_api.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 7e26f990442b..e0118af881d4 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -7777,11 +7777,12 @@ static int nft_flowtable_parse_hook(const struct nft_ctx *ctx,
+ 	return err;
+ }
+ 
++/* call under rcu_read_lock */
+ static const struct nf_flowtable_type *__nft_flowtable_type_get(u8 family)
+ {
+ 	const struct nf_flowtable_type *type;
+ 
+-	list_for_each_entry(type, &nf_tables_flowtables, list) {
++	list_for_each_entry_rcu(type, &nf_tables_flowtables, list) {
+ 		if (family == type->family)
+ 			return type;
+ 	}
+@@ -7793,9 +7794,13 @@ nft_flowtable_type_get(struct net *net, u8 family)
+ {
+ 	const struct nf_flowtable_type *type;
+ 
++	rcu_read_lock();
+ 	type = __nft_flowtable_type_get(family);
+-	if (type != NULL && try_module_get(type->owner))
++	if (type != NULL && try_module_get(type->owner)) {
++		rcu_read_unlock();
+ 		return type;
++	}
++	rcu_read_unlock();
+ 
+ 	lockdep_nfnl_nft_mutex_not_held();
+ #ifdef CONFIG_MODULES
+-- 
+2.52.0
+
