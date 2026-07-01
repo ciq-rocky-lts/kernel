@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 29
+%define ciq_patch_version 30
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1074,6 +1074,58 @@ Patch0492: 0337-arm64-Subscribe-Microsoft-Azure-Cobalt-100-to-ARM-Ne.patch
 Patch0493: 0338-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
 Patch0494: 0339-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
 Patch0495: 0340-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
+#CIQ Patch Version: 372.32.1+30.1.el8_6_ciq
+Patch0496: 0341-net-emac-emac-mac-Fix-a-use-after-free-in-emac_mac_t.patch
+Patch0497: 0342-net-core-reject-skb_copy-_expand-for-fraglist-GSO-sk.patch
+Patch0498: 0343-rtnetlink-Correct-nested-IFLA_VF_VLAN_LIST-attribute.patch
+Patch0499: 0344-af_unix-Fix-data-races-in-unix_release_sock-unix_str.patch
+Patch0500: 0345-net-mlx5-Discard-command-completions-in-internal-err.patch
+Patch0501: 0346-tls-fix-missing-memory-barrier-in-tls_init.patch
+Patch0502: 0347-r8169-Fix-possible-ring-buffer-corruption-on-fragmen.patch
+Patch0503: 0348-netfilter-tproxy-bail-out-if-IP-has-been-disabled-on.patch
+Patch0504: 0349-net-treat-possible_net_t-net-pointer-as-an-RCU-one-a.patch
+Patch0505: 0350-net-add-dev_net_rcu-helper.patch
+Patch0506: 0351-ndisc-use-RCU-protection-in-ndisc_alloc_skb.patch
+Patch0507: 0352-crypto-asymmetric_keys-prevent-overflow-in-asymmetri.patch
+Patch0508: 0353-nbd-defer-config-unlock-in-nbd_genl_connect.patch
+Patch0509: 0354-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
+Patch0510: 0355-netfilter-xt_tcpmss-check-remaining-length-before-re.patch
+Patch0511: 0356-wifi-brcmfmac-validate-bsscfg-indices-in-IF-events.patch
+Patch0512: 0357-netfilter-ip6t_eui64-reject-invalid-MAC-header-for-a.patch
+Patch0513: 0358-xfs-add-bounds-checking-to-xlog_recover_process_data.patch
+Patch0514: 0359-HID-core-zero-initialize-the-report-buffer.patch
+Patch0515: 0360-media-uvcvideo-Fix-double-free-in-error-path.patch
+Patch0516: 0361-geneve-Fix-use-after-free-in-geneve_find_dev.patch
+Patch0517: 0362-geneve-Suppress-list-corruption-splat-in-geneve_dest.patch
+Patch0518: 0363-HID-intel-ish-hid-Fix-use-after-free-issue-in-ishtp_.patch
+Patch0519: 0364-mlxsw-spectrum_mr-Fix-use-after-free-when-updating-m.patch
+Patch0520: 0365-xfs-delete-attr-leaf-freemap-entries-when-empty.patch
+Patch0521: 0366-xfs-fix-freemap-adjustments-when-adding-xattrs-to-le.patch
+Patch0522: 0367-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
+Patch0523: 0368-media-imon-reorganize-serialization.patch
+Patch0524: 0369-media-imon-fix-a-race-condition-in-send_packet.patch
+Patch0525: 0370-media-imon-Fix-race-getting-ictx-lock.patch
+Patch0526: 0371-media-imon-grab-lock-earlier-in-imon_ir_change_proto.patch
+Patch0527: 0372-media-rc-fix-races-with-imon_disconnect.patch
+Patch0528: 0373-KVM-nVMX-add-missing-consistency-checks-for-CR0-and-.patch
+Patch0529: 0374-KVM-x86-mmu-Fix-race-condition-in-direct_page_fault.patch
+Patch0530: 0375-KVM-x86-avoid-calling-x86-emulator-without-a-decoded.patch
+Patch0531: 0376-RDMA-umad-Reject-negative-data_len-in-ib_umad_write.patch
+Patch0532: 0377-net-sched-act_pedit-really-ensure-the-skb-is-writabl.patch
+Patch0533: 0378-net-sched-act_pedit-sanitize-shift-argument-before-u.patch
+Patch0534: 0379-net-sched-act_pedit-use-NLA_POLICY-for-parsing-ex-ke.patch
+Patch0535: 0380-net_sched-refactor-TC-action-init-API.patch
+Patch0536: 0381-net-sched-cls_api-reset-flags-on-replay.patch
+Patch0537: 0382-flow_offload-fill-flags-to-action-structure.patch
+Patch0538: 0383-net-sched-transition-act_pedit-to-rcu-and-percpu-sta.patch
+Patch0539: 0384-net-sched-simplify-tcf_pedit_act.patch
+Patch0540: 0385-net-sched-act_pedit-remove-extra-check-for-key-type.patch
+Patch0541: 0386-net-sched-act_pedit-check-static-offsets-a-priori.patch
+Patch0542: 0387-net-sched-act_pedit-rate-limit-datapath-messages.patch
+Patch0543: 0388-net-sched-act_pedit-Parse-L3-Header-for-L4-offset.patch
+Patch0544: 0389-net-sched-act_pedit-free-pedit-keys-on-bail-from-off.patch
+Patch0545: 0390-net-sched-act_pedit-fix-action-bind-logic.patch
+Patch0546: 0391-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2136,6 +2188,57 @@ ApplyOptionalPatch 0337-arm64-Subscribe-Microsoft-Azure-Cobalt-100-to-ARM-Ne.pat
 ApplyOptionalPatch 0338-arm64-errata-Mitigate-TLBI-errata-on-various-Arm-CPU.patch
 ApplyOptionalPatch 0339-arm64-errata-Mitigate-TLBI-errata-on-NVIDIA-Olympus-.patch
 ApplyOptionalPatch 0340-arm64-errata-Mitigate-TLBI-errata-on-Microsoft-Azure.patch
+ApplyOptionalPatch 0341-net-emac-emac-mac-Fix-a-use-after-free-in-emac_mac_t.patch
+ApplyOptionalPatch 0342-net-core-reject-skb_copy-_expand-for-fraglist-GSO-sk.patch
+ApplyOptionalPatch 0343-rtnetlink-Correct-nested-IFLA_VF_VLAN_LIST-attribute.patch
+ApplyOptionalPatch 0344-af_unix-Fix-data-races-in-unix_release_sock-unix_str.patch
+ApplyOptionalPatch 0345-net-mlx5-Discard-command-completions-in-internal-err.patch
+ApplyOptionalPatch 0346-tls-fix-missing-memory-barrier-in-tls_init.patch
+ApplyOptionalPatch 0347-r8169-Fix-possible-ring-buffer-corruption-on-fragmen.patch
+ApplyOptionalPatch 0348-netfilter-tproxy-bail-out-if-IP-has-been-disabled-on.patch
+ApplyOptionalPatch 0349-net-treat-possible_net_t-net-pointer-as-an-RCU-one-a.patch
+ApplyOptionalPatch 0350-net-add-dev_net_rcu-helper.patch
+ApplyOptionalPatch 0351-ndisc-use-RCU-protection-in-ndisc_alloc_skb.patch
+ApplyOptionalPatch 0352-crypto-asymmetric_keys-prevent-overflow-in-asymmetri.patch
+ApplyOptionalPatch 0353-nbd-defer-config-unlock-in-nbd_genl_connect.patch
+ApplyOptionalPatch 0354-scsi-target-iscsi-Fix-use-after-free-in-iscsit_dec_c.patch
+ApplyOptionalPatch 0355-netfilter-xt_tcpmss-check-remaining-length-before-re.patch
+ApplyOptionalPatch 0356-wifi-brcmfmac-validate-bsscfg-indices-in-IF-events.patch
+ApplyOptionalPatch 0357-netfilter-ip6t_eui64-reject-invalid-MAC-header-for-a.patch
+ApplyOptionalPatch 0358-xfs-add-bounds-checking-to-xlog_recover_process_data.patch
+ApplyOptionalPatch 0359-HID-core-zero-initialize-the-report-buffer.patch
+ApplyOptionalPatch 0360-media-uvcvideo-Fix-double-free-in-error-path.patch
+ApplyOptionalPatch 0361-geneve-Fix-use-after-free-in-geneve_find_dev.patch
+ApplyOptionalPatch 0362-geneve-Suppress-list-corruption-splat-in-geneve_dest.patch
+ApplyOptionalPatch 0363-HID-intel-ish-hid-Fix-use-after-free-issue-in-ishtp_.patch
+ApplyOptionalPatch 0364-mlxsw-spectrum_mr-Fix-use-after-free-when-updating-m.patch
+ApplyOptionalPatch 0365-xfs-delete-attr-leaf-freemap-entries-when-empty.patch
+ApplyOptionalPatch 0366-xfs-fix-freemap-adjustments-when-adding-xattrs-to-le.patch
+ApplyOptionalPatch 0367-KVM-x86-mmu-Drop-zap-existing-present-SPTE-even-when.patch
+ApplyOptionalPatch 0368-media-imon-reorganize-serialization.patch
+ApplyOptionalPatch 0369-media-imon-fix-a-race-condition-in-send_packet.patch
+ApplyOptionalPatch 0370-media-imon-Fix-race-getting-ictx-lock.patch
+ApplyOptionalPatch 0371-media-imon-grab-lock-earlier-in-imon_ir_change_proto.patch
+ApplyOptionalPatch 0372-media-rc-fix-races-with-imon_disconnect.patch
+ApplyOptionalPatch 0373-KVM-nVMX-add-missing-consistency-checks-for-CR0-and-.patch
+ApplyOptionalPatch 0374-KVM-x86-mmu-Fix-race-condition-in-direct_page_fault.patch
+ApplyOptionalPatch 0375-KVM-x86-avoid-calling-x86-emulator-without-a-decoded.patch
+ApplyOptionalPatch 0376-RDMA-umad-Reject-negative-data_len-in-ib_umad_write.patch
+ApplyOptionalPatch 0377-net-sched-act_pedit-really-ensure-the-skb-is-writabl.patch
+ApplyOptionalPatch 0378-net-sched-act_pedit-sanitize-shift-argument-before-u.patch
+ApplyOptionalPatch 0379-net-sched-act_pedit-use-NLA_POLICY-for-parsing-ex-ke.patch
+ApplyOptionalPatch 0380-net_sched-refactor-TC-action-init-API.patch
+ApplyOptionalPatch 0381-net-sched-cls_api-reset-flags-on-replay.patch
+ApplyOptionalPatch 0382-flow_offload-fill-flags-to-action-structure.patch
+ApplyOptionalPatch 0383-net-sched-transition-act_pedit-to-rcu-and-percpu-sta.patch
+ApplyOptionalPatch 0384-net-sched-simplify-tcf_pedit_act.patch
+ApplyOptionalPatch 0385-net-sched-act_pedit-remove-extra-check-for-key-type.patch
+ApplyOptionalPatch 0386-net-sched-act_pedit-check-static-offsets-a-priori.patch
+ApplyOptionalPatch 0387-net-sched-act_pedit-rate-limit-datapath-messages.patch
+ApplyOptionalPatch 0388-net-sched-act_pedit-Parse-L3-Header-for-L4-offset.patch
+ApplyOptionalPatch 0389-net-sched-act_pedit-free-pedit-keys-on-bail-from-off.patch
+ApplyOptionalPatch 0390-net-sched-act_pedit-fix-action-bind-logic.patch
+ApplyOptionalPatch 0391-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
 
 
 # CIQ LTS patches:
@@ -3695,6 +3798,59 @@ fi
 #
 #
 %changelog
+* Mon Jun 29 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+30.1.el8_6_ciq
+- net/sched: fix pedit partial COW leading to page cache corruption (Rajat Gupta) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: fix action bind logic (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: free pedit keys on bail from offset check (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: Parse L3 Header for L4 offset (Max Tottenham) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: rate limit datapath messages (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: check static offsets a priori (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: remove extra check for key type (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: simplify tcf_pedit_act (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: transition act_pedit to rcu and percpu stats (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- flow_offload: fill flags to action structure (Baowen Zheng) [ciqres] {CVE-2026-46331}
+- net/sched: cls_api, reset flags on replay (Brett Mastbergen) [ciqres] {CVE-2026-46331}
+- net_sched: refactor TC action init API (Cong Wang) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: use NLA_POLICY for parsing 'ex' keys (Pedro Tammela) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: sanitize shift argument before usage (Jonathan Maple) [ciqres] {CVE-2026-46331}
+- net/sched: act_pedit: really ensure the skb is writable (Jonathan Maple) [ciqres] {CVE-2026-46331}
+- RDMA/umad: Reject negative data_len in ib_umad_write (CIQ Kernel Automation) [ciqres] {CVE-2026-23243}
+- KVM: x86: avoid calling x86 emulator without a decoded instruction (Marcin Wcisło) [ciqres] {CVE-2022-1852}
+- KVM: x86/mmu: Fix race condition in direct_page_fault (Marcin Wcisło) [ciqres] {CVE-2022-45869}
+- KVM: nVMX: add missing consistency checks for CR0 and CR4 (Marcin Wcisło) [ciqres] {CVE-2023-30456}
+- media: rc: fix races with imon_disconnect() (Marcin Wcisło) [ciqres] {CVE-2025-39993}
+- media: imon: grab lock earlier in imon_ir_change_protocol() (Marcin Wcisło) [ciqres] {CVE-2025-39993}
+- media: imon: Fix race getting ictx->lock (Marcin Wcisło) [ciqres] {CVE-2025-39993}
+- media: imon: fix a race condition in send_packet() (Marcin Wcisło) [ciqres] {CVE-2025-39993}
+- media: imon: reorganize serialization (Marcin Wcisło) [ciqres] {CVE-2025-39993}
+- KVM: x86/mmu: Drop/zap existing present SPTE even when creating an MMIO SPTE (Marcin Wcisło) [ciqres] {CVE-2026-23401}
+- xfs: fix freemap adjustments when adding xattrs to leaf blocks (CIQ Kernel Automation) [ciqres] {CVE-2026-43158}
+- xfs: delete attr leaf freemap entries when empty (Brett Mastbergen) [ciqres] {CVE-2026-43187}
+- mlxsw: spectrum_mr: Fix use-after-free when updating multicast route stats (CIQ Kernel Automation) [ciqres] {CVE-2025-68800}
+- HID: intel-ish-hid: Fix use-after-free issue in ishtp_hid_remove() (CIQ Kernel Automation) [ciqres] {CVE-2025-21928}
+- geneve: Suppress list corruption splat in geneve_destroy_tunnels(). (CIQ Kernel Automation) [ciqres] {CVE-2025-21858}
+- geneve: Fix use-after-free in geneve_find_dev(). (CIQ Kernel Automation) [ciqres] {CVE-2025-21858}
+- media: uvcvideo: Fix double free in error path (CIQ Kernel Automation) [ciqres] {CVE-2024-57980}
+- HID: core: zero-initialize the report buffer (CIQ Kernel Automation) [ciqres] {CVE-2024-50302}
+- xfs: add bounds checking to xlog_recover_process_data (CIQ Kernel Automation) [ciqres] {CVE-2024-41014}
+- netfilter: ip6t_eui64: reject invalid MAC header for all packets (CIQ Kernel Automation) [ciqres] {CVE-2026-31685}
+- wifi: brcmfmac: validate bsscfg indices in IF events (CIQ Kernel Automation) [ciqres] {CVE-2026-43110}
+- netfilter: xt_tcpmss: check remaining length before reading optlen (CIQ Kernel Automation) [ciqres] {CVE-2026-43190}
+- scsi: target: iscsi: Fix use-after-free in iscsit_dec_conn_usage_count() (CIQ Kernel Automation) [ciqres] {CVE-2026-23216}
+- nbd: defer config unlock in nbd_genl_connect (CIQ Kernel Automation) [ciqres] {CVE-2025-68366}
+- crypto: asymmetric_keys - prevent overflow in asymmetric_key_generate_id (CIQ Kernel Automation) [ciqres] {CVE-2025-68724}
+- ndisc: use RCU protection in ndisc_alloc_skb() (CIQ Kernel Automation) [ciqres] {CVE-2025-21764}
+- net: add dev_net_rcu() helper (Roxana Nicolescu) [ciqres] {CVE-2025-21764}
+- net: treat possible_net_t net pointer as an RCU one and add read_pnet_rcu() (Roxana Nicolescu) [ciqres] {CVE-2025-21764}
+- netfilter: tproxy: bail out if IP has been disabled on the device (CIQ Kernel Automation) [ciqres] {CVE-2024-36270}
+- r8169: Fix possible ring buffer corruption on fragmented Tx packets. (CIQ Kernel Automation) [ciqres] {CVE-2024-38586}
+- tls: fix missing memory barrier in tls_init (CIQ Kernel Automation) [ciqres] {CVE-2024-36489}
+- net/mlx5: Discard command completions in internal error (CIQ Kernel Automation) [ciqres] {CVE-2024-38555}
+- af_unix: Fix data races in unix_release_sock/unix_stream_sendmsg (CIQ Kernel Automation) [ciqres] {CVE-2024-38596}
+- rtnetlink: Correct nested IFLA_VF_VLAN_LIST attribute validation (CIQ Kernel Automation) [ciqres] {CVE-2024-36017}
+- net: core: reject skb_copy(_expand) for fraglist GSO skbs (CIQ Kernel Automation) [ciqres] {CVE-2024-36929}
+- net:emac/emac-mac: Fix a use after free in emac_mac_tx_buf_send (CIQ Kernel Automation) [ciqres] {CVE-2021-47013}
+
 * Fri Jun 12 2026 Roxana Nicolescu <rnicolescu@ciq.com> - 4.18.0-372.32.1+29.1.el8_6_ciq
 - arm64: errata: Mitigate TLBI errata on Microsoft Azure Cobalt 100 CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}
 - arm64: errata: Mitigate TLBI errata on NVIDIA Olympus CPU (Brett Mastbergen) [ciqres] {CVE-2025-10263}

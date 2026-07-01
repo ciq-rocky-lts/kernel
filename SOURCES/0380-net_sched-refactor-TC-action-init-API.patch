@@ -1,0 +1,1505 @@
+From 35c465381d6716eae3e5f0dafd62e4cbf008af62 Mon Sep 17 00:00:00 2001
+From: Cong Wang <cong.wang@bytedance.com>
+Date: Thu, 29 Jul 2021 16:12:14 -0700
+Subject: [PATCH] net_sched: refactor TC action init API
+
+jira VULN-188478
+cve-pre CVE-2026-46331
+commit-author Rajat Gupta <rajat.gupta@oss.qualcomm.com>
+commit 695176bfe5dec2051f950bdac0ae0b21e29e6de3
+
+TC action ->init() API has 10 parameters, it becomes harder
+to read. Some of them are just boolean and can be replaced
+by flags. Similarly for the internal API tcf_action_init()
+and tcf_exts_validate().
+
+This patch converts them to flags and fold them into
+the upper 16 bits of "flags", whose lower 16 bits are still
+reserved for user-space. More specifically, the following
+kernel flags are introduced:
+
+TCA_ACT_FLAGS_POLICE replace 'name' in a few contexts, to
+distinguish whether it is compatible with policer.
+
+TCA_ACT_FLAGS_BIND replaces 'bind', to indicate whether
+this action is bound to a filter.
+
+TCA_ACT_FLAGS_REPLACE  replaces 'ovr' in most contexts,
+means we are replacing an existing action.
+
+TCA_ACT_FLAGS_NO_RTNL replaces 'rtnl_held' but has the
+opposite meaning, because we still hold RTNL in most
+cases.
+
+The only user-space flag TCA_ACT_FLAGS_NO_PERCPU_STATS is
+untouched and still stored as before.
+
+I have tested this patch with tdc and I do not see any
+failure related to this patch.
+
+	Tested-by: Vlad Buslov <vladbu@nvidia.com>
+	Acked-by: Jamal Hadi Salim<jhs@mojatatu.com>
+	Cc: Jiri Pirko <jiri@resnulli.us>
+	Signed-off-by: Cong Wang <cong.wang@bytedance.com>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit 695176bfe5dec2051f950bdac0ae0b21e29e6de3)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ include/net/act_api.h        | 22 ++++++++-----
+ include/net/pkt_cls.h        |  2 +-
+ include/net/sch_generic.h    |  2 +-
+ include/uapi/linux/pkt_cls.h |  1 +
+ net/sched/act_api.c          | 61 ++++++++++++++++++------------------
+ net/sched/act_bpf.c          |  4 +--
+ net/sched/act_connmark.c     |  4 +--
+ net/sched/act_csum.c         |  7 +++--
+ net/sched/act_ct.c           |  4 +--
+ net/sched/act_ctinfo.c       |  4 +--
+ net/sched/act_gact.c         |  4 +--
+ net/sched/act_gate.c         |  4 +--
+ net/sched/act_ife.c          |  9 +++---
+ net/sched/act_ipt.c          | 21 +++++++------
+ net/sched/act_mirred.c       |  4 +--
+ net/sched/act_mpls.c         |  4 +--
+ net/sched/act_nat.c          |  6 ++--
+ net/sched/act_pedit.c        |  4 +--
+ net/sched/act_police.c       |  4 +--
+ net/sched/act_sample.c       |  7 +++--
+ net/sched/act_simple.c       |  4 +--
+ net/sched/act_skbedit.c      |  4 +--
+ net/sched/act_skbmod.c       |  3 +-
+ net/sched/act_tunnel_key.c   |  4 +--
+ net/sched/act_vlan.c         |  4 +--
+ net/sched/cls_api.c          | 28 ++++++++++-------
+ net/sched/cls_basic.c        | 10 +++---
+ net/sched/cls_bpf.c          |  8 ++---
+ net/sched/cls_cgroup.c       |  6 ++--
+ net/sched/cls_flow.c         |  6 ++--
+ net/sched/cls_flower.c       | 18 +++++------
+ net/sched/cls_fw.c           | 13 ++++----
+ net/sched/cls_matchall.c     | 17 +++++-----
+ net/sched/cls_route.c        | 10 +++---
+ net/sched/cls_rsvp.h         |  7 ++---
+ net/sched/cls_tcindex.c      | 10 +++---
+ net/sched/cls_u32.c          | 24 +++++++-------
+ 37 files changed, 185 insertions(+), 169 deletions(-)
+
+diff --git a/include/net/act_api.h b/include/net/act_api.h
+index 086b291e9530..f19f7f4a463c 100644
+--- a/include/net/act_api.h
++++ b/include/net/act_api.h
+@@ -58,6 +58,14 @@ struct tc_action {
+ #define TCA_ACT_HW_STATS_ANY (TCA_ACT_HW_STATS_IMMEDIATE | \
+ 			      TCA_ACT_HW_STATS_DELAYED)
+ 
++/* Reserve 16 bits for user-space. See TCA_ACT_FLAGS_NO_PERCPU_STATS. */
++#define TCA_ACT_FLAGS_USER_BITS 16
++#define TCA_ACT_FLAGS_USER_MASK 0xffff
++#define TCA_ACT_FLAGS_POLICE	(1U << TCA_ACT_FLAGS_USER_BITS)
++#define TCA_ACT_FLAGS_BIND	(1U << (TCA_ACT_FLAGS_USER_BITS + 1))
++#define TCA_ACT_FLAGS_REPLACE	(1U << (TCA_ACT_FLAGS_USER_BITS + 2))
++#define TCA_ACT_FLAGS_NO_RTNL	(1U << (TCA_ACT_FLAGS_USER_BITS + 3))
++
+ /* Update lastuse only if needed, to avoid dirtying a cache line.
+  * We use a temp variable to avoid fetching jiffies twice.
+  */
+@@ -99,8 +107,8 @@ struct tc_action_ops {
+ 	void	(*cleanup)(struct tc_action *);
+ 	int     (*lookup)(struct net *net, struct tc_action **a, u32 index);
+ 	int     (*init)(struct net *net, struct nlattr *nla,
+-			struct nlattr *est, struct tc_action **act, int ovr,
+-			int bind, bool rtnl_held, struct tcf_proto *tp,
++			struct nlattr *est, struct tc_action **act,
++			struct tcf_proto *tp,
+ 			u32 flags, struct netlink_ext_ack *extack);
+ 	int     (*walk)(struct net *, struct sk_buff *,
+ 			struct netlink_callback *, int,
+@@ -179,18 +187,16 @@ int tcf_action_destroy(struct tc_action *actions[], int bind);
+ int tcf_action_exec(struct sk_buff *skb, struct tc_action **actions,
+ 		    int nr_actions, struct tcf_result *res);
+ int tcf_action_init(struct net *net, struct tcf_proto *tp, struct nlattr *nla,
+-		    struct nlattr *est, char *name, int ovr, int bind,
++		    struct nlattr *est,
+ 		    struct tc_action *actions[], int init_res[], size_t *attr_size,
+-		    bool rtnl_held, struct netlink_ext_ack *extack);
+-struct tc_action_ops *tc_action_load_ops(char *name, struct nlattr *nla,
++		    u32 flags, struct netlink_ext_ack *extack);
++struct tc_action_ops *tc_action_load_ops(struct nlattr *nla, bool police,
+ 					 bool rtnl_held,
+ 					 struct netlink_ext_ack *extack);
+ struct tc_action *tcf_action_init_1(struct net *net, struct tcf_proto *tp,
+ 				    struct nlattr *nla, struct nlattr *est,
+-				    char *name, int ovr, int bind,
+ 				    struct tc_action_ops *a_o, int *init_res,
+-				    bool rtnl_held,
+-				    struct netlink_ext_ack *extack);
++				    u32 flags, struct netlink_ext_ack *extack);
+ int tcf_action_dump(struct sk_buff *skb, struct tc_action *actions[], int bind,
+ 		    int ref, bool terse);
+ int tcf_action_dump_old(struct sk_buff *skb, struct tc_action *a, int, int);
+diff --git a/include/net/pkt_cls.h b/include/net/pkt_cls.h
+index 64605b556176..d448994929a4 100644
+--- a/include/net/pkt_cls.h
++++ b/include/net/pkt_cls.h
+@@ -319,7 +319,7 @@ tcf_exts_exec(struct sk_buff *skb, struct tcf_exts *exts,
+ 
+ int tcf_exts_validate(struct net *net, struct tcf_proto *tp,
+ 		      struct nlattr **tb, struct nlattr *rate_tlv,
+-		      struct tcf_exts *exts, bool ovr, bool rtnl_held,
++		      struct tcf_exts *exts, u32 flags,
+ 		      struct netlink_ext_ack *extack);
+ void tcf_exts_destroy(struct tcf_exts *exts);
+ void tcf_exts_change(struct tcf_exts *dst, struct tcf_exts *src);
+diff --git a/include/net/sch_generic.h b/include/net/sch_generic.h
+index d1543c4f98ec..798bd03f8559 100644
+--- a/include/net/sch_generic.h
++++ b/include/net/sch_generic.h
+@@ -340,7 +340,7 @@ struct tcf_proto_ops {
+ 	int			(*change)(struct net *net, struct sk_buff *,
+ 					struct tcf_proto*, unsigned long,
+ 					u32 handle, struct nlattr **,
+-					void **, bool, bool,
++					void **, u32,
+ 					struct netlink_ext_ack *);
+ 	int			(*delete)(struct tcf_proto *tp, void *arg,
+ 					  bool *last, bool rtnl_held,
+diff --git a/include/uapi/linux/pkt_cls.h b/include/uapi/linux/pkt_cls.h
+index dc1c5fb345b5..9a56760b5a76 100644
+--- a/include/uapi/linux/pkt_cls.h
++++ b/include/uapi/linux/pkt_cls.h
+@@ -22,6 +22,7 @@ enum {
+ 	__TCA_ACT_MAX
+ };
+ 
++/* See other TCA_ACT_FLAGS_ * flags in include/net/act_api.h. */
+ #define TCA_ACT_FLAGS_NO_PERCPU_STATS 1 /* Don't use percpu allocator for
+ 					 * actions stats.
+ 					 */
+diff --git a/net/sched/act_api.c b/net/sched/act_api.c
+index affcf730c2c3..e96bc5e8e4c4 100644
+--- a/net/sched/act_api.c
++++ b/net/sched/act_api.c
+@@ -500,7 +500,7 @@ int tcf_idr_create(struct tc_action_net *tn, u32 index, struct nlattr *est,
+ 	p->tcfa_tm.install = jiffies;
+ 	p->tcfa_tm.lastuse = jiffies;
+ 	p->tcfa_tm.firstuse = 0;
+-	p->tcfa_flags = flags;
++	p->tcfa_flags = flags & TCA_ACT_FLAGS_USER_MASK;
+ 	if (est) {
+ 		err = gen_new_estimator(&p->tcfa_bstats, p->cpu_bstats,
+ 					&p->tcfa_rate_est,
+@@ -949,7 +949,7 @@ void tcf_idr_insert_many(struct tc_action *actions[])
+ 	}
+ }
+ 
+-struct tc_action_ops *tc_action_load_ops(char *name, struct nlattr *nla,
++struct tc_action_ops *tc_action_load_ops(struct nlattr *nla, bool police,
+ 					 bool rtnl_held,
+ 					 struct netlink_ext_ack *extack)
+ {
+@@ -959,7 +959,7 @@ struct tc_action_ops *tc_action_load_ops(char *name, struct nlattr *nla,
+ 	struct nlattr *kind;
+ 	int err;
+ 
+-	if (name == NULL) {
++	if (!police) {
+ 		err = nla_parse_nested_deprecated(tb, TCA_ACT_MAX, nla,
+ 						  tcf_action_policy, extack);
+ 		if (err < 0)
+@@ -975,7 +975,7 @@ struct tc_action_ops *tc_action_load_ops(char *name, struct nlattr *nla,
+ 			return ERR_PTR(err);
+ 		}
+ 	} else {
+-		if (strlcpy(act_name, name, IFNAMSIZ) >= IFNAMSIZ) {
++		if (strlcpy(act_name, "police", IFNAMSIZ) >= IFNAMSIZ) {
+ 			NL_SET_ERR_MSG(extack, "TC action name too long");
+ 			return ERR_PTR(-EINVAL);
+ 		}
+@@ -1012,12 +1012,11 @@ struct tc_action_ops *tc_action_load_ops(char *name, struct nlattr *nla,
+ 
+ struct tc_action *tcf_action_init_1(struct net *net, struct tcf_proto *tp,
+ 				    struct nlattr *nla, struct nlattr *est,
+-				    char *name, int ovr, int bind,
+ 				    struct tc_action_ops *a_o, int *init_res,
+-				    bool rtnl_held,
+-				    struct netlink_ext_ack *extack)
++				    u32 flags, struct netlink_ext_ack *extack)
+ {
+-	struct nla_bitfield32 flags = { 0, 0 };
++	bool police = flags & TCA_ACT_FLAGS_POLICE;
++	struct nla_bitfield32 userflags = { 0, 0 };
+ 	u8 hw_stats = TCA_ACT_HW_STATS_ANY;
+ 	struct nlattr *tb[TCA_ACT_MAX + 1];
+ 	struct tc_cookie *cookie = NULL;
+@@ -1025,7 +1024,7 @@ struct tc_action *tcf_action_init_1(struct net *net, struct tcf_proto *tp,
+ 	int err;
+ 
+ 	/* backward compatibility for policer */
+-	if (name == NULL) {
++	if (!police) {
+ 		err = nla_parse_nested_deprecated(tb, TCA_ACT_MAX, nla,
+ 						  tcf_action_policy, extack);
+ 		if (err < 0)
+@@ -1040,22 +1039,22 @@ struct tc_action *tcf_action_init_1(struct net *net, struct tcf_proto *tp,
+ 		}
+ 		hw_stats = tcf_action_hw_stats_get(tb[TCA_ACT_HW_STATS]);
+ 		if (tb[TCA_ACT_FLAGS])
+-			flags = nla_get_bitfield32(tb[TCA_ACT_FLAGS]);
++			userflags = nla_get_bitfield32(tb[TCA_ACT_FLAGS]);
+ 
+-		err = a_o->init(net, tb[TCA_ACT_OPTIONS], est, &a, ovr, bind,
+-				rtnl_held, tp, flags.value, extack);
++		err = a_o->init(net, tb[TCA_ACT_OPTIONS], est, &a, tp,
++				userflags.value | flags, extack);
+ 	} else {
+-		err = a_o->init(net, nla, est, &a, ovr, bind, rtnl_held,
+-				tp, flags.value, extack);
++		err = a_o->init(net, nla, est, &a, tp, userflags.value | flags,
++				extack);
+ 	}
+ 	if (err < 0)
+ 		goto err_out;
+ 	*init_res = err;
+ 
+-	if (!name && tb[TCA_ACT_COOKIE])
++	if (!police && tb[TCA_ACT_COOKIE])
+ 		tcf_set_action_cookie(&a->act_cookie, cookie);
+ 
+-	if (!name)
++	if (!police)
+ 		a->hw_stats = hw_stats;
+ 
+ 	return a;
+@@ -1071,9 +1070,9 @@ struct tc_action *tcf_action_init_1(struct net *net, struct tcf_proto *tp,
+ /* Returns numbers of initialized actions or negative error. */
+ 
+ int tcf_action_init(struct net *net, struct tcf_proto *tp, struct nlattr *nla,
+-		    struct nlattr *est, char *name, int ovr, int bind,
+-		    struct tc_action *actions[], int init_res[], size_t *attr_size,
+-		    bool rtnl_held, struct netlink_ext_ack *extack)
++		    struct nlattr *est, struct tc_action *actions[],
++		    int init_res[], size_t *attr_size, u32 flags,
++		    struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_ops *ops[TCA_ACT_MAX_PRIO] = {};
+ 	struct nlattr *tb[TCA_ACT_MAX_PRIO + 1];
+@@ -1090,7 +1089,9 @@ int tcf_action_init(struct net *net, struct tcf_proto *tp, struct nlattr *nla,
+ 	for (i = 1; i <= TCA_ACT_MAX_PRIO && tb[i]; i++) {
+ 		struct tc_action_ops *a_o;
+ 
+-		a_o = tc_action_load_ops(name, tb[i], rtnl_held, extack);
++		a_o = tc_action_load_ops(tb[i], flags & TCA_ACT_FLAGS_POLICE,
++					 !(flags & TCA_ACT_FLAGS_NO_RTNL),
++					 extack);
+ 		if (IS_ERR(a_o)) {
+ 			err = PTR_ERR(a_o);
+ 			goto err_mod;
+@@ -1099,9 +1100,8 @@ int tcf_action_init(struct net *net, struct tcf_proto *tp, struct nlattr *nla,
+ 	}
+ 
+ 	for (i = 1; i <= TCA_ACT_MAX_PRIO && tb[i]; i++) {
+-		act = tcf_action_init_1(net, tp, tb[i], est, name, ovr, bind,
+-					ops[i - 1], &init_res[i - 1], rtnl_held,
+-					extack);
++		act = tcf_action_init_1(net, tp, tb[i], est, ops[i - 1],
++					&init_res[i - 1], flags, extack);
+ 		if (IS_ERR(act)) {
+ 			err = PTR_ERR(act);
+ 			goto err;
+@@ -1121,7 +1121,7 @@ int tcf_action_init(struct net *net, struct tcf_proto *tp, struct nlattr *nla,
+ 	goto err_mod;
+ 
+ err:
+-	tcf_action_destroy(actions, bind);
++	tcf_action_destroy(actions, flags & TCA_ACT_FLAGS_BIND);
+ err_mod:
+ 	for (i = 0; i < TCA_ACT_MAX_PRIO; i++) {
+ 		if (ops[i])
+@@ -1511,7 +1511,7 @@ tcf_add_notify(struct net *net, struct nlmsghdr *n, struct tc_action *actions[],
+ }
+ 
+ static int tcf_action_add(struct net *net, struct nlattr *nla,
+-			  struct nlmsghdr *n, u32 portid, int ovr,
++			  struct nlmsghdr *n, u32 portid, u32 flags,
+ 			  struct netlink_ext_ack *extack)
+ {
+ 	size_t attr_size = 0;
+@@ -1520,8 +1520,8 @@ static int tcf_action_add(struct net *net, struct nlattr *nla,
+ 	int init_res[TCA_ACT_MAX_PRIO] = {};
+ 
+ 	for (loop = 0; loop < 10; loop++) {
+-		ret = tcf_action_init(net, NULL, nla, NULL, NULL, ovr, 0,
+-				      actions, init_res, &attr_size, true, extack);
++		ret = tcf_action_init(net, NULL, nla, NULL, actions, init_res,
++				      &attr_size, flags, extack);
+ 		if (ret != -EAGAIN)
+ 			break;
+ 	}
+@@ -1552,7 +1552,8 @@ static int tc_ctl_action(struct sk_buff *skb, struct nlmsghdr *n,
+ 	struct net *net = sock_net(skb->sk);
+ 	struct nlattr *tca[TCA_ROOT_MAX + 1];
+ 	u32 portid = NETLINK_CB(skb).portid;
+-	int ret = 0, ovr = 0;
++	u32 flags = 0;
++	int ret = 0;
+ 
+ 	if ((n->nlmsg_type != RTM_GETACTION) &&
+ 	    !netlink_capable(skb, CAP_NET_ADMIN))
+@@ -1578,8 +1579,8 @@ static int tc_ctl_action(struct sk_buff *skb, struct nlmsghdr *n,
+ 		 * is zero) then just set this
+ 		 */
+ 		if (n->nlmsg_flags & NLM_F_REPLACE)
+-			ovr = 1;
+-		ret = tcf_action_add(net, tca[TCA_ACT_TAB], n, portid, ovr,
++			flags = TCA_ACT_FLAGS_REPLACE;
++		ret = tcf_action_add(net, tca[TCA_ACT_TAB], n, portid, flags,
+ 				     extack);
+ 		break;
+ 	case RTM_DELACTION:
+diff --git a/net/sched/act_bpf.c b/net/sched/act_bpf.c
+index a68db4b396ec..d771e3ed2674 100644
+--- a/net/sched/act_bpf.c
++++ b/net/sched/act_bpf.c
+@@ -285,11 +285,11 @@ static void tcf_bpf_prog_fill_cfg(const struct tcf_bpf *prog,
+ 
+ static int tcf_bpf_init(struct net *net, struct nlattr *nla,
+ 			struct nlattr *est, struct tc_action **act,
+-			int replace, int bind, bool rtnl_held,
+ 			struct tcf_proto *tp, u32 flags,
+ 			struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, bpf_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_ACT_BPF_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+ 	struct tcf_bpf_cfg cfg, old;
+@@ -327,7 +327,7 @@ static int tcf_bpf_init(struct net *net, struct nlattr *nla,
+ 		if (bind)
+ 			return 0;
+ 
+-		if (!replace) {
++		if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			tcf_idr_release(*act, bind);
+ 			return -EEXIST;
+ 		}
+diff --git a/net/sched/act_connmark.c b/net/sched/act_connmark.c
+index 1552a5b1ee3d..0d48f60a3f8d 100644
+--- a/net/sched/act_connmark.c
++++ b/net/sched/act_connmark.c
+@@ -100,12 +100,12 @@ static const struct nla_policy connmark_policy[TCA_CONNMARK_MAX + 1] = {
+ 
+ static int tcf_connmark_init(struct net *net, struct nlattr *nla,
+ 			     struct nlattr *est, struct tc_action **a,
+-			     int ovr, int bind, bool rtnl_held,
+ 			     struct tcf_proto *tp, u32 flags,
+ 			     struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, connmark_net_id);
+ 	struct nlattr *tb[TCA_CONNMARK_MAX + 1];
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct tcf_chain *goto_ch = NULL;
+ 	struct tcf_connmark_info *ci;
+ 	struct tc_connmark *parm;
+@@ -148,7 +148,7 @@ static int tcf_connmark_init(struct net *net, struct nlattr *nla,
+ 		ci = to_connmark(*a);
+ 		if (bind)
+ 			return 0;
+-		if (!ovr) {
++		if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			tcf_idr_release(*a, bind);
+ 			return -EEXIST;
+ 		}
+diff --git a/net/sched/act_csum.c b/net/sched/act_csum.c
+index b4d2a5734688..7e4c90a0a58f 100644
+--- a/net/sched/act_csum.c
++++ b/net/sched/act_csum.c
+@@ -46,11 +46,12 @@ static unsigned int csum_net_id;
+ static struct tc_action_ops act_csum_ops;
+ 
+ static int tcf_csum_init(struct net *net, struct nlattr *nla,
+-			 struct nlattr *est, struct tc_action **a, int ovr,
+-			 int bind, bool rtnl_held, struct tcf_proto *tp,
++			 struct nlattr *est, struct tc_action **a,
++			 struct tcf_proto *tp,
+ 			 u32 flags, struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, csum_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct tcf_csum_params *params_new;
+ 	struct nlattr *tb[TCA_CSUM_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+@@ -83,7 +84,7 @@ static int tcf_csum_init(struct net *net, struct nlattr *nla,
+ 	} else if (err > 0) {
+ 		if (bind)/* dont override defaults */
+ 			return 0;
+-		if (!ovr) {
++		if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			tcf_idr_release(*a, bind);
+ 			return -EEXIST;
+ 		}
+diff --git a/net/sched/act_ct.c b/net/sched/act_ct.c
+index a29210603052..1e677fb4a2af 100644
+--- a/net/sched/act_ct.c
++++ b/net/sched/act_ct.c
+@@ -1241,11 +1241,11 @@ static int tcf_ct_fill_params(struct net *net,
+ 
+ static int tcf_ct_init(struct net *net, struct nlattr *nla,
+ 		       struct nlattr *est, struct tc_action **a,
+-		       int replace, int bind, bool rtnl_held,
+ 		       struct tcf_proto *tp, u32 flags,
+ 		       struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, ct_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct tcf_ct_params *params = NULL;
+ 	struct nlattr *tb[TCA_CT_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+@@ -1285,7 +1285,7 @@ static int tcf_ct_init(struct net *net, struct nlattr *nla,
+ 		if (bind)
+ 			return 0;
+ 
+-		if (!replace) {
++		if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			tcf_idr_release(*a, bind);
+ 			return -EEXIST;
+ 		}
+diff --git a/net/sched/act_ctinfo.c b/net/sched/act_ctinfo.c
+index b20c8ce59905..549374a2d008 100644
+--- a/net/sched/act_ctinfo.c
++++ b/net/sched/act_ctinfo.c
+@@ -154,11 +154,11 @@ static const struct nla_policy ctinfo_policy[TCA_CTINFO_MAX + 1] = {
+ 
+ static int tcf_ctinfo_init(struct net *net, struct nlattr *nla,
+ 			   struct nlattr *est, struct tc_action **a,
+-			   int ovr, int bind, bool rtnl_held,
+ 			   struct tcf_proto *tp, u32 flags,
+ 			   struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, ctinfo_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	u32 dscpmask = 0, dscpstatemask, index;
+ 	struct nlattr *tb[TCA_CTINFO_MAX + 1];
+ 	struct tcf_ctinfo_params *cp_new;
+@@ -221,7 +221,7 @@ static int tcf_ctinfo_init(struct net *net, struct nlattr *nla,
+ 	} else if (err > 0) {
+ 		if (bind) /* don't override defaults */
+ 			return 0;
+-		if (!ovr) {
++		if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			tcf_idr_release(*a, bind);
+ 			return -EEXIST;
+ 		}
+diff --git a/net/sched/act_gact.c b/net/sched/act_gact.c
+index 61306ce9dce8..540cebb57be7 100644
+--- a/net/sched/act_gact.c
++++ b/net/sched/act_gact.c
+@@ -57,11 +57,11 @@ static const struct nla_policy gact_policy[TCA_GACT_MAX + 1] = {
+ 
+ static int tcf_gact_init(struct net *net, struct nlattr *nla,
+ 			 struct nlattr *est, struct tc_action **a,
+-			 int ovr, int bind, bool rtnl_held,
+ 			 struct tcf_proto *tp, u32 flags,
+ 			 struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, gact_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_GACT_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+ 	struct tc_gact *parm;
+@@ -114,7 +114,7 @@ static int tcf_gact_init(struct net *net, struct nlattr *nla,
+ 	} else if (err > 0) {
+ 		if (bind)/* dont override defaults */
+ 			return 0;
+-		if (!ovr) {
++		if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			tcf_idr_release(*a, bind);
+ 			return -EEXIST;
+ 		}
+diff --git a/net/sched/act_gate.c b/net/sched/act_gate.c
+index a78cb7965718..7df72a4197a3 100644
+--- a/net/sched/act_gate.c
++++ b/net/sched/act_gate.c
+@@ -295,12 +295,12 @@ static void gate_setup_timer(struct tcf_gate *gact, u64 basetime,
+ 
+ static int tcf_gate_init(struct net *net, struct nlattr *nla,
+ 			 struct nlattr *est, struct tc_action **a,
+-			 int ovr, int bind, bool rtnl_held,
+ 			 struct tcf_proto *tp, u32 flags,
+ 			 struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, gate_net_id);
+ 	enum tk_offsets tk_offset = TK_OFFS_TAI;
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_GATE_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+ 	u64 cycletime = 0, basetime = 0;
+@@ -364,7 +364,7 @@ static int tcf_gate_init(struct net *net, struct nlattr *nla,
+ 		}
+ 
+ 		ret = ACT_P_CREATED;
+-	} else if (!ovr) {
++	} else if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 		tcf_idr_release(*a, bind);
+ 		return -EEXIST;
+ 	}
+diff --git a/net/sched/act_ife.c b/net/sched/act_ife.c
+index 0ff0599a3345..bc6077d67f90 100644
+--- a/net/sched/act_ife.c
++++ b/net/sched/act_ife.c
+@@ -484,11 +484,11 @@ static int populate_metalist(struct tcf_ife_info *ife, struct nlattr **tb,
+ 
+ static int tcf_ife_init(struct net *net, struct nlattr *nla,
+ 			struct nlattr *est, struct tc_action **a,
+-			int ovr, int bind, bool rtnl_held,
+ 			struct tcf_proto *tp, u32 flags,
+ 			struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, ife_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_IFE_MAX + 1];
+ 	struct nlattr *tb2[IFE_META_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+@@ -537,7 +537,7 @@ static int tcf_ife_init(struct net *net, struct nlattr *nla,
+ 			kfree(p);
+ 			return err;
+ 		}
+-		err = load_metalist(tb2, rtnl_held);
++		err = load_metalist(tb2, !(flags & TCA_ACT_FLAGS_NO_RTNL));
+ 		if (err) {
+ 			kfree(p);
+ 			return err;
+@@ -565,7 +565,7 @@ static int tcf_ife_init(struct net *net, struct nlattr *nla,
+ 			return ret;
+ 		}
+ 		ret = ACT_P_CREATED;
+-	} else if (!ovr) {
++	} else if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 		tcf_idr_release(*a, bind);
+ 		kfree(p);
+ 		return -EEXIST;
+@@ -605,7 +605,8 @@ static int tcf_ife_init(struct net *net, struct nlattr *nla,
+ 	}
+ 
+ 	if (tb[TCA_IFE_METALST]) {
+-		err = populate_metalist(ife, tb2, exists, rtnl_held);
++		err = populate_metalist(ife, tb2, exists,
++					!(flags & TCA_ACT_FLAGS_NO_RTNL));
+ 		if (err)
+ 			goto metadata_parse_err;
+ 	} else {
+diff --git a/net/sched/act_ipt.c b/net/sched/act_ipt.c
+index 84f96e723430..810f53225ab3 100644
+--- a/net/sched/act_ipt.c
++++ b/net/sched/act_ipt.c
+@@ -98,10 +98,11 @@ static const struct nla_policy ipt_policy[TCA_IPT_MAX + 1] = {
+ 
+ static int __tcf_ipt_init(struct net *net, unsigned int id, struct nlattr *nla,
+ 			  struct nlattr *est, struct tc_action **a,
+-			  const struct tc_action_ops *ops, int ovr, int bind,
++			  const struct tc_action_ops *ops,
+ 			  struct tcf_proto *tp, u32 flags)
+ {
+ 	struct tc_action_net *tn = net_generic(net, id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_IPT_MAX + 1];
+ 	struct tcf_ipt *ipt;
+ 	struct xt_entry_target *td, *t;
+@@ -158,7 +159,7 @@ static int __tcf_ipt_init(struct net *net, unsigned int id, struct nlattr *nla,
+ 		if (bind)/* dont override defaults */
+ 			return 0;
+ 
+-		if (!ovr) {
++		if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			tcf_idr_release(*a, bind);
+ 			return -EEXIST;
+ 		}
+@@ -205,21 +206,21 @@ static int __tcf_ipt_init(struct net *net, unsigned int id, struct nlattr *nla,
+ }
+ 
+ static int tcf_ipt_init(struct net *net, struct nlattr *nla,
+-			struct nlattr *est, struct tc_action **a, int ovr,
+-			int bind, bool rtnl_held, struct tcf_proto *tp,
++			struct nlattr *est, struct tc_action **a,
++			struct tcf_proto *tp,
+ 			u32 flags, struct netlink_ext_ack *extack)
+ {
+-	return __tcf_ipt_init(net, ipt_net_id, nla, est, a, &act_ipt_ops, ovr,
+-			      bind, tp, flags);
++	return __tcf_ipt_init(net, ipt_net_id, nla, est, a, &act_ipt_ops,
++			      tp, flags);
+ }
+ 
+ static int tcf_xt_init(struct net *net, struct nlattr *nla,
+-		       struct nlattr *est, struct tc_action **a, int ovr,
+-		       int bind, bool unlocked, struct tcf_proto *tp,
++		       struct nlattr *est, struct tc_action **a,
++		       struct tcf_proto *tp,
+ 		       u32 flags, struct netlink_ext_ack *extack)
+ {
+-	return __tcf_ipt_init(net, xt_net_id, nla, est, a, &act_xt_ops, ovr,
+-			      bind, tp, flags);
++	return __tcf_ipt_init(net, xt_net_id, nla, est, a, &act_xt_ops,
++			      tp, flags);
+ }
+ 
+ static int tcf_ipt_act(struct sk_buff *skb, const struct tc_action *a,
+diff --git a/net/sched/act_mirred.c b/net/sched/act_mirred.c
+index 5af86bc4cbf8..87f82b8145e3 100644
+--- a/net/sched/act_mirred.c
++++ b/net/sched/act_mirred.c
+@@ -96,11 +96,11 @@ static struct tc_action_ops act_mirred_ops;
+ 
+ static int tcf_mirred_init(struct net *net, struct nlattr *nla,
+ 			   struct nlattr *est, struct tc_action **a,
+-			   int ovr, int bind, bool rtnl_held,
+ 			   struct tcf_proto *tp,
+ 			   u32 flags, struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, mirred_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_MIRRED_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+ 	bool mac_header_xmit = false;
+@@ -160,7 +160,7 @@ static int tcf_mirred_init(struct net *net, struct nlattr *nla,
+ 			return ret;
+ 		}
+ 		ret = ACT_P_CREATED;
+-	} else if (!ovr) {
++	} else if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 		tcf_idr_release(*a, bind);
+ 		return -EEXIST;
+ 	}
+diff --git a/net/sched/act_mpls.c b/net/sched/act_mpls.c
+index a7a2b3612089..f6de8ec7edf1 100644
+--- a/net/sched/act_mpls.c
++++ b/net/sched/act_mpls.c
+@@ -153,11 +153,11 @@ static const struct nla_policy mpls_policy[TCA_MPLS_MAX + 1] = {
+ 
+ static int tcf_mpls_init(struct net *net, struct nlattr *nla,
+ 			 struct nlattr *est, struct tc_action **a,
+-			 int ovr, int bind, bool rtnl_held,
+ 			 struct tcf_proto *tp, u32 flags,
+ 			 struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, mpls_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_MPLS_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+ 	struct tcf_mpls_params *p;
+@@ -256,7 +256,7 @@ static int tcf_mpls_init(struct net *net, struct nlattr *nla,
+ 		}
+ 
+ 		ret = ACT_P_CREATED;
+-	} else if (!ovr) {
++	} else if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 		tcf_idr_release(*a, bind);
+ 		return -EEXIST;
+ 	}
+diff --git a/net/sched/act_nat.c b/net/sched/act_nat.c
+index e4fd4c97bf3d..bfbe442e4e19 100644
+--- a/net/sched/act_nat.c
++++ b/net/sched/act_nat.c
+@@ -38,11 +38,11 @@ static const struct nla_policy nat_policy[TCA_NAT_MAX + 1] = {
+ };
+ 
+ static int tcf_nat_init(struct net *net, struct nlattr *nla, struct nlattr *est,
+-			struct tc_action **a, int ovr, int bind,
+-			bool rtnl_held,	struct tcf_proto *tp,
++			struct tc_action **a, struct tcf_proto *tp,
+ 			u32 flags, struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, nat_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_NAT_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+ 	struct tc_nat *parm;
+@@ -74,7 +74,7 @@ static int tcf_nat_init(struct net *net, struct nlattr *nla, struct nlattr *est,
+ 	} else if (err > 0) {
+ 		if (bind)
+ 			return 0;
+-		if (!ovr) {
++		if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			tcf_idr_release(*a, bind);
+ 			return -EEXIST;
+ 		}
+diff --git a/net/sched/act_pedit.c b/net/sched/act_pedit.c
+index 6c3e5239b134..cbdcd1a590af 100644
+--- a/net/sched/act_pedit.c
++++ b/net/sched/act_pedit.c
+@@ -135,11 +135,11 @@ static int tcf_pedit_key_ex_dump(struct sk_buff *skb,
+ 
+ static int tcf_pedit_init(struct net *net, struct nlattr *nla,
+ 			  struct nlattr *est, struct tc_action **a,
+-			  int ovr, int bind, bool rtnl_held,
+ 			  struct tcf_proto *tp, u32 flags,
+ 			  struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, pedit_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_PEDIT_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+ 	struct tc_pedit_key *keys = NULL;
+@@ -197,7 +197,7 @@ static int tcf_pedit_init(struct net *net, struct nlattr *nla,
+ 	} else if (err > 0) {
+ 		if (bind)
+ 			goto out_free;
+-		if (!ovr) {
++		if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			ret = -EEXIST;
+ 			goto out_release;
+ 		}
+diff --git a/net/sched/act_police.c b/net/sched/act_police.c
+index 7cf05591f65f..becdfed60584 100644
+--- a/net/sched/act_police.c
++++ b/net/sched/act_police.c
+@@ -52,11 +52,11 @@ static const struct nla_policy police_policy[TCA_POLICE_MAX + 1] = {
+ 
+ static int tcf_police_init(struct net *net, struct nlattr *nla,
+ 			       struct nlattr *est, struct tc_action **a,
+-			       int ovr, int bind, bool rtnl_held,
+ 			       struct tcf_proto *tp, u32 flags,
+ 			       struct netlink_ext_ack *extack)
+ {
+ 	int ret = 0, tcfp_result = TC_ACT_OK, err, size;
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_POLICE_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+ 	struct tc_police *parm;
+@@ -101,7 +101,7 @@ static int tcf_police_init(struct net *net, struct nlattr *nla,
+ 		}
+ 		ret = ACT_P_CREATED;
+ 		spin_lock_init(&(to_police(*a)->tcfp_lock));
+-	} else if (!ovr) {
++	} else if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 		tcf_idr_release(*a, bind);
+ 		return -EEXIST;
+ 	}
+diff --git a/net/sched/act_sample.c b/net/sched/act_sample.c
+index f22e4c31d332..6ec20f601764 100644
+--- a/net/sched/act_sample.c
++++ b/net/sched/act_sample.c
+@@ -37,11 +37,12 @@ static const struct nla_policy sample_policy[TCA_SAMPLE_MAX + 1] = {
+ };
+ 
+ static int tcf_sample_init(struct net *net, struct nlattr *nla,
+-			   struct nlattr *est, struct tc_action **a, int ovr,
+-			   int bind, bool rtnl_held, struct tcf_proto *tp,
++			   struct nlattr *est, struct tc_action **a,
++			   struct tcf_proto *tp,
+ 			   u32 flags, struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, sample_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_SAMPLE_MAX + 1];
+ 	struct psample_group *psample_group;
+ 	u32 psample_group_num, rate, index;
+@@ -78,7 +79,7 @@ static int tcf_sample_init(struct net *net, struct nlattr *nla,
+ 			return ret;
+ 		}
+ 		ret = ACT_P_CREATED;
+-	} else if (!ovr) {
++	} else if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 		tcf_idr_release(*a, bind);
+ 		return -EEXIST;
+ 	}
+diff --git a/net/sched/act_simple.c b/net/sched/act_simple.c
+index dac4d3241871..6b96208a87cd 100644
+--- a/net/sched/act_simple.c
++++ b/net/sched/act_simple.c
+@@ -90,11 +90,11 @@ static const struct nla_policy simple_policy[TCA_DEF_MAX + 1] = {
+ 
+ static int tcf_simp_init(struct net *net, struct nlattr *nla,
+ 			 struct nlattr *est, struct tc_action **a,
+-			 int ovr, int bind, bool rtnl_held,
+ 			 struct tcf_proto *tp, u32 flags,
+ 			 struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, simp_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_DEF_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+ 	struct tc_defact *parm;
+@@ -152,7 +152,7 @@ static int tcf_simp_init(struct net *net, struct nlattr *nla,
+ 		tcf_action_set_ctrlact(*a, parm->action, goto_ch);
+ 		ret = ACT_P_CREATED;
+ 	} else {
+-		if (!ovr) {
++		if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			err = -EEXIST;
+ 			goto release_idr;
+ 		}
+diff --git a/net/sched/act_skbedit.c b/net/sched/act_skbedit.c
+index a3d9e0bb2ea7..83398d911455 100644
+--- a/net/sched/act_skbedit.c
++++ b/net/sched/act_skbedit.c
+@@ -107,11 +107,11 @@ static const struct nla_policy skbedit_policy[TCA_SKBEDIT_MAX + 1] = {
+ 
+ static int tcf_skbedit_init(struct net *net, struct nlattr *nla,
+ 			    struct nlattr *est, struct tc_action **a,
+-			    int ovr, int bind, bool rtnl_held,
+ 			    struct tcf_proto *tp, u32 act_flags,
+ 			    struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, skbedit_net_id);
++	bool bind = act_flags & TCA_ACT_FLAGS_BIND;
+ 	struct tcf_skbedit_params *params_new;
+ 	struct nlattr *tb[TCA_SKBEDIT_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+@@ -197,7 +197,7 @@ static int tcf_skbedit_init(struct net *net, struct nlattr *nla,
+ 		ret = ACT_P_CREATED;
+ 	} else {
+ 		d = to_skbedit(*a);
+-		if (!ovr) {
++		if (!(act_flags & TCA_ACT_FLAGS_REPLACE)) {
+ 			tcf_idr_release(*a, bind);
+ 			return -EEXIST;
+ 		}
+diff --git a/net/sched/act_skbmod.c b/net/sched/act_skbmod.c
+index 6a3643f448eb..011c50c983b3 100644
+--- a/net/sched/act_skbmod.c
++++ b/net/sched/act_skbmod.c
+@@ -86,11 +86,12 @@ static const struct nla_policy skbmod_policy[TCA_SKBMOD_MAX + 1] = {
+ 
+ static int tcf_skbmod_init(struct net *net, struct nlattr *nla,
+ 			   struct nlattr *est, struct tc_action **a,
+-			   int ovr, int bind, bool rtnl_held,
+ 			   struct tcf_proto *tp, u32 flags,
+ 			   struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, skbmod_net_id);
++	bool ovr = flags & TCA_ACT_FLAGS_REPLACE;
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_SKBMOD_MAX + 1];
+ 	struct tcf_skbmod_params *p, *p_old;
+ 	struct tcf_chain *goto_ch = NULL;
+diff --git a/net/sched/act_tunnel_key.c b/net/sched/act_tunnel_key.c
+index e5510e9f0b44..49718e0c173b 100644
+--- a/net/sched/act_tunnel_key.c
++++ b/net/sched/act_tunnel_key.c
+@@ -359,11 +359,11 @@ static void tunnel_key_release_params(struct tcf_tunnel_key_params *p)
+ 
+ static int tunnel_key_init(struct net *net, struct nlattr *nla,
+ 			   struct nlattr *est, struct tc_action **a,
+-			   int ovr, int bind, bool rtnl_held,
+ 			   struct tcf_proto *tp, u32 act_flags,
+ 			   struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, tunnel_key_net_id);
++	bool bind = act_flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_TUNNEL_KEY_MAX + 1];
+ 	struct tcf_tunnel_key_params *params_new;
+ 	struct metadata_dst *metadata = NULL;
+@@ -508,7 +508,7 @@ static int tunnel_key_init(struct net *net, struct nlattr *nla,
+ 		}
+ 
+ 		ret = ACT_P_CREATED;
+-	} else if (!ovr) {
++	} else if (!(act_flags & TCA_ACT_FLAGS_REPLACE)) {
+ 		NL_SET_ERR_MSG(extack, "TC IDR already exists");
+ 		ret = -EEXIST;
+ 		goto release_tun_meta;
+diff --git a/net/sched/act_vlan.c b/net/sched/act_vlan.c
+index 84e71465a559..d7706cdd4df4 100644
+--- a/net/sched/act_vlan.c
++++ b/net/sched/act_vlan.c
+@@ -119,11 +119,11 @@ static const struct nla_policy vlan_policy[TCA_VLAN_MAX + 1] = {
+ 
+ static int tcf_vlan_init(struct net *net, struct nlattr *nla,
+ 			 struct nlattr *est, struct tc_action **a,
+-			 int ovr, int bind, bool rtnl_held,
+ 			 struct tcf_proto *tp, u32 flags,
+ 			 struct netlink_ext_ack *extack)
+ {
+ 	struct tc_action_net *tn = net_generic(net, vlan_net_id);
++	bool bind = flags & TCA_ACT_FLAGS_BIND;
+ 	struct nlattr *tb[TCA_VLAN_MAX + 1];
+ 	struct tcf_chain *goto_ch = NULL;
+ 	bool push_prio_exists = false;
+@@ -230,7 +230,7 @@ static int tcf_vlan_init(struct net *net, struct nlattr *nla,
+ 		}
+ 
+ 		ret = ACT_P_CREATED;
+-	} else if (!ovr) {
++	} else if (!(flags & TCA_ACT_FLAGS_REPLACE)) {
+ 		tcf_idr_release(*a, bind);
+ 		return -EEXIST;
+ 	}
+diff --git a/net/sched/cls_api.c b/net/sched/cls_api.c
+index 35694052a5f5..dd9e05ba5359 100644
+--- a/net/sched/cls_api.c
++++ b/net/sched/cls_api.c
+@@ -1965,6 +1965,7 @@ static int tc_new_tfilter(struct sk_buff *skb, struct nlmsghdr *n,
+ 	int err;
+ 	int tp_created;
+ 	bool rtnl_held = false;
++	u32 flags = 0;
+ 
+ 	if (!netlink_ns_capable(skb, net->user_ns, CAP_NET_ADMIN))
+ 		return -EPERM;
+@@ -2130,9 +2131,12 @@ static int tc_new_tfilter(struct sk_buff *skb, struct nlmsghdr *n,
+ 		goto errout;
+ 	}
+ 
++	if (!(n->nlmsg_flags & NLM_F_CREATE))
++		flags |= TCA_ACT_FLAGS_REPLACE;
++	if (!rtnl_held)
++		flags |= TCA_ACT_FLAGS_NO_RTNL;
+ 	err = tp->ops->change(net, skb, tp, cl, t->tcm_handle, tca, &fh,
+-			      n->nlmsg_flags & NLM_F_CREATE ? TCA_ACT_NOREPLACE : TCA_ACT_REPLACE,
+-			      rtnl_held, extack);
++			      flags, extack);
+ 	if (err == 0) {
+ 		tfilter_notify(net, skb, n, tp, block, q, parent, fh,
+ 			       RTM_NEWTFILTER, false, rtnl_held);
+@@ -3042,8 +3046,8 @@ void tcf_exts_destroy(struct tcf_exts *exts)
+ EXPORT_SYMBOL(tcf_exts_destroy);
+ 
+ int tcf_exts_validate(struct net *net, struct tcf_proto *tp, struct nlattr **tb,
+-		      struct nlattr *rate_tlv, struct tcf_exts *exts, bool ovr,
+-		      bool rtnl_held, struct netlink_ext_ack *extack)
++		      struct nlattr *rate_tlv, struct tcf_exts *exts,
++		      u32 flags, struct netlink_ext_ack *extack)
+ {
+ #ifdef CONFIG_NET_CLS_ACT
+ 	{
+@@ -3054,13 +3058,15 @@ int tcf_exts_validate(struct net *net, struct tcf_proto *tp, struct nlattr **tb,
+ 		if (exts->police && tb[exts->police]) {
+ 			struct tc_action_ops *a_o;
+ 
+-			a_o = tc_action_load_ops("police", tb[exts->police], rtnl_held, extack);
++			a_o = tc_action_load_ops(tb[exts->police], true,
++						 !(flags & TCA_ACT_FLAGS_NO_RTNL),
++						 extack);
+ 			if (IS_ERR(a_o))
+ 				return PTR_ERR(a_o);
++			flags |= TCA_ACT_FLAGS_POLICE | TCA_ACT_FLAGS_BIND;
+ 			act = tcf_action_init_1(net, tp, tb[exts->police],
+-						rate_tlv, "police", ovr,
+-						TCA_ACT_BIND, a_o, init_res,
+-						rtnl_held, extack);
++						rate_tlv, a_o, init_res, flags,
++						extack);
+ 			module_put(a_o->owner);
+ 			if (IS_ERR(act))
+ 				return PTR_ERR(act);
+@@ -3072,10 +3078,10 @@ int tcf_exts_validate(struct net *net, struct tcf_proto *tp, struct nlattr **tb,
+ 		} else if (exts->action && tb[exts->action]) {
+ 			int err;
+ 
++			flags |= TCA_ACT_FLAGS_BIND;
+ 			err = tcf_action_init(net, tp, tb[exts->action],
+-					      rate_tlv, NULL, ovr, TCA_ACT_BIND,
+-					      exts->actions, init_res,
+-					      &attr_size, rtnl_held, extack);
++					      rate_tlv, exts->actions, init_res,
++					      &attr_size, flags, extack);
+ 			if (err < 0)
+ 				return err;
+ 			exts->nr_actions = err;
+diff --git a/net/sched/cls_basic.c b/net/sched/cls_basic.c
+index 497e7e127c8f..4d9c368c6398 100644
+--- a/net/sched/cls_basic.c
++++ b/net/sched/cls_basic.c
+@@ -149,12 +149,12 @@ static const struct nla_policy basic_policy[TCA_BASIC_MAX + 1] = {
+ static int basic_set_parms(struct net *net, struct tcf_proto *tp,
+ 			   struct basic_filter *f, unsigned long base,
+ 			   struct nlattr **tb,
+-			   struct nlattr *est, bool ovr,
++			   struct nlattr *est, u32 flags,
+ 			   struct netlink_ext_ack *extack)
+ {
+ 	int err;
+ 
+-	err = tcf_exts_validate(net, tp, tb, est, &f->exts, ovr, true, extack);
++	err = tcf_exts_validate(net, tp, tb, est, &f->exts, flags, extack);
+ 	if (err < 0)
+ 		return err;
+ 
+@@ -173,8 +173,8 @@ static int basic_set_parms(struct net *net, struct tcf_proto *tp,
+ 
+ static int basic_change(struct net *net, struct sk_buff *in_skb,
+ 			struct tcf_proto *tp, unsigned long base, u32 handle,
+-			struct nlattr **tca, void **arg, bool ovr,
+-			bool rtnl_held, struct netlink_ext_ack *extack)
++			struct nlattr **tca, void **arg,
++			u32 flags, struct netlink_ext_ack *extack)
+ {
+ 	int err;
+ 	struct basic_head *head = rtnl_dereference(tp->root);
+@@ -220,7 +220,7 @@ static int basic_change(struct net *net, struct sk_buff *in_skb,
+ 		goto errout;
+ 	}
+ 
+-	err = basic_set_parms(net, tp, fnew, base, tb, tca[TCA_RATE], ovr,
++	err = basic_set_parms(net, tp, fnew, base, tb, tca[TCA_RATE], flags,
+ 			      extack);
+ 	if (err < 0) {
+ 		if (!fold)
+diff --git a/net/sched/cls_bpf.c b/net/sched/cls_bpf.c
+index a3c5a2d863ba..38db19c07d75 100644
+--- a/net/sched/cls_bpf.c
++++ b/net/sched/cls_bpf.c
+@@ -414,7 +414,7 @@ static int cls_bpf_prog_from_efd(struct nlattr **tb, struct cls_bpf_prog *prog,
+ 
+ static int cls_bpf_set_parms(struct net *net, struct tcf_proto *tp,
+ 			     struct cls_bpf_prog *prog, unsigned long base,
+-			     struct nlattr **tb, struct nlattr *est, bool ovr,
++			     struct nlattr **tb, struct nlattr *est, u32 flags,
+ 			     struct netlink_ext_ack *extack)
+ {
+ 	bool is_bpf, is_ebpf, have_exts = false;
+@@ -426,7 +426,7 @@ static int cls_bpf_set_parms(struct net *net, struct tcf_proto *tp,
+ 	if ((!is_bpf && !is_ebpf) || (is_bpf && is_ebpf))
+ 		return -EINVAL;
+ 
+-	ret = tcf_exts_validate(net, tp, tb, est, &prog->exts, ovr, true,
++	ret = tcf_exts_validate(net, tp, tb, est, &prog->exts, flags,
+ 				extack);
+ 	if (ret < 0)
+ 		return ret;
+@@ -465,7 +465,7 @@ static int cls_bpf_set_parms(struct net *net, struct tcf_proto *tp,
+ static int cls_bpf_change(struct net *net, struct sk_buff *in_skb,
+ 			  struct tcf_proto *tp, unsigned long base,
+ 			  u32 handle, struct nlattr **tca,
+-			  void **arg, bool ovr, bool rtnl_held,
++			  void **arg, u32 flags,
+ 			  struct netlink_ext_ack *extack)
+ {
+ 	struct cls_bpf_head *head = rtnl_dereference(tp->root);
+@@ -510,7 +510,7 @@ static int cls_bpf_change(struct net *net, struct sk_buff *in_skb,
+ 		goto errout;
+ 	prog->handle = handle;
+ 
+-	ret = cls_bpf_set_parms(net, tp, prog, base, tb, tca[TCA_RATE], ovr,
++	ret = cls_bpf_set_parms(net, tp, prog, base, tb, tca[TCA_RATE], flags,
+ 				extack);
+ 	if (ret < 0)
+ 		goto errout_idr;
+diff --git a/net/sched/cls_cgroup.c b/net/sched/cls_cgroup.c
+index 35659127e5a3..56fa0a7be06a 100644
+--- a/net/sched/cls_cgroup.c
++++ b/net/sched/cls_cgroup.c
+@@ -80,7 +80,7 @@ static void cls_cgroup_destroy_work(struct work_struct *work)
+ static int cls_cgroup_change(struct net *net, struct sk_buff *in_skb,
+ 			     struct tcf_proto *tp, unsigned long base,
+ 			     u32 handle, struct nlattr **tca,
+-			     void **arg, bool ovr, bool rtnl_held,
++			     void **arg, u32 flags,
+ 			     struct netlink_ext_ack *extack)
+ {
+ 	struct nlattr *tb[TCA_CGROUP_MAX + 1];
+@@ -112,8 +112,8 @@ static int cls_cgroup_change(struct net *net, struct sk_buff *in_skb,
+ 	if (err < 0)
+ 		goto errout;
+ 
+-	err = tcf_exts_validate(net, tp, tb, tca[TCA_RATE], &new->exts, ovr,
+-				true, extack);
++	err = tcf_exts_validate(net, tp, tb, tca[TCA_RATE], &new->exts, flags,
++				extack);
+ 	if (err < 0)
+ 		goto errout;
+ 
+diff --git a/net/sched/cls_flow.c b/net/sched/cls_flow.c
+index df9fb7adbdc0..54c96d2f07b9 100644
+--- a/net/sched/cls_flow.c
++++ b/net/sched/cls_flow.c
+@@ -391,7 +391,7 @@ static void flow_destroy_filter_work(struct work_struct *work)
+ static int flow_change(struct net *net, struct sk_buff *in_skb,
+ 		       struct tcf_proto *tp, unsigned long base,
+ 		       u32 handle, struct nlattr **tca,
+-		       void **arg, bool ovr, bool rtnl_held,
++		       void **arg, u32 flags,
+ 		       struct netlink_ext_ack *extack)
+ {
+ 	struct flow_head *head = rtnl_dereference(tp->root);
+@@ -446,8 +446,8 @@ static int flow_change(struct net *net, struct sk_buff *in_skb,
+ 	if (err < 0)
+ 		goto err2;
+ 
+-	err = tcf_exts_validate(net, tp, tb, tca[TCA_RATE], &fnew->exts, ovr,
+-				true, extack);
++	err = tcf_exts_validate(net, tp, tb, tca[TCA_RATE], &fnew->exts, flags,
++				extack);
+ 	if (err < 0)
+ 		goto err2;
+ 
+diff --git a/net/sched/cls_flower.c b/net/sched/cls_flower.c
+index 4e11975f8b05..4cf04e97b1c4 100644
+--- a/net/sched/cls_flower.c
++++ b/net/sched/cls_flower.c
+@@ -1928,23 +1928,22 @@ static int fl_check_assign_mask(struct cls_fl_head *head,
+ static int fl_set_parms(struct net *net, struct tcf_proto *tp,
+ 			struct cls_fl_filter *f, struct fl_flow_mask *mask,
+ 			unsigned long base, struct nlattr **tb,
+-			struct nlattr *est, bool ovr,
+-			struct fl_flow_tmplt *tmplt, bool rtnl_held,
++			struct nlattr *est,
++			struct fl_flow_tmplt *tmplt, u32 flags,
+ 			struct netlink_ext_ack *extack)
+ {
+ 	int err;
+ 
+-	err = tcf_exts_validate(net, tp, tb, est, &f->exts, ovr, rtnl_held,
+-				extack);
++	err = tcf_exts_validate(net, tp, tb, est, &f->exts, flags, extack);
+ 	if (err < 0)
+ 		return err;
+ 
+ 	if (tb[TCA_FLOWER_CLASSID]) {
+ 		f->res.classid = nla_get_u32(tb[TCA_FLOWER_CLASSID]);
+-		if (!rtnl_held)
++		if (flags & TCA_ACT_FLAGS_NO_RTNL)
+ 			rtnl_lock();
+ 		tcf_bind_filter(tp, &f->res, base);
+-		if (!rtnl_held)
++		if (flags & TCA_ACT_FLAGS_NO_RTNL)
+ 			rtnl_unlock();
+ 	}
+ 
+@@ -1988,10 +1987,11 @@ static int fl_ht_insert_unique(struct cls_fl_filter *fnew,
+ static int fl_change(struct net *net, struct sk_buff *in_skb,
+ 		     struct tcf_proto *tp, unsigned long base,
+ 		     u32 handle, struct nlattr **tca,
+-		     void **arg, bool ovr, bool rtnl_held,
++		     void **arg, u32 flags,
+ 		     struct netlink_ext_ack *extack)
+ {
+ 	struct cls_fl_head *head = fl_head_dereference(tp);
++	bool rtnl_held = !(flags & TCA_ACT_FLAGS_NO_RTNL);
+ 	struct cls_fl_filter *fold = *arg;
+ 	struct cls_fl_filter *fnew;
+ 	struct fl_flow_mask *mask;
+@@ -2047,8 +2047,8 @@ static int fl_change(struct net *net, struct sk_buff *in_skb,
+ 		}
+ 	}
+ 
+-	err = fl_set_parms(net, tp, fnew, mask, base, tb, tca[TCA_RATE], ovr,
+-			   tp->chain->tmplt_priv, rtnl_held, extack);
++	err = fl_set_parms(net, tp, fnew, mask, base, tb, tca[TCA_RATE],
++			   tp->chain->tmplt_priv, flags, extack);
+ 	if (err)
+ 		goto errout;
+ 
+diff --git a/net/sched/cls_fw.c b/net/sched/cls_fw.c
+index bae434685b73..5285f40558a3 100644
+--- a/net/sched/cls_fw.c
++++ b/net/sched/cls_fw.c
+@@ -202,15 +202,15 @@ static const struct nla_policy fw_policy[TCA_FW_MAX + 1] = {
+ 
+ static int fw_set_parms(struct net *net, struct tcf_proto *tp,
+ 			struct fw_filter *f, struct nlattr **tb,
+-			struct nlattr **tca, unsigned long base, bool ovr,
++			struct nlattr **tca, unsigned long base, u32 flags,
+ 			struct netlink_ext_ack *extack)
+ {
+ 	struct fw_head *head = rtnl_dereference(tp->root);
+ 	u32 mask;
+ 	int err;
+ 
+-	err = tcf_exts_validate(net, tp, tb, tca[TCA_RATE], &f->exts, ovr,
+-				true, extack);
++	err = tcf_exts_validate(net, tp, tb, tca[TCA_RATE], &f->exts, flags,
++				extack);
+ 	if (err < 0)
+ 		return err;
+ 
+@@ -241,8 +241,7 @@ static int fw_set_parms(struct net *net, struct tcf_proto *tp,
+ static int fw_change(struct net *net, struct sk_buff *in_skb,
+ 		     struct tcf_proto *tp, unsigned long base,
+ 		     u32 handle, struct nlattr **tca, void **arg,
+-		     bool ovr, bool rtnl_held,
+-		     struct netlink_ext_ack *extack)
++		     u32 flags, struct netlink_ext_ack *extack)
+ {
+ 	struct fw_head *head = rtnl_dereference(tp->root);
+ 	struct fw_filter *f = *arg;
+@@ -280,7 +279,7 @@ static int fw_change(struct net *net, struct sk_buff *in_skb,
+ 			return err;
+ 		}
+ 
+-		err = fw_set_parms(net, tp, fnew, tb, tca, base, ovr, extack);
++		err = fw_set_parms(net, tp, fnew, tb, tca, base, flags, extack);
+ 		if (err < 0) {
+ 			tcf_exts_destroy(&fnew->exts);
+ 			kfree(fnew);
+@@ -329,7 +328,7 @@ static int fw_change(struct net *net, struct sk_buff *in_skb,
+ 	f->id = handle;
+ 	f->tp = tp;
+ 
+-	err = fw_set_parms(net, tp, f, tb, tca, base, ovr, extack);
++	err = fw_set_parms(net, tp, f, tb, tca, base, flags, extack);
+ 	if (err < 0)
+ 		goto errout;
+ 
+diff --git a/net/sched/cls_matchall.c b/net/sched/cls_matchall.c
+index a7821d78dd10..b3960c998bbc 100644
+--- a/net/sched/cls_matchall.c
++++ b/net/sched/cls_matchall.c
+@@ -167,13 +167,12 @@ static const struct nla_policy mall_policy[TCA_MATCHALL_MAX + 1] = {
+ static int mall_set_parms(struct net *net, struct tcf_proto *tp,
+ 			  struct cls_mall_head *head,
+ 			  unsigned long base, struct nlattr **tb,
+-			  struct nlattr *est, bool ovr,
++			  struct nlattr *est, u32 flags,
+ 			  struct netlink_ext_ack *extack)
+ {
+ 	int err;
+ 
+-	err = tcf_exts_validate(net, tp, tb, est, &head->exts, ovr, true,
+-				extack);
++	err = tcf_exts_validate(net, tp, tb, est, &head->exts, flags, extack);
+ 	if (err < 0)
+ 		return err;
+ 
+@@ -187,13 +186,13 @@ static int mall_set_parms(struct net *net, struct tcf_proto *tp,
+ static int mall_change(struct net *net, struct sk_buff *in_skb,
+ 		       struct tcf_proto *tp, unsigned long base,
+ 		       u32 handle, struct nlattr **tca,
+-		       void **arg, bool ovr, bool rtnl_held,
++		       void **arg, u32 flags,
+ 		       struct netlink_ext_ack *extack)
+ {
+ 	struct cls_mall_head *head = rtnl_dereference(tp->root);
+ 	struct nlattr *tb[TCA_MATCHALL_MAX + 1];
+ 	struct cls_mall_head *new;
+-	u32 flags = 0;
++	u32 userflags = 0;
+ 	int err;
+ 
+ 	if (!tca[TCA_OPTIONS])
+@@ -208,8 +207,8 @@ static int mall_change(struct net *net, struct sk_buff *in_skb,
+ 		return err;
+ 
+ 	if (tb[TCA_MATCHALL_FLAGS]) {
+-		flags = nla_get_u32(tb[TCA_MATCHALL_FLAGS]);
+-		if (!tc_flags_valid(flags))
++		userflags = nla_get_u32(tb[TCA_MATCHALL_FLAGS]);
++		if (!tc_flags_valid(userflags))
+ 			return -EINVAL;
+ 	}
+ 
+@@ -224,14 +223,14 @@ static int mall_change(struct net *net, struct sk_buff *in_skb,
+ 	if (!handle)
+ 		handle = 1;
+ 	new->handle = handle;
+-	new->flags = flags;
++	new->flags = userflags;
+ 	new->pf = alloc_percpu(struct tc_matchall_pcnt);
+ 	if (!new->pf) {
+ 		err = -ENOMEM;
+ 		goto err_alloc_percpu;
+ 	}
+ 
+-	err = mall_set_parms(net, tp, new, base, tb, tca[TCA_RATE], ovr,
++	err = mall_set_parms(net, tp, new, base, tb, tca[TCA_RATE], flags,
+ 			     extack);
+ 	if (err)
+ 		goto err_set_parms;
+diff --git a/net/sched/cls_route.c b/net/sched/cls_route.c
+index 2c971975cc50..bb2aa00b81f3 100644
+--- a/net/sched/cls_route.c
++++ b/net/sched/cls_route.c
+@@ -386,7 +386,7 @@ static int route4_set_parms(struct net *net, struct tcf_proto *tp,
+ 			    unsigned long base, struct route4_filter *f,
+ 			    u32 handle, struct route4_head *head,
+ 			    struct nlattr **tb, struct nlattr *est, int new,
+-			    bool ovr, struct netlink_ext_ack *extack)
++			    u32 flags, struct netlink_ext_ack *extack)
+ {
+ 	u32 id = 0, to = 0, nhandle = 0x8000;
+ 	struct route4_filter *fp;
+@@ -394,7 +394,7 @@ static int route4_set_parms(struct net *net, struct tcf_proto *tp,
+ 	struct route4_bucket *b;
+ 	int err;
+ 
+-	err = tcf_exts_validate(net, tp, tb, est, &f->exts, ovr, true, extack);
++	err = tcf_exts_validate(net, tp, tb, est, &f->exts, flags, extack);
+ 	if (err < 0)
+ 		return err;
+ 
+@@ -468,8 +468,8 @@ static int route4_set_parms(struct net *net, struct tcf_proto *tp,
+ 
+ static int route4_change(struct net *net, struct sk_buff *in_skb,
+ 			 struct tcf_proto *tp, unsigned long base, u32 handle,
+-			 struct nlattr **tca, void **arg, bool ovr,
+-			 bool rtnl_held, struct netlink_ext_ack *extack)
++			 struct nlattr **tca, void **arg, u32 flags,
++			 struct netlink_ext_ack *extack)
+ {
+ 	struct route4_head *head = rtnl_dereference(tp->root);
+ 	struct route4_filter __rcu **fp;
+@@ -513,7 +513,7 @@ static int route4_change(struct net *net, struct sk_buff *in_skb,
+ 	}
+ 
+ 	err = route4_set_parms(net, tp, base, f, handle, head, tb,
+-			       tca[TCA_RATE], new, ovr, extack);
++			       tca[TCA_RATE], new, flags, extack);
+ 	if (err < 0)
+ 		goto errout;
+ 
+diff --git a/net/sched/cls_rsvp.h b/net/sched/cls_rsvp.h
+index 3d518a3ab9eb..62fb1dc6f316 100644
+--- a/net/sched/cls_rsvp.h
++++ b/net/sched/cls_rsvp.h
+@@ -474,9 +474,8 @@ static const struct nla_policy rsvp_policy[TCA_RSVP_MAX + 1] = {
+ 
+ static int rsvp_change(struct net *net, struct sk_buff *in_skb,
+ 		       struct tcf_proto *tp, unsigned long base,
+-		       u32 handle,
+-		       struct nlattr **tca,
+-		       void **arg, bool ovr, bool rtnl_held,
++		       u32 handle, struct nlattr **tca,
++		       void **arg, u32 flags,
+ 		       struct netlink_ext_ack *extack)
+ {
+ 	struct rsvp_head *data = rtnl_dereference(tp->root);
+@@ -503,7 +502,7 @@ static int rsvp_change(struct net *net, struct sk_buff *in_skb,
+ 	err = tcf_exts_init(&e, net, TCA_RSVP_ACT, TCA_RSVP_POLICE);
+ 	if (err < 0)
+ 		return err;
+-	err = tcf_exts_validate(net, tp, tb, tca[TCA_RATE], &e, ovr, true,
++	err = tcf_exts_validate(net, tp, tb, tca[TCA_RATE], &e, flags,
+ 				extack);
+ 	if (err < 0)
+ 		goto errout2;
+diff --git a/net/sched/cls_tcindex.c b/net/sched/cls_tcindex.c
+index 729c16bbd2ee..83042a101b22 100644
+--- a/net/sched/cls_tcindex.c
++++ b/net/sched/cls_tcindex.c
+@@ -330,7 +330,7 @@ static int
+ tcindex_set_parms(struct net *net, struct tcf_proto *tp, unsigned long base,
+ 		  u32 handle, struct tcindex_data *p,
+ 		  struct tcindex_filter_result *r, struct nlattr **tb,
+-		  struct nlattr *est, bool ovr, struct netlink_ext_ack *extack)
++		  struct nlattr *est, u32 flags, struct netlink_ext_ack *extack)
+ {
+ 	struct tcindex_filter_result new_filter_result, *old_r = r;
+ 	struct tcindex_data *cp = NULL, *oldp;
+@@ -343,7 +343,7 @@ tcindex_set_parms(struct net *net, struct tcf_proto *tp, unsigned long base,
+ 	err = tcf_exts_init(&e, net, TCA_TCINDEX_ACT, TCA_TCINDEX_POLICE);
+ 	if (err < 0)
+ 		return err;
+-	err = tcf_exts_validate(net, tp, tb, est, &e, ovr, true, extack);
++	err = tcf_exts_validate(net, tp, tb, est, &e, flags, extack);
+ 	if (err < 0)
+ 		goto errout;
+ 
+@@ -554,8 +554,8 @@ tcindex_set_parms(struct net *net, struct tcf_proto *tp, unsigned long base,
+ static int
+ tcindex_change(struct net *net, struct sk_buff *in_skb,
+ 	       struct tcf_proto *tp, unsigned long base, u32 handle,
+-	       struct nlattr **tca, void **arg, bool ovr,
+-	       bool rtnl_held, struct netlink_ext_ack *extack)
++	       struct nlattr **tca, void **arg, u32 flags,
++	       struct netlink_ext_ack *extack)
+ {
+ 	struct nlattr *opt = tca[TCA_OPTIONS];
+ 	struct nlattr *tb[TCA_TCINDEX_MAX + 1];
+@@ -576,7 +576,7 @@ tcindex_change(struct net *net, struct sk_buff *in_skb,
+ 		return err;
+ 
+ 	return tcindex_set_parms(net, tp, base, handle, p, r, tb,
+-				 tca[TCA_RATE], ovr, extack);
++				 tca[TCA_RATE], flags, extack);
+ }
+ 
+ static void tcindex_walk(struct tcf_proto *tp, struct tcf_walker *walker,
+diff --git a/net/sched/cls_u32.c b/net/sched/cls_u32.c
+index e4615a2bd904..92a341b5424b 100644
+--- a/net/sched/cls_u32.c
++++ b/net/sched/cls_u32.c
+@@ -716,12 +716,12 @@ static const struct nla_policy u32_policy[TCA_U32_MAX + 1] = {
+ static int u32_set_parms(struct net *net, struct tcf_proto *tp,
+ 			 unsigned long base,
+ 			 struct tc_u_knode *n, struct nlattr **tb,
+-			 struct nlattr *est, bool ovr,
++			 struct nlattr *est, u32 flags,
+ 			 struct netlink_ext_ack *extack)
+ {
+ 	int err, ifindex = -1;
+ 
+-	err = tcf_exts_validate(net, tp, tb, est, &n->exts, ovr, true, extack);
++	err = tcf_exts_validate(net, tp, tb, est, &n->exts, flags, extack);
+ 	if (err < 0)
+ 		return err;
+ 
+@@ -848,7 +848,7 @@ static struct tc_u_knode *u32_init_knode(struct net *net, struct tcf_proto *tp,
+ 
+ static int u32_change(struct net *net, struct sk_buff *in_skb,
+ 		      struct tcf_proto *tp, unsigned long base, u32 handle,
+-		      struct nlattr **tca, void **arg, bool ovr, bool rtnl_held,
++		      struct nlattr **tca, void **arg, u32 flags,
+ 		      struct netlink_ext_ack *extack)
+ {
+ 	struct tc_u_common *tp_c = tp->data;
+@@ -857,7 +857,7 @@ static int u32_change(struct net *net, struct sk_buff *in_skb,
+ 	struct tc_u32_sel *s;
+ 	struct nlattr *opt = tca[TCA_OPTIONS];
+ 	struct nlattr *tb[TCA_U32_MAX + 1];
+-	u32 htid, flags = 0;
++	u32 htid, userflags = 0;
+ 	size_t sel_size;
+ 	int err;
+ 
+@@ -876,8 +876,8 @@ static int u32_change(struct net *net, struct sk_buff *in_skb,
+ 		return err;
+ 
+ 	if (tb[TCA_U32_FLAGS]) {
+-		flags = nla_get_u32(tb[TCA_U32_FLAGS]);
+-		if (!tc_flags_valid(flags)) {
++		userflags = nla_get_u32(tb[TCA_U32_FLAGS]);
++		if (!tc_flags_valid(userflags)) {
+ 			NL_SET_ERR_MSG_MOD(extack, "Invalid filter flags");
+ 			return -EINVAL;
+ 		}
+@@ -892,7 +892,7 @@ static int u32_change(struct net *net, struct sk_buff *in_skb,
+ 			return -EINVAL;
+ 		}
+ 
+-		if ((n->flags ^ flags) &
++		if ((n->flags ^ userflags) &
+ 		    ~(TCA_CLS_FLAGS_IN_HW | TCA_CLS_FLAGS_NOT_IN_HW)) {
+ 			NL_SET_ERR_MSG_MOD(extack, "Key node flags do not match passed flags");
+ 			return -EINVAL;
+@@ -903,7 +903,7 @@ static int u32_change(struct net *net, struct sk_buff *in_skb,
+ 			return -ENOMEM;
+ 
+ 		err = u32_set_parms(net, tp, base, new, tb,
+-				    tca[TCA_RATE], ovr, extack);
++				    tca[TCA_RATE], flags, extack);
+ 
+ 		if (err) {
+ 			__u32_destroy_key(new);
+@@ -963,9 +963,9 @@ static int u32_change(struct net *net, struct sk_buff *in_skb,
+ 		ht->handle = handle;
+ 		ht->prio = tp->prio;
+ 		idr_init(&ht->handle_idr);
+-		ht->flags = flags;
++		ht->flags = userflags;
+ 
+-		err = u32_replace_hw_hnode(tp, ht, flags, extack);
++		err = u32_replace_hw_hnode(tp, ht, userflags, extack);
+ 		if (err) {
+ 			idr_remove(&tp_c->handle_idr, handle);
+ 			kfree(ht);
+@@ -1046,7 +1046,7 @@ static int u32_change(struct net *net, struct sk_buff *in_skb,
+ 	RCU_INIT_POINTER(n->ht_up, ht);
+ 	n->handle = handle;
+ 	n->fshift = s->hmask ? ffs(ntohl(s->hmask)) - 1 : 0;
+-	n->flags = flags;
++	n->flags = userflags;
+ 
+ 	err = tcf_exts_init(&n->exts, net, TCA_U32_ACT, TCA_U32_POLICE);
+ 	if (err < 0)
+@@ -1068,7 +1068,7 @@ static int u32_change(struct net *net, struct sk_buff *in_skb,
+ 	}
+ #endif
+ 
+-	err = u32_set_parms(net, tp, base, n, tb, tca[TCA_RATE], ovr,
++	err = u32_set_parms(net, tp, base, n, tb, tca[TCA_RATE], flags,
+ 			    extack);
+ 	if (err == 0) {
+ 		struct tc_u_knode __rcu **ins;
+-- 
+2.52.0
+

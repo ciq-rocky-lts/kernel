@@ -1,0 +1,64 @@
+From fa2ae77e84c43e2e9f5e5ae4cb76fe83f91d8dcb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Thu, 18 Jun 2026 03:08:59 +0200
+Subject: [PATCH] media: imon: grab lock earlier in imon_ir_change_protocol()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-158816
+cve-pre CVE-2025-39993
+commit-author Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
+commit 7019553ab850ce1d3f0e512e16d14ab153f91c04
+
+Move mutex_trylock() in imon_ir_change_protocol() to the beginning,
+for memcpy() which modifies ictx->usb_tx_buf should be protected by
+ictx->lock.
+
+Also, verify at the beginning of send_packet() that ictx->lock is held
+in case send_packet() is by error called from imon_ir_change_protocol()
+when mutex_trylock() failed due to concurrent requests.
+
+	Signed-off-by: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
+	Signed-off-by: Sean Young <sean@mess.org>
+	Signed-off-by: Hans Verkuil <hverkuil+cisco@kernel.org>
+(cherry picked from commit 7019553ab850ce1d3f0e512e16d14ab153f91c04)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ drivers/media/rc/imon.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/media/rc/imon.c b/drivers/media/rc/imon.c
+index d8b9d8a6863c..1d13a030df10 100644
+--- a/drivers/media/rc/imon.c
++++ b/drivers/media/rc/imon.c
+@@ -579,6 +579,8 @@ static int send_packet(struct imon_context *ictx)
+ 	int retval = 0;
+ 	struct usb_ctrlrequest *control_req = NULL;
+ 
++	lockdep_assert_held(&ictx->lock);
++
+ 	/* Check if we need to use control or interrupt urb */
+ 	if (!ictx->tx_control) {
+ 		pipe = usb_sndintpipe(ictx->usbdev_intf0,
+@@ -1107,7 +1109,7 @@ static int imon_ir_change_protocol(struct rc_dev *rc, u64 *rc_proto)
+ 	int retval;
+ 	struct imon_context *ictx = rc->priv;
+ 	struct device *dev = ictx->dev;
+-	bool unlock = false;
++	const bool unlock = mutex_trylock(&ictx->lock);
+ 	unsigned char ir_proto_packet[] = {
+ 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x86 };
+ 
+@@ -1134,8 +1136,6 @@ static int imon_ir_change_protocol(struct rc_dev *rc, u64 *rc_proto)
+ 
+ 	memcpy(ictx->usb_tx_buf, &ir_proto_packet, sizeof(ir_proto_packet));
+ 
+-	unlock = mutex_trylock(&ictx->lock);
+-
+ 	retval = send_packet(ictx);
+ 	if (retval)
+ 		goto out;
+-- 
+2.52.0
+

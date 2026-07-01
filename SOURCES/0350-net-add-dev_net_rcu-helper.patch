@@ -1,0 +1,63 @@
+From 076feea66ec976b5ce701d67082cf8fdaa971fd0 Mon Sep 17 00:00:00 2001
+From: Roxana Nicolescu <rnicolescu@ciq.com>
+Date: Wed, 17 Jun 2026 11:44:32 +0200
+Subject: [PATCH] net: add dev_net_rcu() helper
+
+jira VULN-54021
+cve-pre CVE-2025-21764
+commit-author Eric Dumazet <edumazet@google.com>
+commit 482ad2a4ace2740ca0ff1cbc8f3c7f862f3ab507
+
+dev->nd_net can change, readers should either
+use rcu_read_lock() or RTNL.
+
+We currently use a generic helper, dev_net() with
+no debugging support. We probably have many hidden bugs.
+
+Add dev_net_rcu() helper for callers using rcu_read_lock()
+protection.
+
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+	Reviewed-by: Kuniyuki Iwashima <kuniyu@amazon.com>
+Link: https://patch.msgid.link/20250205155120.1676781-2-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 482ad2a4ace2740ca0ff1cbc8f3c7f862f3ab507)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ include/linux/netdevice.h   | 6 ++++++
+ include/net/net_namespace.h | 2 +-
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/include/linux/netdevice.h b/include/linux/netdevice.h
+index ba5c194dd0f0..c2dfb319ac42 100644
+--- a/include/linux/netdevice.h
++++ b/include/linux/netdevice.h
+@@ -2427,6 +2427,12 @@ struct net *dev_net(const struct net_device *dev)
+ 	return read_pnet(&dev->nd_net);
+ }
+ 
++static inline
++struct net *dev_net_rcu(const struct net_device *dev)
++{
++	return read_pnet_rcu(&dev->nd_net);
++}
++
+ static inline
+ void dev_net_set(struct net_device *dev, struct net *net)
+ {
+diff --git a/include/net/net_namespace.h b/include/net/net_namespace.h
+index d2f4c8352724..dc29f8d385bd 100644
+--- a/include/net/net_namespace.h
++++ b/include/net/net_namespace.h
+@@ -353,7 +353,7 @@ static inline struct net *read_pnet(const possible_net_t *pnet)
+ #endif
+ }
+ 
+-static inline struct net *read_pnet_rcu(possible_net_t *pnet)
++static inline struct net *read_pnet_rcu(const possible_net_t *pnet)
+ {
+ #ifdef CONFIG_NET_NS
+ 	return rcu_dereference(pnet->net);
+-- 
+2.52.0
+

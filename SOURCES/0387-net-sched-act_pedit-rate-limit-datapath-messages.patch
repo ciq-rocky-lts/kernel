@@ -1,0 +1,70 @@
+From 21e81bd8692128fc1b7a1683b06f42004854d977 Mon Sep 17 00:00:00 2001
+From: Pedro Tammela <pctammela@mojatatu.com>
+Date: Fri, 21 Apr 2023 18:25:17 -0300
+Subject: [PATCH] net/sched: act_pedit: rate limit datapath messages
+
+jira VULN-188478
+cve-pre CVE-2026-46331
+commit-author Rajat Gupta <rajat.gupta@oss.qualcomm.com>
+commit e3c9673e2f6e1b3aa4bb87c570336e10f364c28a
+
+Unbounded info messages in the pedit datapath can flood the printk
+ring buffer quite easily depending on the action created.
+As these messages are informational, usually printing some, not all,
+is enough to bring attention to the real issue.
+
+	Reviewed-by: Jamal Hadi Salim <jhs@mojatatu.com>
+	Reviewed-by: Simon Horman <simon.horman@corigine.com>
+	Signed-off-by: Pedro Tammela <pctammela@mojatatu.com>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit e3c9673e2f6e1b3aa4bb87c570336e10f364c28a)
+	Signed-off-by: Roxana Nicolescu <rnicolescu@ciq.com>
+---
+ net/sched/act_pedit.c | 12 +++++-------
+ 1 file changed, 5 insertions(+), 7 deletions(-)
+
+diff --git a/net/sched/act_pedit.c b/net/sched/act_pedit.c
+index d502d4d08671..2de56897c669 100644
+--- a/net/sched/act_pedit.c
++++ b/net/sched/act_pedit.c
+@@ -386,8 +386,8 @@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,
+ 			u8 *d, _d;
+ 
+ 			if (!offset_valid(skb, hoffset + tkey->at)) {
+-				pr_info("tc action pedit 'at' offset %d out of bounds\n",
+-					hoffset + tkey->at);
++				pr_info_ratelimited("tc action pedit 'at' offset %d out of bounds\n",
++						    hoffset + tkey->at);
+ 				goto bad;
+ 			}
+ 			d = skb_header_pointer(skb, hoffset + tkey->at,
+@@ -397,14 +397,13 @@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,
+ 
+ 			offset += (*d & tkey->offmask) >> tkey->shift;
+ 			if (offset % 4) {
+-				pr_info("tc action pedit offset must be on 32 bit boundaries\n");
++				pr_info_ratelimited("tc action pedit offset must be on 32 bit boundaries\n");
+ 				goto bad;
+ 			}
+ 		}
+ 
+ 		if (!offset_valid(skb, hoffset + offset)) {
+-			pr_info("tc action pedit offset %d out of bounds\n",
+-				hoffset + offset);
++			pr_info_ratelimited("tc action pedit offset %d out of bounds\n", hoffset + offset);
+ 			goto bad;
+ 		}
+ 
+@@ -421,8 +420,7 @@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,
+ 			val = (*ptr + tkey->val) & ~tkey->mask;
+ 			break;
+ 		default:
+-			pr_info("tc action pedit bad command (%d)\n",
+-				cmd);
++			pr_info_ratelimited("tc action pedit bad command (%d)\n", cmd);
+ 			goto bad;
+ 		}
+ 
+-- 
+2.52.0
+
