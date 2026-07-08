@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 16
+%define ciq_patch_version 17
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -627,6 +627,7 @@ License: ((GPL-2.0-only WITH Linux-syscall-note) OR BSD-2-Clause) AND ((GPL-2.0-
 URL: https://www.kernel.org/
 Version: %{specversion}
 Release: %{pkg_release}
+Provides: ciq-lts-kernel = %{?epoch:%{epoch}:}%{version}-%{release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
 %if 0%{?fedora}
@@ -1212,6 +1213,9 @@ Patch1000213: 1213-smb-client-require-a-full-NFS-mode-SID-before-readin.patch
 Patch1000214: 1214-smb-client-use-kzalloc-to-zero-initialize-security-d.patch
 Patch1000215: 1215-smb-client-validate-dacloffset-before-building-DACL-.patch
 Patch1000216: 1216-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
+#CIQ Patch Version: 570.60.1+17.1.el9_6_ciq
+Patch1000217: 1217-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+Patch1000218: 1218-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1646,6 +1650,7 @@ This package provides less commonly used kernel modules for the %{?2:%{2} }kerne
 %define kernel_modules_package(m) \
 %package %{?1:%{1}-}modules\
 Summary: kernel modules to match the %{?2:%{2}-}core kernel\
+Provides: ciq-lts-kernel = %{?epoch:%{epoch}:}%{version}-%{release}\
 Provides: kernel%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-modules-%{_target_cpu} = %{version}-%{release}%{uname_suffix %{?1:%{1}}}\
 Provides: kernel-modules = %{version}-%{release}%{uname_suffix %{?1:%{1}}}\
@@ -1669,6 +1674,7 @@ This package provides commonly used kernel modules for the %{?2:%{2}-}core kerne
 %define kernel_modules_core_package(m) \
 %package %{?1:%{1}-}modules-core\
 Summary: Core kernel modules to match the %{?2:%{2}-}core kernel\
+Provides: ciq-lts-kernel = %{?epoch:%{epoch}:}%{version}-%{release}\
 Provides: kernel%{?1:-%{1}}-modules-core-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-modules-core-%{_target_cpu} = %{version}-%{release}%{uname_suffix %{?1:%{1}}}\
 Provides: kernel-modules-core = %{version}-%{release}%{uname_suffix %{?1:%{1}}}\
@@ -1710,6 +1716,7 @@ The meta-package for the %{1} kernel\
 %define kernel_variant_package(n:mo) \
 %package %{?1:%{1}-}core\
 Summary: %{variant_summary}\
+Provides: ciq-lts-kernel = %{?epoch:%{epoch}:}%{version}-%{release}\
 Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{uname_suffix %{?1:%{1}}}\
 Provides: installonlypkg(kernel)\
 %if %{-m:1}%{!-m:0}\
@@ -2187,6 +2194,8 @@ ApplyOptionalPatch 1213-smb-client-require-a-full-NFS-mode-SID-before-readin.pat
 ApplyOptionalPatch 1214-smb-client-use-kzalloc-to-zero-initialize-security-d.patch
 ApplyOptionalPatch 1215-smb-client-validate-dacloffset-before-building-DACL-.patch
 ApplyOptionalPatch 1216-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
+ApplyOptionalPatch 1217-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+ApplyOptionalPatch 1218-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4303,6 +4312,13 @@ fi
 #
 #
 %changelog
+* Mon Jul 06 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+17.1.el9_6_ciq
+- KVM: x86: Fix shadow paging use-after-free due to unexpected role (Paolo Bonzini) [ciqres] {CVE-2026-53359}
+- KVM: x86: Fix shadow paging use-after-free due to unexpected GFN (Sean Christopherson) [ciqres] {CVE-2026-46113}
+
+* Tue Jun 30 2026 Jason Rodriguez <jrodriguez@ciq.com> - 5.14.0-570.60.1+16.2.el9_6_ciq
+- [CIQ] Add ciq-lts-kernel virtual provide on kernel main + kernel-core/modules/modules-core subpackages
+
 * Mon Jun 29 2026 Shreeya Patel <spatel@ciq.com> - 5.14.0-570.60.1+16.1.el9_6_ciq
 - net/sched: fix pedit partial COW leading to page cache corruption (Brett Mastbergen) [ciqres] {CVE-2026-46331}
 - smb: client: validate dacloffset before building DACL pointers (Marcin Wcisło) [ciqres] {CVE-2026-46195}
