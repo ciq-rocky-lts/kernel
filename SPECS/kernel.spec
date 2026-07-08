@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 33
+%define ciq_patch_version 34
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1541,6 +1541,26 @@ Patch1000587: 0542-wifi-nl80211-don-t-free-NULL-coalescing-rule.patch
 Patch1000588: 0543-icmp-prevent-possible-NULL-dereferences-from-icmp_bu.patch
 Patch1000589: 0544-scsi-qedi-Fix-crash-while-reading-debugfs-attribute.patch
 Patch1000590: 0545-mlxsw-spectrum_acl_tcam-Fix-memory-leak-when-canceli.patch
+#CIQ Patch Version: 284.30.1+34.1.el9_2_ciq
+Patch1000591: 0546-net-bonding-fix-use-after-free-in-bond_xmit_broadcas.patch
+Patch1000592: 0547-smb-client-validate-the-whole-DACL-before-rewriting-.patch
+Patch1000593: 0548-smb-client-require-a-full-NFS-mode-SID-before-readin.patch
+Patch1000594: 0549-smb-client-use-kzalloc-to-zero-initialize-security-d.patch
+Patch1000595: 0550-smb-client-validate-dacloffset-before-building-DACL-.patch
+Patch1000596: 0551-netfilter-nf_conntrack_h323-check-for-zero-length-in.patch
+Patch1000597: 0552-netfilter-ip6t_eui64-reject-invalid-MAC-header-for-a.patch
+Patch1000598: 0553-sctp-revalidate-list-cursor-after-sctp_sendmsg_to_as.patch
+Patch1000599: 0554-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+Patch1000600: 0555-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+Patch1000601: 0556-netfilter-nf_tables-honor-table-dormant-flag-from-ne.patch
+Patch1000602: 0557-octeontx2-af-avoid-off-by-one-read-from-userspace.patch
+Patch1000603: 0558-mptcp-ensure-snd_nxt-is-properly-initialized-on-conn.patch
+Patch1000604: 0559-net-core-reject-skb_copy-_expand-for-fraglist-GSO-sk.patch
+Patch1000605: 0560-Bluetooth-l2cap-fix-null-ptr-deref-in-l2cap_chan_tim.patch
+Patch1000606: 0561-Bluetooth-L2CAP-fix-chan-ref-leak-in-l2cap_chan_time.patch
+Patch1000607: 0562-rtnetlink-Correct-nested-IFLA_VF_VLAN_LIST-attribute.patch
+Patch1000608: 0563-stm-class-Fix-a-double-free-in-stm_register_device.patch
+Patch1000609: 0564-scsi-qedf-Ensure-the-copied-buf-is-NUL-terminated.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2807,6 +2827,25 @@ ApplyOptionalPatch 0542-wifi-nl80211-don-t-free-NULL-coalescing-rule.patch
 ApplyOptionalPatch 0543-icmp-prevent-possible-NULL-dereferences-from-icmp_bu.patch
 ApplyOptionalPatch 0544-scsi-qedi-Fix-crash-while-reading-debugfs-attribute.patch
 ApplyOptionalPatch 0545-mlxsw-spectrum_acl_tcam-Fix-memory-leak-when-canceli.patch
+ApplyOptionalPatch 0546-net-bonding-fix-use-after-free-in-bond_xmit_broadcas.patch
+ApplyOptionalPatch 0547-smb-client-validate-the-whole-DACL-before-rewriting-.patch
+ApplyOptionalPatch 0548-smb-client-require-a-full-NFS-mode-SID-before-readin.patch
+ApplyOptionalPatch 0549-smb-client-use-kzalloc-to-zero-initialize-security-d.patch
+ApplyOptionalPatch 0550-smb-client-validate-dacloffset-before-building-DACL-.patch
+ApplyOptionalPatch 0551-netfilter-nf_conntrack_h323-check-for-zero-length-in.patch
+ApplyOptionalPatch 0552-netfilter-ip6t_eui64-reject-invalid-MAC-header-for-a.patch
+ApplyOptionalPatch 0553-sctp-revalidate-list-cursor-after-sctp_sendmsg_to_as.patch
+ApplyOptionalPatch 0554-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+ApplyOptionalPatch 0555-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+ApplyOptionalPatch 0556-netfilter-nf_tables-honor-table-dormant-flag-from-ne.patch
+ApplyOptionalPatch 0557-octeontx2-af-avoid-off-by-one-read-from-userspace.patch
+ApplyOptionalPatch 0558-mptcp-ensure-snd_nxt-is-properly-initialized-on-conn.patch
+ApplyOptionalPatch 0559-net-core-reject-skb_copy-_expand-for-fraglist-GSO-sk.patch
+ApplyOptionalPatch 0560-Bluetooth-l2cap-fix-null-ptr-deref-in-l2cap_chan_tim.patch
+ApplyOptionalPatch 0561-Bluetooth-L2CAP-fix-chan-ref-leak-in-l2cap_chan_time.patch
+ApplyOptionalPatch 0562-rtnetlink-Correct-nested-IFLA_VF_VLAN_LIST-attribute.patch
+ApplyOptionalPatch 0563-stm-class-Fix-a-double-free-in-stm_register_device.patch
+ApplyOptionalPatch 0564-scsi-qedf-Ensure-the-copied-buf-is-NUL-terminated.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4690,6 +4729,27 @@ fi
 #
 #
 %changelog
+* Tue Jul 07 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+34.1.el9_2_ciq
+- scsi: qedf: Ensure the copied buf is NUL terminated (CIQ Kernel Automation) [ciqres] {CVE-2024-38559}
+- stm class: Fix a double free in stm_register_device() (CIQ Kernel Automation) [ciqres] {CVE-2024-38627}
+- rtnetlink: Correct nested IFLA_VF_VLAN_LIST attribute validation (CIQ Kernel Automation) [ciqres] {CVE-2024-36017}
+- Bluetooth: L2CAP: fix chan ref leak in l2cap_chan_timeout() on !conn (CIQ Kernel Automation) [ciqres] {CVE-2024-27399}
+- Bluetooth: l2cap: fix null-ptr-deref in l2cap_chan_timeout (CIQ Kernel Automation) [ciqres] {CVE-2024-27399}
+- net: core: reject skb_copy(_expand) for fraglist GSO skbs (CIQ Kernel Automation) [ciqres] {CVE-2024-36929}
+- mptcp: ensure snd_nxt is properly initialized on connect (CIQ Kernel Automation) [ciqres] {CVE-2024-36889}
+- octeontx2-af: avoid off-by-one read from userspace (CIQ Kernel Automation) [ciqres] {CVE-2024-36957}
+- netfilter: nf_tables: honor table dormant flag from netdev release event path (CIQ Kernel Automation) [ciqres] {CVE-2024-36005}
+- KVM: x86: Fix shadow paging use-after-free due to unexpected role (Paolo Bonzini) [ciqres] {CVE-2026-53359}
+- KVM: x86: Fix shadow paging use-after-free due to unexpected GFN (Sean Christopherson) [ciqres] {CVE-2026-46113}
+- sctp: revalidate list cursor after sctp_sendmsg_to_asoc() in SCTP_SENDALL (CIQ Kernel Automation) [ciqres] {CVE-2026-46227}
+- netfilter: ip6t_eui64: reject invalid MAC header for all packets (CIQ Kernel Automation) [ciqres] {CVE-2026-31685}
+- netfilter: nf_conntrack_h323: check for zero length in DecodeQ931() (CIQ Kernel Automation) [ciqres] {CVE-2026-23455}
+- smb: client: validate dacloffset before building DACL pointers (Marcin Wcisło) [ciqres] {CVE-2026-46195}
+- smb: client: use kzalloc to zero-initialize security descriptor buffer (Marcin Wcisło) [ciqres] {CVE-2026-46139}
+- smb: client: require a full NFS mode SID before reading mode bits (Marcin Wcisło) [ciqres] {CVE-2026-43350}
+- smb: client: validate the whole DACL before rewriting it in cifsacl (Marcin Wcisło) [ciqres] {CVE-2026-31709}
+- net: bonding: fix use-after-free in bond_xmit_broadcast() (Marcin Wcisło) [ciqres] {CVE-2026-31419}
+
 * Mon Jun 29 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+33.1.el9_2_ciq
 - mlxsw: spectrum_acl_tcam: Fix memory leak when canceling rehash work (CIQ Kernel Automation) [ciqres] {CVE-2024-35852}
 - scsi: qedi: Fix crash while reading debugfs attribute (CIQ Kernel Automation) [ciqres] {CVE-2024-40978}
