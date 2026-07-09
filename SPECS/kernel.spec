@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 30
+%define ciq_patch_version 31
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1126,6 +1126,20 @@ Patch0543: 0388-net-sched-act_pedit-Parse-L3-Header-for-L4-offset.patch
 Patch0544: 0389-net-sched-act_pedit-free-pedit-keys-on-bail-from-off.patch
 Patch0545: 0390-net-sched-act_pedit-fix-action-bind-logic.patch
 Patch0546: 0391-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
+#CIQ Patch Version: 372.32.1+31.1.el8_6_ciq
+Patch0547: 0392-sch_hfsc-make-hfsc_qlen_notify-idempotent.patch
+Patch0548: 0393-net-sched-sch_hfsc-Don-t-make-class-passive-twice.patch
+Patch0549: 0394-libceph-make-decode_pool-more-resilient-against-corr.patch
+Patch0550: 0395-libceph-prevent-potential-out-of-bounds-reads-in-han.patch
+Patch0551: 0396-libceph-replace-overzealous-BUG_ON-in-osdmap_apply_i.patch
+Patch0552: 0397-RDMA-rxe-Fix-double-free-in-rxe_srq_from_init.patch
+Patch0553: 0398-netfilter-nf_conntrack_h323-check-for-zero-length-in.patch
+Patch0554: 0399-sctp-revalidate-list-cursor-after-sctp_sendmsg_to_as.patch
+Patch0555: 0400-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+Patch0556: 0401-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+Patch0557: 0402-gfs2-Add-metapath_dibh-helper.patch
+Patch0558: 0403-gfs2-Fix-use-after-free-in-iomap-inline-data-write-p.patch
+Patch0559: 0404-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2239,6 +2253,19 @@ ApplyOptionalPatch 0388-net-sched-act_pedit-Parse-L3-Header-for-L4-offset.patch
 ApplyOptionalPatch 0389-net-sched-act_pedit-free-pedit-keys-on-bail-from-off.patch
 ApplyOptionalPatch 0390-net-sched-act_pedit-fix-action-bind-logic.patch
 ApplyOptionalPatch 0391-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
+ApplyOptionalPatch 0392-sch_hfsc-make-hfsc_qlen_notify-idempotent.patch
+ApplyOptionalPatch 0393-net-sched-sch_hfsc-Don-t-make-class-passive-twice.patch
+ApplyOptionalPatch 0394-libceph-make-decode_pool-more-resilient-against-corr.patch
+ApplyOptionalPatch 0395-libceph-prevent-potential-out-of-bounds-reads-in-han.patch
+ApplyOptionalPatch 0396-libceph-replace-overzealous-BUG_ON-in-osdmap_apply_i.patch
+ApplyOptionalPatch 0397-RDMA-rxe-Fix-double-free-in-rxe_srq_from_init.patch
+ApplyOptionalPatch 0398-netfilter-nf_conntrack_h323-check-for-zero-length-in.patch
+ApplyOptionalPatch 0399-sctp-revalidate-list-cursor-after-sctp_sendmsg_to_as.patch
+ApplyOptionalPatch 0400-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+ApplyOptionalPatch 0401-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+ApplyOptionalPatch 0402-gfs2-Add-metapath_dibh-helper.patch
+ApplyOptionalPatch 0403-gfs2-Fix-use-after-free-in-iomap-inline-data-write-p.patch
+ApplyOptionalPatch 0404-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
 
 
 # CIQ LTS patches:
@@ -3798,6 +3825,21 @@ fi
 #
 #
 %changelog
+* Wed Jul 08 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+31.1.el8_6_ciq
+- RDMA/mlx4: Fix mis-use of RCU in mlx4_srq_event() (CIQ Kernel Automation) [ciqres] {CVE-2026-46181}
+- gfs2: Fix use-after-free in iomap inline data write path (CIQ Kernel Automation) [ciqres] {CVE-2026-45984}
+- gfs2: Add metapath_dibh helper (Roxana Nicolescu) [ciqres] {CVE-2026-45984}
+- KVM: x86: Fix shadow paging use-after-free due to unexpected role (Sultan Alsawaf) [ciqres] {CVE-2026-53359}
+- KVM: x86: Fix shadow paging use-after-free due to unexpected GFN (Sultan Alsawaf) [ciqres] {CVE-2026-46113}
+- sctp: revalidate list cursor after sctp_sendmsg_to_asoc() in SCTP_SENDALL (CIQ Kernel Automation) [ciqres] {CVE-2026-46227}
+- netfilter: nf_conntrack_h323: check for zero length in DecodeQ931() (CIQ Kernel Automation) [ciqres] {CVE-2026-23455}
+- RDMA/rxe: Fix double free in rxe_srq_from_init (CIQ Kernel Automation) [ciqres] {CVE-2026-45852}
+- libceph: replace overzealous BUG_ON in osdmap_apply_incremental() (CIQ Kernel Automation) [ciqres] {CVE-2026-22990}
+- libceph: prevent potential out-of-bounds reads in handle_auth_done() (CIQ Kernel Automation) [ciqres] {CVE-2026-22984}
+- libceph: make decode_pool() more resilient against corrupted osdmaps (CIQ Kernel Automation) [ciqres] {CVE-2025-71116}
+- net/sched: sch_hfsc: Don't make class passive twice (CIQ Kernel Automation) [ciqres] {CVE-2025-38177}
+- sch_hfsc: make hfsc_qlen_notify() idempotent (CIQ Kernel Automation) [ciqres] {CVE-2025-38177}
+
 * Mon Jun 29 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+30.1.el8_6_ciq
 - net/sched: fix pedit partial COW leading to page cache corruption (Rajat Gupta) [ciqres] {CVE-2026-46331}
 - net/sched: act_pedit: fix action bind logic (Pedro Tammela) [ciqres] {CVE-2026-46331}
