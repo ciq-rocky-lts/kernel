@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 17
+%define ciq_patch_version 18
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -639,6 +639,19 @@ Patch1115: 0089-i40e-validate-ring_len-parameter-against-hardware-sp.patch
 Patch1116: 0090-sctp-linearize-cloned-gso-packets-in-sctp_rcv.patch
 Patch1117: 0091-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
 Patch1118: 0092-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.18.1
+Patch1119: 0093-usbip-validate-number_of_packets-in-usbip_pack_ret_s.patch
+Patch1120: 0094-netfilter-ip6t_eui64-reject-invalid-MAC-header-for-a.patch
+Patch1121: 0095-nfsd-fix-heap-overflow-in-NFSv4.0-LOCK-replay-cache.patch
+Patch1122: 0096-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
+Patch1123: 0097-netfilter-xt_tcpmss-check-remaining-length-before-re.patch
+Patch1124: 0098-xfs-fix-freemap-adjustments-when-adding-xattrs-to-le.patch
+Patch1125: 0099-RDMA-umad-Reject-negative-data_len-in-ib_umad_write.patch
+Patch1126: 0100-wifi-brcmfmac-validate-bsscfg-indices-in-IF-events.patch
+Patch1127: 0101-netfilter-nf_conntrack_h323-check-for-zero-length-in.patch
+Patch1128: 0102-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
+Patch1129: 0103-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
+Patch1130: 0104-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -1100,6 +1113,18 @@ ApplyOptionalPatch 0089-i40e-validate-ring_len-parameter-against-hardware-sp.pat
 ApplyOptionalPatch 0090-sctp-linearize-cloned-gso-packets-in-sctp_rcv.patch
 ApplyOptionalPatch 0091-tcp-Clear-tcp_sk-sk-fastopen_rsk-in-tcp_disconnect.patch
 ApplyOptionalPatch 0092-ip6_tunnel-clear-skb2-cb-in-ip4ip6_err.patch
+ApplyOptionalPatch 0093-usbip-validate-number_of_packets-in-usbip_pack_ret_s.patch
+ApplyOptionalPatch 0094-netfilter-ip6t_eui64-reject-invalid-MAC-header-for-a.patch
+ApplyOptionalPatch 0095-nfsd-fix-heap-overflow-in-NFSv4.0-LOCK-replay-cache.patch
+ApplyOptionalPatch 0096-sctp-avoid-NULL-dereference-when-chunk-data-buffer-i.patch
+ApplyOptionalPatch 0097-netfilter-xt_tcpmss-check-remaining-length-before-re.patch
+ApplyOptionalPatch 0098-xfs-fix-freemap-adjustments-when-adding-xattrs-to-le.patch
+ApplyOptionalPatch 0099-RDMA-umad-Reject-negative-data_len-in-ib_umad_write.patch
+ApplyOptionalPatch 0100-wifi-brcmfmac-validate-bsscfg-indices-in-IF-events.patch
+ApplyOptionalPatch 0101-netfilter-nf_conntrack_h323-check-for-zero-length-in.patch
+ApplyOptionalPatch 0102-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
+ApplyOptionalPatch 0103-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
+ApplyOptionalPatch 0104-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2103,6 +2128,20 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Mon Jul 13 2026 Jonathan Maple <jmaple@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.18.1
+- locking/rtmutex: Skip remove_waiter() when waiter is not enqueued (Davidlohr Bueso) [ciqres] {CVE-2026-53163}
+- rtmutex: Use waiter::task instead of current in remove_waiter() (Keenan Dong) [ciqres] {CVE-2026-43499}
+- RDMA/mlx4: Fix mis-use of RCU in mlx4_srq_event() (CIQ Kernel Automation) [ciqres] {CVE-2026-46181}
+- netfilter: nf_conntrack_h323: check for zero length in DecodeQ931() (CIQ Kernel Automation) [ciqres] {CVE-2026-23455}
+- wifi: brcmfmac: validate bsscfg indices in IF events (CIQ Kernel Automation) [ciqres] {CVE-2026-43110}
+- RDMA/umad: Reject negative data_len in ib_umad_write (CIQ Kernel Automation) [ciqres] {CVE-2026-23243}
+- xfs: fix freemap adjustments when adding xattrs to leaf blocks (CIQ Kernel Automation) [ciqres] {CVE-2026-43158}
+- netfilter: xt_tcpmss: check remaining length before reading optlen (CIQ Kernel Automation) [ciqres] {CVE-2026-43190}
+- sctp: avoid NULL dereference when chunk data buffer is missing (Marcin Wcisło) [ciqres] {CVE-2025-40240}
+- nfsd: fix heap overflow in NFSv4.0 LOCK replay cache (Marcin Wcisło) [ciqres] {CVE-2026-31402}
+- netfilter: ip6t_eui64: reject invalid MAC header for all packets (CIQ Kernel Automation) [ciqres] {CVE-2026-31685}
+- usbip: validate number_of_packets in usbip_pack_ret_submit() (CIQ Kernel Automation) [ciqres] {CVE-2026-31607}
+
 * Thu Jun 11 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.17.1
 - ip6_tunnel: clear skb2->cb[] in ip4ip6_err() (Brett Mastbergen) [ciqres] {CVE-2026-43037}
 - tcp: Clear tcp_sk(sk)->fastopen_rsk in tcp_disconnect(). (Marcin Wcisło) [ciqres] {CVE-2025-39955}

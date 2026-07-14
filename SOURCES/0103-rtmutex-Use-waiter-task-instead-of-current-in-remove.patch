@@ -1,0 +1,96 @@
+From e239dc56cb8f403c3fce6be3872fe80ee5b1b48c Mon Sep 17 00:00:00 2001
+From: Keenan Dong <keenanat2000@gmail.com>
+Date: Wed, 8 Apr 2026 16:46:00 +0800
+Subject: [PATCH] rtmutex: Use waiter::task instead of current in
+ remove_waiter()
+
+jira VULN-191592
+cve CVE-2026-43499
+commit-author Keenan Dong <keenanat2000@gmail.com>
+commit 3bfdc63936dd4773109b7b8c280c0f3b5ae7d349
+upstream-diff |
+        3.10 has a monolithic kernel/rtmutex.c (not locking/rtmutex.c) and
+        no scoped_guard() on el7, so the pi_lock section keeps
+        raw_spin_lock_irqsave/irqrestore and the chain walk uses the 5-arg
+        rt_mutex_adjust_prio_chain(). Functionally identical:
+        remove_waiter() now operates on waiter->task.
+
+remove_waiter() is used by the slowlock paths, but it is also used for
+proxy-lock rollback in rt_mutex_start_proxy_lock() when invoked from
+futex_requeue().
+
+In the latter case waiter::task is not current, but remove_waiter()
+operates on current for the dequeue operation. That results in several
+problems:
+
+  1) the rbtree dequeue happens without waiter::task::pi_lock being held
+
+  2) the waiter task's pi_blocked_on state is not cleared, which leaves a
+     dangling pointer primed for UAF around.
+
+  3) rt_mutex_adjust_prio_chain() operates on the wrong top priority waiter
+     task
+
+Use waiter::task instead of current in all related operations in
+remove_waiter() to cure those problems.
+
+[ tglx: Fixup rt_mutex_adjust_prio_chain(), add a comment and amend the
+  	changelog ]
+
+Fixes: 8161239a8bcc ("rtmutex: Simplify PI algorithm and make highest prio task get lock")
+	Reported-by: Yuan Tan <yuantan098@gmail.com>
+	Reported-by: Yifan Wu <yifanwucs@gmail.com>
+	Reported-by: Juefei Pu <tomapufckgml@gmail.com>
+	Reported-by: Xin Liu <bird@lzu.edu.cn>
+	Signed-off-by: Keenan Dong <keenanat2000@gmail.com>
+	Signed-off-by: Thomas Gleixner <tglx@kernel.org>
+	Cc: stable@vger.kernel.org
+
+(cherry picked from commit 3bfdc63936dd4773109b7b8c280c0f3b5ae7d349)
+	Signed-off-by: Sultan Alsawaf <sultan@ciq.com>
+---
+ kernel/rtmutex.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/kernel/rtmutex.c b/kernel/rtmutex.c
+index 6131a046aab6..7387cdce0512 100644
+--- a/kernel/rtmutex.c
++++ b/kernel/rtmutex.c
+@@ -604,19 +604,22 @@ static void mark_wakeup_next_waiter(struct wake_q_head *wake_q,
+  *
+  * Must be called with lock->wait_lock held and
+  * have just failed to try_to_take_rt_mutex().
++ *
++ * When invoked from rt_mutex_start_proxy_lock() waiter::task != current !
+  */
+ static void remove_waiter(struct rt_mutex *lock,
+ 			  struct rt_mutex_waiter *waiter)
+ {
+ 	int first = (waiter == rt_mutex_top_waiter(lock));
+ 	struct task_struct *owner = rt_mutex_owner(lock);
++	struct task_struct *waiter_task = waiter->task;
+ 	unsigned long flags;
+ 	int chain_walk = 0;
+ 
+-	raw_spin_lock_irqsave(&current->pi_lock, flags);
++	raw_spin_lock_irqsave(&waiter_task->pi_lock, flags);
+ 	rt_mutex_dequeue(lock, waiter);
+-	current->pi_blocked_on = NULL;
+-	raw_spin_unlock_irqrestore(&current->pi_lock, flags);
++	waiter_task->pi_blocked_on = NULL;
++	raw_spin_unlock_irqrestore(&waiter_task->pi_lock, flags);
+ 
+ 	if (!owner)
+ 		return;
+@@ -649,7 +652,7 @@ static void remove_waiter(struct rt_mutex *lock,
+ 
+ 	raw_spin_unlock(&lock->wait_lock);
+ 
+-	rt_mutex_adjust_prio_chain(owner, 0, lock, NULL, current);
++	rt_mutex_adjust_prio_chain(owner, 0, lock, NULL, waiter_task);
+ 
+ 	raw_spin_lock(&lock->wait_lock);
+ }
+-- 
+2.52.0
+
