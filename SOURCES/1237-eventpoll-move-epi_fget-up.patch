@@ -1,0 +1,110 @@
+From 384a43f4b424bf92d5e5b1acf38a29e2f84432b9 Mon Sep 17 00:00:00 2001
+From: Christian Brauner <brauner@kernel.org>
+Date: Tue, 7 Jul 2026 13:04:41 +0000
+Subject: [PATCH] eventpoll: move epi_fget() up
+
+jira VULN-186882
+cve-pre CVE-2026-46242
+commit-author Christian Brauner <brauner@kernel.org>
+commit 86e87059e6d1fd5115a31949726450ed03c1073b
+upstream-diff |
+	Pure code motion, no functional change intended (matches upstream's
+	own commit message). Kept this tree's existing epi_fget() body
+	using atomic_long_inc_not_zero(&file->f_count) instead of upstream's
+	file_ref_get(&file->f_ref); the file_ref_t/file_ref_get() API comes
+	from a separate, unrelated whole-VFS struct file refcounting rework
+	(commit 90ee6ed776c06 "fs: port files to file_ref", 2024-10-07) that
+	is not present on this branch and is out of scope for this CVE fix.
+	Both mechanisms provide the identical "pin the file, fail if it's
+	already at zero refs" semantics the upcoming ep_remove() UAF fix
+	depends on, so this substitution preserves the security property
+	unchanged.
+
+We'll need it when removing files so move it up. No functional change.
+
+Link: https://patch.msgid.link/20260423-work-epoll-uaf-v1-5-2470f9eec0f5@kernel.org
+Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+
+(cherry picked from commit 86e87059e6d1fd5115a31949726450ed03c1073b)
+Signed-off-by: Shreeya Patel <spatel@ciq.com>
+---
+ fs/eventpoll.c | 56 +++++++++++++++++++++++++-------------------------
+ 1 file changed, 28 insertions(+), 28 deletions(-)
+
+diff --git a/fs/eventpoll.c b/fs/eventpoll.c
+index 1047cd19b4d7..b389fd78fab9 100644
+--- a/fs/eventpoll.c
++++ b/fs/eventpoll.c
+@@ -711,6 +711,34 @@ static void ep_free(struct eventpoll *ep)
+ 	kfree(ep);
+ }
+ 
++/*
++ * The ffd.file pointer may be in the process of being torn down due to
++ * being closed, but we may not have finished eventpoll_release() yet.
++ *
++ * Normally, even with the atomic_long_inc_not_zero, the file may have
++ * been free'd and then gotten re-allocated to something else (since
++ * files are not RCU-delayed, they are SLAB_TYPESAFE_BY_RCU).
++ *
++ * But for epoll, users hold the ep->mtx mutex, and as such any file in
++ * the process of being free'd will block in eventpoll_release_file()
++ * and thus the underlying file allocation will not be free'd, and the
++ * file re-use cannot happen.
++ *
++ * For the same reason we can avoid a rcu_read_lock() around the
++ * operation - 'ffd.file' cannot go away even if the refcount has
++ * reached zero (but we must still not call out to ->poll() functions
++ * etc).
++ */
++static struct file *epi_fget(const struct epitem *epi)
++{
++	struct file *file;
++
++	file = epi->ffd.file;
++	if (!atomic_long_inc_not_zero(&file->f_count))
++		file = NULL;
++	return file;
++}
++
+ /*
+  * Called with &file->f_lock held,
+  * returns with it released
+@@ -882,34 +910,6 @@ static __poll_t __ep_eventpoll_poll(struct file *file, poll_table *wait, int dep
+ 	return res;
+ }
+ 
+-/*
+- * The ffd.file pointer may be in the process of being torn down due to
+- * being closed, but we may not have finished eventpoll_release() yet.
+- *
+- * Normally, even with the atomic_long_inc_not_zero, the file may have
+- * been free'd and then gotten re-allocated to something else (since
+- * files are not RCU-delayed, they are SLAB_TYPESAFE_BY_RCU).
+- *
+- * But for epoll, users hold the ep->mtx mutex, and as such any file in
+- * the process of being free'd will block in eventpoll_release_file()
+- * and thus the underlying file allocation will not be free'd, and the
+- * file re-use cannot happen.
+- *
+- * For the same reason we can avoid a rcu_read_lock() around the
+- * operation - 'ffd.file' cannot go away even if the refcount has
+- * reached zero (but we must still not call out to ->poll() functions
+- * etc).
+- */
+-static struct file *epi_fget(const struct epitem *epi)
+-{
+-	struct file *file;
+-
+-	file = epi->ffd.file;
+-	if (!atomic_long_inc_not_zero(&file->f_count))
+-		file = NULL;
+-	return file;
+-}
+-
+ /*
+  * Differs from ep_eventpoll_poll() in that internal callers already have
+  * the ep->mtx so we need to start from depth=1, such that mutex_lock_nested()
+-- 
+2.52.0
+

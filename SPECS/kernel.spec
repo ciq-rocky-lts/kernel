@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 17
+%define ciq_patch_version 18
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1216,6 +1216,31 @@ Patch1000216: 1216-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
 #CIQ Patch Version: 570.60.1+17.1.el9_6_ciq
 Patch1000217: 1217-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
 Patch1000218: 1218-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+#CIQ Patch Version: 570.60.1+18.1.el9_6_ciq
+Patch1000219: 1219-netfilter-conntrack-clamp-maximum-hashtable-size-to-.patch
+Patch1000220: 1220-RDMA-rxe-Fix-double-free-in-rxe_srq_from_init.patch
+Patch1000221: 1221-ALSA-aloop-Fix-racy-access-at-PCM-trigger.patch
+Patch1000222: 1222-RDMA-umem-Fix-double-dma_buf_unpin-in-failure-path.patch
+Patch1000223: 1223-scsi-qla2xxx-Completely-fix-fcport-double-free.patch
+Patch1000224: 1224-netfilter-flowtable-strictly-check-for-maximum-numbe.patch
+Patch1000225: 1225-netfilter-nf_conntrack_helper-pass-helper-to-expect-.patch
+Patch1000226: 1226-RDMA-mlx5-Fix-error-path-fall-through-in-mlx5_ib_dev.patch
+Patch1000227: 1227-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
+Patch1000228: 1228-sctp-revalidate-list-cursor-after-sctp_sendmsg_to_as.patch
+Patch1000229: 1229-exit-prevent-preemption-of-oopsing-TASK_DEAD-task.patch
+Patch1000230: 1230-netfilter-nft_inner-Fix-IPv6-inner_thoff-desync.patch
+Patch1000231: 1231-epoll-annotate-racy-check.patch
+Patch1000232: 1232-eventpoll-use-hlist_is_singular_node-in-__ep_remove.patch
+Patch1000233: 1233-eventpoll-split-__ep_remove.patch
+Patch1000234: 1234-eventpoll-kill-__ep_remove.patch
+Patch1000235: 1235-eventpoll-drop-vestigial-__-prefix-from-ep_remove_-f.patch
+Patch1000236: 1236-eventpoll-rename-ep_remove_safe-back-to-ep_remove.patch
+Patch1000237: 1237-eventpoll-move-epi_fget-up.patch
+Patch1000238: 1238-eventpoll-fix-ep_remove-struct-eventpoll-struct-file.patch
+Patch1000239: 1239-file-add-fput-cleanup-helper.patch
+Patch1000240: 1240-eventpoll-defer-struct-eventpoll-free-to-RCU-grace-p.patch
+Patch1000241: 1241-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
+Patch1000242: 1242-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2196,6 +2221,30 @@ ApplyOptionalPatch 1215-smb-client-validate-dacloffset-before-building-DACL-.pat
 ApplyOptionalPatch 1216-net-sched-fix-pedit-partial-COW-leading-to-page-cach.patch
 ApplyOptionalPatch 1217-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
 ApplyOptionalPatch 1218-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
+ApplyOptionalPatch 1219-netfilter-conntrack-clamp-maximum-hashtable-size-to-.patch
+ApplyOptionalPatch 1220-RDMA-rxe-Fix-double-free-in-rxe_srq_from_init.patch
+ApplyOptionalPatch 1221-ALSA-aloop-Fix-racy-access-at-PCM-trigger.patch
+ApplyOptionalPatch 1222-RDMA-umem-Fix-double-dma_buf_unpin-in-failure-path.patch
+ApplyOptionalPatch 1223-scsi-qla2xxx-Completely-fix-fcport-double-free.patch
+ApplyOptionalPatch 1224-netfilter-flowtable-strictly-check-for-maximum-numbe.patch
+ApplyOptionalPatch 1225-netfilter-nf_conntrack_helper-pass-helper-to-expect-.patch
+ApplyOptionalPatch 1226-RDMA-mlx5-Fix-error-path-fall-through-in-mlx5_ib_dev.patch
+ApplyOptionalPatch 1227-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
+ApplyOptionalPatch 1228-sctp-revalidate-list-cursor-after-sctp_sendmsg_to_as.patch
+ApplyOptionalPatch 1229-exit-prevent-preemption-of-oopsing-TASK_DEAD-task.patch
+ApplyOptionalPatch 1230-netfilter-nft_inner-Fix-IPv6-inner_thoff-desync.patch
+ApplyOptionalPatch 1231-epoll-annotate-racy-check.patch
+ApplyOptionalPatch 1232-eventpoll-use-hlist_is_singular_node-in-__ep_remove.patch
+ApplyOptionalPatch 1233-eventpoll-split-__ep_remove.patch
+ApplyOptionalPatch 1234-eventpoll-kill-__ep_remove.patch
+ApplyOptionalPatch 1235-eventpoll-drop-vestigial-__-prefix-from-ep_remove_-f.patch
+ApplyOptionalPatch 1236-eventpoll-rename-ep_remove_safe-back-to-ep_remove.patch
+ApplyOptionalPatch 1237-eventpoll-move-epi_fget-up.patch
+ApplyOptionalPatch 1238-eventpoll-fix-ep_remove-struct-eventpoll-struct-file.patch
+ApplyOptionalPatch 1239-file-add-fput-cleanup-helper.patch
+ApplyOptionalPatch 1240-eventpoll-defer-struct-eventpoll-free-to-RCU-grace-p.patch
+ApplyOptionalPatch 1241-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
+ApplyOptionalPatch 1242-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4312,6 +4361,32 @@ fi
 #
 #
 %changelog
+* Mon Jul 13 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+18.1.el9_6_ciq
+- locking/rtmutex: Skip remove_waiter() when waiter is not enqueued (Davidlohr Bueso) [ciqres] {CVE-2026-53163}
+- rtmutex: Use waiter::task instead of current in remove_waiter() (Keenan Dong) [ciqres] {CVE-2026-43499}
+- eventpoll: defer struct eventpoll free to RCU grace period (Nicholas Carlini) [ciqres] {CVE-2026-43074}
+- file: add fput() cleanup helper (Christian Brauner) [ciqres] {CVE-2026-46242}
+- eventpoll: fix ep_remove struct eventpoll / struct file UAF (Christian Brauner) [ciqres] {CVE-2026-46242}
+- eventpoll: move epi_fget() up (Christian Brauner) [ciqres] {CVE-2026-46242}
+- eventpoll: rename ep_remove_safe() back to ep_remove() (Christian Brauner) [ciqres] {CVE-2026-46242}
+- eventpoll: drop vestigial __ prefix from ep_remove_{file,epi}() (Christian Brauner) [ciqres] {CVE-2026-46242}
+- eventpoll: kill __ep_remove() (Christian Brauner) [ciqres] {CVE-2026-46242}
+- eventpoll: split __ep_remove() (Christian Brauner) [ciqres] {CVE-2026-46242}
+- eventpoll: use hlist_is_singular_node() in __ep_remove() (Christian Brauner) [ciqres] {CVE-2026-46242}
+- epoll: annotate racy check (Christian Brauner) [ciqres] {CVE-2026-46242}
+- netfilter: nft_inner: Fix IPv6 inner_thoff desync (CIQ Kernel Automation) [ciqres] {CVE-2026-46244}
+- exit: prevent preemption of oopsing TASK_DEAD task (CIQ Kernel Automation) [ciqres] {CVE-2026-46173}
+- sctp: revalidate list cursor after sctp_sendmsg_to_asoc() in SCTP_SENDALL (CIQ Kernel Automation) [ciqres] {CVE-2026-46227}
+- RDMA/mlx4: Fix mis-use of RCU in mlx4_srq_event() (CIQ Kernel Automation) [ciqres] {CVE-2026-46181}
+- RDMA/mlx5: Fix error path fall-through in mlx5_ib_dev_res_srq_init() (CIQ Kernel Automation) [ciqres] {CVE-2026-46176}
+- netfilter: nf_conntrack_helper: pass helper to expect cleanup (CIQ Kernel Automation) [ciqres] {CVE-2026-43027}
+- netfilter: flowtable: strictly check for maximum number of actions (CIQ Kernel Automation) [ciqres] {CVE-2026-43329}
+- scsi: qla2xxx: Completely fix fcport double free (CIQ Kernel Automation) [ciqres] {CVE-2026-43414}
+- RDMA/umem: Fix double dma_buf_unpin in failure path (CIQ Kernel Automation) [ciqres] {CVE-2026-43128}
+- ALSA: aloop: Fix racy access at PCM trigger (CIQ Kernel Automation) [ciqres] {CVE-2026-23191}
+- RDMA/rxe: Fix double free in rxe_srq_from_init (CIQ Kernel Automation) [ciqres] {CVE-2026-45852}
+- netfilter: conntrack: clamp maximum hashtable size to INT_MAX (CIQ Kernel Automation) [ciqres] {CVE-2025-21648}
+
 * Mon Jul 06 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+17.1.el9_6_ciq
 - KVM: x86: Fix shadow paging use-after-free due to unexpected role (Paolo Bonzini) [ciqres] {CVE-2026-53359}
 - KVM: x86: Fix shadow paging use-after-free due to unexpected GFN (Sean Christopherson) [ciqres] {CVE-2026-46113}
