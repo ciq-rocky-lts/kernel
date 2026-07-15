@@ -1,0 +1,35 @@
+From 3bf33e5d350bca0d50cc6aeb003ba107bc4c019b Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 13 Jul 2026 07:41:04 +0000
+Subject: [PATCH] NFSv4: Fix memory leak in nfs4_set_security_label
+
+jira VULN-44160
+cve CVE-2024-41076
+commit-author Dmitry Mastykin <mastichi@gmail.com>
+commit aad11473f8f4be3df86461081ce35ec5b145ba68
+
+We leak nfs_fattr and nfs4_label every time we set a security xattr.
+
+	Signed-off-by: Dmitry Mastykin <mastichi@gmail.com>
+	Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>
+(cherry picked from commit aad11473f8f4be3df86461081ce35ec5b145ba68)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ fs/nfs/nfs4proc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fs/nfs/nfs4proc.c b/fs/nfs/nfs4proc.c
+index 17471c9dd0ef..2b5864c624ad 100644
+--- a/fs/nfs/nfs4proc.c
++++ b/fs/nfs/nfs4proc.c
+@@ -6213,6 +6213,7 @@ nfs4_set_security_label(struct inode *inode, const void *buf, size_t buflen)
+ 	if (status == 0)
+ 		nfs_setsecurity(inode, fattr);
+ 
++	nfs_free_fattr(fattr);
+ 	return status;
+ }
+ #endif	/* CONFIG_NFS_V4_SECURITY_LABEL */
+-- 
+2.52.0
+

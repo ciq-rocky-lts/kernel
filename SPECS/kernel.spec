@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 34
+%define ciq_patch_version 35
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1561,6 +1561,31 @@ Patch1000606: 0561-Bluetooth-L2CAP-fix-chan-ref-leak-in-l2cap_chan_time.patch
 Patch1000607: 0562-rtnetlink-Correct-nested-IFLA_VF_VLAN_LIST-attribute.patch
 Patch1000608: 0563-stm-class-Fix-a-double-free-in-stm_register_device.patch
 Patch1000609: 0564-scsi-qedf-Ensure-the-copied-buf-is-NUL-terminated.patch
+#CIQ Patch Version: 284.30.1+35.1.el9_2_ciq
+Patch1000610: 0565-RDMA-core-Fix-KASAN-slab-use-after-free-Read-in-ib_r.patch
+Patch1000611: 0566-net-page_pool-use-in_softirq-instead.patch
+Patch1000612: 0567-page_pool-fix-inconsistency-for-page_pool_ring_-un-l.patch
+Patch1000613: 0568-page_pool-Fix-use-after-free-in-page_pool_recycle_in.patch
+Patch1000614: 0569-RDMA-umem-Fix-double-dma_buf_unpin-in-failure-path.patch
+Patch1000615: 0570-Bluetooth-Fix-use-after-free-bugs-caused-by-sco_sock.patch
+Patch1000616: 0571-Bluetooth-SCO-Fix-UAF-on-sco_sock_timeout.patch
+Patch1000617: 0572-Bluetooth-SCO-Fix-use-after-free-in-sco_recv_frame-d.patch
+Patch1000618: 0573-netfilter-flowtable-strictly-check-for-maximum-numbe.patch
+Patch1000619: 0574-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
+Patch1000620: 0575-RDMA-vmw_pvrdma-Fix-double-free-on-pvrdma_alloc_ucon.patch
+Patch1000621: 0576-exit-prevent-preemption-of-oopsing-TASK_DEAD-task.patch
+Patch1000622: 0577-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
+Patch1000623: 0578-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
+Patch1000624: 0579-af_unix-Fix-data-races-in-unix_release_sock-unix_str.patch
+Patch1000625: 0580-net-openvswitch-fix-overwriting-ct-original-tuple-fo.patch
+Patch1000626: 0581-net-mlx5-Discard-command-completions-in-internal-err.patch
+Patch1000627: 0582-net-bridge-mst-fix-vlan-use-after-free.patch
+Patch1000628: 0583-net-bridge-mst-fix-suspicious-rcu-usage-in-br_mst_se.patch
+Patch1000629: 0584-net-bridge-mst-pass-vlan-group-directly-to-br_mst_vl.patch
+Patch1000630: 0585-blk-cgroup-fix-list-corruption-from-reorder-of-WRITE.patch
+Patch1000631: 0586-blk-cgroup-fix-list-corruption-from-resetting-io-sta.patch
+Patch1000632: 0587-tcp-Fix-shift-out-of-bounds-in-dctcp_update_alpha.patch
+Patch1000633: 0588-NFSv4-Fix-memory-leak-in-nfs4_set_security_label.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2846,6 +2871,30 @@ ApplyOptionalPatch 0561-Bluetooth-L2CAP-fix-chan-ref-leak-in-l2cap_chan_time.pat
 ApplyOptionalPatch 0562-rtnetlink-Correct-nested-IFLA_VF_VLAN_LIST-attribute.patch
 ApplyOptionalPatch 0563-stm-class-Fix-a-double-free-in-stm_register_device.patch
 ApplyOptionalPatch 0564-scsi-qedf-Ensure-the-copied-buf-is-NUL-terminated.patch
+ApplyOptionalPatch 0565-RDMA-core-Fix-KASAN-slab-use-after-free-Read-in-ib_r.patch
+ApplyOptionalPatch 0566-net-page_pool-use-in_softirq-instead.patch
+ApplyOptionalPatch 0567-page_pool-fix-inconsistency-for-page_pool_ring_-un-l.patch
+ApplyOptionalPatch 0568-page_pool-Fix-use-after-free-in-page_pool_recycle_in.patch
+ApplyOptionalPatch 0569-RDMA-umem-Fix-double-dma_buf_unpin-in-failure-path.patch
+ApplyOptionalPatch 0570-Bluetooth-Fix-use-after-free-bugs-caused-by-sco_sock.patch
+ApplyOptionalPatch 0571-Bluetooth-SCO-Fix-UAF-on-sco_sock_timeout.patch
+ApplyOptionalPatch 0572-Bluetooth-SCO-Fix-use-after-free-in-sco_recv_frame-d.patch
+ApplyOptionalPatch 0573-netfilter-flowtable-strictly-check-for-maximum-numbe.patch
+ApplyOptionalPatch 0574-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
+ApplyOptionalPatch 0575-RDMA-vmw_pvrdma-Fix-double-free-on-pvrdma_alloc_ucon.patch
+ApplyOptionalPatch 0576-exit-prevent-preemption-of-oopsing-TASK_DEAD-task.patch
+ApplyOptionalPatch 0577-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
+ApplyOptionalPatch 0578-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
+ApplyOptionalPatch 0579-af_unix-Fix-data-races-in-unix_release_sock-unix_str.patch
+ApplyOptionalPatch 0580-net-openvswitch-fix-overwriting-ct-original-tuple-fo.patch
+ApplyOptionalPatch 0581-net-mlx5-Discard-command-completions-in-internal-err.patch
+ApplyOptionalPatch 0582-net-bridge-mst-fix-vlan-use-after-free.patch
+ApplyOptionalPatch 0583-net-bridge-mst-fix-suspicious-rcu-usage-in-br_mst_se.patch
+ApplyOptionalPatch 0584-net-bridge-mst-pass-vlan-group-directly-to-br_mst_vl.patch
+ApplyOptionalPatch 0585-blk-cgroup-fix-list-corruption-from-reorder-of-WRITE.patch
+ApplyOptionalPatch 0586-blk-cgroup-fix-list-corruption-from-resetting-io-sta.patch
+ApplyOptionalPatch 0587-tcp-Fix-shift-out-of-bounds-in-dctcp_update_alpha.patch
+ApplyOptionalPatch 0588-NFSv4-Fix-memory-leak-in-nfs4_set_security_label.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4729,6 +4778,32 @@ fi
 #
 #
 %changelog
+* Mon Jul 13 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+35.1.el9_2_ciq
+- NFSv4: Fix memory leak in nfs4_set_security_label (CIQ Kernel Automation) [ciqres] {CVE-2024-41076}
+- tcp: Fix shift-out-of-bounds in dctcp_update_alpha(). (CIQ Kernel Automation) [ciqres] {CVE-2024-37356}
+- blk-cgroup: fix list corruption from resetting io stat (CIQ Kernel Automation) [ciqres] {CVE-2024-38663}
+- blk-cgroup: fix list corruption from reorder of WRITE ->lqueued (CIQ Kernel Automation) [ciqres] {CVE-2024-38384}
+- net: bridge: mst: pass vlan group directly to br_mst_vlan_set_state (CIQ Kernel Automation) [ciqres] {CVE-2024-40921}
+- net: bridge: mst: fix suspicious rcu usage in br_mst_set_state (CIQ Kernel Automation) [ciqres] {CVE-2024-40920}
+- net: bridge: mst: fix vlan use-after-free (CIQ Kernel Automation) [ciqres] {CVE-2024-36979}
+- net/mlx5: Discard command completions in internal error (CIQ Kernel Automation) [ciqres] {CVE-2024-38555}
+- net: openvswitch: fix overwriting ct original tuple for ICMPv6 (CIQ Kernel Automation) [ciqres] {CVE-2024-38558}
+- af_unix: Fix data races in unix_release_sock/unix_stream_sendmsg (CIQ Kernel Automation) [ciqres] {CVE-2024-38596}
+- locking/rtmutex: Skip remove_waiter() when waiter is not enqueued (Davidlohr Bueso) [ciqres] {CVE-2026-53163}
+- rtmutex: Use waiter::task instead of current in remove_waiter() (Keenan Dong) [ciqres] {CVE-2026-43499}
+- exit: prevent preemption of oopsing TASK_DEAD task (CIQ Kernel Automation) [ciqres] {CVE-2026-46173}
+- RDMA/vmw_pvrdma: Fix double free on pvrdma_alloc_ucontext() error path (CIQ Kernel Automation) [ciqres] {CVE-2026-46189}
+- RDMA/mlx4: Fix mis-use of RCU in mlx4_srq_event() (CIQ Kernel Automation) [ciqres] {CVE-2026-46181}
+- netfilter: flowtable: strictly check for maximum number of actions (CIQ Kernel Automation) [ciqres] {CVE-2026-43329}
+- Bluetooth: SCO: Fix use-after-free in sco_recv_frame() due to missing sock_hold (CIQ Kernel Automation) [ciqres] {CVE-2026-31408}
+- Bluetooth: SCO: Fix UAF on sco_sock_timeout (Roxana Nicolescu) [ciqres] {CVE-2024-50125}
+- Bluetooth: Fix use-after-free bugs caused by sco_sock_timeout (Roxana Nicolescu) [ciqres] {CVE-2024-27398}
+- RDMA/umem: Fix double dma_buf_unpin in failure path (CIQ Kernel Automation) [ciqres] {CVE-2026-43128}
+- page_pool: Fix use-after-free in page_pool_recycle_in_ring (Marcin Wcisło) [ciqres] {CVE-2025-38129}
+- page_pool: fix inconsistency for page_pool_ring_[un]lock() (Marcin Wcisło) [ciqres] {CVE-2025-38129}
+- net: page_pool: use in_softirq() instead (Marcin Wcisło) [ciqres] {CVE-2025-38129}
+- RDMA/core: Fix "KASAN: slab-use-after-free Read in ib_register_device" problem (Marcin Wcisło) [ciqres] {CVE-2025-38022}
+
 * Tue Jul 07 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+34.1.el9_2_ciq
 - scsi: qedf: Ensure the copied buf is NUL terminated (CIQ Kernel Automation) [ciqres] {CVE-2024-38559}
 - stm class: Fix a double free in stm_register_device() (CIQ Kernel Automation) [ciqres] {CVE-2024-38627}
