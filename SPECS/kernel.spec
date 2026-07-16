@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 31
+%define ciq_patch_version 32
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1140,6 +1140,10 @@ Patch0556: 0401-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.patch
 Patch0557: 0402-gfs2-Add-metapath_dibh-helper.patch
 Patch0558: 0403-gfs2-Fix-use-after-free-in-iomap-inline-data-write-p.patch
 Patch0559: 0404-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
+#CIQ Patch Version: 372.32.1+32.1.el8_6_ciq
+Patch0560: 0405-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
+Patch0561: 0406-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
+Patch0562: 0407-ALSA-usb-audio-Add-sanity-check-for-OOB-writes-at-si.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2266,6 +2270,9 @@ ApplyOptionalPatch 0401-KVM-x86-Fix-shadow-paging-use-after-free-due-to-unex.pat
 ApplyOptionalPatch 0402-gfs2-Add-metapath_dibh-helper.patch
 ApplyOptionalPatch 0403-gfs2-Fix-use-after-free-in-iomap-inline-data-write-p.patch
 ApplyOptionalPatch 0404-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
+ApplyOptionalPatch 0405-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
+ApplyOptionalPatch 0406-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
+ApplyOptionalPatch 0407-ALSA-usb-audio-Add-sanity-check-for-OOB-writes-at-si.patch
 
 
 # CIQ LTS patches:
@@ -3825,6 +3832,11 @@ fi
 #
 #
 %changelog
+* Mon Jul 13 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+32.1.el8_6_ciq
+- ALSA: usb-audio: Add sanity check for OOB writes at silencing (CIQ Kernel Automation) [ciqres] {CVE-2026-43279}
+- locking/rtmutex: Skip remove_waiter() when waiter is not enqueued (Davidlohr Bueso) [ciqres] {CVE-2026-53163}
+- rtmutex: Use waiter::task instead of current in remove_waiter() (Keenan Dong) [ciqres] {CVE-2026-43499}
+
 * Wed Jul 08 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+31.1.el8_6_ciq
 - RDMA/mlx4: Fix mis-use of RCU in mlx4_srq_event() (CIQ Kernel Automation) [ciqres] {CVE-2026-46181}
 - gfs2: Fix use-after-free in iomap inline data write path (CIQ Kernel Automation) [ciqres] {CVE-2026-45984}
