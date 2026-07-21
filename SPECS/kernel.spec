@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 18
+%define ciq_patch_version 19
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1241,6 +1241,33 @@ Patch1000239: 1239-file-add-fput-cleanup-helper.patch
 Patch1000240: 1240-eventpoll-defer-struct-eventpoll-free-to-RCU-grace-p.patch
 Patch1000241: 1241-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
 Patch1000242: 1242-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
+#CIQ Patch Version: 570.60.1+19.1.el9_6_ciq
+Patch1000243: 1243-ima-don-t-clear-IMA_DIGSIG-flag-when-setting-or-remo.patch
+Patch1000244: 1244-gfs2-Add-metapath_dibh-helper.patch
+Patch1000245: 1245-gfs2-Fix-use-after-free-in-iomap-inline-data-write-p.patch
+Patch1000246: 1246-Bluetooth-SCO-Fix-use-after-free-in-sco_recv_frame-d.patch
+Patch1000247: 1247-wifi-mac80211-drop-stray-static-from-fast-RX-rx_resu.patch
+Patch1000248: 1248-RDMA-vmw_pvrdma-Fix-double-free-on-pvrdma_alloc_ucon.patch
+Patch1000249: 1249-ALSA-usb-audio-Add-sanity-check-for-OOB-writes-at-si.patch
+Patch1000250: 1250-xfs-resample-the-data-fork-mapping-after-cycling-ILO.patch
+Patch1000251: 1251-neigh-introduce-neigh_confirm-helper-function.patch
+Patch1000252: 1252-ipv6-remove-one-read_lock-read_unlock-pair-in-rt6_ch.patch
+Patch1000253: 1253-ipv6-flowlabel-do-not-disable-BH-where-not-needed.patch
+Patch1000254: 1254-neighbour-switch-to-standard-rcu-instead-of-rcu_bh.patch
+Patch1000255: 1255-net-remove-rcu_dereference_bh_rtnl.patch
+Patch1000256: 1256-ipv6-remove-nexthop_fib6_nh_bh.patch
+Patch1000257: 1257-vrf-Fix-lockdep-splat-in-output-path.patch
+Patch1000258: 1258-bpf-Fix-mismatched-RCU-unlock-flavour-in-bpf_out_nei.patch
+Patch1000259: 1259-net-dst-add-four-helpers-to-annotate-data-races-arou.patch
+Patch1000260: 1260-net-Add-locking-to-protect-skb-dev-access-in-ip_outp.patch
+Patch1000261: 1261-ipv4-use-RCU-protection-in-__ip_rt_update_pmtu.patch
+Patch1000262: 1262-net-dst-introduce-dst-dev_rcu.patch
+Patch1000263: 1263-ipv6-use-RCU-in-ip6_output.patch
+Patch1000264: 1264-ipv6-use-RCU-in-ip6_xmit.patch
+Patch1000265: 1265-net-ipv4-Consolidate-ipv4_mtu-and-ip_dst_mtu_maybe_f.patch
+Patch1000266: 1266-ipv4-use-RCU-protection-in-ip_dst_mtu_maybe_forward.patch
+Patch1000267: 1267-ipv4-add-RCU-protection-to-ip4_dst_hoplimit.patch
+Patch1000268: 1268-net-use-dst_dev_rcu-in-sk_setup_caps.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2245,6 +2272,32 @@ ApplyOptionalPatch 1239-file-add-fput-cleanup-helper.patch
 ApplyOptionalPatch 1240-eventpoll-defer-struct-eventpoll-free-to-RCU-grace-p.patch
 ApplyOptionalPatch 1241-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
 ApplyOptionalPatch 1242-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
+ApplyOptionalPatch 1243-ima-don-t-clear-IMA_DIGSIG-flag-when-setting-or-remo.patch
+ApplyOptionalPatch 1244-gfs2-Add-metapath_dibh-helper.patch
+ApplyOptionalPatch 1245-gfs2-Fix-use-after-free-in-iomap-inline-data-write-p.patch
+ApplyOptionalPatch 1246-Bluetooth-SCO-Fix-use-after-free-in-sco_recv_frame-d.patch
+ApplyOptionalPatch 1247-wifi-mac80211-drop-stray-static-from-fast-RX-rx_resu.patch
+ApplyOptionalPatch 1248-RDMA-vmw_pvrdma-Fix-double-free-on-pvrdma_alloc_ucon.patch
+ApplyOptionalPatch 1249-ALSA-usb-audio-Add-sanity-check-for-OOB-writes-at-si.patch
+ApplyOptionalPatch 1250-xfs-resample-the-data-fork-mapping-after-cycling-ILO.patch
+ApplyOptionalPatch 1251-neigh-introduce-neigh_confirm-helper-function.patch
+ApplyOptionalPatch 1252-ipv6-remove-one-read_lock-read_unlock-pair-in-rt6_ch.patch
+ApplyOptionalPatch 1253-ipv6-flowlabel-do-not-disable-BH-where-not-needed.patch
+ApplyOptionalPatch 1254-neighbour-switch-to-standard-rcu-instead-of-rcu_bh.patch
+ApplyOptionalPatch 1255-net-remove-rcu_dereference_bh_rtnl.patch
+ApplyOptionalPatch 1256-ipv6-remove-nexthop_fib6_nh_bh.patch
+ApplyOptionalPatch 1257-vrf-Fix-lockdep-splat-in-output-path.patch
+ApplyOptionalPatch 1258-bpf-Fix-mismatched-RCU-unlock-flavour-in-bpf_out_nei.patch
+ApplyOptionalPatch 1259-net-dst-add-four-helpers-to-annotate-data-races-arou.patch
+ApplyOptionalPatch 1260-net-Add-locking-to-protect-skb-dev-access-in-ip_outp.patch
+ApplyOptionalPatch 1261-ipv4-use-RCU-protection-in-__ip_rt_update_pmtu.patch
+ApplyOptionalPatch 1262-net-dst-introduce-dst-dev_rcu.patch
+ApplyOptionalPatch 1263-ipv6-use-RCU-in-ip6_output.patch
+ApplyOptionalPatch 1264-ipv6-use-RCU-in-ip6_xmit.patch
+ApplyOptionalPatch 1265-net-ipv4-Consolidate-ipv4_mtu-and-ip_dst_mtu_maybe_f.patch
+ApplyOptionalPatch 1266-ipv4-use-RCU-protection-in-ip_dst_mtu_maybe_forward.patch
+ApplyOptionalPatch 1267-ipv4-add-RCU-protection-to-ip4_dst_hoplimit.patch
+ApplyOptionalPatch 1268-net-use-dst_dev_rcu-in-sk_setup_caps.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4361,6 +4414,34 @@ fi
 #
 #
 %changelog
+* Tue Jul 21 2026 Shreeya Patel <spatel@ciq.com> - 5.14.0-570.60.1+19.1.el9_6_ciq
+- net: use dst_dev_rcu() in sk_setup_caps() (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- ipv4: add RCU protection to ip4_dst_hoplimit() (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- ipv4: use RCU protection in ip_dst_mtu_maybe_forward() (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- net: ipv4: Consolidate ipv4_mtu and ip_dst_mtu_maybe_forward (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- ipv6: use RCU in ip6_xmit() (Marcin Wcisło) [ciqres] {CVE-2025-40135}
+- ipv6: use RCU in ip6_output() (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- net: dst: introduce dst->dev_rcu (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- ipv4: use RCU protection in __ip_rt_update_pmtu() (Marcin Wcisło) [ciqres] {CVE-2025-21766}
+- net: Add locking to protect skb->dev access in ip_output (Marcin Wcisło) [ciqres] {CVE-2025-40135}
+- net: dst: add four helpers to annotate data-races around dst->dev (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- bpf: Fix mismatched RCU unlock flavour in bpf_out_neigh_v6 (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- vrf: Fix lockdep splat in output path (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- ipv6: remove nexthop_fib6_nh_bh() (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- net: remove rcu_dereference_bh_rtnl() (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- neighbour: switch to standard rcu, instead of rcu_bh (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- ipv6: flowlabel: do not disable BH where not needed (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- ipv6: remove one read_lock()/read_unlock() pair in rt6_check_neigh() (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- neigh: introduce neigh_confirm() helper function (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- xfs: resample the data fork mapping after cycling ILOCK (Jonathan Maple) [ciqres]
+- ALSA: usb-audio: Add sanity check for OOB writes at silencing (CIQ Kernel Automation) [ciqres] {CVE-2026-43279}
+- RDMA/vmw_pvrdma: Fix double free on pvrdma_alloc_ucontext() error path (CIQ Kernel Automation) [ciqres] {CVE-2026-46189}
+- wifi: mac80211: drop stray 'static' from fast-RX rx_result (CIQ Kernel Automation) [ciqres] {CVE-2026-46152}
+- Bluetooth: SCO: Fix use-after-free in sco_recv_frame() due to missing sock_hold (CIQ Kernel Automation) [ciqres] {CVE-2026-31408}
+- gfs2: Fix use-after-free in iomap inline data write path (CIQ Kernel Automation) [ciqres] {CVE-2026-45984}
+- gfs2: Add metapath_dibh helper (Roxana Nicolescu) [ciqres] {CVE-2026-45984}
+- ima: don't clear IMA_DIGSIG flag when setting or removing non-IMA xattr (CIQ Kernel Automation) [ciqres] {CVE-2025-68183}
+
 * Mon Jul 13 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+18.1.el9_6_ciq
 - locking/rtmutex: Skip remove_waiter() when waiter is not enqueued (Davidlohr Bueso) [ciqres] {CVE-2026-53163}
 - rtmutex: Use waiter::task instead of current in remove_waiter() (Keenan Dong) [ciqres] {CVE-2026-43499}
