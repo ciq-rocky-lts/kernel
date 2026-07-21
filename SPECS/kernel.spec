@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 32
+%define ciq_patch_version 33
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1144,6 +1144,11 @@ Patch0559: 0404-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
 Patch0560: 0405-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
 Patch0561: 0406-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
 Patch0562: 0407-ALSA-usb-audio-Add-sanity-check-for-OOB-writes-at-si.patch
+#CIQ Patch Version: 372.32.1+33.1.el8_6_ciq
+Patch0563: 0408-net-sched-act_csum-validate-nested-VLAN-headers.patch
+Patch0564: 0409-drm-gem-Fix-inconsistent-plane-dimension-calculation.patch
+Patch0565: 0410-RDMA-vmw_pvrdma-Fix-double-free-on-pvrdma_alloc_ucon.patch
+Patch0566: 0411-xfs-resample-the-data-fork-mapping-after-cycling-ILO.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2273,6 +2278,10 @@ ApplyOptionalPatch 0404-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
 ApplyOptionalPatch 0405-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
 ApplyOptionalPatch 0406-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
 ApplyOptionalPatch 0407-ALSA-usb-audio-Add-sanity-check-for-OOB-writes-at-si.patch
+ApplyOptionalPatch 0408-net-sched-act_csum-validate-nested-VLAN-headers.patch
+ApplyOptionalPatch 0409-drm-gem-Fix-inconsistent-plane-dimension-calculation.patch
+ApplyOptionalPatch 0410-RDMA-vmw_pvrdma-Fix-double-free-on-pvrdma_alloc_ucon.patch
+ApplyOptionalPatch 0411-xfs-resample-the-data-fork-mapping-after-cycling-ILO.patch
 
 
 # CIQ LTS patches:
@@ -3832,6 +3841,12 @@ fi
 #
 #
 %changelog
+* Tue Jul 21 2026 Shreeya Patel <spatel@ciq.com> - 4.18.0-372.32.1+33.1.el8_6_ciq
+- xfs: resample the data fork mapping after cycling ILOCK (Jonathan Maple) [ciqres]
+- RDMA/vmw_pvrdma: Fix double free on pvrdma_alloc_ucontext() error path (CIQ Kernel Automation) [ciqres] {CVE-2026-46189}
+- drm/gem: Fix inconsistent plane dimension calculation in drm_gem_fb_init_with_funcs() (CIQ Kernel Automation) [ciqres] {CVE-2026-46209}
+- net: sched: act_csum: validate nested VLAN headers (CIQ Kernel Automation) [ciqres] {CVE-2026-31684}
+
 * Mon Jul 13 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+32.1.el8_6_ciq
 - ALSA: usb-audio: Add sanity check for OOB writes at silencing (CIQ Kernel Automation) [ciqres] {CVE-2026-43279}
 - locking/rtmutex: Skip remove_waiter() when waiter is not enqueued (Davidlohr Bueso) [ciqres] {CVE-2026-53163}
