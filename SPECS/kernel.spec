@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 35
+%define ciq_patch_version 36
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1586,6 +1586,16 @@ Patch1000630: 0585-blk-cgroup-fix-list-corruption-from-reorder-of-WRITE.patch
 Patch1000631: 0586-blk-cgroup-fix-list-corruption-from-resetting-io-sta.patch
 Patch1000632: 0587-tcp-Fix-shift-out-of-bounds-in-dctcp_update_alpha.patch
 Patch1000633: 0588-NFSv4-Fix-memory-leak-in-nfs4_set_security_label.patch
+#CIQ Patch Version: 284.30.1+36.1.el9_2_ciq
+Patch1000634: 0589-tls-fix-missing-memory-barrier-in-tls_init.patch
+Patch1000635: 0590-r8169-Fix-possible-ring-buffer-corruption-on-fragmen.patch
+Patch1000636: 0591-genirq-cpuhotplug-x86-vector-Prevent-vector-leak-dur.patch
+Patch1000637: 0592-mm-huge_memory-don-t-unpoison-huge_zero_folio.patch
+Patch1000638: 0593-nvmet-fix-a-possible-leak-when-destroy-a-ctrl-during.patch
+Patch1000639: 0594-netfilter-tproxy-bail-out-if-IP-has-been-disabled-on.patch
+Patch1000640: 0595-mptcp-ensure-snd_una-is-properly-initialized-on-conn.patch
+Patch1000641: 0596-nvme-avoid-double-free-special-payload.patch
+Patch1000642: 0597-xfs-resample-the-data-fork-mapping-after-cycling-ILO.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2895,6 +2905,15 @@ ApplyOptionalPatch 0585-blk-cgroup-fix-list-corruption-from-reorder-of-WRITE.pat
 ApplyOptionalPatch 0586-blk-cgroup-fix-list-corruption-from-resetting-io-sta.patch
 ApplyOptionalPatch 0587-tcp-Fix-shift-out-of-bounds-in-dctcp_update_alpha.patch
 ApplyOptionalPatch 0588-NFSv4-Fix-memory-leak-in-nfs4_set_security_label.patch
+ApplyOptionalPatch 0589-tls-fix-missing-memory-barrier-in-tls_init.patch
+ApplyOptionalPatch 0590-r8169-Fix-possible-ring-buffer-corruption-on-fragmen.patch
+ApplyOptionalPatch 0591-genirq-cpuhotplug-x86-vector-Prevent-vector-leak-dur.patch
+ApplyOptionalPatch 0592-mm-huge_memory-don-t-unpoison-huge_zero_folio.patch
+ApplyOptionalPatch 0593-nvmet-fix-a-possible-leak-when-destroy-a-ctrl-during.patch
+ApplyOptionalPatch 0594-netfilter-tproxy-bail-out-if-IP-has-been-disabled-on.patch
+ApplyOptionalPatch 0595-mptcp-ensure-snd_una-is-properly-initialized-on-conn.patch
+ApplyOptionalPatch 0596-nvme-avoid-double-free-special-payload.patch
+ApplyOptionalPatch 0597-xfs-resample-the-data-fork-mapping-after-cycling-ILO.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4778,6 +4797,17 @@ fi
 #
 #
 %changelog
+* Tue Jul 21 2026 Shreeya Patel <spatel@ciq.com> - 5.14.0-284.30.1+36.1.el9_2_ciq
+- xfs: resample the data fork mapping after cycling ILOCK (Jonathan Maple) [ciqres]
+- nvme: avoid double free special payload (CIQ Kernel Automation) [ciqres] {CVE-2024-41073}
+- mptcp: ensure snd_una is properly initialized on connect (CIQ Kernel Automation) [ciqres] {CVE-2024-40931}
+- netfilter: tproxy: bail out if IP has been disabled on the device (CIQ Kernel Automation) [ciqres] {CVE-2024-36270}
+- nvmet: fix a possible leak when destroy a ctrl during qp establishment (CIQ Kernel Automation) [ciqres] {CVE-2024-42152}
+- mm/huge_memory: don't unpoison huge_zero_folio (CIQ Kernel Automation) [ciqres] {CVE-2024-40914}
+- genirq/cpuhotplug, x86/vector: Prevent vector leak during CPU offline (CIQ Kernel Automation) [ciqres] {CVE-2024-31076}
+- r8169: Fix possible ring buffer corruption on fragmented Tx packets. (CIQ Kernel Automation) [ciqres] {CVE-2024-38586}
+- tls: fix missing memory barrier in tls_init (CIQ Kernel Automation) [ciqres] {CVE-2024-36489}
+
 * Mon Jul 13 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+35.1.el9_2_ciq
 - NFSv4: Fix memory leak in nfs4_set_security_label (CIQ Kernel Automation) [ciqres] {CVE-2024-41076}
 - tcp: Fix shift-out-of-bounds in dctcp_update_alpha(). (CIQ Kernel Automation) [ciqres] {CVE-2024-37356}

@@ -1,0 +1,80 @@
+From ee4f7feaebb4505274543c36c36c8394c77dd29c Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Fri, 17 Jul 2026 13:34:14 -0400
+Subject: [PATCH] xfs: resample the data fork mapping after cycling ILOCK
+
+commit-author Darrick J. Wong <djwong@kernel.org>
+commit 2f4acd0fcd862e22eab45690ec2c08c80b6ef2e7
+upstream-diff |
+	Between this kernel and the recent change xfs_reflink_allocate_cow()
+	was refactored into two separate functions in d62113303d691bcd8d0675ae4ac63e7769afc56c
+	xfs: Fix false ENOSPC when performing direct write on a delalloc extent in cow fork
+	In addition after fixing the bug the offset_fsb and count_fsb need to
+	be refreshed as a part of the above commit it creates
+    xfs_reflink_convert_unwritten() which refreshes prior to returns.
+
+xfs_reflink_fill_{cow_hole,delalloc} are both presented with an inode,
+a data fork mapping, and a cow fork mapping.  Unfortunately, these two
+helpers cycle the ILOCK to grab a transaction, which means that the
+mappings are stale as soon as we reacquire the ILOCK.  Currently we
+refresh the cow fork mapping by re-calling xfs_find_trim_cow_extent, but
+we don't refresh the data fork mapping beforehand, which means that the
+xfs_bmap_trim_cow in that function queries the refcount btree about the
+wrong physical blocks and returns an inaccurate value in *shared.
+
+If *shared is now false, the directio write proceeds with a stale data
+fork mapping.  Fix this by querying the data fork mapping if the
+sequence counter changes across the ILOCK cycle.
+
+	Cc: hch@lst.de
+	Cc: stable@vger.kernel.org # v4.11
+Fixes: 3c68d44 ("xfs: allocate direct I/O COW blocks in iomap_begin")
+	Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+	Reviewed-by: Christoph Hellwig <hch@lst.de>
+	Reviewed-by: Carlos Maiolino <cmaiolino@redhat.com>
+	Signed-off-by: Carlos Maiolino <cem@kernel.org>
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ fs/xfs/xfs_reflink.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/fs/xfs/xfs_reflink.c b/fs/xfs/xfs_reflink.c
+index cb0edb1d68ef..bbbf46452838 100644
+--- a/fs/xfs/xfs_reflink.c
++++ b/fs/xfs/xfs_reflink.c
+@@ -357,6 +357,7 @@ xfs_reflink_allocate_cow(
+ 	int			nimaps, error = 0;
+ 	bool			found;
+ 	xfs_filblks_t		resaligned;
++	unsigned int		seq_before = READ_ONCE(ip->i_df.if_seq);
+ 	xfs_extlen_t		resblks = 0;
+ 
+ 	ASSERT(xfs_isilocked(ip, XFS_ILOCK_EXCL));
+@@ -385,6 +386,24 @@ xfs_reflink_allocate_cow(
+ 
+ 	*lockmode = XFS_ILOCK_EXCL;
+ 
++	/*
++	 * The data fork mapping may have changed while we dropped the ILOCK
++	 * (a racing O_DIRECT writer under IOLOCK_SHARED can complete a full
++	 * CoW cycle including xfs_reflink_end_cow(), which remaps this offset
++	 * and drops the refcount of the old shared block).  Re-read it so the
++	 * shared-status recheck below and the caller's in-place iomap both
++	 * operate on the current mapping rather than a stale physical block.
++	 */
++	if (seq_before != READ_ONCE(ip->i_df.if_seq)) {
++		nimaps = 1;
++		error = xfs_bmapi_read(ip, imap->br_startoff,
++				imap->br_blockcount, imap, &nimaps, 0);
++		if (error)
++			goto out_trans_cancel;
++		offset_fsb = imap->br_startoff;
++		count_fsb = imap->br_blockcount;
++	}
++
+ 	/*
+ 	 * Check for an overlapping extent again now that we dropped the ilock.
+ 	 */
+-- 
+2.51.0
+

@@ -1,0 +1,39 @@
+From a411ac17b51c8c4d1e333f7234fa908220dbfc3f Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 20 Jul 2026 07:37:12 +0000
+Subject: [PATCH] nvme: avoid double free special payload
+
+jira VULN-44150
+cve CVE-2024-41073
+commit-author Chunguang Xu <chunguang.xu@shopee.com>
+commit e5d574ab37f5f2e7937405613d9b1a724811e5ad
+
+If a discard request needs to be retried, and that retry may fail before
+a new special payload is added, a double free will result. Clear the
+RQF_SPECIAL_LOAD when the request is cleaned.
+
+	Signed-off-by: Chunguang Xu <chunguang.xu@shopee.com>
+	Reviewed-by: Sagi Grimberg <sagi@grimberg.me>
+	Reviewed-by: Max Gurtovoy <mgurtovoy@nvidia.com>
+	Signed-off-by: Keith Busch <kbusch@kernel.org>
+(cherry picked from commit e5d574ab37f5f2e7937405613d9b1a724811e5ad)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/nvme/host/core.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/nvme/host/core.c b/drivers/nvme/host/core.c
+index ed42128968ff..85af90b852e8 100644
+--- a/drivers/nvme/host/core.c
++++ b/drivers/nvme/host/core.c
+@@ -959,6 +959,7 @@ void nvme_cleanup_cmd(struct request *req)
+ 			clear_bit_unlock(0, &ctrl->discard_page_busy);
+ 		else
+ 			kfree(bvec_virt(&req->special_vec));
++		req->rq_flags &= ~RQF_SPECIAL_PAYLOAD;
+ 	}
+ }
+ EXPORT_SYMBOL_GPL(nvme_cleanup_cmd);
+-- 
+2.51.0
+

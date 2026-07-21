@@ -1,0 +1,65 @@
+From d942af546fe4dbb6f615bc94a4111b5a3f24eb5a Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 20 Jul 2026 07:34:29 +0000
+Subject: [PATCH] nvmet: fix a possible leak when destroy a ctrl during qp
+ establishment
+
+jira VULN-38461
+cve CVE-2024-42152
+commit-author Sagi Grimberg <sagi@grimberg.me>
+commit c758b77d4a0a0ed3a1292b3fd7a2aeccd1a169a4
+
+In nvmet_sq_destroy we capture sq->ctrl early and if it is non-NULL we
+know that a ctrl was allocated (in the admin connect request handler)
+and we need to release pending AERs, clear ctrl->sqs and sq->ctrl
+(for nvme-loop primarily), and drop the final reference on the ctrl.
+
+However, a small window is possible where nvmet_sq_destroy starts (as
+a result of the client giving up and disconnecting) concurrently with
+the nvme admin connect cmd (which may be in an early stage). But *before*
+kill_and_confirm of sq->ref (i.e. the admin connect managed to get an sq
+live reference). In this case, sq->ctrl was allocated however after it was
+captured in a local variable in nvmet_sq_destroy.
+This prevented the final reference drop on the ctrl.
+
+Solve this by re-capturing the sq->ctrl after all inflight request has
+completed, where for sure sq->ctrl reference is final, and move forward
+based on that.
+
+This issue was observed in an environment with many hosts connecting
+multiple ctrls simoutanuosly, creating a delay in allocating a ctrl
+leading up to this race window.
+
+	Reported-by: Alex Turin <alex@vastdata.com>
+	Signed-off-by: Sagi Grimberg <sagi@grimberg.me>
+	Reviewed-by: Christoph Hellwig <hch@lst.de>
+	Signed-off-by: Keith Busch <kbusch@kernel.org>
+(cherry picked from commit c758b77d4a0a0ed3a1292b3fd7a2aeccd1a169a4)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/nvme/target/core.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/nvme/target/core.c b/drivers/nvme/target/core.c
+index aecb5853f8da..94b56016b81c 100644
+--- a/drivers/nvme/target/core.c
++++ b/drivers/nvme/target/core.c
+@@ -799,6 +799,15 @@ void nvmet_sq_destroy(struct nvmet_sq *sq)
+ 	percpu_ref_exit(&sq->ref);
+ 	nvmet_auth_sq_free(sq);
+ 
++	/*
++	 * we must reference the ctrl again after waiting for inflight IO
++	 * to complete. Because admin connect may have sneaked in after we
++	 * store sq->ctrl locally, but before we killed the percpu_ref. the
++	 * admin connect allocates and assigns sq->ctrl, which now needs a
++	 * final ref put, as this ctrl is going away.
++	 */
++	ctrl = sq->ctrl;
++
+ 	if (ctrl) {
+ 		/*
+ 		 * The teardown flow may take some time, and the host may not
+-- 
+2.51.0
+
