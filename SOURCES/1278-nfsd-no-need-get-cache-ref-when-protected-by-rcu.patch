@@ -1,0 +1,50 @@
+From a314e113f6e62a19046aa080ca16a33c5c1ecc3a Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Tue, 28 Jul 2026 13:17:20 -0400
+Subject: [PATCH] nfsd: no need get cache ref when protected by rcu
+
+jira VULN-167075
+cve CVE-2024-53216
+commit-author Yang Erkun <yangerkun@huawei.com>
+commit c224edca7af028828e2ad866b61d731b5e72b46d
+
+rcu_read_lock/rcu_read_unlock has already provide protection for the
+pointer we will reference when we call e_show. Therefore, there is no
+need to obtain a cache reference to help protect cache_head.
+Additionally, the .put such as expkey_put/svc_export_put will invoke
+dput, which can sleep and break rcu. Stop get cache reference to fix
+them all.
+
+Fixes: ae74136b4bb6 ("SUNRPC: Allow cache lookups to use RCU protection rather than the r/w spinlock")
+	Suggested-by: NeilBrown <neilb@suse.de>
+	Signed-off-by: Yang Erkun <yangerkun@huawei.com>
+	Reviewed-by: Jeff Layton <jlayton@kernel.org>
+	Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+(cherry picked from commit c224edca7af028828e2ad866b61d731b5e72b46d)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ fs/nfsd/export.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/fs/nfsd/export.c b/fs/nfsd/export.c
+index 426542cbb271..c673352964d0 100644
+--- a/fs/nfsd/export.c
++++ b/fs/nfsd/export.c
+@@ -1372,13 +1372,9 @@ static int e_show(struct seq_file *m, void *p)
+ 		return 0;
+ 	}
+ 
+-	if (!cache_get_rcu(&exp->h))
++	if (cache_check_rcu(cd, &exp->h, NULL))
+ 		return 0;
+ 
+-	if (cache_check(cd, &exp->h, NULL))
+-		return 0;
+-
+-	exp_put(exp);
+ 	return svc_export_show(m, cd, cp);
+ }
+ 
+-- 
+2.52.0
+

@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 19
+%define ciq_patch_version 20
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1268,6 +1268,19 @@ Patch1000265: 1265-net-ipv4-Consolidate-ipv4_mtu-and-ip_dst_mtu_maybe_f.patch
 Patch1000266: 1266-ipv4-use-RCU-protection-in-ip_dst_mtu_maybe_forward.patch
 Patch1000267: 1267-ipv4-add-RCU-protection-to-ip4_dst_hoplimit.patch
 Patch1000268: 1268-net-use-dst_dev_rcu-in-sk_setup_caps.patch
+#CIQ Patch Version: 570.60.1+20.1.el9_6_ciq
+Patch1000269: 1269-net-sched-act_api-use-RCU-with-deferred-freeing-for-.patch
+Patch1000270: 1270-VMCI-Fix-use-after-free-when-removing-resource-in-vm.patch
+Patch1000271: 1271-vt-prevent-kernel-infoleak-in-con_font_get.patch
+Patch1000272: 1272-Bluetooth-hci_event-Fix-UAF-in-hci_acl_create_conn_s.patch
+Patch1000273: 1273-drm-amd-display-Do-not-skip-unrelated-mode-changes-i.patch
+Patch1000274: 1274-net-sched-act_csum-validate-nested-VLAN-headers.patch
+Patch1000275: 1275-smb-client-fix-OOB-reads-parsing-symlink-error-respo.patch
+Patch1000276: 1276-drm-gem-Fix-inconsistent-plane-dimension-calculation.patch
+Patch1000277: 1277-SUNRPC-introduce-cache_check_rcu-to-help-check-in-rc.patch
+Patch1000278: 1278-nfsd-no-need-get-cache-ref-when-protected-by-rcu.patch
+Patch1000279: 1279-SUNRPC-no-need-get-cache-ref-when-protected-by-rcu.patch
+Patch1000280: 1280-nfsd-fix-UAF-when-access-ex_uuid-or-ex_stats.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2298,6 +2311,18 @@ ApplyOptionalPatch 1265-net-ipv4-Consolidate-ipv4_mtu-and-ip_dst_mtu_maybe_f.pat
 ApplyOptionalPatch 1266-ipv4-use-RCU-protection-in-ip_dst_mtu_maybe_forward.patch
 ApplyOptionalPatch 1267-ipv4-add-RCU-protection-to-ip4_dst_hoplimit.patch
 ApplyOptionalPatch 1268-net-use-dst_dev_rcu-in-sk_setup_caps.patch
+ApplyOptionalPatch 1269-net-sched-act_api-use-RCU-with-deferred-freeing-for-.patch
+ApplyOptionalPatch 1270-VMCI-Fix-use-after-free-when-removing-resource-in-vm.patch
+ApplyOptionalPatch 1271-vt-prevent-kernel-infoleak-in-con_font_get.patch
+ApplyOptionalPatch 1272-Bluetooth-hci_event-Fix-UAF-in-hci_acl_create_conn_s.patch
+ApplyOptionalPatch 1273-drm-amd-display-Do-not-skip-unrelated-mode-changes-i.patch
+ApplyOptionalPatch 1274-net-sched-act_csum-validate-nested-VLAN-headers.patch
+ApplyOptionalPatch 1275-smb-client-fix-OOB-reads-parsing-symlink-error-respo.patch
+ApplyOptionalPatch 1276-drm-gem-Fix-inconsistent-plane-dimension-calculation.patch
+ApplyOptionalPatch 1277-SUNRPC-introduce-cache_check_rcu-to-help-check-in-rc.patch
+ApplyOptionalPatch 1278-nfsd-no-need-get-cache-ref-when-protected-by-rcu.patch
+ApplyOptionalPatch 1279-SUNRPC-no-need-get-cache-ref-when-protected-by-rcu.patch
+ApplyOptionalPatch 1280-nfsd-fix-UAF-when-access-ex_uuid-or-ex_stats.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4414,6 +4439,20 @@ fi
 #
 #
 %changelog
+* Thu Jul 30 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+20.1.el9_6_ciq
+- nfsd: fix UAF when access ex_uuid or ex_stats (Brett Mastbergen) [ciqres] {CVE-2024-53216}
+- SUNRPC: no need get cache ref when protected by rcu (Brett Mastbergen) [ciqres] {CVE-2024-53216}
+- nfsd: no need get cache ref when protected by rcu (Brett Mastbergen) [ciqres] {CVE-2024-53216}
+- SUNRPC: introduce cache_check_rcu to help check in rcu context (Brett Mastbergen) [ciqres] {CVE-2024-53216}
+- drm/gem: Fix inconsistent plane dimension calculation in drm_gem_fb_init_with_funcs() (CIQ Kernel Automation) [ciqres] {CVE-2026-46209}
+- smb: client: fix OOB reads parsing symlink error response (CIQ Kernel Automation) [ciqres] {CVE-2026-31613}
+- net: sched: act_csum: validate nested VLAN headers (CIQ Kernel Automation) [ciqres] {CVE-2026-31684}
+- drm/amd/display: Do not skip unrelated mode changes in DSC validation (CIQ Kernel Automation) [ciqres] {CVE-2026-31488}
+- Bluetooth: hci_event: Fix UAF in hci_acl_create_conn_sync (CIQ Kernel Automation) [ciqres] {CVE-2025-39982}
+- vt: prevent kernel-infoleak in con_font_get() (CIQ Kernel Automation) [ciqres] {CVE-2024-50076}
+- VMCI: Fix use-after-free when removing resource in vmci_resource_remove() (CIQ Kernel Automation) [ciqres] {CVE-2024-46738}
+- net/sched: act_api: use RCU with deferred freeing for action lifecycle (Brett Mastbergen) [ciqres] {CVE-2026-53264}
+
 * Tue Jul 21 2026 Shreeya Patel <spatel@ciq.com> - 5.14.0-570.60.1+19.1.el9_6_ciq
 - net: use dst_dev_rcu() in sk_setup_caps() (Marcin Wcisło) [ciqres] {CVE-2025-40170}
 - ipv4: add RCU protection to ip4_dst_hoplimit() (Marcin Wcisło) [ciqres] {CVE-2025-40170}
