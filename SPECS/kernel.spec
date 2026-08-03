@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 36
+%define ciq_patch_version 37
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1596,6 +1596,17 @@ Patch1000639: 0594-netfilter-tproxy-bail-out-if-IP-has-been-disabled-on.patch
 Patch1000640: 0595-mptcp-ensure-snd_una-is-properly-initialized-on-conn.patch
 Patch1000641: 0596-nvme-avoid-double-free-special-payload.patch
 Patch1000642: 0597-xfs-resample-the-data-fork-mapping-after-cycling-ILO.patch
+#CIQ Patch Version: 284.30.1+37.1.el9_2_ciq
+Patch1000643: 0598-netfilter-nf_conntrack_helper-pass-helper-to-expect-.patch
+Patch1000644: 0599-pinctrl-fix-deadlock-in-create_pinctrl-when-handling.patch
+Patch1000645: 0600-ACPICA-Revert-ACPICA-avoid-Info-mapping-multiple-BAR.patch
+Patch1000646: 0601-ipv6-prevent-possible-NULL-dereference-in-rt6_probe.patch
+Patch1000647: 0602-tipc-force-a-dst-refcount-before-doing-decryption.patch
+Patch1000648: 0603-drm-radeon-fix-UBSAN-warning-in-kv_dpm.c.patch
+Patch1000649: 0604-powerpc-eeh-avoid-possible-crash-when-edev-pdev-chan.patch
+Patch1000650: 0605-drm-amdgpu-avoid-using-null-object-of-framebuffer.patch
+Patch1000651: 0606-xfs-add-bounds-checking-to-xlog_recover_process_data.patch
+Patch1000652: 0607-net-sched-act_api-use-RCU-with-deferred-freeing-for-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2914,6 +2925,16 @@ ApplyOptionalPatch 0594-netfilter-tproxy-bail-out-if-IP-has-been-disabled-on.pat
 ApplyOptionalPatch 0595-mptcp-ensure-snd_una-is-properly-initialized-on-conn.patch
 ApplyOptionalPatch 0596-nvme-avoid-double-free-special-payload.patch
 ApplyOptionalPatch 0597-xfs-resample-the-data-fork-mapping-after-cycling-ILO.patch
+ApplyOptionalPatch 0598-netfilter-nf_conntrack_helper-pass-helper-to-expect-.patch
+ApplyOptionalPatch 0599-pinctrl-fix-deadlock-in-create_pinctrl-when-handling.patch
+ApplyOptionalPatch 0600-ACPICA-Revert-ACPICA-avoid-Info-mapping-multiple-BAR.patch
+ApplyOptionalPatch 0601-ipv6-prevent-possible-NULL-dereference-in-rt6_probe.patch
+ApplyOptionalPatch 0602-tipc-force-a-dst-refcount-before-doing-decryption.patch
+ApplyOptionalPatch 0603-drm-radeon-fix-UBSAN-warning-in-kv_dpm.c.patch
+ApplyOptionalPatch 0604-powerpc-eeh-avoid-possible-crash-when-edev-pdev-chan.patch
+ApplyOptionalPatch 0605-drm-amdgpu-avoid-using-null-object-of-framebuffer.patch
+ApplyOptionalPatch 0606-xfs-add-bounds-checking-to-xlog_recover_process_data.patch
+ApplyOptionalPatch 0607-net-sched-act_api-use-RCU-with-deferred-freeing-for-.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4797,6 +4818,18 @@ fi
 #
 #
 %changelog
+* Fri Jul 31 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+37.1.el9_2_ciq
+- net/sched: act_api: use RCU with deferred freeing for action lifecycle (Brett Mastbergen) [ciqres] {CVE-2026-53264}
+- xfs: add bounds checking to xlog_recover_process_data (CIQ Kernel Automation) [ciqres] {CVE-2024-41014}
+- drm/amdgpu: avoid using null object of framebuffer (CIQ Kernel Automation) [ciqres] {CVE-2024-41093}
+- powerpc/eeh: avoid possible crash when edev->pdev changes (CIQ Kernel Automation) [ciqres] {CVE-2024-41064}
+- drm/radeon: fix UBSAN warning in kv_dpm.c (CIQ Kernel Automation) [ciqres] {CVE-2024-40988}
+- tipc: force a dst refcount before doing decryption (CIQ Kernel Automation) [ciqres] {CVE-2024-40983}
+- ipv6: prevent possible NULL dereference in rt6_probe() (CIQ Kernel Automation) [ciqres] {CVE-2024-40960}
+- ACPICA: Revert "ACPICA: avoid Info: mapping multiple BARs. Your kernel is fine." (CIQ Kernel Automation) [ciqres] {CVE-2024-40984}
+- pinctrl: fix deadlock in create_pinctrl() when handling -EPROBE_DEFER (CIQ Kernel Automation) [ciqres] {CVE-2024-42090}
+- netfilter: nf_conntrack_helper: pass helper to expect cleanup (CIQ Kernel Automation) [ciqres] {CVE-2026-43027}
+
 * Tue Jul 21 2026 Shreeya Patel <spatel@ciq.com> - 5.14.0-284.30.1+36.1.el9_2_ciq
 - xfs: resample the data fork mapping after cycling ILOCK (Jonathan Maple) [ciqres]
 - nvme: avoid double free special payload (CIQ Kernel Automation) [ciqres] {CVE-2024-41073}

@@ -1,0 +1,76 @@
+From 1bf3bf9f5fac186bee9d6cb29b041c5421a37369 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 27 Jul 2026 07:42:35 +0000
+Subject: [PATCH] drm/amdgpu: avoid using null object of framebuffer
+
+jira VULN-38380
+cve CVE-2024-41093
+commit-author Julia Zhang <julia.zhang@amd.com>
+commit bcfa48ff785bd121316592b131ff6531e3e696bb
+
+Instead of using state->fb->obj[0] directly, get object from framebuffer
+by calling drm_gem_fb_get_obj() and return error code when object is
+null to avoid using null object of framebuffer.
+
+	Reported-by: Fusheng Huang <fusheng.huang@ecarxgroup.com>
+	Signed-off-by: Julia Zhang <Julia.Zhang@amd.com>
+	Reviewed-by: Huang Rui <ray.huang@amd.com>
+	Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+	Cc: stable@vger.kernel.org
+(cherry picked from commit bcfa48ff785bd121316592b131ff6531e3e696bb)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/gpu/drm/amd/amdgpu/amdgpu_vkms.c | 18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_vkms.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_vkms.c
+index f69827aefb57..d20afc3d914b 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_vkms.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_vkms.c
+@@ -2,6 +2,7 @@
+ 
+ #include <drm/drm_atomic_helper.h>
+ #include <drm/drm_simple_kms_helper.h>
++#include <drm/drm_gem_framebuffer_helper.h>
+ #include <drm/drm_vblank.h>
+ 
+ #include "amdgpu.h"
+@@ -310,7 +311,13 @@ static int amdgpu_vkms_prepare_fb(struct drm_plane *plane,
+ 		return 0;
+ 	}
+ 	afb = to_amdgpu_framebuffer(new_state->fb);
+-	obj = new_state->fb->obj[0];
++
++	obj = drm_gem_fb_get_obj(new_state->fb, 0);
++	if (!obj) {
++		DRM_ERROR("Failed to get obj from framebuffer\n");
++		return -EINVAL;
++	}
++
+ 	rbo = gem_to_amdgpu_bo(obj);
+ 	adev = amdgpu_ttm_adev(rbo->tbo.bdev);
+ 
+@@ -364,12 +371,19 @@ static void amdgpu_vkms_cleanup_fb(struct drm_plane *plane,
+ 				   struct drm_plane_state *old_state)
+ {
+ 	struct amdgpu_bo *rbo;
++	struct drm_gem_object *obj;
+ 	int r;
+ 
+ 	if (!old_state->fb)
+ 		return;
+ 
+-	rbo = gem_to_amdgpu_bo(old_state->fb->obj[0]);
++	obj = drm_gem_fb_get_obj(old_state->fb, 0);
++	if (!obj) {
++		DRM_ERROR("Failed to get obj from framebuffer\n");
++		return;
++	}
++
++	rbo = gem_to_amdgpu_bo(obj);
+ 	r = amdgpu_bo_reserve(rbo, false);
+ 	if (unlikely(r)) {
+ 		DRM_ERROR("failed to reserve rbo before unpin\n");
+-- 
+2.52.0
+
