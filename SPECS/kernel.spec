@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 20
+%define ciq_patch_version 21
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1281,6 +1281,8 @@ Patch1000277: 1277-SUNRPC-introduce-cache_check_rcu-to-help-check-in-rc.patch
 Patch1000278: 1278-nfsd-no-need-get-cache-ref-when-protected-by-rcu.patch
 Patch1000279: 1279-SUNRPC-no-need-get-cache-ref-when-protected-by-rcu.patch
 Patch1000280: 1280-nfsd-fix-UAF-when-access-ex_uuid-or-ex_stats.patch
+#CIQ Patch Version: 570.60.1+21.1.el9_6_ciq
+Patch1000281: 1281-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2323,6 +2325,7 @@ ApplyOptionalPatch 1277-SUNRPC-introduce-cache_check_rcu-to-help-check-in-rc.pat
 ApplyOptionalPatch 1278-nfsd-no-need-get-cache-ref-when-protected-by-rcu.patch
 ApplyOptionalPatch 1279-SUNRPC-no-need-get-cache-ref-when-protected-by-rcu.patch
 ApplyOptionalPatch 1280-nfsd-fix-UAF-when-access-ex_uuid-or-ex_stats.patch
+ApplyOptionalPatch 1281-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4439,6 +4442,9 @@ fi
 #
 #
 %changelog
+* Wed Aug 05 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+21.1.el9_6_ciq
+- KVM: x86: Check for invalid/obsolete root *after* making MMU pages available (Brett Mastbergen) [ciqres] {CVE-2026-64561}
+
 * Thu Jul 30 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+20.1.el9_6_ciq
 - nfsd: fix UAF when access ex_uuid or ex_stats (Brett Mastbergen) [ciqres] {CVE-2024-53216}
 - SUNRPC: no need get cache ref when protected by rcu (Brett Mastbergen) [ciqres] {CVE-2024-53216}
