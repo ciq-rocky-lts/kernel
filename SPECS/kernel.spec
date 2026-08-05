@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 33
+%define ciq_patch_version 34
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1149,6 +1149,15 @@ Patch0563: 0408-net-sched-act_csum-validate-nested-VLAN-headers.patch
 Patch0564: 0409-drm-gem-Fix-inconsistent-plane-dimension-calculation.patch
 Patch0565: 0410-RDMA-vmw_pvrdma-Fix-double-free-on-pvrdma_alloc_ucon.patch
 Patch0566: 0411-xfs-resample-the-data-fork-mapping-after-cycling-ILO.patch
+#CIQ Patch Version: 372.32.1+34.1.el8_6_ciq
+Patch0567: 0412-netfilter-nf_tables-don-t-skip-expired-elements-duri.patch
+Patch0568: 0413-netfilter-nf_tables-don-t-fail-inserts-if-duplicate-.patch
+Patch0569: 0414-net-sched-act_api-use-RCU-with-deferred-freeing-for-.patch
+Patch0570: 0415-RDMA-core-Fix-KASAN-slab-use-after-free-Read-in-ib_r.patch
+Patch0571: 0416-net-page_pool-use-in_softirq-instead.patch
+Patch0572: 0417-page_pool-fix-inconsistency-for-page_pool_ring_-un-l.patch
+Patch0573: 0418-page_pool-Fix-use-after-free-in-page_pool_recycle_in.patch
+Patch0574: 0419-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2282,6 +2291,14 @@ ApplyOptionalPatch 0408-net-sched-act_csum-validate-nested-VLAN-headers.patch
 ApplyOptionalPatch 0409-drm-gem-Fix-inconsistent-plane-dimension-calculation.patch
 ApplyOptionalPatch 0410-RDMA-vmw_pvrdma-Fix-double-free-on-pvrdma_alloc_ucon.patch
 ApplyOptionalPatch 0411-xfs-resample-the-data-fork-mapping-after-cycling-ILO.patch
+ApplyOptionalPatch 0412-netfilter-nf_tables-don-t-skip-expired-elements-duri.patch
+ApplyOptionalPatch 0413-netfilter-nf_tables-don-t-fail-inserts-if-duplicate-.patch
+ApplyOptionalPatch 0414-net-sched-act_api-use-RCU-with-deferred-freeing-for-.patch
+ApplyOptionalPatch 0415-RDMA-core-Fix-KASAN-slab-use-after-free-Read-in-ib_r.patch
+ApplyOptionalPatch 0416-net-page_pool-use-in_softirq-instead.patch
+ApplyOptionalPatch 0417-page_pool-fix-inconsistency-for-page_pool_ring_-un-l.patch
+ApplyOptionalPatch 0418-page_pool-Fix-use-after-free-in-page_pool_recycle_in.patch
+ApplyOptionalPatch 0419-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
 
 
 # CIQ LTS patches:
@@ -3841,6 +3858,16 @@ fi
 #
 #
 %changelog
+* Tue Aug 04 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+34.1.el8_6_ciq
+- KVM: x86: Check for invalid/obsolete root *after* making MMU pages available (Brett Mastbergen) [ciqres] {CVE-2026-64561}
+- page_pool: Fix use-after-free in page_pool_recycle_in_ring (Marcin Wcisło) [ciqres] {CVE-2025-38129}
+- page_pool: fix inconsistency for page_pool_ring_[un]lock() (Marcin Wcisło) [ciqres] {CVE-2025-38129}
+- net: page_pool: use in_softirq() instead (Marcin Wcisło) [ciqres] {CVE-2025-38129}
+- RDMA/core: Fix "KASAN: slab-use-after-free Read in ib_register_device" problem (Marcin Wcisło) [ciqres] {CVE-2025-38022}
+- net/sched: act_api: use RCU with deferred freeing for action lifecycle (Brett Mastbergen) [ciqres] {CVE-2026-53264}
+- netfilter: nf_tables: don't fail inserts if duplicate has expired (CIQ Kernel Automation) [ciqres] {CVE-2023-52925}
+- netfilter: nf_tables: don't skip expired elements during walk (CIQ Kernel Automation) [ciqres] {CVE-2023-52924}
+
 * Tue Jul 21 2026 Shreeya Patel <spatel@ciq.com> - 4.18.0-372.32.1+33.1.el8_6_ciq
 - xfs: resample the data fork mapping after cycling ILOCK (Jonathan Maple) [ciqres]
 - RDMA/vmw_pvrdma: Fix double free on pvrdma_alloc_ucontext() error path (CIQ Kernel Automation) [ciqres] {CVE-2026-46189}
