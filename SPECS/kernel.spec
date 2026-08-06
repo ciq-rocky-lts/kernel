@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 37
+%define ciq_patch_version 38
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1607,6 +1607,10 @@ Patch1000649: 0604-powerpc-eeh-avoid-possible-crash-when-edev-pdev-chan.patch
 Patch1000650: 0605-drm-amdgpu-avoid-using-null-object-of-framebuffer.patch
 Patch1000651: 0606-xfs-add-bounds-checking-to-xlog_recover_process_data.patch
 Patch1000652: 0607-net-sched-act_api-use-RCU-with-deferred-freeing-for-.patch
+#CIQ Patch Version: 284.30.1+38.1.el9_2_ciq
+Patch1000653: 0608-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
+Patch1000654: 0609-net-sched-act_csum-validate-nested-VLAN-headers.patch
+Patch1000655: 0610-drm-gem-Fix-inconsistent-plane-dimension-calculation.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2935,6 +2939,9 @@ ApplyOptionalPatch 0604-powerpc-eeh-avoid-possible-crash-when-edev-pdev-chan.pat
 ApplyOptionalPatch 0605-drm-amdgpu-avoid-using-null-object-of-framebuffer.patch
 ApplyOptionalPatch 0606-xfs-add-bounds-checking-to-xlog_recover_process_data.patch
 ApplyOptionalPatch 0607-net-sched-act_api-use-RCU-with-deferred-freeing-for-.patch
+ApplyOptionalPatch 0608-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
+ApplyOptionalPatch 0609-net-sched-act_csum-validate-nested-VLAN-headers.patch
+ApplyOptionalPatch 0610-drm-gem-Fix-inconsistent-plane-dimension-calculation.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4818,6 +4825,11 @@ fi
 #
 #
 %changelog
+* Wed Aug 05 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+38.1.el9_2_ciq
+- drm/gem: Fix inconsistent plane dimension calculation in drm_gem_fb_init_with_funcs() (CIQ Kernel Automation) [ciqres] {CVE-2026-46209}
+- net: sched: act_csum: validate nested VLAN headers (CIQ Kernel Automation) [ciqres] {CVE-2026-31684}
+- KVM: x86: Check for invalid/obsolete root *after* making MMU pages available (Brett Mastbergen) [ciqres] {CVE-2026-64561}
+
 * Fri Jul 31 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+37.1.el9_2_ciq
 - net/sched: act_api: use RCU with deferred freeing for action lifecycle (Brett Mastbergen) [ciqres] {CVE-2026-53264}
 - xfs: add bounds checking to xlog_recover_process_data (CIQ Kernel Automation) [ciqres] {CVE-2024-41014}
