@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 18
+%define ciq_patch_version 19
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -652,6 +652,9 @@ Patch1127: 0101-netfilter-nf_conntrack_h323-check-for-zero-length-in.patch
 Patch1128: 0102-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
 Patch1129: 0103-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
 Patch1130: 0104-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.19.1
+Patch1131: 0105-net-sched-act_csum-validate-nested-VLAN-headers.patch
+Patch1132: 0106-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -1125,6 +1128,8 @@ ApplyOptionalPatch 0101-netfilter-nf_conntrack_h323-check-for-zero-length-in.pat
 ApplyOptionalPatch 0102-RDMA-mlx4-Fix-mis-use-of-RCU-in-mlx4_srq_event.patch
 ApplyOptionalPatch 0103-rtmutex-Use-waiter-task-instead-of-current-in-remove.patch
 ApplyOptionalPatch 0104-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
+ApplyOptionalPatch 0105-net-sched-act_csum-validate-nested-VLAN-headers.patch
+ApplyOptionalPatch 0106-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2128,6 +2133,10 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Fri Aug 07 2026 Jonathan Maple <jmaple@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.19.1
+- sctp: don't free the ASCONF's own transport in DEL-IP processing (Jonathan Maple) [ciqres] {CVE-2026-64564}
+- net: sched: act_csum: validate nested VLAN headers (CIQ Kernel Automation) [ciqres] {CVE-2026-31684}
+
 * Mon Jul 13 2026 Jonathan Maple <jmaple@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.18.1
 - locking/rtmutex: Skip remove_waiter() when waiter is not enqueued (Davidlohr Bueso) [ciqres] {CVE-2026-53163}
 - rtmutex: Use waiter::task instead of current in remove_waiter() (Keenan Dong) [ciqres] {CVE-2026-43499}
