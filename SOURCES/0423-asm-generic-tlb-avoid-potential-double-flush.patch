@@ -1,0 +1,68 @@
+From 1df5199e418056f36293bef1df0562d00bfadd8c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Mon, 3 Feb 2020 17:36:53 -0800
+Subject: [PATCH] asm-generic/tlb: avoid potential double flush
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-71581
+cve-pre CVE-2025-38085
+commit-author Peter Zijlstra <peterz@infradead.org>
+commit 0758cd8304942292e95a0f750c374533db378b32
+
+Aneesh reported that:
+
+	tlb_flush_mmu()
+	  tlb_flush_mmu_tlbonly()
+	    tlb_flush()			<-- #1
+	  tlb_flush_mmu_free()
+	    tlb_table_flush()
+	      tlb_table_invalidate()
+		tlb_flush_mmu_tlbonly()
+		  tlb_flush()		<-- #2
+
+does two TLBIs when tlb->fullmm, because __tlb_reset_range() will not
+clear tlb->end in that case.
+
+Observe that any caller to __tlb_adjust_range() also sets at least one of
+the tlb->freed_tables || tlb->cleared_p* bits, and those are
+unconditionally cleared by __tlb_reset_range().
+
+Change the condition for actually issuing TLBI to having one of those bits
+set, as opposed to having tlb->end != 0.
+
+Link: http://lkml.kernel.org/r/20200116064531.483522-4-aneesh.kumar@linux.ibm.com
+	Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+	Signed-off-by: Aneesh Kumar K.V <aneesh.kumar@linux.ibm.com>
+	Reported-by: "Aneesh Kumar K.V" <aneesh.kumar@linux.ibm.com>
+	Cc: Michael Ellerman <mpe@ellerman.id.au>
+	Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+	Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+(cherry picked from commit 0758cd8304942292e95a0f750c374533db378b32)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/asm-generic/tlb.h | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/include/asm-generic/tlb.h b/include/asm-generic/tlb.h
+index 085b8f0f8f26..7ee1c2b3be75 100644
+--- a/include/asm-generic/tlb.h
++++ b/include/asm-generic/tlb.h
+@@ -404,7 +404,12 @@ tlb_update_vma_flags(struct mmu_gather *tlb, struct vm_area_struct *vma)
+ 
+ static inline void tlb_flush_mmu_tlbonly(struct mmu_gather *tlb)
+ {
+-	if (!tlb->end)
++	/*
++	 * Anything calling __tlb_adjust_range() also sets at least one of
++	 * these bits.
++	 */
++	if (!(tlb->freed_tables || tlb->cleared_ptes || tlb->cleared_pmds ||
++	      tlb->cleared_puds || tlb->cleared_p4ds))
+ 		return;
+ 
+ 	tlb_flush(tlb);
+-- 
+2.52.0
+

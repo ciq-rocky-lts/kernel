@@ -1,0 +1,91 @@
+From 3aec85d87d71e9659aa4de8bb5a8d3477d0c84a8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 27 Jan 2021 23:53:42 +0000
+Subject: [PATCH] mm: proc: Invalidate TLB after clearing soft-dirty page state
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-71581
+cve-pre CVE-2025-38085
+commit-author Will Deacon <will@kernel.org>
+commit 912efa17e5121693dfbadae29768f4144a3f9e62
+upstream-diff Fixed context conflicts due to the lack of the following
+  commits:
+  - 4d45e75a9955ade5c2f49bd96fc4173b2cec9a72 ("mm: remove the
+    now-unnecessary mmget_still_valid() hack")
+  - 29a951dfb3c3263c3a0f3bd9f7f2c2cfde4baedb ("mm: fix clear_refs_write
+    locking")
+  Backporting them, although syntactically clean, would require including
+  additional patches to provide the logic required for them to be correct.
+
+Since commit 0758cd830494 ("asm-generic/tlb: avoid potential double
+flush"), TLB invalidation is elided in tlb_finish_mmu() if no entries
+were batched via the tlb_remove_*() functions. Consequently, the
+page-table modifications performed by clear_refs_write() in response to
+a write to /proc/<pid>/clear_refs do not perform TLB invalidation.
+Although this is fine when simply aging the ptes, in the case of
+clearing the "soft-dirty" state we can end up with entries where
+pte_write() is false, yet a writable mapping remains in the TLB.
+
+Fix this by avoiding the mmu_gather API altogether: managing both the
+'tlb_flush_pending' flag on the 'mm_struct' and explicit TLB
+invalidation for the sort-dirty path, much like mprotect() does already.
+
+Fixes: 0758cd830494 ("asm-generic/tlb: avoid potential double flush”)
+	Signed-off-by: Will Deacon <will@kernel.org>
+	Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+	Reviewed-by: Yu Zhao <yuzhao@google.com>
+	Acked-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+	Acked-by: Linus Torvalds <torvalds@linux-foundation.org>
+Link: https://lkml.kernel.org/r/20210127235347.1402-2-will@kernel.org
+(cherry picked from commit 912efa17e5121693dfbadae29768f4144a3f9e62)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/proc/task_mmu.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/fs/proc/task_mmu.c b/fs/proc/task_mmu.c
+index 3945b2d54401..fa13d4a6817e 100644
+--- a/fs/proc/task_mmu.c
++++ b/fs/proc/task_mmu.c
+@@ -1106,7 +1106,6 @@ static ssize_t clear_refs_write(struct file *file, const char __user *buf,
+ 	struct mm_struct *mm;
+ 	struct vm_area_struct *vma;
+ 	enum clear_refs_types type;
+-	struct mmu_gather tlb;
+ 	int itype;
+ 	int rv;
+ 
+@@ -1151,7 +1150,6 @@ static ssize_t clear_refs_write(struct file *file, const char __user *buf,
+ 			count = -EINTR;
+ 			goto out_mm;
+ 		}
+-		tlb_gather_mmu(&tlb, mm, 0, -1);
+ 		if (type == CLEAR_REFS_SOFT_DIRTY) {
+ 			for (vma = mm->mmap; vma; vma = vma->vm_next) {
+ 				if (!(vma->vm_flags & VM_SOFTDIRTY))
+@@ -1187,15 +1185,18 @@ static ssize_t clear_refs_write(struct file *file, const char __user *buf,
+ 				break;
+ 			}
+ 
++			inc_tlb_flush_pending(mm);
+ 			mmu_notifier_range_init(&range, MMU_NOTIFY_SOFT_DIRTY,
+ 						0, NULL, mm, 0, -1UL);
+ 			mmu_notifier_invalidate_range_start(&range);
+ 		}
+ 		walk_page_range(mm, 0, mm->highest_vm_end, &clear_refs_walk_ops,
+ 				&cp);
+-		if (type == CLEAR_REFS_SOFT_DIRTY)
++		if (type == CLEAR_REFS_SOFT_DIRTY) {
+ 			mmu_notifier_invalidate_range_end(&range);
+-		tlb_finish_mmu(&tlb, 0, -1);
++			flush_tlb_mm(mm);
++			dec_tlb_flush_pending(mm);
++		}
+ 		mmap_read_unlock(mm);
+ out_mm:
+ 		mmput(mm);
+-- 
+2.52.0
+

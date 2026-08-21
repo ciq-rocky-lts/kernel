@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 34
+%define ciq_patch_version 35
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1158,6 +1158,30 @@ Patch0571: 0416-net-page_pool-use-in_softirq-instead.patch
 Patch0572: 0417-page_pool-fix-inconsistency-for-page_pool_ring_-un-l.patch
 Patch0573: 0418-page_pool-Fix-use-after-free-in-page_pool_recycle_in.patch
 Patch0574: 0419-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
+#CIQ Patch Version: 372.32.1+35.1.el8_6_ciq
+Patch0575: 0420-arm-asm-tlb.h-Fix-build-error-implicit-func-declarat.patch
+Patch0576: 0421-ARM-Kconfig-remove-useless-parenthesis.patch
+Patch0577: 0422-arm-tlb-Convert-to-generic-mmu_gather.patch
+Patch0578: 0423-asm-generic-tlb-avoid-potential-double-flush.patch
+Patch0579: 0424-asm-generic-tlb-rename-HAVE_RCU_TABLE_FREE.patch
+Patch0580: 0425-asm-generic-tlb-provide-MMU_GATHER_TABLE_FREE.patch
+Patch0581: 0426-mm-proc-Invalidate-TLB-after-clearing-soft-dirty-pag.patch
+Patch0582: 0427-mm-hugetlb-make-detecting-shared-pte-more-reliable.patch
+Patch0583: 0428-hugetlb-unshare-some-PMDs-when-splitting-VMAs.patch
+Patch0584: 0429-mm-hugetlb-proc-check-for-hugetlb-shared-PMD-in-proc.patch
+Patch0585: 0430-mm-hugetlb-independent-PMD-page-table-shared-count.patch
+Patch0586: 0431-mm-hugetlb-unshare-page-tables-during-VMA-split-not-.patch
+Patch0587: 0432-mm-hugetlb-fix-huge_pmd_unshare-vs-GUP-fast-race.patch
+Patch0588: 0433-mm-hugetlb-fix-copy_hugetlb_page_range-to-use-pt_sha.patch
+Patch0589: 0434-mm-hugetlb-fix-hugetlb_pmd_shared.patch
+Patch0590: 0435-mm-hugetlb-fix-two-comments-related-to-huge_pmd_unsh.patch
+Patch0591: 0436-mm-rmap-fix-two-comments-related-to-huge_pmd_unshare.patch
+Patch0592: 0437-mm-hugetlb-fix-excessive-IPI-broadcasts-when-unshari.patch
+Patch0593: 0438-md-bitmap-fix-GPF-in-write_page-caused-by-resize-rac.patch
+Patch0594: 0439-dm-log-fix-out-of-bounds-write-due-to-region_count-o.patch
+Patch0595: 0440-dm-log-fix-a-bitset_size-overflow-on-32bit-machines.patch
+Patch0596: 0441-fs-smb-client-fix-out-of-bounds-read-in-cifs_sanitiz.patch
+Patch0597: 0442-xen-privcmd-fix-double-free-via-VMA-splitting.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2299,6 +2323,29 @@ ApplyOptionalPatch 0416-net-page_pool-use-in_softirq-instead.patch
 ApplyOptionalPatch 0417-page_pool-fix-inconsistency-for-page_pool_ring_-un-l.patch
 ApplyOptionalPatch 0418-page_pool-Fix-use-after-free-in-page_pool_recycle_in.patch
 ApplyOptionalPatch 0419-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
+ApplyOptionalPatch 0420-arm-asm-tlb.h-Fix-build-error-implicit-func-declarat.patch
+ApplyOptionalPatch 0421-ARM-Kconfig-remove-useless-parenthesis.patch
+ApplyOptionalPatch 0422-arm-tlb-Convert-to-generic-mmu_gather.patch
+ApplyOptionalPatch 0423-asm-generic-tlb-avoid-potential-double-flush.patch
+ApplyOptionalPatch 0424-asm-generic-tlb-rename-HAVE_RCU_TABLE_FREE.patch
+ApplyOptionalPatch 0425-asm-generic-tlb-provide-MMU_GATHER_TABLE_FREE.patch
+ApplyOptionalPatch 0426-mm-proc-Invalidate-TLB-after-clearing-soft-dirty-pag.patch
+ApplyOptionalPatch 0427-mm-hugetlb-make-detecting-shared-pte-more-reliable.patch
+ApplyOptionalPatch 0428-hugetlb-unshare-some-PMDs-when-splitting-VMAs.patch
+ApplyOptionalPatch 0429-mm-hugetlb-proc-check-for-hugetlb-shared-PMD-in-proc.patch
+ApplyOptionalPatch 0430-mm-hugetlb-independent-PMD-page-table-shared-count.patch
+ApplyOptionalPatch 0431-mm-hugetlb-unshare-page-tables-during-VMA-split-not-.patch
+ApplyOptionalPatch 0432-mm-hugetlb-fix-huge_pmd_unshare-vs-GUP-fast-race.patch
+ApplyOptionalPatch 0433-mm-hugetlb-fix-copy_hugetlb_page_range-to-use-pt_sha.patch
+ApplyOptionalPatch 0434-mm-hugetlb-fix-hugetlb_pmd_shared.patch
+ApplyOptionalPatch 0435-mm-hugetlb-fix-two-comments-related-to-huge_pmd_unsh.patch
+ApplyOptionalPatch 0436-mm-rmap-fix-two-comments-related-to-huge_pmd_unshare.patch
+ApplyOptionalPatch 0437-mm-hugetlb-fix-excessive-IPI-broadcasts-when-unshari.patch
+ApplyOptionalPatch 0438-md-bitmap-fix-GPF-in-write_page-caused-by-resize-rac.patch
+ApplyOptionalPatch 0439-dm-log-fix-out-of-bounds-write-due-to-region_count-o.patch
+ApplyOptionalPatch 0440-dm-log-fix-a-bitset_size-overflow-on-32bit-machines.patch
+ApplyOptionalPatch 0441-fs-smb-client-fix-out-of-bounds-read-in-cifs_sanitiz.patch
+ApplyOptionalPatch 0442-xen-privcmd-fix-double-free-via-VMA-splitting.patch
 
 
 # CIQ LTS patches:
@@ -3858,6 +3905,31 @@ fi
 #
 #
 %changelog
+* Fri Aug 21 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+35.1.el8_6_ciq
+- xen/privcmd: fix double free via VMA splitting (CIQ Kernel Automation) [ciqres] {CVE-2026-31787}
+- fs/smb/client: fix out-of-bounds read in cifs_sanitize_prepath (CIQ Kernel Automation) [ciqres] {CVE-2026-43112}
+- dm-log: fix a bitset_size overflow on 32bit machines (CIQ Kernel Automation) [ciqres] {CVE-2026-72105}
+- dm log: fix out-of-bounds write due to region_count overflow (CIQ Kernel Automation) [ciqres] {CVE-2026-53059}
+- md/bitmap: fix GPF in write_page caused by resize race (CIQ Kernel Automation) [ciqres] {CVE-2026-43163}
+- mm/hugetlb: fix excessive IPI broadcasts when unsharing PMD tables using mmu_gather (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- mm/rmap: fix two comments related to huge_pmd_unshare() (Marcin Wcisło) [ciqres] {CVE-2024-57883}
+- mm/hugetlb: fix two comments related to huge_pmd_unshare() (Marcin Wcisło) [ciqres] {CVE-2024-57883}
+- mm/hugetlb: fix hugetlb_pmd_shared() (Marcin Wcisło) [ciqres] {CVE-2026-23100}
+- mm/hugetlb: fix copy_hugetlb_page_range() to use ->pt_share_count (Marcin Wcisło) [ciqres] {CVE-2025-38084}
+- mm/hugetlb: fix huge_pmd_unshare() vs GUP-fast race (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- mm/hugetlb: unshare page tables during VMA split, not before (Marcin Wcisło) [ciqres] {CVE-2025-38084}
+- mm: hugetlb: independent PMD page table shared count (Marcin Wcisło) [ciqres] {CVE-2024-57883}
+- mm: hugetlb: proc: check for hugetlb shared PMD in /proc/PID/smaps (Marcin Wcisło) [ciqres] {CVE-2026-23100}
+- hugetlb: unshare some PMDs when splitting VMAs (Marcin Wcisło) [ciqres] {CVE-2025-38084}
+- mm/hugetlb: make detecting shared pte more reliable (Marcin Wcisło) [ciqres] {CVE-2025-38084}
+- mm: proc: Invalidate TLB after clearing soft-dirty page state (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- asm-generic/tlb: provide MMU_GATHER_TABLE_FREE (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- asm-generic/tlb: rename HAVE_RCU_TABLE_FREE (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- asm-generic/tlb: avoid potential double flush (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- arm/tlb: Convert to generic mmu_gather (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- ARM: Kconfig: remove useless parenthesis (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+- arm/asm/tlb.h: Fix build error implicit func declaration (Marcin Wcisło) [ciqres] {CVE-2025-38085}
+
 * Tue Aug 04 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+34.1.el8_6_ciq
 - KVM: x86: Check for invalid/obsolete root *after* making MMU pages available (Brett Mastbergen) [ciqres] {CVE-2026-64561}
 - page_pool: Fix use-after-free in page_pool_recycle_in_ring (Marcin Wcisło) [ciqres] {CVE-2025-38129}

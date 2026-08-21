@@ -1,0 +1,50 @@
+From b68976e598a24c2f9d5c11d6891278a1002105c8 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Fri, 14 Aug 2026 19:41:06 +0000
+Subject: [PATCH] fs/smb/client: fix out-of-bounds read in
+ cifs_sanitize_prepath
+
+jira VULN-184327
+cve CVE-2026-43112
+commit-author Fredric Cover <FredTheDude@proton.me>
+commit 78ec5bf2f589ec7fd8f169394bfeca541b077317
+
+When cifs_sanitize_prepath is called with an empty string or a string
+containing only delimiters (e.g., "/"), the current logic attempts to
+check *(cursor2 - 1) before cursor2 has advanced. This results in an
+out-of-bounds read.
+
+This patch adds an early exit check after stripping prepended
+delimiters. If no path content remains, the function returns NULL.
+
+The bug was identified via manual audit and verified using a
+standalone test case compiled with AddressSanitizer, which
+triggered a SEGV on affected inputs.
+
+	Signed-off-by: Fredric Cover <FredTheDude@proton.me>
+	Reviewed-by: Henrique Carvalho <[2]henrique.carvalho@suse.com>
+	Signed-off-by: Steve French <stfrench@microsoft.com>
+(cherry picked from commit 78ec5bf2f589ec7fd8f169394bfeca541b077317)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ fs/cifs/fs_context.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/fs/cifs/fs_context.c b/fs/cifs/fs_context.c
+index 145da6c50254..ada3d6beea92 100644
+--- a/fs/cifs/fs_context.c
++++ b/fs/cifs/fs_context.c
+@@ -460,6 +460,10 @@ static char *sanitize_path(char *path)
+ 	while (IS_DELIM(*cursor1))
+ 		cursor1++;
+ 
++	/* exit in case of only delimiters */
++	if (!*cursor1)
++		return NULL;
++
+ 	/* copy the first letter */
+ 	*cursor2 = *cursor1;
+ 
+-- 
+2.52.0
+
