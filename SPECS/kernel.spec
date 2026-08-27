@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 38
+%define ciq_patch_version 39
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1611,6 +1611,55 @@ Patch1000652: 0607-net-sched-act_api-use-RCU-with-deferred-freeing-for-.patch
 Patch1000653: 0608-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
 Patch1000654: 0609-net-sched-act_csum-validate-nested-VLAN-headers.patch
 Patch1000655: 0610-drm-gem-Fix-inconsistent-plane-dimension-calculation.patch
+#CIQ Patch Version: 284.30.1+39.1.el9_2_ciq
+Patch1000656: 0611-net-sunrpc-Remap-EPERM-in-case-of-connection-failure.patch
+Patch1000657: 0612-net-iucv-fix-use-after-free-in-iucv_sock_close.patch
+Patch1000658: 0613-ethtool-check-device-is-present-when-getting-link-se.patch
+Patch1000659: 0614-HID-core-zero-initialize-the-report-buffer.patch
+Patch1000660: 0615-mm-fix-NULL-pointer-dereference-in-alloc_pages_bulk_.patch
+Patch1000661: 0616-xsk-fix-OOB-map-writes-when-deleting-elements.patch
+Patch1000662: 0617-bpf-fix-OOB-devmap-writes-when-deleting-elements.patch
+Patch1000663: 0618-media-uvcvideo-Fix-double-free-in-error-path.patch
+Patch1000664: 0619-gfs2-Add-metapath_dibh-helper.patch
+Patch1000665: 0620-gfs2-Fix-use-after-free-in-iomap-inline-data-write-p.patch
+Patch1000666: 0621-xen-privcmd-fix-double-free-via-VMA-splitting.patch
+Patch1000667: 0622-wifi-iwlwifi-limit-printed-string-from-FW-file.patch
+Patch1000668: 0623-HID-intel-ish-hid-Fix-use-after-free-issue-in-ishtp_.patch
+Patch1000669: 0624-x86-microcode-AMD-Fix-out-of-bounds-on-systems-with-.patch
+Patch1000670: 0625-ntb_hw_switchtec-Fix-shift-out-of-bounds-in-switchte.patch
+Patch1000671: 0626-net-openvswitch-fix-nested-key-length-validation-in-.patch
+Patch1000672: 0627-e1000e-fix-heap-overflow-in-e1000_set_eeprom.patch
+Patch1000673: 0628-md-bitmap-fix-GPF-in-write_page-caused-by-resize-rac.patch
+Patch1000674: 0629-can-j1939-prevent-deadlock-by-changing-j1939_socks_l.patch
+Patch1000675: 0630-can-j1939-implement-NETDEV_UNREGISTER-notification-h.patch
+Patch1000676: 0631-can-j1939-make-j1939_sk_bind-fail-if-device-is-no-lo.patch
+Patch1000677: 0632-can-j1939-add-missing-calls-in-NETDEV_UNREGISTER-not.patch
+Patch1000678: 0633-net-ipv6-introduce-ip6_dst_mtu_maybe_forward.patch
+Patch1000679: 0634-net-ipv4-Consolidate-ipv4_mtu-and-ip_dst_mtu_maybe_f.patch
+Patch1000680: 0635-neigh-introduce-neigh_confirm-helper-function.patch
+Patch1000681: 0636-ipv6-refactor-ip6_finish_output2.patch
+Patch1000682: 0637-ipv6-remove-one-read_lock-read_unlock-pair-in-rt6_ch.patch
+Patch1000683: 0638-ipv6-flowlabel-do-not-disable-BH-where-not-needed.patch
+Patch1000684: 0639-neighbour-switch-to-standard-rcu-instead-of-rcu_bh.patch
+Patch1000685: 0640-net-remove-rcu_dereference_bh_rtnl.patch
+Patch1000686: 0641-ipv6-remove-nexthop_fib6_nh_bh.patch
+Patch1000687: 0642-udp6-Fix-race-condition-in-udp6_sendmsg-connect.patch
+Patch1000688: 0643-vrf-Fix-lockdep-splat-in-output-path.patch
+Patch1000689: 0644-ipv6-fix-possible-UAF-in-ip6_finish_output2.patch
+Patch1000690: 0645-ipv6-prevent-possible-UAF-in-ip6_xmit.patch
+Patch1000691: 0646-bpf-Fix-mismatched-RCU-unlock-flavour-in-bpf_out_nei.patch
+Patch1000692: 0647-ipv4-add-RCU-protection-to-ip4_dst_hoplimit.patch
+Patch1000693: 0648-ipv4-use-RCU-protection-in-ip_dst_mtu_maybe_forward.patch
+Patch1000694: 0649-ipv4-use-RCU-protection-in-__ip_rt_update_pmtu.patch
+Patch1000695: 0650-ipv6-use-RCU-protection-in-ip6_default_advmss.patch
+Patch1000696: 0651-net-dst-add-four-helpers-to-annotate-data-races-arou.patch
+Patch1000697: 0652-net-Add-locking-to-protect-skb-dev-access-in-ip_outp.patch
+Patch1000698: 0653-net-dst-introduce-dst-dev_rcu.patch
+Patch1000699: 0654-ipv6-use-RCU-in-ip6_xmit.patch
+Patch1000700: 0655-ipv6-use-RCU-in-ip6_output.patch
+Patch1000701: 0656-net-use-dst_dev_rcu-in-sk_setup_caps.patch
+Patch1000702: 0657-ALSA-usb-audio-Add-sanity-check-for-OOB-writes-at-si.patch
+Patch1000703: 0658-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2942,6 +2991,54 @@ ApplyOptionalPatch 0607-net-sched-act_api-use-RCU-with-deferred-freeing-for-.pat
 ApplyOptionalPatch 0608-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
 ApplyOptionalPatch 0609-net-sched-act_csum-validate-nested-VLAN-headers.patch
 ApplyOptionalPatch 0610-drm-gem-Fix-inconsistent-plane-dimension-calculation.patch
+ApplyOptionalPatch 0611-net-sunrpc-Remap-EPERM-in-case-of-connection-failure.patch
+ApplyOptionalPatch 0612-net-iucv-fix-use-after-free-in-iucv_sock_close.patch
+ApplyOptionalPatch 0613-ethtool-check-device-is-present-when-getting-link-se.patch
+ApplyOptionalPatch 0614-HID-core-zero-initialize-the-report-buffer.patch
+ApplyOptionalPatch 0615-mm-fix-NULL-pointer-dereference-in-alloc_pages_bulk_.patch
+ApplyOptionalPatch 0616-xsk-fix-OOB-map-writes-when-deleting-elements.patch
+ApplyOptionalPatch 0617-bpf-fix-OOB-devmap-writes-when-deleting-elements.patch
+ApplyOptionalPatch 0618-media-uvcvideo-Fix-double-free-in-error-path.patch
+ApplyOptionalPatch 0619-gfs2-Add-metapath_dibh-helper.patch
+ApplyOptionalPatch 0620-gfs2-Fix-use-after-free-in-iomap-inline-data-write-p.patch
+ApplyOptionalPatch 0621-xen-privcmd-fix-double-free-via-VMA-splitting.patch
+ApplyOptionalPatch 0622-wifi-iwlwifi-limit-printed-string-from-FW-file.patch
+ApplyOptionalPatch 0623-HID-intel-ish-hid-Fix-use-after-free-issue-in-ishtp_.patch
+ApplyOptionalPatch 0624-x86-microcode-AMD-Fix-out-of-bounds-on-systems-with-.patch
+ApplyOptionalPatch 0625-ntb_hw_switchtec-Fix-shift-out-of-bounds-in-switchte.patch
+ApplyOptionalPatch 0626-net-openvswitch-fix-nested-key-length-validation-in-.patch
+ApplyOptionalPatch 0627-e1000e-fix-heap-overflow-in-e1000_set_eeprom.patch
+ApplyOptionalPatch 0628-md-bitmap-fix-GPF-in-write_page-caused-by-resize-rac.patch
+ApplyOptionalPatch 0629-can-j1939-prevent-deadlock-by-changing-j1939_socks_l.patch
+ApplyOptionalPatch 0630-can-j1939-implement-NETDEV_UNREGISTER-notification-h.patch
+ApplyOptionalPatch 0631-can-j1939-make-j1939_sk_bind-fail-if-device-is-no-lo.patch
+ApplyOptionalPatch 0632-can-j1939-add-missing-calls-in-NETDEV_UNREGISTER-not.patch
+ApplyOptionalPatch 0633-net-ipv6-introduce-ip6_dst_mtu_maybe_forward.patch
+ApplyOptionalPatch 0634-net-ipv4-Consolidate-ipv4_mtu-and-ip_dst_mtu_maybe_f.patch
+ApplyOptionalPatch 0635-neigh-introduce-neigh_confirm-helper-function.patch
+ApplyOptionalPatch 0636-ipv6-refactor-ip6_finish_output2.patch
+ApplyOptionalPatch 0637-ipv6-remove-one-read_lock-read_unlock-pair-in-rt6_ch.patch
+ApplyOptionalPatch 0638-ipv6-flowlabel-do-not-disable-BH-where-not-needed.patch
+ApplyOptionalPatch 0639-neighbour-switch-to-standard-rcu-instead-of-rcu_bh.patch
+ApplyOptionalPatch 0640-net-remove-rcu_dereference_bh_rtnl.patch
+ApplyOptionalPatch 0641-ipv6-remove-nexthop_fib6_nh_bh.patch
+ApplyOptionalPatch 0642-udp6-Fix-race-condition-in-udp6_sendmsg-connect.patch
+ApplyOptionalPatch 0643-vrf-Fix-lockdep-splat-in-output-path.patch
+ApplyOptionalPatch 0644-ipv6-fix-possible-UAF-in-ip6_finish_output2.patch
+ApplyOptionalPatch 0645-ipv6-prevent-possible-UAF-in-ip6_xmit.patch
+ApplyOptionalPatch 0646-bpf-Fix-mismatched-RCU-unlock-flavour-in-bpf_out_nei.patch
+ApplyOptionalPatch 0647-ipv4-add-RCU-protection-to-ip4_dst_hoplimit.patch
+ApplyOptionalPatch 0648-ipv4-use-RCU-protection-in-ip_dst_mtu_maybe_forward.patch
+ApplyOptionalPatch 0649-ipv4-use-RCU-protection-in-__ip_rt_update_pmtu.patch
+ApplyOptionalPatch 0650-ipv6-use-RCU-protection-in-ip6_default_advmss.patch
+ApplyOptionalPatch 0651-net-dst-add-four-helpers-to-annotate-data-races-arou.patch
+ApplyOptionalPatch 0652-net-Add-locking-to-protect-skb-dev-access-in-ip_outp.patch
+ApplyOptionalPatch 0653-net-dst-introduce-dst-dev_rcu.patch
+ApplyOptionalPatch 0654-ipv6-use-RCU-in-ip6_xmit.patch
+ApplyOptionalPatch 0655-ipv6-use-RCU-in-ip6_output.patch
+ApplyOptionalPatch 0656-net-use-dst_dev_rcu-in-sk_setup_caps.patch
+ApplyOptionalPatch 0657-ALSA-usb-audio-Add-sanity-check-for-OOB-writes-at-si.patch
+ApplyOptionalPatch 0658-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4825,6 +4922,56 @@ fi
 #
 #
 %changelog
+* Wed Aug 26 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+39.1.el9_2_ciq
+- ipc: limit next_id allocation to the valid ID range (CIQ Kernel Automation) [ciqres] {CVE-2026-52923}
+- ALSA: usb-audio: Add sanity check for OOB writes at silencing (CIQ Kernel Automation) [ciqres] {CVE-2026-43279}
+- net: use dst_dev_rcu() in sk_setup_caps() (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- ipv6: use RCU in ip6_output() (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- ipv6: use RCU in ip6_xmit() (Marcin Wcisło) [ciqres] {CVE-2025-40135}
+- net: dst: introduce dst->dev_rcu (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- net: Add locking to protect skb->dev access in ip_output (Marcin Wcisło) [ciqres] {CVE-2025-40135}
+- net: dst: add four helpers to annotate data-races around dst->dev (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- ipv6: use RCU protection in ip6_default_advmss() (Marcin Wcisło) [ciqres] {CVE-2025-21765}
+- ipv4: use RCU protection in __ip_rt_update_pmtu() (Marcin Wcisło) [ciqres] {CVE-2025-21766}
+- ipv4: use RCU protection in ip_dst_mtu_maybe_forward() (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- ipv4: add RCU protection to ip4_dst_hoplimit() (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- bpf: Fix mismatched RCU unlock flavour in bpf_out_neigh_v6 (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- ipv6: prevent possible UAF in ip6_xmit() (Marcin Wcisło) [ciqres] {CVE-2024-44985}
+- ipv6: fix possible UAF in ip6_finish_output2() (Marcin Wcisło) [ciqres] {CVE-2024-44986}
+- vrf: Fix lockdep splat in output path (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- udp6: Fix race condition in udp6_sendmsg & connect (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- ipv6: remove nexthop_fib6_nh_bh() (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- net: remove rcu_dereference_bh_rtnl() (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- neighbour: switch to standard rcu, instead of rcu_bh (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- ipv6: flowlabel: do not disable BH where not needed (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- ipv6: remove one read_lock()/read_unlock() pair in rt6_check_neigh() (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- ipv6: refactor ip6_finish_output2() (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- neigh: introduce neigh_confirm() helper function (Marcin Wcisło) [ciqres] {CVE-2025-40158}
+- net: ipv4: Consolidate ipv4_mtu and ip_dst_mtu_maybe_forward (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- net: ipv6: introduce ip6_dst_mtu_maybe_forward (Marcin Wcisło) [ciqres] {CVE-2025-40170}
+- can: j1939: add missing calls in NETDEV_UNREGISTER notification handler (CIQ Kernel Automation) [ciqres] {CVE-2025-39925}
+- can: j1939: make j1939_sk_bind() fail if device is no longer registered (CIQ Kernel Automation) [ciqres] {CVE-2025-39925}
+- can: j1939: implement NETDEV_UNREGISTER notification handler (CIQ Kernel Automation) [ciqres] {CVE-2025-39925}
+- can: j1939: prevent deadlock by changing j1939_socks_lock to rwlock (Brett Mastbergen) [ciqres] {CVE-2023-52638}
+- md/bitmap: fix GPF in write_page caused by resize race (CIQ Kernel Automation) [ciqres] {CVE-2026-43163}
+- e1000e: fix heap overflow in e1000_set_eeprom (CIQ Kernel Automation) [ciqres] {CVE-2025-39898}
+- net: openvswitch: fix nested key length validation in the set() action (CIQ Kernel Automation) [ciqres] {CVE-2025-37789}
+- ntb_hw_switchtec: Fix shift-out-of-bounds in switchtec_ntb_mw_set_trans (CIQ Kernel Automation) [ciqres] {CVE-2023-53034}
+- x86/microcode/AMD: Fix out-of-bounds on systems with CPU-less NUMA nodes (CIQ Kernel Automation) [ciqres] {CVE-2025-21991}
+- HID: intel-ish-hid: Fix use-after-free issue in ishtp_hid_remove() (CIQ Kernel Automation) [ciqres] {CVE-2025-21928}
+- wifi: iwlwifi: limit printed string from FW file (CIQ Kernel Automation) [ciqres] {CVE-2025-21905}
+- xen/privcmd: fix double free via VMA splitting (CIQ Kernel Automation) [ciqres] {CVE-2026-31787}
+- gfs2: Fix use-after-free in iomap inline data write path (CIQ Kernel Automation) [ciqres] {CVE-2026-45984}
+- gfs2: Add metapath_dibh helper (Brett Mastbergen) [ciqres] {CVE-2026-45984}
+- media: uvcvideo: Fix double free in error path (CIQ Kernel Automation) [ciqres] {CVE-2024-57980}
+- bpf: fix OOB devmap writes when deleting elements (CIQ Kernel Automation) [ciqres] {CVE-2024-56615}
+- xsk: fix OOB map writes when deleting elements (CIQ Kernel Automation) [ciqres] {CVE-2024-56614}
+- mm: fix NULL pointer dereference in alloc_pages_bulk_noprof (CIQ Kernel Automation) [ciqres] {CVE-2024-53113}
+- HID: core: zero-initialize the report buffer (CIQ Kernel Automation) [ciqres] {CVE-2024-50302}
+- ethtool: check device is present when getting link settings (CIQ Kernel Automation) [ciqres] {CVE-2024-46679}
+- net/iucv: fix use after free in iucv_sock_close() (CIQ Kernel Automation) [ciqres] {CVE-2024-42271}
+- net, sunrpc: Remap EPERM in case of connection failure in xs_tcp_setup_socket (CIQ Kernel Automation) [ciqres] {CVE-2024-42246}
+
 * Wed Aug 05 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+38.1.el9_2_ciq
 - drm/gem: Fix inconsistent plane dimension calculation in drm_gem_fb_init_with_funcs() (CIQ Kernel Automation) [ciqres] {CVE-2026-46209}
 - net: sched: act_csum: validate nested VLAN headers (CIQ Kernel Automation) [ciqres] {CVE-2026-31684}

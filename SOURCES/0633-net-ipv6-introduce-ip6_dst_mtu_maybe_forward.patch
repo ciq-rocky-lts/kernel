@@ -1,0 +1,110 @@
+From b9e33973332f184c0327f3249840b772c4040530 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sun, 16 Aug 2026 00:12:46 +0200
+Subject: [PATCH] net: ipv6: introduce ip6_dst_mtu_maybe_forward
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-160265
+cve-pre CVE-2025-40170
+commit-author Vadim Fedorenko <vfedorenko@novek.ru>
+commit 427faee167bce4ccb0b22f6815a9ac509e31d4c3
+
+Replace ip6_dst_mtu_forward with ip6_dst_mtu_maybe_forward and
+reuse this code in ip6_mtu. Actually these two functions were
+almost duplicates, this change will simplify the maintaince of
+mtu calculation code.
+
+	Signed-off-by: Vadim Fedorenko <vfedorenko@novek.ru>
+	Reviewed-by: David Ahern <dsahern@kernel.org>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit 427faee167bce4ccb0b22f6815a9ac509e31d4c3)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/net/ip6_route.h            |  5 +++--
+ net/ipv6/ip6_output.c              |  2 +-
+ net/ipv6/route.c                   | 20 +-------------------
+ net/netfilter/nf_flow_table_core.c |  2 +-
+ 4 files changed, 6 insertions(+), 23 deletions(-)
+
+diff --git a/include/net/ip6_route.h b/include/net/ip6_route.h
+index 0bf09a9bca4e..5efd0b71dc67 100644
+--- a/include/net/ip6_route.h
++++ b/include/net/ip6_route.h
+@@ -316,12 +316,13 @@ static inline bool rt6_duplicate_nexthop(struct fib6_info *a, struct fib6_info *
+ 	       !lwtunnel_cmp_encap(nha->fib_nh_lws, nhb->fib_nh_lws);
+ }
+ 
+-static inline unsigned int ip6_dst_mtu_forward(const struct dst_entry *dst)
++static inline unsigned int ip6_dst_mtu_maybe_forward(const struct dst_entry *dst,
++						     bool forwarding)
+ {
+ 	struct inet6_dev *idev;
+ 	unsigned int mtu;
+ 
+-	if (dst_metric_locked(dst, RTAX_MTU)) {
++	if (!forwarding || dst_metric_locked(dst, RTAX_MTU)) {
+ 		mtu = dst_metric_raw(dst, RTAX_MTU);
+ 		if (mtu)
+ 			goto out;
+diff --git a/net/ipv6/ip6_output.c b/net/ipv6/ip6_output.c
+index 40430d1e9d3f..d208671c976a 100644
+--- a/net/ipv6/ip6_output.c
++++ b/net/ipv6/ip6_output.c
+@@ -618,7 +618,7 @@ int ip6_forward(struct sk_buff *skb)
+ 		}
+ 	}
+ 
+-	mtu = ip6_dst_mtu_forward(dst);
++	mtu = ip6_dst_mtu_maybe_forward(dst, true);
+ 	if (mtu < IPV6_MIN_MTU)
+ 		mtu = IPV6_MIN_MTU;
+ 
+diff --git a/net/ipv6/route.c b/net/ipv6/route.c
+index a5ad8fea1078..aaab4d258c26 100644
+--- a/net/ipv6/route.c
++++ b/net/ipv6/route.c
+@@ -3203,25 +3203,7 @@ static unsigned int ip6_default_advmss(const struct dst_entry *dst)
+ 
+ INDIRECT_CALLABLE_SCOPE unsigned int ip6_mtu(const struct dst_entry *dst)
+ {
+-	struct inet6_dev *idev;
+-	unsigned int mtu;
+-
+-	mtu = dst_metric_raw(dst, RTAX_MTU);
+-	if (mtu)
+-		goto out;
+-
+-	mtu = IPV6_MIN_MTU;
+-
+-	rcu_read_lock();
+-	idev = __in6_dev_get(dst->dev);
+-	if (idev)
+-		mtu = idev->cnf.mtu6;
+-	rcu_read_unlock();
+-
+-out:
+-	mtu = min_t(unsigned int, mtu, IP6_MAX_MTU);
+-
+-	return mtu - lwtunnel_headroom(dst->lwtstate, mtu);
++	return ip6_dst_mtu_maybe_forward(dst, false);
+ }
+ EXPORT_INDIRECT_CALLABLE(ip6_mtu);
+ 
+diff --git a/net/netfilter/nf_flow_table_core.c b/net/netfilter/nf_flow_table_core.c
+index e8d5d30fd00a..fee0ccd7fee3 100644
+--- a/net/netfilter/nf_flow_table_core.c
++++ b/net/netfilter/nf_flow_table_core.c
+@@ -99,7 +99,7 @@ static int flow_offload_fill_route(struct flow_offload *flow,
+ 		flow_tuple->mtu = ip_dst_mtu_maybe_forward(dst, true);
+ 		break;
+ 	case NFPROTO_IPV6:
+-		flow_tuple->mtu = ip6_dst_mtu_forward(dst);
++		flow_tuple->mtu = ip6_dst_mtu_maybe_forward(dst, true);
+ 		break;
+ 	}
+ 
+-- 
+2.52.0
+

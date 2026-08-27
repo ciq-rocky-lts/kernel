@@ -1,0 +1,146 @@
+From 032122be262645cb4b4b54267186b762450faf19 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sun, 16 Aug 2026 00:48:33 +0200
+Subject: [PATCH] net: use dst_dev_rcu() in sk_setup_caps()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-160265
+cve CVE-2025-40170
+commit-author Eric Dumazet <edumazet@google.com>
+commit 99a2ace61b211b0be861b07fbaa062fca4b58879
+upstream-diff Used CentOS 9 backport
+  acc5b1b3f6e937c219da6eff70f79f29c0c794e0 as the base. It dealt already
+  with the missing commits:
+  - a74fc62eec155ca5a6da8ff3856f3dc87fe24558 ("ipv4: adopt dst_dev,
+    skb_dst_dev and skb_dst_dev_net[_rcu]")
+  - 1caf27297215a5241f9bfc9c07336349d9034ee3 ("ipv6: adopt dst_dev()
+    helper")
+  Additionally, in net/core/sock.c:
+  - Omitted changes to the `sk_trim_gso_size()' function
+    (`sk_dst_gso_max_size()' in the upstream), because `dst->dev' is not
+    used there (introduced in 5a01b46698289af301f7ec7ed4f35129ffb9d188
+    ("net: add support for ipv4 big tcp")).
+  - In `sk_setup_caps()', instead of changing the last argument of the
+    nonexistent `sk_dst_gso_max_size()' call from `dst' to `dev' a
+    `dst_dev(dst)' to `dev' substitution was made similarly to how it was
+    done 4 lines later.
+
+Use RCU to protect accesses to dst->dev from sk_setup_caps()
+and sk_dst_gso_max_size().
+
+Also use dst_dev_rcu() in ip6_dst_mtu_maybe_forward(),
+and ip_dst_mtu_maybe_forward().
+
+ip4_dst_hoplimit() can use dst_dev_net_rcu().
+
+Fixes: 4a6ce2b6f2ec ("net: introduce a new function dst_dev_put()")
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+	Reviewed-by: David Ahern <dsahern@kernel.org>
+Link: https://patch.msgid.link/20250828195823.3958522-6-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit acc5b1b3f6e937c219da6eff70f79f29c0c794e0)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/net/ip.h        |  6 ++++--
+ include/net/ip6_route.h |  2 +-
+ include/net/route.h     |  2 +-
+ net/core/sock.c         | 10 +++++++---
+ 4 files changed, 13 insertions(+), 7 deletions(-)
+
+diff --git a/include/net/ip.h b/include/net/ip.h
+index 0650f7d24947..86de7ad5e85c 100644
+--- a/include/net/ip.h
++++ b/include/net/ip.h
+@@ -441,12 +441,14 @@ static inline unsigned int ip_dst_mtu_maybe_forward(const struct dst_entry *dst,
+ 						    bool forwarding)
+ {
+ 	const struct rtable *rt = container_of(dst, struct rtable, dst);
++	const struct net_device *dev;
+ 	unsigned int mtu, res;
+ 	struct net *net;
+ 
+ 	rcu_read_lock();
+ 
+-	net = dev_net_rcu(dst->dev);
++	dev = dst_dev_rcu(dst);
++	net = dev_net_rcu(dev);
+ 	if (READ_ONCE(net->ipv4.sysctl_ip_fwd_use_pmtu) ||
+ 	    ip_mtu_locked(dst) ||
+ 	    !forwarding) {
+@@ -460,7 +462,7 @@ static inline unsigned int ip_dst_mtu_maybe_forward(const struct dst_entry *dst,
+ 	if (mtu)
+ 		goto out;
+ 
+-	mtu = READ_ONCE(dst->dev->mtu);
++	mtu = READ_ONCE(dev->mtu);
+ 
+ 	if (unlikely(ip_mtu_locked(dst))) {
+ 		if (rt->rt_uses_gateway && mtu > 576)
+diff --git a/include/net/ip6_route.h b/include/net/ip6_route.h
+index 5efd0b71dc67..e466c0da4e64 100644
+--- a/include/net/ip6_route.h
++++ b/include/net/ip6_route.h
+@@ -330,7 +330,7 @@ static inline unsigned int ip6_dst_mtu_maybe_forward(const struct dst_entry *dst
+ 
+ 	mtu = IPV6_MIN_MTU;
+ 	rcu_read_lock();
+-	idev = __in6_dev_get(dst->dev);
++	idev = __in6_dev_get(dst_dev_rcu(dst));
+ 	if (idev)
+ 		mtu = idev->cnf.mtu6;
+ 	rcu_read_unlock();
+diff --git a/include/net/route.h b/include/net/route.h
+index ae1f33d062ea..fcd1b29f58f6 100644
+--- a/include/net/route.h
++++ b/include/net/route.h
+@@ -363,7 +363,7 @@ static inline int ip4_dst_hoplimit(const struct dst_entry *dst)
+ 		const struct net *net;
+ 
+ 		rcu_read_lock();
+-		net = dev_net_rcu(dst->dev);
++		net = dst_dev_net_rcu(dst);
+ 		hoplimit = READ_ONCE(net->ipv4.sysctl_ip_default_ttl);
+ 		rcu_read_unlock();
+ 	}
+diff --git a/net/core/sock.c b/net/core/sock.c
+index 1663a32555d5..c1f5786561d2 100644
+--- a/net/core/sock.c
++++ b/net/core/sock.c
+@@ -2283,9 +2283,12 @@ static void sk_trim_gso_size(struct sock *sk)
+ 
+ void sk_setup_caps(struct sock *sk, struct dst_entry *dst)
+ {
++	const struct net_device *dev;
+ 	u32 max_segs = 1;
+ 
+-	sk->sk_route_caps = dst_dev(dst)->features;
++	rcu_read_lock();
++	dev = dst_dev_rcu(dst);
++	sk->sk_route_caps = dev->features;
+ 	if (sk_is_tcp(sk))
+ 		sk->sk_route_caps |= NETIF_F_GSO;
+ 	if (sk->sk_route_caps & NETIF_F_GSO)
+@@ -2298,15 +2301,16 @@ void sk_setup_caps(struct sock *sk, struct dst_entry *dst)
+ 		} else {
+ 			sk->sk_route_caps |= NETIF_F_SG | NETIF_F_HW_CSUM;
+ 			/* pairs with the WRITE_ONCE() in netif_set_gso_max_size() */
+-			sk->sk_gso_max_size = READ_ONCE(dst_dev(dst)->gso_max_size);
++			sk->sk_gso_max_size = READ_ONCE(dev->gso_max_size);
+ 			sk_trim_gso_size(sk);
+ 			sk->sk_gso_max_size -= (MAX_TCP_HEADER + 1);
+ 			/* pairs with the WRITE_ONCE() in netif_set_gso_max_segs() */
+-			max_segs = max_t(u32, READ_ONCE(dst_dev(dst)->gso_max_segs), 1);
++			max_segs = max_t(u32, READ_ONCE(dev->gso_max_segs), 1);
+ 		}
+ 	}
+ 	sk->sk_gso_max_segs = max_segs;
+ 	sk_dst_set(sk, dst);
++	rcu_read_unlock();
+ }
+ EXPORT_SYMBOL_GPL(sk_setup_caps);
+ 
+-- 
+2.52.0
+

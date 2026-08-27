@@ -1,0 +1,77 @@
+From 07a002fb40d031360cfef54626fd7bf443385f5f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sun, 16 Aug 2026 00:42:48 +0200
+Subject: [PATCH] ipv4: use RCU protection in __ip_rt_update_pmtu()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-54043
+cve CVE-2025-21766
+commit-author Eric Dumazet <edumazet@google.com>
+commit 139512191bd06f1b496117c76372b2ce372c9a41
+upstream-diff Used CentOS 9 backport
+  fd7e9d21f4fa35270f40feb436ad53deebbcc0ee for the clean pick. The
+  modified function `__ip_rt_update_pmtu' is identicial in LTS 9.2 and
+  CentOS 9.
+
+__ip_rt_update_pmtu() must use RCU protection to make
+sure the net structure it reads does not disappear.
+
+Fixes: 2fbc6e89b2f1 ("ipv4: Update exception handling for multipath routes via same device")
+Fixes: 1de6b15a434c ("Namespaceify min_pmtu sysctl")
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+Link: https://patch.msgid.link/20250205155120.1676781-8-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit fd7e9d21f4fa35270f40feb436ad53deebbcc0ee)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/ipv4/route.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/net/ipv4/route.c b/net/ipv4/route.c
+index 6ee4c197162d..ca619f4f847e 100644
+--- a/net/ipv4/route.c
++++ b/net/ipv4/route.c
+@@ -1022,9 +1022,9 @@ out:	kfree_skb_reason(skb, reason);
+ static void __ip_rt_update_pmtu(struct rtable *rt, struct flowi4 *fl4, u32 mtu)
+ {
+ 	struct dst_entry *dst = &rt->dst;
+-	struct net *net = dev_net(dst->dev);
+ 	struct fib_result res;
+ 	bool lock = false;
++	struct net *net;
+ 	u32 old_mtu;
+ 
+ 	if (ip_mtu_locked(dst))
+@@ -1034,6 +1034,8 @@ static void __ip_rt_update_pmtu(struct rtable *rt, struct flowi4 *fl4, u32 mtu)
+ 	if (old_mtu < mtu)
+ 		return;
+ 
++	rcu_read_lock();
++	net = dev_net_rcu(dst->dev);
+ 	if (mtu < ip_rt_min_pmtu) {
+ 		lock = true;
+ 		mtu = min(old_mtu, ip_rt_min_pmtu);
+@@ -1041,9 +1043,8 @@ static void __ip_rt_update_pmtu(struct rtable *rt, struct flowi4 *fl4, u32 mtu)
+ 
+ 	if (rt->rt_pmtu == mtu && !lock &&
+ 	    time_before(jiffies, dst->expires - ip_rt_mtu_expires / 2))
+-		return;
++		goto out;
+ 
+-	rcu_read_lock();
+ 	if (fib_lookup(net, fl4, &res, 0) == 0) {
+ 		struct fib_nh_common *nhc;
+ 
+@@ -1052,6 +1053,7 @@ static void __ip_rt_update_pmtu(struct rtable *rt, struct flowi4 *fl4, u32 mtu)
+ 		update_or_create_fnhe(nhc, fl4->daddr, 0, mtu, lock,
+ 				      jiffies + ip_rt_mtu_expires);
+ 	}
++out:
+ 	rcu_read_unlock();
+ }
+ 
+-- 
+2.52.0
+

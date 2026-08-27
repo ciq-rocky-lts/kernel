@@ -1,0 +1,43 @@
+From 1f56a2f649b0f6a989ebf00c54113e873197d7a6 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 10 Aug 2026 07:08:46 +0000
+Subject: [PATCH] media: uvcvideo: Fix double free in error path
+
+jira VULN-53325
+cve CVE-2024-57980
+commit-author Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+commit c6ef3a7fa97ec823a1e1af9085cf13db9f7b3bac
+
+If the uvc_status_init() function fails to allocate the int_urb, it will
+free the dev->status pointer but doesn't reset the pointer to NULL. This
+results in the kfree() call in uvc_status_cleanup() trying to
+double-free the memory. Fix it by resetting the dev->status pointer to
+NULL after freeing it.
+
+Fixes: a31a4055473b ("V4L/DVB:usbvideo:don't use part of buffer for USB transfer #4")
+	Cc: stable@vger.kernel.org
+Link: https://lore.kernel.org/r/20241107235130.31372-1-laurent.pinchart@ideasonboard.com
+	Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Reviewed by: Ricardo Ribalda <ribalda@chromium.org>
+	Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+(cherry picked from commit c6ef3a7fa97ec823a1e1af9085cf13db9f7b3bac)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/media/usb/uvc/uvc_status.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/media/usb/uvc/uvc_status.c b/drivers/media/usb/uvc/uvc_status.c
+index 7518ffce22ed..b24c4c012ce2 100644
+--- a/drivers/media/usb/uvc/uvc_status.c
++++ b/drivers/media/usb/uvc/uvc_status.c
+@@ -266,6 +266,7 @@ int uvc_status_init(struct uvc_device *dev)
+ 	dev->int_urb = usb_alloc_urb(0, GFP_KERNEL);
+ 	if (dev->int_urb == NULL) {
+ 		kfree(dev->status);
++		dev->status = NULL;
+ 		return -ENOMEM;
+ 	}
+ 
+-- 
+2.52.0
+

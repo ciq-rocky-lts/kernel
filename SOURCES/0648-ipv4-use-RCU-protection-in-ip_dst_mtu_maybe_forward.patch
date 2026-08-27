@@ -1,0 +1,65 @@
+From 97a08d4f99a241b92d102851ea760b849a57a525 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sun, 16 Aug 2026 00:42:00 +0200
+Subject: [PATCH] ipv4: use RCU protection in ip_dst_mtu_maybe_forward()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-160265
+cve-pre CVE-2025-40170
+commit-author Eric Dumazet <edumazet@google.com>
+commit 071d8012869b6af352acca346ade13e7be90a49f
+upstream-diff Used CentOS 9 backport
+  4ea98f09499595e3b4b380e5ef60c2c9563b06be which dealt with the context
+  conflicts.
+
+ip_dst_mtu_maybe_forward() must use RCU protection to make
+sure the net structure it reads does not disappear.
+
+Fixes: f87c10a8aa1e8 ("ipv4: introduce ip_dst_mtu_maybe_forward and protect forwarding path against pmtu spoofing")
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+	Reviewed-by: Kuniyuki Iwashima <kuniyu@amazon.com>
+Link: https://patch.msgid.link/20250205155120.1676781-4-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 4ea98f09499595e3b4b380e5ef60c2c9563b06be)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/net/ip.h | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/include/net/ip.h b/include/net/ip.h
+index ff39673f3651..0650f7d24947 100644
+--- a/include/net/ip.h
++++ b/include/net/ip.h
+@@ -441,9 +441,12 @@ static inline unsigned int ip_dst_mtu_maybe_forward(const struct dst_entry *dst,
+ 						    bool forwarding)
+ {
+ 	const struct rtable *rt = container_of(dst, struct rtable, dst);
+-	struct net *net = dev_net(dst->dev);
+-	unsigned int mtu;
++	unsigned int mtu, res;
++	struct net *net;
++
++	rcu_read_lock();
+ 
++	net = dev_net_rcu(dst->dev);
+ 	if (READ_ONCE(net->ipv4.sysctl_ip_fwd_use_pmtu) ||
+ 	    ip_mtu_locked(dst) ||
+ 	    !forwarding) {
+@@ -467,7 +470,11 @@ static inline unsigned int ip_dst_mtu_maybe_forward(const struct dst_entry *dst,
+ out:
+ 	mtu = min_t(unsigned int, mtu, IP_MAX_MTU);
+ 
+-	return mtu - lwtunnel_headroom(dst->lwtstate, mtu);
++	res = mtu - lwtunnel_headroom(dst->lwtstate, mtu);
++
++	rcu_read_unlock();
++
++	return res;
+ }
+ 
+ static inline unsigned int ip_skb_dst_mtu(struct sock *sk,
+-- 
+2.52.0
+

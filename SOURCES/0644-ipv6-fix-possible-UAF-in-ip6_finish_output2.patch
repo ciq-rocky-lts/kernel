@@ -1,0 +1,54 @@
+From 09850a7fc309d9df15d69713b052b2fb4cbd202f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sun, 16 Aug 2026 00:40:20 +0200
+Subject: [PATCH] ipv6: fix possible UAF in ip6_finish_output2()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-8330
+cve CVE-2024-44986
+commit-author Eric Dumazet <edumazet@google.com>
+commit da273b377ae0d9bd255281ed3c2adb228321687b
+
+If skb_expand_head() returns NULL, skb has been freed
+and associated dst/idev could also have been freed.
+
+We need to hold rcu_read_lock() to make sure the dst and
+associated idev are alive.
+
+Fixes: 5796015fa968 ("ipv6: allocate enough headroom in ip6_finish_output2()")
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+	Cc: Vasily Averin <vasily.averin@linux.dev>
+	Reviewed-by: David Ahern <dsahern@kernel.org>
+Link: https://patch.msgid.link/20240820160859.3786976-3-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit da273b377ae0d9bd255281ed3c2adb228321687b)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/ipv6/ip6_output.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/net/ipv6/ip6_output.c b/net/ipv6/ip6_output.c
+index 1142a46d1acb..f24fb7a2671d 100644
+--- a/net/ipv6/ip6_output.c
++++ b/net/ipv6/ip6_output.c
+@@ -69,11 +69,15 @@ static int ip6_finish_output2(struct net *net, struct sock *sk, struct sk_buff *
+ 
+ 	/* Be paranoid, rather than too clever. */
+ 	if (unlikely(hh_len > skb_headroom(skb)) && dev->header_ops) {
++		/* Make sure idev stays alive */
++		rcu_read_lock();
+ 		skb = skb_expand_head(skb, hh_len);
+ 		if (!skb) {
+ 			IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTDISCARDS);
++			rcu_read_unlock();
+ 			return -ENOMEM;
+ 		}
++		rcu_read_unlock();
+ 	}
+ 
+ 	hdr = ipv6_hdr(skb);
+-- 
+2.52.0
+

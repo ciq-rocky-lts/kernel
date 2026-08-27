@@ -1,0 +1,64 @@
+From a49460ee5aafb9e1ddd069481f0e94c8dda93b33 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sun, 16 Aug 2026 00:25:00 +0200
+Subject: [PATCH] ipv6: refactor ip6_finish_output2()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-160216
+cve-pre CVE-2025-40158
+commit-author Pavel Begunkov <asml.silence@gmail.com>
+commit 58f71be58b8713e41f8568938a0199190f723d1d
+
+Throw neigh checks in ip6_finish_output2() under a single slow path if,
+so we don't have the overhead in the hot path.
+
+	Signed-off-by: Pavel Begunkov <asml.silence@gmail.com>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit 58f71be58b8713e41f8568938a0199190f723d1d)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/ipv6/ip6_output.c | 24 +++++++++++++-----------
+ 1 file changed, 13 insertions(+), 11 deletions(-)
+
+diff --git a/net/ipv6/ip6_output.c b/net/ipv6/ip6_output.c
+index d208671c976a..ee04f929d287 100644
+--- a/net/ipv6/ip6_output.c
++++ b/net/ipv6/ip6_output.c
+@@ -119,19 +119,21 @@ static int ip6_finish_output2(struct net *net, struct sock *sk, struct sk_buff *
+ 	rcu_read_lock_bh();
+ 	nexthop = rt6_nexthop((struct rt6_info *)dst, daddr);
+ 	neigh = __ipv6_neigh_lookup_noref(dev, nexthop);
+-	if (unlikely(!neigh))
+-		neigh = __neigh_create(&nd_tbl, nexthop, dev, false);
+-	if (!IS_ERR(neigh)) {
+-		sock_confirm_neigh(skb, neigh);
+-		ret = neigh_output(neigh, skb, false);
+-		rcu_read_unlock_bh();
+-		return ret;
++
++	if (unlikely(IS_ERR_OR_NULL(neigh))) {
++		if (unlikely(!neigh))
++			neigh = __neigh_create(&nd_tbl, nexthop, dev, false);
++		if (IS_ERR(neigh)) {
++			rcu_read_unlock_bh();
++			IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTNOROUTES);
++			kfree_skb_reason(skb, SKB_DROP_REASON_NEIGH_CREATEFAIL);
++			return -EINVAL;
++		}
+ 	}
++	sock_confirm_neigh(skb, neigh);
++	ret = neigh_output(neigh, skb, false);
+ 	rcu_read_unlock_bh();
+-
+-	IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTNOROUTES);
+-	kfree_skb_reason(skb, SKB_DROP_REASON_NEIGH_CREATEFAIL);
+-	return -EINVAL;
++	return ret;
+ }
+ 
+ static int
+-- 
+2.52.0
+

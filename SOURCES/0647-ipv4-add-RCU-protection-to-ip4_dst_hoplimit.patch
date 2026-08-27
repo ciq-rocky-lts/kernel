@@ -1,0 +1,52 @@
+From 271ab7e00702f20906b79012ffb0c7d09eec25ee Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sun, 16 Aug 2026 00:41:33 +0200
+Subject: [PATCH] ipv4: add RCU protection to ip4_dst_hoplimit()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-160265
+cve-pre CVE-2025-40170
+commit-author Eric Dumazet <edumazet@google.com>
+commit 469308552ca4560176cfc100e7ca84add1bebd7c
+
+ip4_dst_hoplimit() must use RCU protection to make
+sure the net structure it reads does not disappear.
+
+Fixes: fa50d974d104 ("ipv4: Namespaceify ip_default_ttl sysctl knob")
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+	Reviewed-by: Kuniyuki Iwashima <kuniyu@amazon.com>
+Link: https://patch.msgid.link/20250205155120.1676781-3-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 469308552ca4560176cfc100e7ca84add1bebd7c)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ include/net/route.h | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/include/net/route.h b/include/net/route.h
+index 08df79436485..ae1f33d062ea 100644
+--- a/include/net/route.h
++++ b/include/net/route.h
+@@ -358,10 +358,15 @@ static inline int inet_iif(const struct sk_buff *skb)
+ static inline int ip4_dst_hoplimit(const struct dst_entry *dst)
+ {
+ 	int hoplimit = dst_metric_raw(dst, RTAX_HOPLIMIT);
+-	struct net *net = dev_net(dst->dev);
+ 
+-	if (hoplimit == 0)
++	if (hoplimit == 0) {
++		const struct net *net;
++
++		rcu_read_lock();
++		net = dev_net_rcu(dst->dev);
+ 		hoplimit = READ_ONCE(net->ipv4.sysctl_ip_default_ttl);
++		rcu_read_unlock();
++	}
+ 	return hoplimit;
+ }
+ 
+-- 
+2.52.0
+
