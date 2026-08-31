@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 21
+%define ciq_patch_version 22
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1283,6 +1283,23 @@ Patch1000279: 1279-SUNRPC-no-need-get-cache-ref-when-protected-by-rcu.patch
 Patch1000280: 1280-nfsd-fix-UAF-when-access-ex_uuid-or-ex_stats.patch
 #CIQ Patch Version: 570.60.1+21.1.el9_6_ciq
 Patch1000281: 1281-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
+#CIQ Patch Version: 570.60.1+22.1.el9_6_ciq
+Patch1000282: 1282-drm-xe-Fix-error-cleanup-in-xe_exec_queue_create_ioc.patch
+Patch1000283: 1283-crypto-seqiv-Do-not-use-req-iv-after-crypto_aead_enc.patch
+Patch1000284: 1284-fs-smb-client-fix-out-of-bounds-read-in-cifs_sanitiz.patch
+Patch1000285: 1285-scsi-core-Wake-up-the-error-handler-when-final-compl.patch
+Patch1000286: 1286-net-atm-fix-crash-due-to-unvalidated-vcc-pointer-in-.patch
+Patch1000287: 1287-dm-log-fix-out-of-bounds-write-due-to-region_count-o.patch
+Patch1000288: 1288-dm-log-fix-a-bitset_size-overflow-on-32bit-machines.patch
+Patch1000289: 1289-crypto-ccp-copy-IV-using-skcipher-ivsize.patch
+Patch1000290: 1290-net-clear-the-dst-when-changing-skb-protocol.patch
+Patch1000291: 1291-net-Clear-the-dst-when-performing-encap-decap.patch
+Patch1000292: 1292-bpf-Name-the-enum-for-BPF_FUNC_skb_adjust_room-flags.patch
+Patch1000293: 1293-bpf-Refactor-masks-for-ADJ_ROOM-flags-and-encap-vali.patch
+Patch1000294: 1294-bpf-Add-BPF_F_ADJ_ROOM_DECAP_-flags-for-tunnel-decap.patch
+Patch1000295: 1295-bpf-Allow-new-DECAP-flags-and-add-guard-rails.patch
+Patch1000296: 1296-bpf-Clear-decap-state-on-skb_adjust_room-shrink-path.patch
+Patch1000297: 1297-selftests-bpf-tc_tunnel-validate-decap-GSO-and-encap.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2326,6 +2343,22 @@ ApplyOptionalPatch 1278-nfsd-no-need-get-cache-ref-when-protected-by-rcu.patch
 ApplyOptionalPatch 1279-SUNRPC-no-need-get-cache-ref-when-protected-by-rcu.patch
 ApplyOptionalPatch 1280-nfsd-fix-UAF-when-access-ex_uuid-or-ex_stats.patch
 ApplyOptionalPatch 1281-KVM-x86-Check-for-invalid-obsolete-root-after-making.patch
+ApplyOptionalPatch 1282-drm-xe-Fix-error-cleanup-in-xe_exec_queue_create_ioc.patch
+ApplyOptionalPatch 1283-crypto-seqiv-Do-not-use-req-iv-after-crypto_aead_enc.patch
+ApplyOptionalPatch 1284-fs-smb-client-fix-out-of-bounds-read-in-cifs_sanitiz.patch
+ApplyOptionalPatch 1285-scsi-core-Wake-up-the-error-handler-when-final-compl.patch
+ApplyOptionalPatch 1286-net-atm-fix-crash-due-to-unvalidated-vcc-pointer-in-.patch
+ApplyOptionalPatch 1287-dm-log-fix-out-of-bounds-write-due-to-region_count-o.patch
+ApplyOptionalPatch 1288-dm-log-fix-a-bitset_size-overflow-on-32bit-machines.patch
+ApplyOptionalPatch 1289-crypto-ccp-copy-IV-using-skcipher-ivsize.patch
+ApplyOptionalPatch 1290-net-clear-the-dst-when-changing-skb-protocol.patch
+ApplyOptionalPatch 1291-net-Clear-the-dst-when-performing-encap-decap.patch
+ApplyOptionalPatch 1292-bpf-Name-the-enum-for-BPF_FUNC_skb_adjust_room-flags.patch
+ApplyOptionalPatch 1293-bpf-Refactor-masks-for-ADJ_ROOM-flags-and-encap-vali.patch
+ApplyOptionalPatch 1294-bpf-Add-BPF_F_ADJ_ROOM_DECAP_-flags-for-tunnel-decap.patch
+ApplyOptionalPatch 1295-bpf-Allow-new-DECAP-flags-and-add-guard-rails.patch
+ApplyOptionalPatch 1296-bpf-Clear-decap-state-on-skb_adjust_room-shrink-path.patch
+ApplyOptionalPatch 1297-selftests-bpf-tc_tunnel-validate-decap-GSO-and-encap.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4442,6 +4475,24 @@ fi
 #
 #
 %changelog
+* Fri Aug 28 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+22.1.el9_6_ciq
+- selftests/bpf: tc_tunnel - validate decap GSO and encapsulation state (Brett Mastbergen) [ciqres]
+- bpf: Clear decap state on skb_adjust_room shrink path (Brett Mastbergen) [ciqres]
+- bpf: Allow new DECAP flags and add guard rails (Brett Mastbergen) [ciqres]
+- bpf: Add BPF_F_ADJ_ROOM_DECAP_* flags for tunnel decapsulation (Brett Mastbergen) [ciqres]
+- bpf: Refactor masks for ADJ_ROOM flags and encap validation (Brett Mastbergen) [ciqres]
+- bpf: Name the enum for BPF_FUNC_skb_adjust_room flags (Brett Mastbergen) [ciqres]
+- net: Clear the dst when performing encap / decap (Brett Mastbergen) [ciqres]
+- net: clear the dst when changing skb protocol (Brett Mastbergen) [ciqres] {CVE-2025-38192}
+- crypto: ccp - copy IV using skcipher ivsize (CIQ Kernel Automation) [ciqres] {CVE-2026-53016}
+- dm-log: fix a bitset_size overflow on 32bit machines (CIQ Kernel Automation) [ciqres] {CVE-2026-72105}
+- dm log: fix out-of-bounds write due to region_count overflow (CIQ Kernel Automation) [ciqres] {CVE-2026-53059}
+- net: atm: fix crash due to unvalidated vcc pointer in sigd_send() (CIQ Kernel Automation) [ciqres] {CVE-2026-31411}
+- scsi: core: Wake up the error handler when final completions race against each other (CIQ Kernel Automation) [ciqres] {CVE-2026-23110}
+- fs/smb/client: fix out-of-bounds read in cifs_sanitize_prepath (CIQ Kernel Automation) [ciqres] {CVE-2026-43112}
+- crypto: seqiv - Do not use req->iv after crypto_aead_encrypt (CIQ Kernel Automation) [ciqres] {CVE-2025-71131}
+- drm/xe: Fix error cleanup in xe_exec_queue_create_ioctl() (CIQ Kernel Automation) [ciqres] {CVE-2026-52976}
+
 * Wed Aug 05 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+21.1.el9_6_ciq
 - KVM: x86: Check for invalid/obsolete root *after* making MMU pages available (Brett Mastbergen) [ciqres] {CVE-2026-64561}
 

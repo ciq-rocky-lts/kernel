@@ -1,0 +1,141 @@
+From ffc455e59841ab089f763dde28f66c9876e62b1e Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Mon, 1 Jun 2026 10:02:06 -0400
+Subject: [PATCH] selftests/bpf: tc_tunnel - validate decap GSO and
+ encapsulation state
+
+commit-author Nick Hudson <nhudson@akamai.com>
+commit adb771973026efe54627bcbe927e7205d04d6c68
+upstream-diff |
+  The upstream patch targets bpf-next where the BPF program has been
+  converted to use vmlinux.h (commit 86433db93256) and the test runner
+  has been migrated from a shell script to a C-based test_progs harness
+  (commit 8517b1abe5ea). This tree has neither of those prerequisites,
+  so the following upstream changes were dropped:
+  - CO-RE enum existence checks (bpf_core_enum_value_exists). The
+    test_tc_tunnel.sh runner loads BPF via iproute2's legacy tc loader,
+    which does not process CO-RE relocations.
+  - Post-decap GSO gso_type and skb->encapsulation validation
+    via bpf_cast_to_kern_ctx/bpf_core_cast into skb_shared_info.
+    These require vmlinux.h to access kernel-internal structs
+    (sk_buff, skb_shared_info) and SKB_GSO_* constants.
+  - TSO disable removal from prog_tests/test_tc_tunnel.c (file absent;
+    this tree still uses test_tc_tunnel.sh).
+  The functional flag-passing changes (DECAP_L4_GRE, DECAP_L4_UDP,
+  DECAP_IPXIP4, DECAP_IPXIP6) and ipxip_flag parameter plumbing
+  through decap_internal/decap_ipv4/decap_ipv6 are applied as in
+  upstream. The test exercises the new kernel flag acceptance path
+  but does not validate post-decap skb state.
+
+tc_tunnel only partially validated decap state and missed some tunnel
+cases. In particular, IPXIP decap checks were not exercised for
+IPIP/SIT paths, and non-GSO decap encapsulation state was not
+verified.
+
+Tighten the test by:
+
+- setting DECAP_IPXIP4/6 flags for IPIP/SIT/IP6 decap paths based on
+  the outer tunnel header family;
+- requiring needed DECAP enum values via CO-RE enum existence checks
+  so missing kernel support fails fast;
+- validating post-decap tunnel state for both GSO and non-GSO packets:
+  expected gso_type bits must be cleared and skb->encapsulation must
+  match remaining tunnel flags;
+- removing forced TSO disable in the test harness so GSO validation is
+  exercised.
+
+This improves coverage for decap tunnel-state regressions and ensures
+sit_none/ipip-style paths are checked correctly.
+
+	Signed-off-by: Nick Hudson <nhudson@akamai.com>
+	Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
+Link: https://lore.kernel.org/bpf/20260812083115.73100-7-nhudson@akamai.com
+(cherry picked from commit adb771973026efe54627bcbe927e7205d04d6c68)
+Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ .../selftests/bpf/progs/test_tc_tunnel.c      | 23 +++++++++++++------
+ 1 file changed, 16 insertions(+), 7 deletions(-)
+
+diff --git a/tools/testing/selftests/bpf/progs/test_tc_tunnel.c b/tools/testing/selftests/bpf/progs/test_tc_tunnel.c
+index 404124a93892..a8adb1311091 100644
+--- a/tools/testing/selftests/bpf/progs/test_tc_tunnel.c
++++ b/tools/testing/selftests/bpf/progs/test_tc_tunnel.c
+@@ -597,7 +597,8 @@ int __encap_ip6vxlan_eth(struct __sk_buff *skb)
+ 		return TC_ACT_OK;
+ }
+ 
+-static int decap_internal(struct __sk_buff *skb, int off, int len, char proto)
++static int decap_internal(struct __sk_buff *skb, int off, int len, char proto,
++			  __u64 ipxip_flag)
+ {
+ 	__u64 flags = BPF_F_ADJ_ROOM_FIXED_GSO;
+ 	struct ipv6_opt_hdr ip6_opt_hdr;
+@@ -607,10 +608,12 @@ static int decap_internal(struct __sk_buff *skb, int off, int len, char proto)
+ 
+ 	switch (proto) {
+ 	case IPPROTO_IPIP:
+-		flags |= BPF_F_ADJ_ROOM_DECAP_L3_IPV4;
++		flags |= BPF_F_ADJ_ROOM_DECAP_L3_IPV4 |
++			 ipxip_flag;
+ 		break;
+ 	case IPPROTO_IPV6:
+-		flags |= BPF_F_ADJ_ROOM_DECAP_L3_IPV6;
++		flags |= BPF_F_ADJ_ROOM_DECAP_L3_IPV6 |
++			 ipxip_flag;
+ 		break;
+ 	case NEXTHDR_DEST:
+ 		if (bpf_skb_load_bytes(skb, off + len, &ip6_opt_hdr,
+@@ -618,10 +621,12 @@ static int decap_internal(struct __sk_buff *skb, int off, int len, char proto)
+ 			return TC_ACT_OK;
+ 		switch (ip6_opt_hdr.nexthdr) {
+ 		case IPPROTO_IPIP:
+-			flags |= BPF_F_ADJ_ROOM_DECAP_L3_IPV4;
++			flags |= BPF_F_ADJ_ROOM_DECAP_L3_IPV4 |
++				 ipxip_flag;
+ 			break;
+ 		case IPPROTO_IPV6:
+-			flags |= BPF_F_ADJ_ROOM_DECAP_L3_IPV6;
++			flags |= BPF_F_ADJ_ROOM_DECAP_L3_IPV6 |
++				 ipxip_flag;
+ 			break;
+ 		default:
+ 			return TC_ACT_OK;
+@@ -629,6 +634,7 @@ static int decap_internal(struct __sk_buff *skb, int off, int len, char proto)
+ 		break;
+ 	case IPPROTO_GRE:
+ 		olen += sizeof(struct gre_hdr);
++		flags |= BPF_F_ADJ_ROOM_DECAP_L4_GRE;
+ 		if (bpf_skb_load_bytes(skb, off + len, &greh, sizeof(greh)) < 0)
+ 			return TC_ACT_OK;
+ 		switch (bpf_ntohs(greh.protocol)) {
+@@ -642,6 +648,7 @@ static int decap_internal(struct __sk_buff *skb, int off, int len, char proto)
+ 		break;
+ 	case IPPROTO_UDP:
+ 		olen += sizeof(struct udphdr);
++		flags |= BPF_F_ADJ_ROOM_DECAP_L4_UDP;
+ 		if (bpf_skb_load_bytes(skb, off + len, &udph, sizeof(udph)) < 0)
+ 			return TC_ACT_OK;
+ 		switch (bpf_ntohs(udph.dest)) {
+@@ -678,7 +685,8 @@ static int decap_ipv4(struct __sk_buff *skb)
+ 		return TC_ACT_OK;
+ 
+ 	return decap_internal(skb, ETH_HLEN, sizeof(iph_outer),
+-			      iph_outer.protocol);
++			      iph_outer.protocol,
++			      BPF_F_ADJ_ROOM_DECAP_IPXIP4);
+ }
+ 
+ static int decap_ipv6(struct __sk_buff *skb)
+@@ -690,7 +698,8 @@ static int decap_ipv6(struct __sk_buff *skb)
+ 		return TC_ACT_OK;
+ 
+ 	return decap_internal(skb, ETH_HLEN, sizeof(iph_outer),
+-			      iph_outer.nexthdr);
++			      iph_outer.nexthdr,
++			      BPF_F_ADJ_ROOM_DECAP_IPXIP6);
+ }
+ 
+ SEC("decap")
+-- 
+2.52.0
+
