@@ -1,0 +1,118 @@
+From b8ea159f0bdcedcbf5ecca78ee58f3ef6b6139af Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Sat, 29 Aug 2026 01:50:10 +0200
+Subject: [PATCH] mptcp: fix slab-use-after-free in __inet_lookup_established
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-182698
+cve CVE-2026-31669
+commit-author Jiayuan Chen <jiayuan.chen@linux.dev>
+commit 9b55b253907e7431210483519c5ad711a37dafa1
+upstream-diff Conflicts due to multiple updates to the
+  `mptcp_subflow_init' function. Preserved the split of
+  `mptcp_subflow_init' along the `IS_ENABLED(CONFIG_MPTCP_IPV6)' line.
+
+The ehash table lookups are lockless and rely on
+SLAB_TYPESAFE_BY_RCU to guarantee socket memory stability
+during RCU read-side critical sections. Both tcp_prot and
+tcpv6_prot have their slab caches created with this flag
+via proto_register().
+
+However, MPTCP's mptcp_subflow_init() copies tcpv6_prot into
+tcpv6_prot_override during inet_init() (fs_initcall, level 5),
+before inet6_init() (module_init/device_initcall, level 6) has
+called proto_register(&tcpv6_prot). At that point,
+tcpv6_prot.slab is still NULL, so tcpv6_prot_override.slab
+remains NULL permanently.
+
+This causes MPTCP v6 subflow child sockets to be allocated via
+kmalloc (falling into kmalloc-4k) instead of the TCPv6 slab
+cache. The kmalloc-4k cache lacks SLAB_TYPESAFE_BY_RCU, so
+when these sockets are freed without SOCK_RCU_FREE (which is
+cleared for child sockets by design), the memory can be
+immediately reused. Concurrent ehash lookups under
+rcu_read_lock can then access freed memory, triggering a
+slab-use-after-free in __inet_lookup_established.
+
+Fix this by splitting the IPv6-specific initialization out of
+mptcp_subflow_init() into a new mptcp_subflow_v6_init(), called
+from mptcp_proto_v6_init() before protocol registration. This
+ensures tcpv6_prot_override.slab correctly inherits the
+SLAB_TYPESAFE_BY_RCU slab cache.
+
+Fixes: b19bc2945b40 ("mptcp: implement delegated actions")
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Jiayuan Chen <jiayuan.chen@linux.dev>
+	Reviewed-by: Matthieu Baerts (NGI0) <matttbe@kernel.org>
+Link: https://patch.msgid.link/20260406031512.189159-1-jiayuan.chen@linux.dev
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 6b644e703c07d879025067d7e2a6fac8db3b2ac1)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/mptcp/protocol.c |  2 ++
+ net/mptcp/protocol.h |  1 +
+ net/mptcp/subflow.c  | 15 +++++++++------
+ 3 files changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/net/mptcp/protocol.c b/net/mptcp/protocol.c
+index 6f8d831001c9..d569fd42d940 100644
+--- a/net/mptcp/protocol.c
++++ b/net/mptcp/protocol.c
+@@ -3598,6 +3598,8 @@ int __init mptcp_proto_v6_init(void)
+ {
+ 	int err;
+ 
++	mptcp_subflow_v6_init();
++
+ 	mptcp_v6_prot = mptcp_prot;
+ 	strcpy(mptcp_v6_prot.name, "MPTCPv6");
+ 	mptcp_v6_prot.slab = NULL;
+diff --git a/net/mptcp/protocol.h b/net/mptcp/protocol.h
+index 51f7b01f4ff2..2aee40c64222 100644
+--- a/net/mptcp/protocol.h
++++ b/net/mptcp/protocol.h
+@@ -596,6 +596,7 @@ static inline void mptcp_subflow_tcp_fallback(struct sock *sk,
+ void __init mptcp_proto_init(void);
+ #if IS_ENABLED(CONFIG_MPTCP_IPV6)
+ int __init mptcp_proto_v6_init(void);
++void __init mptcp_subflow_v6_init(void);
+ #endif
+ 
+ struct sock *mptcp_sk_clone(const struct sock *sk,
+diff --git a/net/mptcp/subflow.c b/net/mptcp/subflow.c
+index 4618361c2e45..6018f9ecc14c 100644
+--- a/net/mptcp/subflow.c
++++ b/net/mptcp/subflow.c
+@@ -1733,7 +1733,15 @@ void __init mptcp_subflow_init(void)
+ 	tcp_prot_override = tcp_prot;
+ 	tcp_prot_override.release_cb = tcp_release_cb_override;
+ 
++	mptcp_diag_subflow_init(&subflow_ulp_ops);
++
++	if (tcp_register_ulp(&subflow_ulp_ops) != 0)
++		panic("MPTCP: failed to register subflows to ULP\n");
++}
++
+ #if IS_ENABLED(CONFIG_MPTCP_IPV6)
++void __init mptcp_subflow_v6_init(void)
++{
+ 	subflow_request_sock_ipv6_ops = tcp_request_sock_ipv6_ops;
+ 	subflow_request_sock_ipv6_ops.route_req = subflow_v6_route_req;
+ 
+@@ -1751,10 +1759,5 @@ void __init mptcp_subflow_init(void)
+ 
+ 	tcpv6_prot_override = tcpv6_prot;
+ 	tcpv6_prot_override.release_cb = tcp_release_cb_override;
+-#endif
+-
+-	mptcp_diag_subflow_init(&subflow_ulp_ops);
+-
+-	if (tcp_register_ulp(&subflow_ulp_ops) != 0)
+-		panic("MPTCP: failed to register subflows to ULP\n");
+ }
++#endif
+-- 
+2.52.0
+

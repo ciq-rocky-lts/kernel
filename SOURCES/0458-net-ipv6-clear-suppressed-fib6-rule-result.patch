@@ -1,0 +1,61 @@
+From 3423ffdca8f0660a6dbead8a25266d8a054de743 Mon Sep 17 00:00:00 2001
+From: Shreeya Patel <spatel@ciq.com>
+Date: Tue, 8 Sep 2026 13:15:39 +0000
+Subject: [PATCH] net: ipv6: clear suppressed fib6 rule result
+
+jira VULN-204244
+cve CVE-2026-74581
+commit-author Zhiling Zou <zhilinz@nebusec.ai>
+commit 6aea62e433fe1b586202a5fee8b5807ce635e1d7
+upstream-diff Upstream clears the route with `res->rt6 = NULL` on
+  struct fib6_result. This tree predates both the fib6_result
+  conversion and d839b3f55194 ("ipv6: fix memory leak in
+  fib6_rule_suppress"), so fib6_rule_suppress() has no `res` and no
+  ip6_rt_put_flags(); it reads the route straight from arg->result
+  (struct fib_lookup_arg). The equivalent clear is therefore
+  `arg->result = NULL`. The leak path is unchanged: fib6_rule_lookup()
+  returns arg.result after fib_rules_lookup(), which is what hands back
+  the freed route. Taking the upstream form would require the
+  fib6_result refactor, which changes the ->suppress function-pointer
+  signature in struct fib_rules_ops (kABI).
+
+fib6_rule_suppress() drops a suppressed route with ip6_rt_put_flags(),
+but leaves res->rt6 pointing at the released rt6_info.
+
+If no later rule supplies a replacement, fib6_rule_lookup() still sees
+res.rt6 and returns that stale dst to its caller. A suppressing rule can
+therefore leak a released route back to rt6_lookup(), and the next put
+hits rcuref_put_slowpath() from dst_release().
+
+Clear res->rt6 when suppressing the route so suppressed lookups fall
+through to the null dst instead of reusing the released one.
+
+Fixes: cdef485217d3 ("ipv6: fix memory leak in fib6_rule_suppress")
+	Cc: stable@vger.kernel.org
+	Reported-by: Vega <vega@nebusec.ai>
+	Signed-off-by: Zhiling Zou <zhilinz@nebusec.ai>
+	Signed-off-by: Ren Wei <enjou1224z@gmail.com>
+	Reviewed-by: Ido Schimmel <idosch@nvidia.com>
+Link: https://patch.msgid.link/4b8acb7787d54e440155585dd32ebdf0bef7d122.1784710966.git.zhilinz@nebusec.ai
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 6aea62e433fe1b586202a5fee8b5807ce635e1d7)
+	Signed-off-by: Shreeya Patel <spatel@ciq.com>
+---
+ net/ipv6/fib6_rules.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/net/ipv6/fib6_rules.c b/net/ipv6/fib6_rules.c
+index faa910bf5224..1e4e6cd99858 100644
+--- a/net/ipv6/fib6_rules.c
++++ b/net/ipv6/fib6_rules.c
+@@ -289,6 +289,7 @@ static bool fib6_rule_suppress(struct fib_rule *rule, struct fib_lookup_arg *arg
+ 
+ suppress_route:
+ 	ip6_rt_put(rt);
++	arg->result = NULL;
+ 	return true;
+ }
+ 
+-- 
+2.52.0
+

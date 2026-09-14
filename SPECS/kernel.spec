@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 35
+%define ciq_patch_version 36
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1182,6 +1182,25 @@ Patch0594: 0439-dm-log-fix-out-of-bounds-write-due-to-region_count-o.patch
 Patch0595: 0440-dm-log-fix-a-bitset_size-overflow-on-32bit-machines.patch
 Patch0596: 0441-fs-smb-client-fix-out-of-bounds-read-in-cifs_sanitiz.patch
 Patch0597: 0442-xen-privcmd-fix-double-free-via-VMA-splitting.patch
+#CIQ Patch Version: 372.32.1+36.1.el8_6_ciq
+Patch0598: 0443-net-atm-fix-crash-due-to-unvalidated-vcc-pointer-in-.patch
+Patch0599: 0444-HID-wacom-fix-out-of-bounds-read-in-wacom_intuos_bt_.patch
+Patch0600: 0445-crypto-ccp-copy-IV-using-skcipher-ivsize.patch
+Patch0601: 0446-ipv4-free-net-ipv4.sysctl_local_reserved_ports-after.patch
+Patch0602: 0447-net-bridge-stop-fast-leave-after-deleting-a-port-gro.patch
+Patch0603: 0448-sctp-fix-auth_hmacs-array-size-in-struct-sctp_cookie.patch
+Patch0604: 0449-openvswitch-defer-tunnel-netdev_put-to-RCU-release.patch
+Patch0605: 0450-netfilter-nf_queue-hold-bridge-skb-dev-while-queued.patch
+Patch0606: 0451-netfilter-nf_queue-pin-bridge-device-while-NFQUEUE-h.patch
+Patch0607: 0452-openvswitch-vport-fix-self-deadlock-on-release-of-tu.patch
+Patch0608: 0453-tcp-fix-potential-race-in-tcp_v6_syn_recv_sock.patch
+Patch0609: 0454-nvmet-tcp-fix-race-between-ICReq-handling-and-queue-.patch
+Patch0610: 0455-mptcp-fix-slab-use-after-free-in-__inet_lookup_estab.patch
+Patch0611: 0456-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
+Patch0612: 0457-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
+Patch0613: 0458-net-ipv6-clear-suppressed-fib6-rule-result.patch
+Patch0614: 0459-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
+Patch0615: 0460-sctp-stream-fully-roll-back-denied-add-stream-state.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2346,6 +2365,24 @@ ApplyOptionalPatch 0439-dm-log-fix-out-of-bounds-write-due-to-region_count-o.pat
 ApplyOptionalPatch 0440-dm-log-fix-a-bitset_size-overflow-on-32bit-machines.patch
 ApplyOptionalPatch 0441-fs-smb-client-fix-out-of-bounds-read-in-cifs_sanitiz.patch
 ApplyOptionalPatch 0442-xen-privcmd-fix-double-free-via-VMA-splitting.patch
+ApplyOptionalPatch 0443-net-atm-fix-crash-due-to-unvalidated-vcc-pointer-in-.patch
+ApplyOptionalPatch 0444-HID-wacom-fix-out-of-bounds-read-in-wacom_intuos_bt_.patch
+ApplyOptionalPatch 0445-crypto-ccp-copy-IV-using-skcipher-ivsize.patch
+ApplyOptionalPatch 0446-ipv4-free-net-ipv4.sysctl_local_reserved_ports-after.patch
+ApplyOptionalPatch 0447-net-bridge-stop-fast-leave-after-deleting-a-port-gro.patch
+ApplyOptionalPatch 0448-sctp-fix-auth_hmacs-array-size-in-struct-sctp_cookie.patch
+ApplyOptionalPatch 0449-openvswitch-defer-tunnel-netdev_put-to-RCU-release.patch
+ApplyOptionalPatch 0450-netfilter-nf_queue-hold-bridge-skb-dev-while-queued.patch
+ApplyOptionalPatch 0451-netfilter-nf_queue-pin-bridge-device-while-NFQUEUE-h.patch
+ApplyOptionalPatch 0452-openvswitch-vport-fix-self-deadlock-on-release-of-tu.patch
+ApplyOptionalPatch 0453-tcp-fix-potential-race-in-tcp_v6_syn_recv_sock.patch
+ApplyOptionalPatch 0454-nvmet-tcp-fix-race-between-ICReq-handling-and-queue-.patch
+ApplyOptionalPatch 0455-mptcp-fix-slab-use-after-free-in-__inet_lookup_estab.patch
+ApplyOptionalPatch 0456-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
+ApplyOptionalPatch 0457-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
+ApplyOptionalPatch 0458-net-ipv6-clear-suppressed-fib6-rule-result.patch
+ApplyOptionalPatch 0459-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
+ApplyOptionalPatch 0460-sctp-stream-fully-roll-back-denied-add-stream-state.patch
 
 
 # CIQ LTS patches:
@@ -3905,6 +3942,26 @@ fi
 #
 #
 %changelog
+* Mon Sep 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+36.1.el8_6_ciq
+- sctp: stream: fully roll back denied add-stream state (Shreeya Patel) [ciqres] {CVE-2026-52929}
+- sctp: purge outqueue on stale COOKIE-ECHO handling (Shreeya Patel) [ciqres] {CVE-2026-52924}
+- net: ipv6: clear suppressed fib6 rule result (Shreeya Patel) [ciqres] {CVE-2026-74581}
+- ip6_tunnel: clear skb2->cb[] in ip6ip6_err() (Shreeya Patel) [ciqres] {CVE-2026-74597}
+- ipc: limit next_id allocation to the valid ID range (Shreeya Patel) [ciqres] {CVE-2026-52923}
+- mptcp: fix slab-use-after-free in __inet_lookup_established (Marcin Wcisło) [ciqres] {CVE-2026-31669}
+- nvmet-tcp: fix race between ICReq handling and queue teardown (Marcin Wcisło) [ciqres] {CVE-2026-46135}
+- tcp: fix potential race in tcp_v6_syn_recv_sock() (Marcin Wcisło) [ciqres] {CVE-2026-43198}
+- openvswitch: vport: fix self-deadlock on release of tunnel ports (Brett Mastbergen) [ciqres] {CVE-2026-46165}
+- netfilter: nf_queue: pin bridge device while NFQUEUE holds fake dst (Brett Mastbergen) [ciqres] {CVE-2026-72255}
+- netfilter: nf_queue: hold bridge skb->dev while queued (Brett Mastbergen) [ciqres] {CVE-2026-52912}
+- openvswitch: defer tunnel netdev_put to RCU release (Brett Mastbergen) [ciqres] {CVE-2026-31678}
+- sctp: fix auth_hmacs array size in struct sctp_cookie (Brett Mastbergen) [ciqres] {CVE-2026-68376}
+- net: bridge: stop fast-leave after deleting a port group (CIQ Kernel Automation) [ciqres] {CVE-2026-74480}
+- ipv4: free net->ipv4.sysctl_local_reserved_ports after unregister_net_sysctl_table() (CIQ Kernel Automation) [ciqres] {CVE-2026-64002}
+- crypto: ccp - copy IV using skcipher ivsize (CIQ Kernel Automation) [ciqres] {CVE-2026-53016}
+- HID: wacom: fix out-of-bounds read in wacom_intuos_bt_irq (CIQ Kernel Automation) [ciqres] {CVE-2026-43051}
+- net: atm: fix crash due to unvalidated vcc pointer in sigd_send() (CIQ Kernel Automation) [ciqres] {CVE-2026-31411}
+
 * Fri Aug 21 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+35.1.el8_6_ciq
 - xen/privcmd: fix double free via VMA splitting (CIQ Kernel Automation) [ciqres] {CVE-2026-31787}
 - fs/smb/client: fix out-of-bounds read in cifs_sanitize_prepath (CIQ Kernel Automation) [ciqres] {CVE-2026-43112}
