@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 39
+%define ciq_patch_version 40
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -603,6 +603,7 @@ License: GPLv2 and Redistributable, no modification permitted
 URL: https://www.kernel.org/
 Version: %{specversion}
 Release: %{pkg_release}
+Provides: ciq-lts-kernel = %{?epoch:%{epoch}:}%{version}-%{release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
 %if 0%{?fedora}
@@ -1660,6 +1661,19 @@ Patch1000700: 0655-ipv6-use-RCU-in-ip6_output.patch
 Patch1000701: 0656-net-use-dst_dev_rcu-in-sk_setup_caps.patch
 Patch1000702: 0657-ALSA-usb-audio-Add-sanity-check-for-OOB-writes-at-si.patch
 Patch1000703: 0658-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
+#CIQ Patch Version: 284.30.1+40.1.el9_2_ciq
+Patch1000704: 0659-net-ipv6-clear-suppressed-fib6-rule-result.patch
+Patch1000705: 0660-ipv4-free-net-ipv4.sysctl_local_reserved_ports-after.patch
+Patch1000706: 0661-net-bridge-stop-fast-leave-after-deleting-a-port-gro.patch
+Patch1000707: 0662-sctp-fix-auth_hmacs-array-size-in-struct-sctp_cookie.patch
+Patch1000708: 0663-openvswitch-defer-tunnel-netdev_put-to-RCU-release.patch
+Patch1000709: 0664-netfilter-nf_queue-hold-bridge-skb-dev-while-queued.patch
+Patch1000710: 0665-netfilter-nf_queue-pin-bridge-device-while-NFQUEUE-h.patch
+Patch1000711: 0666-posix-cpu-timers-Prevent-UAF-caused-by-non-leader-ex.patch
+Patch1000712: 0667-openvswitch-vport-fix-self-deadlock-on-release-of-tu.patch
+Patch1000713: 0668-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
+Patch1000714: 0669-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
+Patch1000715: 0670-sctp-stream-fully-roll-back-denied-add-stream-state.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2076,6 +2090,7 @@ This package provides less commonly used kernel modules for the %{?2:%{2} }kerne
 %define kernel_modules_package(m) \
 %package %{?1:%{1}-}modules\
 Summary: kernel modules to match the %{?2:%{2}-}core kernel\
+Provides: ciq-lts-kernel = %{?epoch:%{epoch}:}%{version}-%{release}\
 Provides: kernel%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-modules-%{_target_cpu} = %{version}-%{release}%{uname_suffix %{?1:%{1}}}\
 Provides: kernel-modules = %{version}-%{release}%{uname_suffix %{?1:%{1}}}\
@@ -2099,6 +2114,7 @@ This package provides commonly used kernel modules for the %{?2:%{2}-}core kerne
 %define kernel_modules_core_package(m) \
 %package %{?1:%{1}-}modules-core\
 Summary: Core kernel modules to match the %{?2:%{2}-}core kernel\
+Provides: ciq-lts-kernel = %{?epoch:%{epoch}:}%{version}-%{release}\
 Provides: kernel%{?1:-%{1}}-modules-core-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-modules-core-%{_target_cpu} = %{version}-%{release}%{uname_suffix %{?1:%{1}}}\
 Provides: kernel-modules-core = %{version}-%{release}%{uname_suffix %{?1:%{1}}}\
@@ -2137,6 +2153,7 @@ The meta-package for the %{1} kernel\
 %define kernel_variant_package(n:mo) \
 %package %{?1:%{1}-}core\
 Summary: %{variant_summary}\
+Provides: ciq-lts-kernel = %{?epoch:%{epoch}:}%{version}-%{release}\
 Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{uname_suffix %{?1:%{1}}}\
 Provides: installonlypkg(kernel)\
 %if %{-m:1}%{!-m:0}\
@@ -3039,6 +3056,18 @@ ApplyOptionalPatch 0655-ipv6-use-RCU-in-ip6_output.patch
 ApplyOptionalPatch 0656-net-use-dst_dev_rcu-in-sk_setup_caps.patch
 ApplyOptionalPatch 0657-ALSA-usb-audio-Add-sanity-check-for-OOB-writes-at-si.patch
 ApplyOptionalPatch 0658-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
+ApplyOptionalPatch 0659-net-ipv6-clear-suppressed-fib6-rule-result.patch
+ApplyOptionalPatch 0660-ipv4-free-net-ipv4.sysctl_local_reserved_ports-after.patch
+ApplyOptionalPatch 0661-net-bridge-stop-fast-leave-after-deleting-a-port-gro.patch
+ApplyOptionalPatch 0662-sctp-fix-auth_hmacs-array-size-in-struct-sctp_cookie.patch
+ApplyOptionalPatch 0663-openvswitch-defer-tunnel-netdev_put-to-RCU-release.patch
+ApplyOptionalPatch 0664-netfilter-nf_queue-hold-bridge-skb-dev-while-queued.patch
+ApplyOptionalPatch 0665-netfilter-nf_queue-pin-bridge-device-while-NFQUEUE-h.patch
+ApplyOptionalPatch 0666-posix-cpu-timers-Prevent-UAF-caused-by-non-leader-ex.patch
+ApplyOptionalPatch 0667-openvswitch-vport-fix-self-deadlock-on-release-of-tu.patch
+ApplyOptionalPatch 0668-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
+ApplyOptionalPatch 0669-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
+ApplyOptionalPatch 0670-sctp-stream-fully-roll-back-denied-add-stream-state.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4922,6 +4951,23 @@ fi
 #
 #
 %changelog
+* Mon Sep 14 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+40.1.el9_2_ciq
+- sctp: stream: fully roll back denied add-stream state (Shreeya Patel) [ciqres] {CVE-2026-52929}
+- sctp: purge outqueue on stale COOKIE-ECHO handling (Shreeya Patel) [ciqres] {CVE-2026-52924}
+- ip6_tunnel: clear skb2->cb[] in ip6ip6_err() (Shreeya Patel) [ciqres] {CVE-2026-74597}
+- openvswitch: vport: fix self-deadlock on release of tunnel ports (Brett Mastbergen) [ciqres] {CVE-2026-46165}
+- posix-cpu-timers: Prevent UAF caused by non-leader exec() race (Brett Mastbergen) [ciqres] {CVE-2026-64560}
+- netfilter: nf_queue: pin bridge device while NFQUEUE holds fake dst (Brett Mastbergen) [ciqres] {CVE-2026-72255}
+- netfilter: nf_queue: hold bridge skb->dev while queued (Brett Mastbergen) [ciqres] {CVE-2026-52912}
+- openvswitch: defer tunnel netdev_put to RCU release (Brett Mastbergen) [ciqres] {CVE-2026-31678}
+- sctp: fix auth_hmacs array size in struct sctp_cookie (Brett Mastbergen) [ciqres] {CVE-2026-68376}
+- net: bridge: stop fast-leave after deleting a port group (CIQ Kernel Automation) [ciqres] {CVE-2026-74480}
+- ipv4: free net->ipv4.sysctl_local_reserved_ports after unregister_net_sysctl_table() (CIQ Kernel Automation) [ciqres] {CVE-2026-64002}
+- net: ipv6: clear suppressed fib6 rule result (Shreeya Patel) [ciqres] {CVE-2026-74581}
+
+* Sat Aug 29 2026 Jason Rodriguez <jrodriguez@ciq.com> - 5.14.0-284.30.1+39.2.el9_2.ciq
+- Add ciq-lts-kernel virtual provide on main + kernel-core/-modules/-modules-core for 9.2
+
 * Wed Aug 26 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+39.1.el9_2_ciq
 - ipc: limit next_id allocation to the valid ID range (CIQ Kernel Automation) [ciqres] {CVE-2026-52923}
 - ALSA: usb-audio: Add sanity check for OOB writes at silencing (CIQ Kernel Automation) [ciqres] {CVE-2026-43279}
