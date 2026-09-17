@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 22
+%define ciq_patch_version 23
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1300,6 +1300,20 @@ Patch1000294: 1294-bpf-Add-BPF_F_ADJ_ROOM_DECAP_-flags-for-tunnel-decap.patch
 Patch1000295: 1295-bpf-Allow-new-DECAP-flags-and-add-guard-rails.patch
 Patch1000296: 1296-bpf-Clear-decap-state-on-skb_adjust_room-shrink-path.patch
 Patch1000297: 1297-selftests-bpf-tc_tunnel-validate-decap-GSO-and-encap.patch
+#CIQ Patch Version: 570.60.1+23.1.el9_6_ciq
+Patch1000298: 1298-net-ipv6-clear-suppressed-fib6-rule-result.patch
+Patch1000299: 1299-net-bridge-stop-fast-leave-after-deleting-a-port-gro.patch
+Patch1000300: 1300-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
+Patch1000301: 1301-sctp-fix-auth_hmacs-array-size-in-struct-sctp_cookie.patch
+Patch1000302: 1302-openvswitch-defer-tunnel-netdev_put-to-RCU-release.patch
+Patch1000303: 1303-netfilter-nf_queue-hold-bridge-skb-dev-while-queued.patch
+Patch1000304: 1304-netfilter-nf_queue-pin-bridge-device-while-NFQUEUE-h.patch
+Patch1000305: 1305-posix-cpu-timers-Prevent-UAF-caused-by-non-leader-ex.patch
+Patch1000306: 1306-openvswitch-vport-fix-self-deadlock-on-release-of-tu.patch
+Patch1000307: 1307-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
+Patch1000308: 1308-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
+Patch1000309: 1309-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
+Patch1000310: 1310-sctp-stream-fully-roll-back-denied-add-stream-state.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2359,6 +2373,19 @@ ApplyOptionalPatch 1294-bpf-Add-BPF_F_ADJ_ROOM_DECAP_-flags-for-tunnel-decap.pat
 ApplyOptionalPatch 1295-bpf-Allow-new-DECAP-flags-and-add-guard-rails.patch
 ApplyOptionalPatch 1296-bpf-Clear-decap-state-on-skb_adjust_room-shrink-path.patch
 ApplyOptionalPatch 1297-selftests-bpf-tc_tunnel-validate-decap-GSO-and-encap.patch
+ApplyOptionalPatch 1298-net-ipv6-clear-suppressed-fib6-rule-result.patch
+ApplyOptionalPatch 1299-net-bridge-stop-fast-leave-after-deleting-a-port-gro.patch
+ApplyOptionalPatch 1300-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
+ApplyOptionalPatch 1301-sctp-fix-auth_hmacs-array-size-in-struct-sctp_cookie.patch
+ApplyOptionalPatch 1302-openvswitch-defer-tunnel-netdev_put-to-RCU-release.patch
+ApplyOptionalPatch 1303-netfilter-nf_queue-hold-bridge-skb-dev-while-queued.patch
+ApplyOptionalPatch 1304-netfilter-nf_queue-pin-bridge-device-while-NFQUEUE-h.patch
+ApplyOptionalPatch 1305-posix-cpu-timers-Prevent-UAF-caused-by-non-leader-ex.patch
+ApplyOptionalPatch 1306-openvswitch-vport-fix-self-deadlock-on-release-of-tu.patch
+ApplyOptionalPatch 1307-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
+ApplyOptionalPatch 1308-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
+ApplyOptionalPatch 1309-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
+ApplyOptionalPatch 1310-sctp-stream-fully-roll-back-denied-add-stream-state.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4475,6 +4502,21 @@ fi
 #
 #
 %changelog
+* Mon Sep 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+23.1.el9_6_ciq
+- sctp: stream: fully roll back denied add-stream state (Shreeya Patel) [ciqres] {CVE-2026-52929}
+- sctp: purge outqueue on stale COOKIE-ECHO handling (Shreeya Patel) [ciqres] {CVE-2026-52924}
+- ip6_tunnel: clear skb2->cb[] in ip6ip6_err() (Shreeya Patel) [ciqres] {CVE-2026-74597}
+- ipc: limit next_id allocation to the valid ID range (Shreeya Patel) [ciqres] {CVE-2026-52923}
+- openvswitch: vport: fix self-deadlock on release of tunnel ports (Brett Mastbergen) [ciqres] {CVE-2026-46165}
+- posix-cpu-timers: Prevent UAF caused by non-leader exec() race (Brett Mastbergen) [ciqres] {CVE-2026-64560}
+- netfilter: nf_queue: pin bridge device while NFQUEUE holds fake dst (Brett Mastbergen) [ciqres] {CVE-2026-72255}
+- netfilter: nf_queue: hold bridge skb->dev while queued (Brett Mastbergen) [ciqres] {CVE-2026-52912}
+- openvswitch: defer tunnel netdev_put to RCU release (Brett Mastbergen) [ciqres] {CVE-2026-31678}
+- sctp: fix auth_hmacs array size in struct sctp_cookie (Brett Mastbergen) [ciqres] {CVE-2026-68376}
+- vhost: reset the vring metadata cache on vring reconfiguration (CIQ Kernel Automation) [ciqres] {CVE-2026-74580}
+- net: bridge: stop fast-leave after deleting a port group (CIQ Kernel Automation) [ciqres] {CVE-2026-74480}
+- net: ipv6: clear suppressed fib6 rule result (Shreeya Patel) [ciqres] {CVE-2026-74581}
+
 * Fri Aug 28 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+22.1.el9_6_ciq
 - selftests/bpf: tc_tunnel - validate decap GSO and encapsulation state (Brett Mastbergen) [ciqres]
 - bpf: Clear decap state on skb_adjust_room shrink path (Brett Mastbergen) [ciqres]

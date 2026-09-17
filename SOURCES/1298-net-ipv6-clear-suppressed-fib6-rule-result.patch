@@ -1,0 +1,50 @@
+From b5f9574c3947a70c353ddd5200d1be611fc0d29a Mon Sep 17 00:00:00 2001
+From: Shreeya Patel <spatel@ciq.com>
+Date: Mon, 31 Aug 2026 09:14:23 +0000
+Subject: [PATCH] net: ipv6: clear suppressed fib6 rule result
+
+jira VULN-204226
+cve CVE-2026-74581
+commit-author Zhiling Zou <zhilinz@nebusec.ai>
+commit 6aea62e433fe1b586202a5fee8b5807ce635e1d7
+
+fib6_rule_suppress() drops a suppressed route with ip6_rt_put_flags(),
+but leaves res->rt6 pointing at the released rt6_info.
+
+If no later rule supplies a replacement, fib6_rule_lookup() still sees
+res.rt6 and returns that stale dst to its caller. A suppressing rule can
+therefore leak a released route back to rt6_lookup(), and the next put
+hits rcuref_put_slowpath() from dst_release().
+
+Clear res->rt6 when suppressing the route so suppressed lookups fall
+through to the null dst instead of reusing the released one.
+
+Fixes: cdef485217d3 ("ipv6: fix memory leak in fib6_rule_suppress")
+	Cc: stable@vger.kernel.org
+	Reported-by: Vega <vega@nebusec.ai>
+	Signed-off-by: Zhiling Zou <zhilinz@nebusec.ai>
+	Signed-off-by: Ren Wei <enjou1224z@gmail.com>
+	Reviewed-by: Ido Schimmel <idosch@nvidia.com>
+Link: https://patch.msgid.link/4b8acb7787d54e440155585dd32ebdf0bef7d122.1784710966.git.zhilinz@nebusec.ai
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 6aea62e433fe1b586202a5fee8b5807ce635e1d7)
+	Signed-off-by: Shreeya Patel <spatel@ciq.com>
+---
+ net/ipv6/fib6_rules.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/net/ipv6/fib6_rules.c b/net/ipv6/fib6_rules.c
+index d76da67dac56..de1f189037a6 100644
+--- a/net/ipv6/fib6_rules.c
++++ b/net/ipv6/fib6_rules.c
+@@ -301,6 +301,7 @@ INDIRECT_CALLABLE_SCOPE bool fib6_rule_suppress(struct fib_rule *rule,
+ 
+ suppress_route:
+ 	ip6_rt_put_flags(rt, flags);
++	res->rt6 = NULL;
+ 	return true;
+ }
+ 
+-- 
+2.52.0
+
