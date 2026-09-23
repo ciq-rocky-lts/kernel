@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 36
+%define ciq_patch_version 37
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1201,6 +1201,19 @@ Patch0612: 0457-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
 Patch0613: 0458-net-ipv6-clear-suppressed-fib6-rule-result.patch
 Patch0614: 0459-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
 Patch0615: 0460-sctp-stream-fully-roll-back-denied-add-stream-state.patch
+#CIQ Patch Version: 372.32.1+37.1.el8_6_ciq
+Patch0616: 0461-can-bcm-switch-timer-to-HRTIMER_MODE_SOFT-and-remove.patch
+Patch0617: 0462-Bluetooth-hci_event-fix-potential-UAF-in-SSP-passkey.patch
+Patch0618: 0463-Bluetooth-l2cap-Add-missing-chan-lock-in-l2cap_ecred.patch
+Patch0619: 0464-ice-fix-double-free-of-tx_buf-skb.patch
+Patch0620: 0465-ipv6-fix-possible-UAF-in-icmpv6_rcv.patch
+Patch0621: 0466-i2c-stub-Reject-I2C-block-transfers-with-invalid-len.patch
+Patch0622: 0467-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
+Patch0623: 0468-mpls-add-seqcount-to-protect-the-platform_label-s-pa.patch
+Patch0624: 0469-xfrm-ah6-validate-routing-header-segments_left.patch
+Patch0625: 0470-net-tun-bound-receive-headroom.patch
+Patch0626: 0471-pppoe-reload-header-pointer-after-dev_hard_header.patch
+Patch0627: 0472-sctp-prevent-peer-transport-count-overflow.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2383,6 +2396,18 @@ ApplyOptionalPatch 0457-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
 ApplyOptionalPatch 0458-net-ipv6-clear-suppressed-fib6-rule-result.patch
 ApplyOptionalPatch 0459-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
 ApplyOptionalPatch 0460-sctp-stream-fully-roll-back-denied-add-stream-state.patch
+ApplyOptionalPatch 0461-can-bcm-switch-timer-to-HRTIMER_MODE_SOFT-and-remove.patch
+ApplyOptionalPatch 0462-Bluetooth-hci_event-fix-potential-UAF-in-SSP-passkey.patch
+ApplyOptionalPatch 0463-Bluetooth-l2cap-Add-missing-chan-lock-in-l2cap_ecred.patch
+ApplyOptionalPatch 0464-ice-fix-double-free-of-tx_buf-skb.patch
+ApplyOptionalPatch 0465-ipv6-fix-possible-UAF-in-icmpv6_rcv.patch
+ApplyOptionalPatch 0466-i2c-stub-Reject-I2C-block-transfers-with-invalid-len.patch
+ApplyOptionalPatch 0467-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
+ApplyOptionalPatch 0468-mpls-add-seqcount-to-protect-the-platform_label-s-pa.patch
+ApplyOptionalPatch 0469-xfrm-ah6-validate-routing-header-segments_left.patch
+ApplyOptionalPatch 0470-net-tun-bound-receive-headroom.patch
+ApplyOptionalPatch 0471-pppoe-reload-header-pointer-after-dev_hard_header.patch
+ApplyOptionalPatch 0472-sctp-prevent-peer-transport-count-overflow.patch
 
 
 # CIQ LTS patches:
@@ -3942,6 +3967,20 @@ fi
 #
 #
 %changelog
+* Tue Sep 22 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+37.1.el8_6_ciq
+- sctp: prevent peer transport count overflow (Jonathan Maple) [ciqres] {CVE-2026-74469}
+- pppoe: reload header pointer after dev_hard_header() (Jonathan Maple) [ciqres] {CVE-2026-68121}
+- net: tun: bound receive headroom (Jonathan Maple) [ciqres] {CVE-2026-81000}
+- xfrm: ah6: validate routing header segments_left (Jonathan Maple) [ciqres] {CVE-2026-80844}
+- mpls: add seqcount to protect the platform_label{,s} pair (Brett Mastbergen) [ciqres] {CVE-2026-43042}
+- USB: serial: io_ti: fix heap overflow in get_manuf_info() (CIQ Kernel Automation) [ciqres] {CVE-2026-53196}
+- i2c: stub: Reject I2C block transfers with invalid length (CIQ Kernel Automation) [ciqres] {CVE-2026-64191}
+- ipv6: fix possible UAF in icmpv6_rcv() (CIQ Kernel Automation) [ciqres] {CVE-2026-53006}
+- ice: fix double-free of tx_buf skb (CIQ Kernel Automation) [ciqres] {CVE-2026-53009}
+- Bluetooth: l2cap: Add missing chan lock in l2cap_ecred_reconf_rsp (CIQ Kernel Automation) [ciqres] {CVE-2026-53071}
+- Bluetooth: hci_event: fix potential UAF in SSP passkey handlers (CIQ Kernel Automation) [ciqres] {CVE-2026-46056}
+- can: bcm: switch timer to HRTIMER_MODE_SOFT and remove hrtimer_tasklet (CIQ Kernel Automation) [ciqres] {CVE-2026-17523}
+
 * Mon Sep 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+36.1.el8_6_ciq
 - sctp: stream: fully roll back denied add-stream state (Shreeya Patel) [ciqres] {CVE-2026-52929}
 - sctp: purge outqueue on stale COOKIE-ECHO handling (Shreeya Patel) [ciqres] {CVE-2026-52924}
