@@ -1,0 +1,40 @@
+From c45d12b31d4c5f263e38561efe04d1b998707b98 Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Mon, 21 Sep 2026 11:12:07 -0400
+Subject: [PATCH] ah6: fix error return code in ah6_input()
+
+cve-pre cve-2026-80844
+commit-author Zhang Changzhong <zhangchangzhong@huawei.com>
+commit a5ebcbdf34b65fcc07f38eaf2d60563b42619a59
+
+Fix to return a negative error code from the error handling
+case instead of 0, as done elsewhere in this function.
+
+Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
+	Reported-by: Hulk Robot <hulkci@huawei.com>
+	Signed-off-by: Zhang Changzhong <zhangchangzhong@huawei.com>
+Link: https://lore.kernel.org/r/1605581105-35295-1-git-send-email-zhangchangzhong@huawei.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit a5ebcbdf34b65fcc07f38eaf2d60563b42619a59)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ net/ipv6/ah6.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/net/ipv6/ah6.c b/net/ipv6/ah6.c
+index 2242e0f03616..5361a7a6748b 100644
+--- a/net/ipv6/ah6.c
++++ b/net/ipv6/ah6.c
+@@ -592,7 +592,8 @@ static int ah6_input(struct xfrm_state *x, struct sk_buff *skb)
+ 	memcpy(auth_data, ah->auth_data, ahp->icv_trunc_len);
+ 	memset(ah->auth_data, 0, ahp->icv_trunc_len);
+ 
+-	if (ipv6_clear_mutable_options(ip6h, hdr_len, XFRM_POLICY_IN))
++	err = ipv6_clear_mutable_options(ip6h, hdr_len, XFRM_POLICY_IN);
++	if (err)
+ 		goto out_free;
+ 
+ 	ip6h->priority    = 0;
+-- 
+2.52.0
+

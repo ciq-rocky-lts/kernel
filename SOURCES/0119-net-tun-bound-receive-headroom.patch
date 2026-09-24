@@ -1,0 +1,114 @@
+From 9606b18e76ffad697205364f252fb412b89f2cef Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Thu, 17 Sep 2026 13:32:23 -0400
+Subject: [PATCH] net: tun: bound receive headroom
+
+jira VULN-209964
+cve CVE-2026-81000
+commit-author Asim Viladi Oglu Manizada <manizada@pm.me>
+commit 447c9303942c439a117d9b76ce6d6e2116b38ee7
+commit-source-sha ad715e713610d2d5473c3a6498c825ccecf26491
+commit-source stable-5.10.y
+upstream-diff |
+	This kernel does not have the NAPI frags plumbing
+	  * 96aa1b22bd6bb9fccf62f6261f390ed6f3e7967f
+	  tun: correct header offsets in napi frags mode
+	  * 90e33d45940793def6f773b2d528e9f3c84ffdc7
+	  tun: enable napi_gro_frags() for TUN/TAP driver
+	Its also missing the drop label so needed to do local inplace
+	allocation cleanup
+	  * ab00af85d2f886a8e4ace1342d9cc2b232eab6a8
+	  net: tun: rebuild error handling in tun_get_user
+	We also need to keep the origin ip_version check due to keeping
+	the original case statements.
+
+commit 447c9303942c439a117d9b76ce6d6e2116b38ee7 upstream.
+
+tun_get_user() uses tun->align both as skb headroom and when choosing how
+much packet data to keep linear. OVS can propagate an oversized headroom
+request from another port to TUN or TAP.
+
+When align is larger than the usable space in a one-page skb head,
+SKB_MAX_HEAD(align) underflows and the result becomes negative when stored
+in good_linear. That value later wraps when assigned to the size_t linear
+variable, and tun_alloc_skb() can place skb->data outside the allocated
+head.
+
+Bound the headroom stored by TUN to the one-page skb-head budget and the
+largest non-sentinel 16-bit skb header offset. Leave one linear byte for
+raw TUN and a complete Ethernet header for TAP, including NET_IP_ALIGN.
+
+Also pull the raw-TUN protocol byte and the TAP Ethernet header before
+accessing them, so these checks remain safe for nonlinear skbs supplied by
+other allocation paths.
+
+Fixes: eaea34b23c46 ("net/tun: implement ndo_set_rx_headroom")
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Asim Viladi Oglu Manizada <manizada@pm.me>
+	Reviewed-by: Willem de Bruijn <willemb@google.com>
+Link: https://patch.msgid.link/20260812012139.2134643-1-manizada@pm.me
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+	Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+(cherry picked from commit ad715e713610d2d5473c3a6498c825ccecf26491)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ drivers/net/tun.c | 27 +++++++++++++++++++++++----
+ 1 file changed, 23 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/net/tun.c b/drivers/net/tun.c
+index aebfb848e111..42f6a4052a3c 100644
+--- a/drivers/net/tun.c
++++ b/drivers/net/tun.c
+@@ -978,11 +978,16 @@ static void tun_poll_controller(struct net_device *dev)
+ static void tun_set_headroom(struct net_device *dev, int new_hr)
+ {
+ 	struct tun_struct *tun = netdev_priv(dev);
++	size_t max_headroom;
+ 
+-	if (new_hr < NET_SKB_PAD)
+-		new_hr = NET_SKB_PAD;
++	max_headroom = min_t(size_t, SKB_MAX_HEAD(0), U16_MAX - 1);
+ 
+-	tun->align = new_hr;
++	if ((tun->flags & TUN_TYPE_MASK) == IFF_TAP)
++		max_headroom -= ETH_HLEN + NET_IP_ALIGN;
++	else
++		max_headroom -= 1;
++
++	tun->align = clamp_t(int, new_hr, NET_SKB_PAD, max_headroom);
+ }
+ 
+ static int tun_net_change_carrier(struct net_device *dev, bool new_carrier)
+@@ -1399,7 +1404,16 @@ static ssize_t tun_get_user(struct tun_struct *tun, struct tun_file *tfile,
+ 	switch (tun->flags & TUN_TYPE_MASK) {
+ 	case IFF_TUN:
+ 		if (tun->flags & IFF_NO_PI) {
+-			switch (skb->data[0] & 0xf0) {
++			u8 ip_version;
++
++			if (!pskb_may_pull(skb, 1)) {
++				this_cpu_inc(tun->pcpu_stats->rx_dropped);
++				kfree_skb(skb);
++				return -EINVAL;
++			}
++			ip_version = skb->data[0] & 0xf0;
++
++			switch (ip_version) {
+ 			case 0x40:
+ 				pi.proto = htons(ETH_P_IP);
+ 				break;
+@@ -1418,6 +1432,11 @@ static ssize_t tun_get_user(struct tun_struct *tun, struct tun_file *tfile,
+ 		skb->dev = tun->dev;
+ 		break;
+ 	case IFF_TAP:
++		if (!pskb_may_pull(skb, ETH_HLEN)) {
++			this_cpu_inc(tun->pcpu_stats->rx_dropped);
++			kfree_skb(skb);
++			return -ENOMEM;
++		}
+ 		skb->protocol = eth_type_trans(skb, tun->dev);
+ 		break;
+ 	}
+-- 
+2.52.0
+

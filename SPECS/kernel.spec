@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 19
+%define ciq_patch_version 20
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -655,6 +655,20 @@ Patch1130: 0104-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
 #CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.19.1
 Patch1131: 0105-net-sched-act_csum-validate-nested-VLAN-headers.patch
 Patch1132: 0106-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.20.1
+Patch1133: 0107-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
+Patch1134: 0108-dm-log-fix-out-of-bounds-write-due-to-region_count-o.patch
+Patch1135: 0109-dm-log-fix-a-bitset_size-overflow-on-32bit-machines.patch
+Patch1136: 0110-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
+Patch1137: 0111-sctp-fix-auth_hmacs-array-size-in-struct-sctp_cookie.patch
+Patch1138: 0112-openvswitch-defer-tunnel-netdev_put-to-RCU-release.patch
+Patch1139: 0113-net-bridge-stop-fast-leave-after-deleting-a-port-gro.patch
+Patch1140: 0114-openvswitch-vport-fix-self-deadlock-on-release-of-tu.patch
+Patch1141: 0115-ah6-fix-error-return-code-in-ah6_input.patch
+Patch1142: 0116-xfrm-ah6-validate-routing-header-segments_left.patch
+Patch1143: 0117-pppoe-reload-header-pointer-after-dev_hard_header.patch
+Patch1144: 0118-sctp-prevent-peer-transport-count-overflow.patch
+Patch1145: 0119-net-tun-bound-receive-headroom.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -1130,6 +1144,19 @@ ApplyOptionalPatch 0103-rtmutex-Use-waiter-task-instead-of-current-in-remove.pat
 ApplyOptionalPatch 0104-locking-rtmutex-Skip-remove_waiter-when-waiter-is-no.patch
 ApplyOptionalPatch 0105-net-sched-act_csum-validate-nested-VLAN-headers.patch
 ApplyOptionalPatch 0106-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
+ApplyOptionalPatch 0107-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
+ApplyOptionalPatch 0108-dm-log-fix-out-of-bounds-write-due-to-region_count-o.patch
+ApplyOptionalPatch 0109-dm-log-fix-a-bitset_size-overflow-on-32bit-machines.patch
+ApplyOptionalPatch 0110-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
+ApplyOptionalPatch 0111-sctp-fix-auth_hmacs-array-size-in-struct-sctp_cookie.patch
+ApplyOptionalPatch 0112-openvswitch-defer-tunnel-netdev_put-to-RCU-release.patch
+ApplyOptionalPatch 0113-net-bridge-stop-fast-leave-after-deleting-a-port-gro.patch
+ApplyOptionalPatch 0114-openvswitch-vport-fix-self-deadlock-on-release-of-tu.patch
+ApplyOptionalPatch 0115-ah6-fix-error-return-code-in-ah6_input.patch
+ApplyOptionalPatch 0116-xfrm-ah6-validate-routing-header-segments_left.patch
+ApplyOptionalPatch 0117-pppoe-reload-header-pointer-after-dev_hard_header.patch
+ApplyOptionalPatch 0118-sctp-prevent-peer-transport-count-overflow.patch
+ApplyOptionalPatch 0119-net-tun-bound-receive-headroom.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2133,6 +2160,21 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Wed Sep 23 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.20.1
+- net: tun: bound receive headroom (Jonathan Maple) [ciqres] {CVE-2026-81000}
+- sctp: prevent peer transport count overflow (Jonathan Maple) [ciqres] {CVE-2026-74469}
+- pppoe: reload header pointer after dev_hard_header() (Jonathan Maple) [ciqres] {CVE-2026-68121}
+- xfrm: ah6: validate routing header segments_left (Jonathan Maple) [ciqres] {CVE-2026-80844}
+- ah6: fix error return code in ah6_input() (Jonathan Maple) [ciqres] {CVE-2026-80844}
+- openvswitch: vport: fix self-deadlock on release of tunnel ports (Shreeya Patel) [ciqres] {CVE-2026-46165}
+- net: bridge: stop fast-leave after deleting a port group (Shreeya Patel) [ciqres] {CVE-2026-74480}
+- openvswitch: defer tunnel netdev_put to RCU release (Shreeya Patel) [ciqres] {CVE-2026-31678}
+- sctp: fix auth_hmacs array size in struct sctp_cookie (Shreeya Patel) [ciqres] {CVE-2026-68376}
+- ip6_tunnel: clear skb2->cb[] in ip6ip6_err() (Shreeya Patel) [ciqres] {CVE-2026-74597}
+- dm-log: fix a bitset_size overflow on 32bit machines (CIQ Kernel Automation) [ciqres] {CVE-2026-72105}
+- dm log: fix out-of-bounds write due to region_count overflow (CIQ Kernel Automation) [ciqres] {CVE-2026-53059}
+- ipc: limit next_id allocation to the valid ID range (CIQ Kernel Automation) [ciqres] {CVE-2026-52923}
+
 * Fri Aug 07 2026 Jonathan Maple <jmaple@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.19.1
 - sctp: don't free the ASCONF's own transport in DEL-IP processing (Jonathan Maple) [ciqres] {CVE-2026-64564}
 - net: sched: act_csum: validate nested VLAN headers (CIQ Kernel Automation) [ciqres] {CVE-2026-31684}
