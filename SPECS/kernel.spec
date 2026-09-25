@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 40
+%define ciq_patch_version 41
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1674,6 +1674,20 @@ Patch1000712: 0667-openvswitch-vport-fix-self-deadlock-on-release-of-tu.patch
 Patch1000713: 0668-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
 Patch1000714: 0669-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
 Patch1000715: 0670-sctp-stream-fully-roll-back-denied-add-stream-state.patch
+#CIQ Patch Version: 284.30.1+41.1.el9_2_ciq
+Patch1000716: 0671-mpls-add-seqcount-to-protect-the-platform_label-s-pa.patch
+Patch1000717: 0672-xfrm-ah6-validate-routing-header-segments_left.patch
+Patch1000718: 0673-net-tun-rebuild-error-handling-in-tun_get_user.patch
+Patch1000719: 0674-net-tun-bound-receive-headroom.patch
+Patch1000720: 0675-pppoe-reload-header-pointer-after-dev_hard_header.patch
+Patch1000721: 0676-sctp-prevent-peer-transport-count-overflow.patch
+Patch1000722: 0677-netfilter-nft_set_pipapo_avx2-don-t-return-non-match.patch
+Patch1000723: 0678-Bluetooth-hci_event-fix-potential-UAF-in-SSP-passkey.patch
+Patch1000724: 0679-Bluetooth-l2cap-Add-missing-chan-lock-in-l2cap_ecred.patch
+Patch1000725: 0680-crypto-ccp-copy-IV-using-skcipher-ivsize.patch
+Patch1000726: 0681-ipv6-fix-possible-UAF-in-icmpv6_rcv.patch
+Patch1000727: 0682-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
+Patch1000728: 0683-crypto-qat-validate-RSA-CRT-component-lengths.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3068,6 +3082,19 @@ ApplyOptionalPatch 0667-openvswitch-vport-fix-self-deadlock-on-release-of-tu.pat
 ApplyOptionalPatch 0668-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
 ApplyOptionalPatch 0669-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
 ApplyOptionalPatch 0670-sctp-stream-fully-roll-back-denied-add-stream-state.patch
+ApplyOptionalPatch 0671-mpls-add-seqcount-to-protect-the-platform_label-s-pa.patch
+ApplyOptionalPatch 0672-xfrm-ah6-validate-routing-header-segments_left.patch
+ApplyOptionalPatch 0673-net-tun-rebuild-error-handling-in-tun_get_user.patch
+ApplyOptionalPatch 0674-net-tun-bound-receive-headroom.patch
+ApplyOptionalPatch 0675-pppoe-reload-header-pointer-after-dev_hard_header.patch
+ApplyOptionalPatch 0676-sctp-prevent-peer-transport-count-overflow.patch
+ApplyOptionalPatch 0677-netfilter-nft_set_pipapo_avx2-don-t-return-non-match.patch
+ApplyOptionalPatch 0678-Bluetooth-hci_event-fix-potential-UAF-in-SSP-passkey.patch
+ApplyOptionalPatch 0679-Bluetooth-l2cap-Add-missing-chan-lock-in-l2cap_ecred.patch
+ApplyOptionalPatch 0680-crypto-ccp-copy-IV-using-skcipher-ivsize.patch
+ApplyOptionalPatch 0681-ipv6-fix-possible-UAF-in-icmpv6_rcv.patch
+ApplyOptionalPatch 0682-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
+ApplyOptionalPatch 0683-crypto-qat-validate-RSA-CRT-component-lengths.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4951,6 +4978,21 @@ fi
 #
 #
 %changelog
+* Thu Sep 24 2026 Hailey Mothershead <hmothershead@ciq.com> - 5.14.0-284.30.1+41.1.el9_2_ciq
+- crypto: qat - validate RSA CRT component lengths (CIQ Kernel Automation) [ciqres] {CVE-2026-64304}
+- USB: serial: io_ti: fix heap overflow in get_manuf_info() (CIQ Kernel Automation) [ciqres] {CVE-2026-53196}
+- ipv6: fix possible UAF in icmpv6_rcv() (CIQ Kernel Automation) [ciqres] {CVE-2026-53006}
+- crypto: ccp - copy IV using skcipher ivsize (CIQ Kernel Automation) [ciqres] {CVE-2026-53016}
+- Bluetooth: l2cap: Add missing chan lock in l2cap_ecred_reconf_rsp (CIQ Kernel Automation) [ciqres] {CVE-2026-53071}
+- Bluetooth: hci_event: fix potential UAF in SSP passkey handlers (CIQ Kernel Automation) [ciqres] {CVE-2026-46056}
+- netfilter: nft_set_pipapo_avx2: don't return non-matching entry on expiry (CIQ Kernel Automation) [ciqres] {CVE-2026-43114}
+- sctp: prevent peer transport count overflow (Jonathan Maple) [ciqres] {CVE-2026-74469}
+- pppoe: reload header pointer after dev_hard_header() (Jonathan Maple) [ciqres] {CVE-2026-68121}
+- net: tun: bound receive headroom (Jonathan Maple) [ciqres] {CVE-2026-81000}
+- net: tun: rebuild error handling in tun_get_user (Jonathan Maple) [ciqres] {CVE-2026-81000}
+- xfrm: ah6: validate routing header segments_left (Jonathan Maple) [ciqres] {CVE-2026-80844}
+- mpls: add seqcount to protect the platform_label{,s} pair (Brett Mastbergen) [ciqres] {CVE-2026-43042}
+
 * Mon Sep 14 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+40.1.el9_2_ciq
 - sctp: stream: fully roll back denied add-stream state (Shreeya Patel) [ciqres] {CVE-2026-52929}
 - sctp: purge outqueue on stale COOKIE-ECHO handling (Shreeya Patel) [ciqres] {CVE-2026-52924}

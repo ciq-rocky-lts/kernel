@@ -1,0 +1,51 @@
+From cfb92de6678638172c54ae08b6d24dd0c00e1a63 Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Fri, 18 Sep 2026 17:39:50 -0400
+Subject: [PATCH] pppoe: reload header pointer after dev_hard_header()
+
+jira VULN-197182
+cve CVE-2026-68121
+commit-author Asim Viladi Oglu Manizada <manizada@pm.me>
+commit e9c238f6fe42fb1b4dba3a578277de32cb487937
+
+pppoe_sendmsg() saves a pointer to the PPPoE header before calling
+dev_hard_header(). Device header callbacks are allowed to reallocate the
+skb head, invalidating pointers into it.
+
+This can happen when a send is blocked in copy_from_user() while the first
+non-Ethernet port is added to an empty team device. The team's delegated
+GRE header callback then expands the skb head. PPPoE subsequently writes
+six bytes through the stale pointer into the freed head.
+
+Reload the PPPoE header through the skb's network-header offset after
+device header creation. pskb_expand_head() updates that offset when it
+relocates the head.
+
+Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Asim Viladi Oglu Manizada <manizada@pm.me>
+	Reviewed-by: Vadim Fedorenko <vadim.fedorenko@linux.dev>
+	Reviewed-by: Eric Dumazet <edumazet@google.com>
+Link: https://patch.msgid.link/20260722093814.3017176-1-manizada@pm.me
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit e9c238f6fe42fb1b4dba3a578277de32cb487937)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ drivers/net/ppp/pppoe.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/net/ppp/pppoe.c b/drivers/net/ppp/pppoe.c
+index ce2cbb5903d7..1b889f519c84 100644
+--- a/drivers/net/ppp/pppoe.c
++++ b/drivers/net/ppp/pppoe.c
+@@ -893,6 +893,7 @@ static int pppoe_sendmsg(struct socket *sock, struct msghdr *m,
+ 	dev_hard_header(skb, dev, ETH_P_PPP_SES,
+ 			po->pppoe_pa.remote, NULL, total_len);
+ 
++	ph = pppoe_hdr(skb);
+ 	memcpy(ph, &hdr, sizeof(struct pppoe_hdr));
+ 
+ 	ph->length = htons(total_len);
+-- 
+2.52.0
+
