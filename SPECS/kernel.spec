@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 23
+%define ciq_patch_version 24
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1314,6 +1314,25 @@ Patch1000307: 1307-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
 Patch1000308: 1308-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
 Patch1000309: 1309-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
 Patch1000310: 1310-sctp-stream-fully-roll-back-denied-add-stream-state.patch
+#CIQ Patch Version: 570.60.1+24.1.el9_6_ciq
+Patch1000311: 1311-io_uring-poll-fix-signed-comparison-in-io_poll_get_o.patch
+Patch1000312: 1312-i2c-stub-Reject-I2C-block-transfers-with-invalid-len.patch
+Patch1000313: 1313-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
+Patch1000314: 1314-zram-fix-use-after-free-in-zram_bvec_write_partial.patch
+Patch1000315: 1315-mpls-add-seqcount-to-protect-the-platform_label-s-pa.patch
+Patch1000316: 1316-xfrm-ah6-validate-routing-header-segments_left.patch
+Patch1000317: 1317-net-tun-bound-receive-headroom.patch
+Patch1000318: 1318-pppoe-reload-header-pointer-after-dev_hard_header.patch
+Patch1000319: 1319-sctp-prevent-peer-transport-count-overflow.patch
+Patch1000320: 1320-netfilter-nat-use-kfree_rcu-to-release-ops.patch
+Patch1000321: 1321-scsi-target-iscsi-Bound-iscsi_encode_text_output-app.patch
+Patch1000322: 1322-RDMA-siw-bound-Read-Response-placement-to-the-RREAD-.patch
+Patch1000323: 1323-smb-client-fix-double-free-in-SMB2_open-replay.patch
+Patch1000324: 1324-smb-client-fix-query-directory-replay-double-free.patch
+Patch1000325: 1325-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
+Patch1000326: 1326-crypto-af_alg-Fix-incorrect-boolean-values-in-af_alg.patch
+Patch1000327: 1327-crypto-af_alg-Remove-zero-copy-support-from-skcipher.patch
+Patch1000328: 1328-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2386,6 +2405,24 @@ ApplyOptionalPatch 1307-ipc-limit-next_id-allocation-to-the-valid-ID-range.patch
 ApplyOptionalPatch 1308-ip6_tunnel-clear-skb2-cb-in-ip6ip6_err.patch
 ApplyOptionalPatch 1309-sctp-purge-outqueue-on-stale-COOKIE-ECHO-handling.patch
 ApplyOptionalPatch 1310-sctp-stream-fully-roll-back-denied-add-stream-state.patch
+ApplyOptionalPatch 1311-io_uring-poll-fix-signed-comparison-in-io_poll_get_o.patch
+ApplyOptionalPatch 1312-i2c-stub-Reject-I2C-block-transfers-with-invalid-len.patch
+ApplyOptionalPatch 1313-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
+ApplyOptionalPatch 1314-zram-fix-use-after-free-in-zram_bvec_write_partial.patch
+ApplyOptionalPatch 1315-mpls-add-seqcount-to-protect-the-platform_label-s-pa.patch
+ApplyOptionalPatch 1316-xfrm-ah6-validate-routing-header-segments_left.patch
+ApplyOptionalPatch 1317-net-tun-bound-receive-headroom.patch
+ApplyOptionalPatch 1318-pppoe-reload-header-pointer-after-dev_hard_header.patch
+ApplyOptionalPatch 1319-sctp-prevent-peer-transport-count-overflow.patch
+ApplyOptionalPatch 1320-netfilter-nat-use-kfree_rcu-to-release-ops.patch
+ApplyOptionalPatch 1321-scsi-target-iscsi-Bound-iscsi_encode_text_output-app.patch
+ApplyOptionalPatch 1322-RDMA-siw-bound-Read-Response-placement-to-the-RREAD-.patch
+ApplyOptionalPatch 1323-smb-client-fix-double-free-in-SMB2_open-replay.patch
+ApplyOptionalPatch 1324-smb-client-fix-query-directory-replay-double-free.patch
+ApplyOptionalPatch 1325-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
+ApplyOptionalPatch 1326-crypto-af_alg-Fix-incorrect-boolean-values-in-af_alg.patch
+ApplyOptionalPatch 1327-crypto-af_alg-Remove-zero-copy-support-from-skcipher.patch
+ApplyOptionalPatch 1328-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4502,6 +4539,26 @@ fi
 #
 #
 %changelog
+* Fri Sep 25 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+24.1.el9_6_ciq
+- netfilter: bridge: make ebt_snat ARP rewrite writable (Jonathan Maple) [ciqres] {CVE-2026-53266}
+- crypto: af_alg - Remove zero-copy support from skcipher and aead (Jonathan Maple) [ciqres] {CVE-2025-39964}
+- crypto: af_alg - Fix incorrect boolean values in af_alg_ctx (Jonathan Maple) [ciqres] {CVE-2025-40022}
+- crypto: af_alg - Disallow concurrent writes in af_alg_sendmsg (Jonathan Maple) [ciqres] {CVE-2025-39964}
+- smb: client: fix query directory replay double-free (CIQ Kernel Automation) [ciqres] {CVE-2026-64387}
+- smb: client: fix double-free in SMB2_open() replay (CIQ Kernel Automation) [ciqres] {CVE-2026-64382}
+- RDMA/siw: bound Read Response placement to the RREAD length (CIQ Kernel Automation) [ciqres] {CVE-2026-64268}
+- scsi: target: iscsi: Bound iscsi_encode_text_output() appends to rsp_buf (CIQ Kernel Automation) [ciqres] {CVE-2026-63887}
+- netfilter: nat: use kfree_rcu to release ops (CIQ Kernel Automation) [ciqres] {CVE-2026-53000}
+- sctp: prevent peer transport count overflow (Jonathan Maple) [ciqres] {CVE-2026-74469}
+- pppoe: reload header pointer after dev_hard_header() (Jonathan Maple) [ciqres] {CVE-2026-68121}
+- net: tun: bound receive headroom (Jonathan Maple) [ciqres] {CVE-2026-81000}
+- xfrm: ah6: validate routing header segments_left (Jonathan Maple) [ciqres] {CVE-2026-80844}
+- mpls: add seqcount to protect the platform_label{,s} pair (Brett Mastbergen) [ciqres] {CVE-2026-43042}
+- zram: fix use-after-free in zram_bvec_write_partial() (CIQ Kernel Automation) [ciqres] {CVE-2026-53185}
+- USB: serial: io_ti: fix heap overflow in get_manuf_info() (CIQ Kernel Automation) [ciqres] {CVE-2026-53196}
+- i2c: stub: Reject I2C block transfers with invalid length (CIQ Kernel Automation) [ciqres] {CVE-2026-64191}
+- io_uring/poll: fix signed comparison in io_poll_get_ownership() (CIQ Kernel Automation) [ciqres] {CVE-2026-52933}
+
 * Mon Sep 14 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+23.1.el9_6_ciq
 - sctp: stream: fully roll back denied add-stream state (Shreeya Patel) [ciqres] {CVE-2026-52929}
 - sctp: purge outqueue on stale COOKIE-ECHO handling (Shreeya Patel) [ciqres] {CVE-2026-52924}

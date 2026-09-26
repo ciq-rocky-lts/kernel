@@ -1,0 +1,50 @@
+From 6e17cb6d27d941ecfb7ba953d7403bcfcb9e48ea Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Tue, 22 Sep 2026 12:10:59 -0400
+Subject: [PATCH] crypto: af_alg - Fix incorrect boolean values in af_alg_ctx
+
+jira VULN-212363
+cve CVE-2025-40022
+commit-author Eric Biggers <ebiggers@kernel.org>
+commit d0ca0df179c4b21e2a6c4a4fb637aa8fa14575cb
+
+Commit 1b34cbbf4f01 ("crypto: af_alg - Disallow concurrent writes in
+af_alg_sendmsg") changed some fields from bool to 1-bit bitfields of
+type u32.
+
+However, some assignments to these fields, specifically 'more' and
+'merge', assign values greater than 1.  These relied on C's implicit
+conversion to bool, such that zero becomes false and nonzero becomes
+true.
+
+With a 1-bit bitfields of type u32 instead, mod 2 of the value is taken
+instead, resulting in 0 being assigned in some cases when 1 was intended.
+
+Fix this by restoring the bool type.
+
+Fixes: 1b34cbbf4f01 ("crypto: af_alg - Disallow concurrent writes in af_alg_sendmsg")
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Eric Biggers <ebiggers@kernel.org>
+	Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+(cherry picked from commit d0ca0df179c4b21e2a6c4a4fb637aa8fa14575cb)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ include/crypto/if_alg.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/crypto/if_alg.h b/include/crypto/if_alg.h
+index 0b05a25dcf174..86827042396e1 100644
+--- a/include/crypto/if_alg.h
++++ b/include/crypto/if_alg.h
+@@ -151,7 +151,7 @@ struct af_alg_ctx {
+ 	size_t used;
+ 	atomic_t rcvused;
+ 
+-	u32		more:1,
++	bool		more:1,
+ 			merge:1,
+ 			enc:1,
+ 			write:1,
+-- 
+2.52.0
+
