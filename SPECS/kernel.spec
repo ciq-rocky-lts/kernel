@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 41
+%define ciq_patch_version 42
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1688,6 +1688,16 @@ Patch1000725: 0680-crypto-ccp-copy-IV-using-skcipher-ivsize.patch
 Patch1000726: 0681-ipv6-fix-possible-UAF-in-icmpv6_rcv.patch
 Patch1000727: 0682-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
 Patch1000728: 0683-crypto-qat-validate-RSA-CRT-component-lengths.patch
+#CIQ Patch Version: 284.30.1+42.1.el9_2_ciq
+Patch1000729: 0684-tipc-fix-double-free-in-tipc_buf_append.patch
+Patch1000730: 0685-scsi-target-iscsi-Bound-iscsi_encode_text_output-app.patch
+Patch1000731: 0686-RDMA-siw-bound-Read-Response-placement-to-the-RREAD-.patch
+Patch1000732: 0687-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
+Patch1000733: 0688-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
+Patch1000734: 0689-crypto-af_alg-Fix-incorrect-boolean-values-in-af_alg.patch
+Patch1000735: 0690-crypto-af_alg-Remove-zero-copy-support-from-skcipher.patch
+Patch1000736: 0691-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
+Patch1000737: 0692-RDMA-rxe-Fix-OOB-in-free_rd_atomic_resources.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3095,6 +3105,15 @@ ApplyOptionalPatch 0680-crypto-ccp-copy-IV-using-skcipher-ivsize.patch
 ApplyOptionalPatch 0681-ipv6-fix-possible-UAF-in-icmpv6_rcv.patch
 ApplyOptionalPatch 0682-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
 ApplyOptionalPatch 0683-crypto-qat-validate-RSA-CRT-component-lengths.patch
+ApplyOptionalPatch 0684-tipc-fix-double-free-in-tipc_buf_append.patch
+ApplyOptionalPatch 0685-scsi-target-iscsi-Bound-iscsi_encode_text_output-app.patch
+ApplyOptionalPatch 0686-RDMA-siw-bound-Read-Response-placement-to-the-RREAD-.patch
+ApplyOptionalPatch 0687-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
+ApplyOptionalPatch 0688-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
+ApplyOptionalPatch 0689-crypto-af_alg-Fix-incorrect-boolean-values-in-af_alg.patch
+ApplyOptionalPatch 0690-crypto-af_alg-Remove-zero-copy-support-from-skcipher.patch
+ApplyOptionalPatch 0691-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
+ApplyOptionalPatch 0692-RDMA-rxe-Fix-OOB-in-free_rd_atomic_resources.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4978,6 +4997,17 @@ fi
 #
 #
 %changelog
+* Tue Sep 29 2026 Hailey Mothershead <hmothershead@ciq.com> - 5.14.0-284.30.1+42.1.el9_2_ciq
+- RDMA/rxe: Fix OOB in free_rd_atomic_resources() (Hailey Mothershead) [ciqres] {CVE-2026-80863}
+- netfilter: bridge: make ebt_snat ARP rewrite writable (Jonathan Maple) [ciqres] {CVE-2026-53266}
+- crypto: af_alg - Remove zero-copy support from skcipher and aead (Jonathan Maple) [ciqres] {CVE-2025-39964}
+- crypto: af_alg - Fix incorrect boolean values in af_alg_ctx (Jonathan Maple) [ciqres] {CVE-2025-40022}
+- crypto: af_alg - Disallow concurrent writes in af_alg_sendmsg (Jonathan Maple) [ciqres] {CVE-2025-39964}
+- sctp: don't free the ASCONF's own transport in DEL-IP processing (CIQ Kernel Automation) [ciqres] {CVE-2026-64564}
+- RDMA/siw: bound Read Response placement to the RREAD length (CIQ Kernel Automation) [ciqres] {CVE-2026-64268}
+- scsi: target: iscsi: Bound iscsi_encode_text_output() appends to rsp_buf (CIQ Kernel Automation) [ciqres] {CVE-2026-63887}
+- tipc: fix double-free in tipc_buf_append() (CIQ Kernel Automation) [ciqres] {CVE-2026-52993}
+
 * Thu Sep 24 2026 Hailey Mothershead <hmothershead@ciq.com> - 5.14.0-284.30.1+41.1.el9_2_ciq
 - crypto: qat - validate RSA CRT component lengths (CIQ Kernel Automation) [ciqres] {CVE-2026-64304}
 - USB: serial: io_ti: fix heap overflow in get_manuf_info() (CIQ Kernel Automation) [ciqres] {CVE-2026-53196}
