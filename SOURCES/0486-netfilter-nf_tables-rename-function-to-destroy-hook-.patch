@@ -1,0 +1,52 @@
+From b85f90a6d0f2f5cd994cf57a3cdc3ff74c3199e0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Mon, 21 Sep 2026 23:42:47 +0200
+Subject: [PATCH] netfilter: nf_tables: rename function to destroy hook list
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-177693
+cve-pre CVE-2026-23231
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit cdc32546632354305afdcf399a5431138a31c9e0
+upstream-diff Ignored changes in functions `nft_commit_release',
+  `nf_tables_abort_release', because the function being renamed is not
+  used there (missing abadb2f865d72a223d691fc68e006943ecadf0d9 and
+  78d9f48f7f44431a25da2b46b3a8812f6ff2b981).
+
+Rename nft_flowtable_hooks_destroy() by nft_hooks_destroy() to prepare
+for netdev chain device updates.
+
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 465373ff4e04b41b193adaecb1a79bc35965e890)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 784d968ad01b..8f79536cd8c6 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -6691,7 +6691,7 @@ static int nft_register_flowtable_net_hooks(struct net *net,
+ 	return err;
+ }
+ 
+-static void nft_flowtable_hooks_destroy(struct list_head *hook_list)
++static void nft_hooks_destroy(struct list_head *hook_list)
+ {
+ 	struct nft_hook *hook, *next;
+ 
+@@ -6797,7 +6797,7 @@ static int nf_tables_newflowtable(struct net *net, struct sock *nlsk,
+ 					       &flowtable->hook_list,
+ 					       flowtable);
+ 	if (err < 0) {
+-		nft_flowtable_hooks_destroy(&flowtable->hook_list);
++		nft_hooks_destroy(&flowtable->hook_list);
+ 		goto err4;
+ 	}
+ 
+-- 
+2.52.0
+

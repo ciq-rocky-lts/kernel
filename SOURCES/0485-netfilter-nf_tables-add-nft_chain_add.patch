@@ -1,0 +1,83 @@
+From 10889c0c5bc47dd90ce079635104ef93f881ef19 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Mon, 21 Sep 2026 23:42:46 +0200
+Subject: [PATCH] netfilter: nf_tables: add nft_chain_add()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-177693
+cve-pre CVE-2026-23231
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 04b7db414490ea9254d0c1d8930ea9571f8ce9f0
+
+This patch adds a helper function to add the chain to the hashtable and
+the chain list.
+
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit c62ae2d56890e450e4c784ebea4d73e7970c4381)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 28 ++++++++++++++++++++--------
+ 1 file changed, 20 insertions(+), 8 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 79353a42103b..784d968ad01b 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -1981,6 +1981,20 @@ static int nft_basechain_init(struct nft_base_chain *basechain, u8 family,
+ 	return 0;
+ }
+ 
++static int nft_chain_add(struct nft_table *table, struct nft_chain *chain)
++{
++	int err;
++
++	err = rhltable_insert_key(&table->chains_ht, chain->name,
++				  &chain->rhlhead, nft_chain_ht_params);
++	if (err)
++		return err;
++
++	list_add_tail_rcu(&chain->list, &table->chains);
++
++	return 0;
++}
++
+ static int nf_tables_addchain(struct nft_ctx *ctx, u8 family, u8 genmask,
+ 			      u8 policy, u32 flags)
+ {
+@@ -2058,16 +2072,9 @@ static int nf_tables_addchain(struct nft_ctx *ctx, u8 family, u8 genmask,
+ 	if (err < 0)
+ 		goto err1;
+ 
+-	err = rhltable_insert_key(&table->chains_ht, chain->name,
+-				  &chain->rhlhead, nft_chain_ht_params);
+-	if (err)
+-		goto err2;
+-
+ 	trans = nft_trans_chain_add(ctx, NFT_MSG_NEWCHAIN);
+ 	if (IS_ERR(trans)) {
+ 		err = PTR_ERR(trans);
+-		rhltable_remove(&table->chains_ht, &chain->rhlhead,
+-				nft_chain_ht_params);
+ 		goto err2;
+ 	}
+ 
+@@ -2075,8 +2082,13 @@ static int nf_tables_addchain(struct nft_ctx *ctx, u8 family, u8 genmask,
+ 	if (nft_is_base_chain(chain))
+ 		nft_trans_chain_policy(trans) = policy;
+ 
++	err = nft_chain_add(table, chain);
++	if (err < 0) {
++		nft_trans_destroy(trans);
++		goto err2;
++	}
++
+ 	table->use++;
+-	list_add_tail_rcu(&chain->list, &table->chains);
+ 
+ 	return 0;
+ err2:
+-- 
+2.52.0
+

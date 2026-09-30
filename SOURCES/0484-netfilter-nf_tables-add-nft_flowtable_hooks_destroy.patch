@@ -1,0 +1,58 @@
+From 55f676752125393e98794ac878e18307d30e8ac9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Mon, 21 Sep 2026 23:42:46 +0200
+Subject: [PATCH] netfilter: nf_tables: add nft_flowtable_hooks_destroy()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-177693
+cve-pre CVE-2026-23231
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit 389a2cbcb7f15e2af9babdc0c63cec318537e7ed
+
+This patch adds a helper function destroy the flowtable hooks.
+
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 5af8e7f44f027717c8ce86b63b056332b2155812)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_tables_api.c | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 88cd744cdee8..79353a42103b 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -6679,6 +6679,16 @@ static int nft_register_flowtable_net_hooks(struct net *net,
+ 	return err;
+ }
+ 
++static void nft_flowtable_hooks_destroy(struct list_head *hook_list)
++{
++	struct nft_hook *hook, *next;
++
++	list_for_each_entry_safe(hook, next, hook_list, list) {
++		list_del_rcu(&hook->list);
++		kfree_rcu(hook, rcu);
++	}
++}
++
+ static int nf_tables_newflowtable(struct net *net, struct sock *nlsk,
+ 				  struct sk_buff *skb,
+ 				  const struct nlmsghdr *nlh,
+@@ -6775,10 +6785,7 @@ static int nf_tables_newflowtable(struct net *net, struct sock *nlsk,
+ 					       &flowtable->hook_list,
+ 					       flowtable);
+ 	if (err < 0) {
+-		list_for_each_entry_safe(hook, next, &flowtable->hook_list, list) {
+-			list_del_rcu(&hook->list);
+-			kfree_rcu(hook, rcu);
+-		}
++		nft_flowtable_hooks_destroy(&flowtable->hook_list);
+ 		goto err4;
+ 	}
+ 
+-- 
+2.52.0
+

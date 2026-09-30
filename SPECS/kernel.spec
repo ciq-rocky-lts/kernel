@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 37
+%define ciq_patch_version 38
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1214,6 +1214,29 @@ Patch0624: 0469-xfrm-ah6-validate-routing-header-segments_left.patch
 Patch0625: 0470-net-tun-bound-receive-headroom.patch
 Patch0626: 0471-pppoe-reload-header-pointer-after-dev_hard_header.patch
 Patch0627: 0472-sctp-prevent-peer-transport-count-overflow.patch
+#CIQ Patch Version: 372.32.1+38.1.el8_6_ciq
+Patch0628: 0473-netfilter-nft_set_rbtree-.deactivate-fails-if-elemen.patch
+Patch0629: 0474-netfilter-nf_tables-use-timestamp-to-check-for-set-e.patch
+Patch0630: 0475-dlm-validate-length-in-dlm_search_rsb_tree.patch
+Patch0631: 0476-netfilter-ctnetlink-ensure-safe-access-to-master-con.patch
+Patch0632: 0477-netfilter-nf_conntrack_helper-pass-helper-to-expect-.patch
+Patch0633: 0478-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
+Patch0634: 0479-crypto-af_alg-Fix-incorrect-boolean-values-in-af_alg.patch
+Patch0635: 0480-crypto-af_alg-Remove-zero-copy-support-from-skcipher.patch
+Patch0636: 0481-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
+Patch0637: 0482-netfilter-nf_tables-generalise-flowtable-hook-parsin.patch
+Patch0638: 0483-netfilter-nf_tables-pass-hook-list-to-nft_-un-regist.patch
+Patch0639: 0484-netfilter-nf_tables-add-nft_flowtable_hooks_destroy.patch
+Patch0640: 0485-netfilter-nf_tables-add-nft_chain_add.patch
+Patch0641: 0486-netfilter-nf_tables-rename-function-to-destroy-hook-.patch
+Patch0642: 0487-netfilter-nf_tables-register-hooks-last-when-adding-.patch
+Patch0643: 0488-netfilter-nf_tables-fix-use-after-free-in-nf_tables_.patch
+Patch0644: 0489-netfilter-nf_tables-release-flowtable-after-rcu-grac.patch
+Patch0645: 0490-netfilter-conntrack-remove-sprintf-usage.patch
+Patch0646: 0491-tipc-fix-double-free-in-tipc_buf_append.patch
+Patch0647: 0492-RDMA-siw-bound-Read-Response-placement-to-the-RREAD-.patch
+Patch0648: 0493-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
+Patch0649: 0494-RDMA-rxe-Fix-OOB-in-free_rd_atomic_resources.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2408,6 +2431,28 @@ ApplyOptionalPatch 0469-xfrm-ah6-validate-routing-header-segments_left.patch
 ApplyOptionalPatch 0470-net-tun-bound-receive-headroom.patch
 ApplyOptionalPatch 0471-pppoe-reload-header-pointer-after-dev_hard_header.patch
 ApplyOptionalPatch 0472-sctp-prevent-peer-transport-count-overflow.patch
+ApplyOptionalPatch 0473-netfilter-nft_set_rbtree-.deactivate-fails-if-elemen.patch
+ApplyOptionalPatch 0474-netfilter-nf_tables-use-timestamp-to-check-for-set-e.patch
+ApplyOptionalPatch 0475-dlm-validate-length-in-dlm_search_rsb_tree.patch
+ApplyOptionalPatch 0476-netfilter-ctnetlink-ensure-safe-access-to-master-con.patch
+ApplyOptionalPatch 0477-netfilter-nf_conntrack_helper-pass-helper-to-expect-.patch
+ApplyOptionalPatch 0478-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
+ApplyOptionalPatch 0479-crypto-af_alg-Fix-incorrect-boolean-values-in-af_alg.patch
+ApplyOptionalPatch 0480-crypto-af_alg-Remove-zero-copy-support-from-skcipher.patch
+ApplyOptionalPatch 0481-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
+ApplyOptionalPatch 0482-netfilter-nf_tables-generalise-flowtable-hook-parsin.patch
+ApplyOptionalPatch 0483-netfilter-nf_tables-pass-hook-list-to-nft_-un-regist.patch
+ApplyOptionalPatch 0484-netfilter-nf_tables-add-nft_flowtable_hooks_destroy.patch
+ApplyOptionalPatch 0485-netfilter-nf_tables-add-nft_chain_add.patch
+ApplyOptionalPatch 0486-netfilter-nf_tables-rename-function-to-destroy-hook-.patch
+ApplyOptionalPatch 0487-netfilter-nf_tables-register-hooks-last-when-adding-.patch
+ApplyOptionalPatch 0488-netfilter-nf_tables-fix-use-after-free-in-nf_tables_.patch
+ApplyOptionalPatch 0489-netfilter-nf_tables-release-flowtable-after-rcu-grac.patch
+ApplyOptionalPatch 0490-netfilter-conntrack-remove-sprintf-usage.patch
+ApplyOptionalPatch 0491-tipc-fix-double-free-in-tipc_buf_append.patch
+ApplyOptionalPatch 0492-RDMA-siw-bound-Read-Response-placement-to-the-RREAD-.patch
+ApplyOptionalPatch 0493-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
+ApplyOptionalPatch 0494-RDMA-rxe-Fix-OOB-in-free_rd_atomic_resources.patch
 
 
 # CIQ LTS patches:
@@ -3967,6 +4012,30 @@ fi
 #
 #
 %changelog
+* Tue Sep 29 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+38.1.el8_6_ciq
+- RDMA/rxe: Fix OOB in free_rd_atomic_resources() (Hailey Mothershead) [ciqres] {CVE-2026-80863}
+- sctp: don't free the ASCONF's own transport in DEL-IP processing (CIQ Kernel Automation) [ciqres] {CVE-2026-64564}
+- RDMA/siw: bound Read Response placement to the RREAD length (CIQ Kernel Automation) [ciqres] {CVE-2026-64268}
+- tipc: fix double-free in tipc_buf_append() (CIQ Kernel Automation) [ciqres] {CVE-2026-52993}
+- netfilter: conntrack: remove sprintf usage (CIQ Kernel Automation) [ciqres] {CVE-2026-53002}
+- netfilter: nf_tables: release flowtable after rcu grace period on error (Marcin Wcisło) [ciqres] {CVE-2026-23392}
+- netfilter: nf_tables: fix use-after-free in nf_tables_addchain() (Marcin Wcisło) [ciqres] {CVE-2026-23231}
+- netfilter: nf_tables: register hooks last when adding new chain/flowtable (Marcin Wcisło) [ciqres] {CVE-2026-23231}
+- netfilter: nf_tables: rename function to destroy hook list (Marcin Wcisło) [ciqres] {CVE-2026-23231}
+- netfilter: nf_tables: add nft_chain_add() (Marcin Wcisło) [ciqres] {CVE-2026-23231}
+- netfilter: nf_tables: add nft_flowtable_hooks_destroy() (Marcin Wcisło) [ciqres] {CVE-2026-23231}
+- netfilter: nf_tables: pass hook list to nft_{un,}register_flowtable_net_hooks() (Marcin Wcisło) [ciqres] {CVE-2026-23231}
+- netfilter: nf_tables: generalise flowtable hook parsing (Marcin Wcisło) [ciqres] {CVE-2026-23231}
+- netfilter: bridge: make ebt_snat ARP rewrite writable (Brett Mastbergen) [ciqres] {CVE-2026-53266}
+- crypto: af_alg - Remove zero-copy support from skcipher and aead (Brett Mastbergen) [ciqres] {CVE-2025-39964}
+- crypto: af_alg - Fix incorrect boolean values in af_alg_ctx (Brett Mastbergen) [ciqres] {CVE-2025-40022}
+- crypto: af_alg - Disallow concurrent writes in af_alg_sendmsg (Brett Mastbergen) [ciqres] {CVE-2025-39964}
+- netfilter: nf_conntrack_helper: pass helper to expect cleanup (Marcin Wcisło) [ciqres] {CVE-2026-43027}
+- netfilter: ctnetlink: ensure safe access to master conntrack (Marcin Wcisło) [ciqres] {CVE-2026-43116}
+- dlm: validate length in dlm_search_rsb_tree (Marcin Wcisło) [ciqres] {CVE-2026-43125}
+- netfilter: nf_tables: use timestamp to check for set element timeout (Marcin Wcisło) [ciqres] {CVE-2024-27397}
+- netfilter: nft_set_rbtree: .deactivate fails if element has expired (Marcin Wcisło) [ciqres] {CVE-2024-27397}
+
 * Tue Sep 22 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+37.1.el8_6_ciq
 - sctp: prevent peer transport count overflow (Jonathan Maple) [ciqres] {CVE-2026-74469}
 - pppoe: reload header pointer after dev_hard_header() (Jonathan Maple) [ciqres] {CVE-2026-68121}

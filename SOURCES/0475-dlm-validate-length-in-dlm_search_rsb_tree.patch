@@ -1,0 +1,52 @@
+From 37173a02afeb1f18a5734dd31548959990439685 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Tue, 15 Sep 2026 00:59:25 +0200
+Subject: [PATCH] dlm: validate length in dlm_search_rsb_tree
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-184372
+cve CVE-2026-43125
+commit-author Ezrak1e <ezrakiez@gmail.com>
+commit 080e5563f878c64e697b89e7439d730d0daad882
+upstream-diff Kept the `len' check within the `dlm_search_rsb_tree'
+  function like in the upstream, despite the fact that in LTS 8.6 the
+  out-of-bounds write can happen not in `dlm_search_rsb_tree' but in the
+  `rsb_cmp' called by it. Function `rsb_cmp' is not suited for returning
+  error codes, assumed to be always called with correct arguments. The
+  code analysis established that `dlm_search_rsb_tree' was the last
+  place where this may not have been the case.
+
+The len parameter in dlm_dump_rsb_name() is not validated and comes
+from network messages. When it exceeds DLM_RESNAME_MAXLEN, it can
+cause out-of-bounds write in dlm_search_rsb_tree().
+
+Add length validation to prevent potential buffer overflow.
+
+	Signed-off-by: Ezrak1e <ezrakiez@gmail.com>
+	Signed-off-by: Alexander Aring <aahringo@redhat.com>
+	Signed-off-by: David Teigland <teigland@redhat.com>
+(cherry picked from commit 118986f3da1b4b0687e6f061fdedc60e6dcb7d05)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ fs/dlm/lock.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/fs/dlm/lock.c b/fs/dlm/lock.c
+index cc91963683de..2f0c1f51a5dc 100644
+--- a/fs/dlm/lock.c
++++ b/fs/dlm/lock.c
+@@ -451,6 +451,9 @@ int dlm_search_rsb_tree(struct rb_root *tree, char *name, int len,
+ 	struct dlm_rsb *r;
+ 	int rc;
+ 
++	if (len > DLM_RESNAME_MAXLEN)
++		return -EINVAL;
++
+ 	while (node) {
+ 		r = rb_entry(node, struct dlm_rsb, res_hashnode);
+ 		rc = rsb_cmp(r, name, len);
+-- 
+2.52.0
+
