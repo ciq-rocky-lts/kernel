@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 20
+%define ciq_patch_version 21
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -669,6 +669,10 @@ Patch1142: 0116-xfrm-ah6-validate-routing-header-segments_left.patch
 Patch1143: 0117-pppoe-reload-header-pointer-after-dev_hard_header.patch
 Patch1144: 0118-sctp-prevent-peer-transport-count-overflow.patch
 Patch1145: 0119-net-tun-bound-receive-headroom.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.21.1
+Patch1146: 0120-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
+Patch1147: 0121-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
+Patch1148: 0122-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -1157,6 +1161,9 @@ ApplyOptionalPatch 0116-xfrm-ah6-validate-routing-header-segments_left.patch
 ApplyOptionalPatch 0117-pppoe-reload-header-pointer-after-dev_hard_header.patch
 ApplyOptionalPatch 0118-sctp-prevent-peer-transport-count-overflow.patch
 ApplyOptionalPatch 0119-net-tun-bound-receive-headroom.patch
+ApplyOptionalPatch 0120-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
+ApplyOptionalPatch 0121-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
+ApplyOptionalPatch 0122-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2160,6 +2167,11 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Wed Sep 30 2026 Shreeya Patel <spatel@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.21.1
+- USB: serial: io_ti: fix heap overflow in get_manuf_info() (CIQ Kernel Automation) [ciqres] {CVE-2026-53196}
+- netfilter: bridge: make ebt_snat ARP rewrite writable (Brett Mastbergen) [ciqres] {CVE-2026-53266}
+- crypto: af_alg - Disallow concurrent writes in af_alg_sendmsg (Brett Mastbergen) [ciqres] {CVE-2025-39964 CVE-2025-40022}
+
 * Wed Sep 23 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.20.1
 - net: tun: bound receive headroom (Jonathan Maple) [ciqres] {CVE-2026-81000}
 - sctp: prevent peer transport count overflow (Jonathan Maple) [ciqres] {CVE-2026-74469}

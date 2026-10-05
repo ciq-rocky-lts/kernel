@@ -1,0 +1,103 @@
+From 3e176d42d7d4f9db996325d6edb5d044cdb5741e Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Thu, 24 Sep 2026 10:06:33 -0400
+Subject: [PATCH] crypto: af_alg - Disallow concurrent writes in af_alg_sendmsg
+
+jira VULN-158635
+cve CVE-2025-39964
+commit-author Herbert Xu <herbert@gondor.apana.org.au>
+commit 1b34cbbf4f011a121ef7b2d7d6e6920a036d5285
+upstream-diff |
+    context diff: this kernel predates the shared af_alg sendmsg path,
+    so the ctx->write guard is added in skcipher_sendmsg() and
+    skcipher_sendpage() in algif_skcipher.c, the only AF_ALG writers
+    that drop the socket lock in skcipher_wait_for_wmem(). ctx->write
+    is a plain bool in the file-local skcipher_ctx (no u32:1 bitfields,
+    per the CVE-2025-40022 lesson) and is initialized in
+    skcipher_accept_parent_nokey(), which sets fields individually
+    after sock_kmalloc. algif_hash has no wmem wait and algif_aead
+    does not exist in this kernel.
+
+Issuing two writes to the same af_alg socket is bogus as the
+data will be interleaved in an unpredictable fashion.  Furthermore,
+concurrent writes may create inconsistencies in the internal
+socket state.
+
+Disallow this by adding a new ctx->write field that indiciates
+exclusive ownership for writing.
+
+Fixes: 8ff590903d5 ("crypto: algif_skcipher - User-space interface for skcipher operations")
+	Reported-by: Muhammad Alifa Ramdhan <ramdhan@starlabs.sg>
+	Reported-by: Bing-Jhong Billy Jheng <billy@starlabs.sg>
+	Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+(cherry picked from commit 1b34cbbf4f011a121ef7b2d7d6e6920a036d5285)
+Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ crypto/algif_skcipher.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/crypto/algif_skcipher.c b/crypto/algif_skcipher.c
+index 9a62fa9e02ec0..3073e70308a38 100644
+--- a/crypto/algif_skcipher.c
++++ b/crypto/algif_skcipher.c
+@@ -50,6 +50,7 @@ struct skcipher_ctx {
+ 	bool more;
+ 	bool merge;
+ 	bool enc;
++	bool write;
+ 
+ 	struct ablkcipher_request req;
+ };
+@@ -284,6 +285,12 @@ static int skcipher_sendmsg(struct kiocb *unused, struct socket *sock,
+ 	err = -EINVAL;
+ 
+ 	lock_sock(sk);
++	if (ctx->write) {
++		release_sock(sk);
++		return -EBUSY;
++	}
++	ctx->write = true;
++
+ 	if (!ctx->more && ctx->used)
+ 		goto unlock;
+ 
+@@ -371,6 +378,7 @@ static int skcipher_sendmsg(struct kiocb *unused, struct socket *sock,
+ 
+ unlock:
+ 	skcipher_data_wakeup(sk);
++	ctx->write = false;
+ 	release_sock(sk);
+ 
+ 	return copied ?: err;
+@@ -389,6 +397,12 @@ static ssize_t skcipher_sendpage(struct socket *sock, struct page *page,
+ 		flags |= MSG_MORE;
+ 
+ 	lock_sock(sk);
++	if (ctx->write) {
++		release_sock(sk);
++		return -EBUSY;
++	}
++	ctx->write = true;
++
+ 	if (!ctx->more && ctx->used)
+ 		goto unlock;
+ 
+@@ -420,6 +434,7 @@ done:
+ 
+ unlock:
+ 	skcipher_data_wakeup(sk);
++	ctx->write = false;
+ 	release_sock(sk);
+ 
+ 	return err ?: size;
+@@ -726,6 +741,7 @@ static int skcipher_accept_parent_nokey(void *private, struct sock *sk)
+ 	ctx->more = 0;
+ 	ctx->merge = 0;
+ 	ctx->enc = 0;
++	ctx->write = 0;
+ 	af_alg_init_completion(&ctx->completion);
+ 
+ 	ask->private = ctx;
+-- 
+2.51.0
+
