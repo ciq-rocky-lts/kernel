@@ -1,0 +1,57 @@
+From 6c2c3bc60ed1749f2a5f26f9036f1b4c7fa414ea Mon Sep 17 00:00:00 2001
+From: Hailey Mothershead <hmothershead@ciq.com>
+Date: Tue, 29 Sep 2026 20:58:28 -0700
+Subject: [PATCH] espintcp: Fix race condition in espintcp_close()
+
+jira VULN-178061
+cve CVE-2026-23239
+commit-author Hyunwoo Kim <imv4bel@gmail.com>
+commit e1512c1db9e8794d8d130addd2615ec27231d994
+
+This issue was discovered during a code audit.
+
+After cancel_work_sync() is called from espintcp_close(),
+espintcp_tx_work() can still be scheduled from paths such as
+the Delayed ACK handler or ksoftirqd.
+As a result, the espintcp_tx_work() worker may dereference a
+freed espintcp ctx or sk.
+
+The following is a simple race scenario:
+
+           cpu0                             cpu1
+
+  espintcp_close()
+    cancel_work_sync(&ctx->work);
+                                     espintcp_write_space()
+                                       schedule_work(&ctx->work);
+
+To prevent this race condition, cancel_work_sync() is
+replaced with disable_work_sync().
+
+Fixes: e27cca96cd68 ("xfrm: add espintcp (RFC 8229)")
+	Signed-off-by: Hyunwoo Kim <imv4bel@gmail.com>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+Link: https://patch.msgid.link/aZSie7rEdh9Nu0eM@v4bel
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit e1512c1db9e8794d8d130addd2615ec27231d994)
+Signed-off-by: Hailey Mothershead <hmothershead@ciq.com>
+---
+ net/xfrm/espintcp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/xfrm/espintcp.c b/net/xfrm/espintcp.c
+index 627753504379f..44cfd95d8d928 100644
+--- a/net/xfrm/espintcp.c
++++ b/net/xfrm/espintcp.c
+@@ -528,7 +528,7 @@ static void espintcp_close(struct sock *sk, long timeout)
+ 	sk->sk_prot = &tcp_prot;
+ 	barrier();
+ 
+-	cancel_work_sync(&ctx->work);
++	disable_work_sync(&ctx->work);
+ 	strp_done(&ctx->strp);
+ 
+ 	skb_queue_purge(&ctx->out_queue);
+-- 
+2.52.0
+

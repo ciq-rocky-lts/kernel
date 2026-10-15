@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 24
+%define ciq_patch_version 25
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1333,6 +1333,32 @@ Patch1000325: 1325-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
 Patch1000326: 1326-crypto-af_alg-Fix-incorrect-boolean-values-in-af_alg.patch
 Patch1000327: 1327-crypto-af_alg-Remove-zero-copy-support-from-skcipher.patch
 Patch1000328: 1328-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
+#CIQ Patch Version: 570.60.1+25.1.el9_6_ciq
+Patch1000329: 1329-netfilter-nf_tables-reject-mismatching-sum-of-field_.patch
+Patch1000330: 1330-mm-slab-do-not-limit-zeroing-to-orig_size-when-only-.patch
+Patch1000331: 1331-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
+Patch1000332: 1332-RDMA-rxe-Fix-OOB-in-free_rd_atomic_resources.patch
+Patch1000333: 1333-espintcp-Fix-race-condition-in-espintcp_close.patch
+Patch1000334: 1334-xfrm-espintcp-do-not-reuse-an-in-progress-partial-se.patch
+Patch1000335: 1335-xfrm-espintcp-fix-UAF-during-close.patch
+Patch1000336: 1336-dlm-validate-length-in-dlm_search_rsb_tree.patch
+Patch1000337: 1337-tcp-fix-potential-race-in-tcp_v6_syn_recv_sock.patch
+Patch1000338: 1338-linux-dim-Fix-divide-by-0-in-RDMA-DIM.patch
+Patch1000339: 1339-wifi-mt76-mt7925-fix-off-by-one-in-mt7925_load_clc.patch
+Patch1000340: 1340-crypto-pcrypt-Fix-handling-of-MAY_BACKLOG-requests.patch
+Patch1000341: 1341-netfilter-conntrack-remove-sprintf-usage.patch
+Patch1000342: 1342-tipc-fix-double-free-in-tipc_buf_append.patch
+Patch1000343: 1343-xfrm-input-hold-netns-during-deferred-transport-rein.patch
+Patch1000344: 1344-ip6-vti-Use-ip6_tnl.net-in-vti6_changelink.patch
+Patch1000345: 1345-ip6-vti-Use-ip6_tnl.net-in-vti6_siocdevprivate.patch
+Patch1000346: 1346-xfrm-policy-fix-use-after-free-on-inexact-bin-in-xfr.patch
+Patch1000347: 1347-s390-pkey-Check-length-in-pkey_pckmo-handler-impleme.patch
+Patch1000348: 1348-net-qrtr-restrict-socket-creation-to-the-initial-net.patch
+Patch1000349: 1349-netfilter-flowtable-publish-GC-visible-tuple-last.patch
+Patch1000350: 1350-scsi-target-iscsi-Validate-CHAP_R-length-before-base.patch
+Patch1000351: 1351-scsi-target-Fix-hexadecimal-CHAP_I-handling.patch
+Patch1000352: 1352-scsi-target-iscsi-Fix-CRC-overread-and-double-free-i.patch
+Patch1000353: 1353-exec-Cleanup-POSIX-timers-right-after-de_thread.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2423,6 +2449,31 @@ ApplyOptionalPatch 1325-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.pat
 ApplyOptionalPatch 1326-crypto-af_alg-Fix-incorrect-boolean-values-in-af_alg.patch
 ApplyOptionalPatch 1327-crypto-af_alg-Remove-zero-copy-support-from-skcipher.patch
 ApplyOptionalPatch 1328-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
+ApplyOptionalPatch 1329-netfilter-nf_tables-reject-mismatching-sum-of-field_.patch
+ApplyOptionalPatch 1330-mm-slab-do-not-limit-zeroing-to-orig_size-when-only-.patch
+ApplyOptionalPatch 1331-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
+ApplyOptionalPatch 1332-RDMA-rxe-Fix-OOB-in-free_rd_atomic_resources.patch
+ApplyOptionalPatch 1333-espintcp-Fix-race-condition-in-espintcp_close.patch
+ApplyOptionalPatch 1334-xfrm-espintcp-do-not-reuse-an-in-progress-partial-se.patch
+ApplyOptionalPatch 1335-xfrm-espintcp-fix-UAF-during-close.patch
+ApplyOptionalPatch 1336-dlm-validate-length-in-dlm_search_rsb_tree.patch
+ApplyOptionalPatch 1337-tcp-fix-potential-race-in-tcp_v6_syn_recv_sock.patch
+ApplyOptionalPatch 1338-linux-dim-Fix-divide-by-0-in-RDMA-DIM.patch
+ApplyOptionalPatch 1339-wifi-mt76-mt7925-fix-off-by-one-in-mt7925_load_clc.patch
+ApplyOptionalPatch 1340-crypto-pcrypt-Fix-handling-of-MAY_BACKLOG-requests.patch
+ApplyOptionalPatch 1341-netfilter-conntrack-remove-sprintf-usage.patch
+ApplyOptionalPatch 1342-tipc-fix-double-free-in-tipc_buf_append.patch
+ApplyOptionalPatch 1343-xfrm-input-hold-netns-during-deferred-transport-rein.patch
+ApplyOptionalPatch 1344-ip6-vti-Use-ip6_tnl.net-in-vti6_changelink.patch
+ApplyOptionalPatch 1345-ip6-vti-Use-ip6_tnl.net-in-vti6_siocdevprivate.patch
+ApplyOptionalPatch 1346-xfrm-policy-fix-use-after-free-on-inexact-bin-in-xfr.patch
+ApplyOptionalPatch 1347-s390-pkey-Check-length-in-pkey_pckmo-handler-impleme.patch
+ApplyOptionalPatch 1348-net-qrtr-restrict-socket-creation-to-the-initial-net.patch
+ApplyOptionalPatch 1349-netfilter-flowtable-publish-GC-visible-tuple-last.patch
+ApplyOptionalPatch 1350-scsi-target-iscsi-Validate-CHAP_R-length-before-base.patch
+ApplyOptionalPatch 1351-scsi-target-Fix-hexadecimal-CHAP_I-handling.patch
+ApplyOptionalPatch 1352-scsi-target-iscsi-Fix-CRC-overread-and-double-free-i.patch
+ApplyOptionalPatch 1353-exec-Cleanup-POSIX-timers-right-after-de_thread.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4539,6 +4590,33 @@ fi
 #
 #
 %changelog
+* Wed Oct 14 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+25.1.el9_6_ciq
+- exec: Cleanup POSIX timers right after de_thread() (Jonathan Maple) [ciqres] {CVE-2026-98260}
+- scsi: target: iscsi: Fix CRC overread and double-free in iscsit_handle_text_cmd() (Jonathan Maple) [ciqres] {CVE-2026-63888}
+- scsi: target: Fix hexadecimal CHAP_I handling (Jonathan Maple) [ciqres] {CVE-2026-63886}
+- scsi: target: iscsi: Validate CHAP_R length before base64 decode (Jonathan Maple) [ciqres] {CVE-2026-63886}
+- netfilter: flowtable: publish GC-visible tuple last (CIQ Kernel Automation) [ciqres] {CVE-2026-74746}
+- net: qrtr: restrict socket creation to the initial network namespace (CIQ Kernel Automation) [ciqres] {CVE-2026-68294}
+- s390/pkey: Check length in pkey_pckmo handler implementation (CIQ Kernel Automation) [ciqres] {CVE-2026-64558}
+- xfrm: policy: fix use-after-free on inexact bin in xfrm_policy_bysel_ctx() (CIQ Kernel Automation) [ciqres] {CVE-2026-53239}
+- ip6: vti: Use ip6_tnl.net in vti6_siocdevprivate(). (CIQ Kernel Automation) [ciqres] {CVE-2026-63921}
+- ip6: vti: Use ip6_tnl.net in vti6_changelink(). (CIQ Kernel Automation) [ciqres] {CVE-2026-63917}
+- xfrm: input: hold netns during deferred transport reinjection (CIQ Kernel Automation) [ciqres] {CVE-2026-63919}
+- tipc: fix double-free in tipc_buf_append() (CIQ Kernel Automation) [ciqres] {CVE-2026-52993}
+- netfilter: conntrack: remove sprintf usage (CIQ Kernel Automation) [ciqres] {CVE-2026-53002}
+- crypto: pcrypt - Fix handling of MAY_BACKLOG requests (CIQ Kernel Automation) [ciqres] {CVE-2026-43493}
+- wifi: mt76: mt7925: fix off by one in mt7925_load_clc() (CIQ Kernel Automation) [ciqres] {CVE-2024-57990}
+- linux/dim: Fix divide by 0 in RDMA DIM (CIQ Kernel Automation) [ciqres] {CVE-2022-49670}
+- tcp: fix potential race in tcp_v6_syn_recv_sock() (Marcin Wcisło) [ciqres] {CVE-2026-43198}
+- dlm: validate length in dlm_search_rsb_tree (Marcin Wcisło) [ciqres] {CVE-2026-43125}
+- xfrm: espintcp: fix UAF during close (Hailey Mothershead) [ciqres] {CVE-2026-80848}
+- xfrm: espintcp: do not reuse an in-progress partial send (Hailey Mothershead) [ciqres] {CVE-2026-52935}
+- espintcp: Fix race condition in espintcp_close() (Hailey Mothershead) [ciqres] {CVE-2026-23239}
+- RDMA/rxe: Fix OOB in free_rd_atomic_resources() (Hailey Mothershead) [ciqres] {CVE-2026-80863}
+- sctp: don't free the ASCONF's own transport in DEL-IP processing (CIQ Kernel Automation) [ciqres] {CVE-2026-64564}
+- mm/slab: do not limit zeroing to orig_size when only red zoning is enabled (CIQ Kernel Automation) [ciqres] {CVE-2026-64368}
+- netfilter: nf_tables: reject mismatching sum of field_len with set key length (CIQ Kernel Automation) [ciqres] {CVE-2025-21826}
+
 * Fri Sep 25 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+24.1.el9_6_ciq
 - netfilter: bridge: make ebt_snat ARP rewrite writable (Jonathan Maple) [ciqres] {CVE-2026-53266}
 - crypto: af_alg - Remove zero-copy support from skcipher and aead (Jonathan Maple) [ciqres] {CVE-2025-39964}
