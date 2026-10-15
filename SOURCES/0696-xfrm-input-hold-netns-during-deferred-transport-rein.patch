@@ -1,0 +1,82 @@
+From e2a9cc08f4ec938145c0f1bca02bf806e8dfd56e Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Wed, 14 Oct 2026 06:53:09 +0000
+Subject: [PATCH] xfrm: input: hold netns during deferred transport reinjection
+
+jira VULN-195795
+cve CVE-2026-63919
+commit-author Zhengchuan Liang <zcliangcn@gmail.com>
+commit c16f74dc1d75d0e2e7670076d5375deda110ebeb
+
+Transport-mode reinjection stores a struct net pointer in skb->cb and
+uses it later from xfrm_trans_reinject(). That pointer must stay valid
+until the deferred callback runs.
+
+Take a netns reference when queueing deferred reinjection work and drop
+it after the callback completes. Use maybe_get_net() so the queueing
+path does not revive a namespace that is already being torn down.
+
+This keeps the existing workqueue design and fixes the netns lifetime
+handling in one place for all users of xfrm_trans_queue_net().
+
+Fixes: 7b3801927e52 ("xfrm: introduce xfrm_trans_queue_net")
+	Cc: stable@kernel.org
+	Reported-by: Yuan Tan <yuantan098@gmail.com>
+	Reported-by: Xin Liu <bird@lzu.edu.cn>
+Co-developed-by: Luxing Yin <tr0jan@lzu.edu.cn>
+	Signed-off-by: Luxing Yin <tr0jan@lzu.edu.cn>
+	Signed-off-by: Zhengchuan Liang <zcliangcn@gmail.com>
+	Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
+Assisted-by: Codex:gpt-5.4
+	Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>
+(cherry picked from commit c16f74dc1d75d0e2e7670076d5375deda110ebeb)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/xfrm/xfrm_input.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/net/xfrm/xfrm_input.c b/net/xfrm/xfrm_input.c
+index 3d8668d62e639..56e165468c042 100644
+--- a/net/xfrm/xfrm_input.c
++++ b/net/xfrm/xfrm_input.c
+@@ -773,9 +773,12 @@ static void xfrm_trans_reinject(struct work_struct *work)
+ 	spin_unlock_bh(&trans->queue_lock);
+ 
+ 	local_bh_disable();
+-	while ((skb = __skb_dequeue(&queue)))
+-		XFRM_TRANS_SKB_CB(skb)->finish(XFRM_TRANS_SKB_CB(skb)->net,
+-					       NULL, skb);
++	while ((skb = __skb_dequeue(&queue))) {
++		struct net *net = XFRM_TRANS_SKB_CB(skb)->net;
++
++		XFRM_TRANS_SKB_CB(skb)->finish(net, NULL, skb);
++		put_net(net);
++	}
+ 	local_bh_enable();
+ }
+ 
+@@ -784,6 +787,7 @@ int xfrm_trans_queue_net(struct net *net, struct sk_buff *skb,
+ 				       struct sk_buff *))
+ {
+ 	struct xfrm_trans_tasklet *trans;
++	struct net *hold_net;
+ 
+ 	trans = this_cpu_ptr(&xfrm_trans_tasklet);
+ 
+@@ -792,8 +796,12 @@ int xfrm_trans_queue_net(struct net *net, struct sk_buff *skb,
+ 
+ 	BUILD_BUG_ON(sizeof(struct xfrm_trans_cb) > sizeof(skb->cb));
+ 
++	hold_net = maybe_get_net(net);
++	if (!hold_net)
++		return -ENODEV;
++
+ 	XFRM_TRANS_SKB_CB(skb)->finish = finish;
+-	XFRM_TRANS_SKB_CB(skb)->net = net;
++	XFRM_TRANS_SKB_CB(skb)->net = hold_net;
+ 	spin_lock_bh(&trans->queue_lock);
+ 	__skb_queue_tail(&trans->queue, skb);
+ 	spin_unlock_bh(&trans->queue_lock);
+-- 
+2.52.0
+

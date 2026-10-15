@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 42
+%define ciq_patch_version 43
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1698,6 +1698,16 @@ Patch1000734: 0689-crypto-af_alg-Fix-incorrect-boolean-values-in-af_alg.patch
 Patch1000735: 0690-crypto-af_alg-Remove-zero-copy-support-from-skcipher.patch
 Patch1000736: 0691-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
 Patch1000737: 0692-RDMA-rxe-Fix-OOB-in-free_rd_atomic_resources.patch
+#CIQ Patch Version: 284.30.1+43.1.el9_2_ciq
+Patch1000738: 0693-scsi-target-iscsi-Validate-CHAP_R-length-before-base.patch
+Patch1000739: 0694-scsi-target-Fix-hexadecimal-CHAP_I-handling.patch
+Patch1000740: 0695-scsi-target-iscsi-Fix-CRC-overread-and-double-free-i.patch
+Patch1000741: 0696-xfrm-input-hold-netns-during-deferred-transport-rein.patch
+Patch1000742: 0697-ip6-vti-Use-ip6_tnl.net-in-vti6_changelink.patch
+Patch1000743: 0698-ip6-vti-Use-ip6_tnl.net-in-vti6_siocdevprivate.patch
+Patch1000744: 0699-xfrm-policy-fix-use-after-free-on-inexact-bin-in-xfr.patch
+Patch1000745: 0700-udp-fix-potential-use-after-free-in-tunnel-segmentat.patch
+Patch1000746: 0701-exec-Cleanup-POSIX-timers-right-after-de_thread.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3114,6 +3124,15 @@ ApplyOptionalPatch 0689-crypto-af_alg-Fix-incorrect-boolean-values-in-af_alg.pat
 ApplyOptionalPatch 0690-crypto-af_alg-Remove-zero-copy-support-from-skcipher.patch
 ApplyOptionalPatch 0691-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
 ApplyOptionalPatch 0692-RDMA-rxe-Fix-OOB-in-free_rd_atomic_resources.patch
+ApplyOptionalPatch 0693-scsi-target-iscsi-Validate-CHAP_R-length-before-base.patch
+ApplyOptionalPatch 0694-scsi-target-Fix-hexadecimal-CHAP_I-handling.patch
+ApplyOptionalPatch 0695-scsi-target-iscsi-Fix-CRC-overread-and-double-free-i.patch
+ApplyOptionalPatch 0696-xfrm-input-hold-netns-during-deferred-transport-rein.patch
+ApplyOptionalPatch 0697-ip6-vti-Use-ip6_tnl.net-in-vti6_changelink.patch
+ApplyOptionalPatch 0698-ip6-vti-Use-ip6_tnl.net-in-vti6_siocdevprivate.patch
+ApplyOptionalPatch 0699-xfrm-policy-fix-use-after-free-on-inexact-bin-in-xfr.patch
+ApplyOptionalPatch 0700-udp-fix-potential-use-after-free-in-tunnel-segmentat.patch
+ApplyOptionalPatch 0701-exec-Cleanup-POSIX-timers-right-after-de_thread.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4997,6 +5016,17 @@ fi
 #
 #
 %changelog
+* Wed Oct 14 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+43.1.el9_2_ciq
+- exec: Cleanup POSIX timers right after de_thread() (Jonathan Maple) [ciqres] {CVE-2026-98260}
+- udp: fix potential use-after-free in tunnel segmentation (CIQ Kernel Automation) [ciqres] {CVE-2026-74705}
+- xfrm: policy: fix use-after-free on inexact bin in xfrm_policy_bysel_ctx() (CIQ Kernel Automation) [ciqres] {CVE-2026-53239}
+- ip6: vti: Use ip6_tnl.net in vti6_siocdevprivate(). (CIQ Kernel Automation) [ciqres] {CVE-2026-63921}
+- ip6: vti: Use ip6_tnl.net in vti6_changelink(). (CIQ Kernel Automation) [ciqres] {CVE-2026-63917}
+- xfrm: input: hold netns during deferred transport reinjection (CIQ Kernel Automation) [ciqres] {CVE-2026-63919}
+- scsi: target: iscsi: Fix CRC overread and double-free in iscsit_handle_text_cmd() (Jonathan Maple) [ciqres] {CVE-2026-63888}
+- scsi: target: Fix hexadecimal CHAP_I handling (Jonathan Maple) [ciqres] {CVE-2026-63886}
+- scsi: target: iscsi: Validate CHAP_R length before base64 decode (Jonathan Maple) [ciqres] {CVE-2026-63886}
+
 * Tue Sep 29 2026 Hailey Mothershead <hmothershead@ciq.com> - 5.14.0-284.30.1+42.1.el9_2_ciq
 - RDMA/rxe: Fix OOB in free_rd_atomic_resources() (Hailey Mothershead) [ciqres] {CVE-2026-80863}
 - netfilter: bridge: make ebt_snat ARP rewrite writable (Jonathan Maple) [ciqres] {CVE-2026-53266}
