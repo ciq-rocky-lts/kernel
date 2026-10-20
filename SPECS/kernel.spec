@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 43
+%define ciq_patch_version 44
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1708,6 +1708,15 @@ Patch1000743: 0698-ip6-vti-Use-ip6_tnl.net-in-vti6_siocdevprivate.patch
 Patch1000744: 0699-xfrm-policy-fix-use-after-free-on-inexact-bin-in-xfr.patch
 Patch1000745: 0700-udp-fix-potential-use-after-free-in-tunnel-segmentat.patch
 Patch1000746: 0701-exec-Cleanup-POSIX-timers-right-after-de_thread.patch
+#CIQ Patch Version: 284.30.1+44.1.el9_2_ciq
+Patch1000747: 0702-xfrm-espintcp-do-not-reuse-an-in-progress-partial-se.patch
+Patch1000748: 0703-xfrm-espintcp-fix-UAF-during-close.patch
+Patch1000749: 0704-espintcp-remove-encap-socket-caching-to-avoid-refere.patch
+Patch1000750: 0705-espintcp-fix-skb-leaks.patch
+Patch1000751: 0706-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
+Patch1000752: 0707-ALSA-usb-audio-Fix-potential-out-of-bound-accesses-f.patch
+Patch1000753: 0708-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
+Patch1000754: 0709-ipv4-validate-checksum_start-before-completing-check.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3133,6 +3142,14 @@ ApplyOptionalPatch 0698-ip6-vti-Use-ip6_tnl.net-in-vti6_siocdevprivate.patch
 ApplyOptionalPatch 0699-xfrm-policy-fix-use-after-free-on-inexact-bin-in-xfr.patch
 ApplyOptionalPatch 0700-udp-fix-potential-use-after-free-in-tunnel-segmentat.patch
 ApplyOptionalPatch 0701-exec-Cleanup-POSIX-timers-right-after-de_thread.patch
+ApplyOptionalPatch 0702-xfrm-espintcp-do-not-reuse-an-in-progress-partial-se.patch
+ApplyOptionalPatch 0703-xfrm-espintcp-fix-UAF-during-close.patch
+ApplyOptionalPatch 0704-espintcp-remove-encap-socket-caching-to-avoid-refere.patch
+ApplyOptionalPatch 0705-espintcp-fix-skb-leaks.patch
+ApplyOptionalPatch 0706-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
+ApplyOptionalPatch 0707-ALSA-usb-audio-Fix-potential-out-of-bound-accesses-f.patch
+ApplyOptionalPatch 0708-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
+ApplyOptionalPatch 0709-ipv4-validate-checksum_start-before-completing-check.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -5016,6 +5033,16 @@ fi
 #
 #
 %changelog
+* Mon Oct 19 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+44.1.el9_2_ciq
+- ipv4: validate checksum_start before completing checksum (Brett Mastbergen) [ciqres] {CVE-2026-99999}
+- netfilter: nfnetlink_queue: unbreak SCTP traffic (Brett Mastbergen) [ciqres] {CVE-2026-99999}
+- ALSA: usb-audio: Fix potential out-of-bound accesses for Extigy and Mbox devices (Jonathan Maple) [ciqres] {CVE-2024-53197}
+- vhost: reset the vring metadata cache on vring reconfiguration (Jonathan Maple) [ciqres] {CVE-2026-74580}
+- espintcp: fix skb leaks (Hailey Mothershead) [ciqres] {CVE-2025-38057}
+- espintcp: remove encap socket caching to avoid reference leak (Hailey Mothershead) [ciqres] {CVE-2025-38097}
+- xfrm: espintcp: fix UAF during close (Hailey Mothershead) [ciqres] {CVE-2026-80848}
+- xfrm: espintcp: do not reuse an in-progress partial send (Hailey Mothershead) [ciqres] {CVE-2026-52935}
+
 * Wed Oct 14 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+43.1.el9_2_ciq
 - exec: Cleanup POSIX timers right after de_thread() (Jonathan Maple) [ciqres] {CVE-2026-98260}
 - udp: fix potential use-after-free in tunnel segmentation (CIQ Kernel Automation) [ciqres] {CVE-2026-74705}
