@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 38
+%define ciq_patch_version 39
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1237,6 +1237,26 @@ Patch0646: 0491-tipc-fix-double-free-in-tipc_buf_append.patch
 Patch0647: 0492-RDMA-siw-bound-Read-Response-placement-to-the-RREAD-.patch
 Patch0648: 0493-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
 Patch0649: 0494-RDMA-rxe-Fix-OOB-in-free_rd_atomic_resources.patch
+#CIQ Patch Version: 372.32.1+39.1.el8_6_ciq
+Patch0650: 0495-netfilter-flowtable-really-fix-NAT-IPv6-offload.patch
+Patch0651: 0496-netfilter-flowtable-strictly-check-for-maximum-numbe.patch
+Patch0652: 0497-net-bridge-mcast-re-implement-br_multicast_-enable-d.patch
+Patch0653: 0498-net-bridge-mcast-update-multicast-contex-when-vlan-s.patch
+Patch0654: 0499-bridge-mcast-Fix-use-after-free-during-router-port-c.patch
+Patch0655: 0500-net-bridge-Flush-multicast-groups-when-snooping-is-d.patch
+Patch0656: 0501-bridge-mcast-Fix-a-possible-use-after-free-when-remo.patch
+Patch0657: 0502-xfrm-policy-fix-use-after-free-on-inexact-bin-in-xfr.patch
+Patch0658: 0503-net-qrtr-restrict-socket-creation-to-the-initial-net.patch
+Patch0659: 0504-scsi-libiscsi_tcp-Bound-SCSI-Response-data-segment-t.patch
+Patch0660: 0505-udp-fix-potential-use-after-free-in-tunnel-segmentat.patch
+Patch0661: 0506-netfilter-flowtable-publish-GC-visible-tuple-last.patch
+Patch0662: 0507-xfrm-espintcp-do-not-reuse-an-in-progress-partial-se.patch
+Patch0663: 0508-xfrm-espintcp-fix-UAF-during-close.patch
+Patch0664: 0509-espintcp-remove-encap-socket-caching-to-avoid-refere.patch
+Patch0665: 0510-espintcp-fix-skb-leaks.patch
+Patch0666: 0511-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
+Patch0667: 0512-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
+Patch0668: 0513-ipv4-validate-checksum_start-before-completing-check.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2453,6 +2473,25 @@ ApplyOptionalPatch 0491-tipc-fix-double-free-in-tipc_buf_append.patch
 ApplyOptionalPatch 0492-RDMA-siw-bound-Read-Response-placement-to-the-RREAD-.patch
 ApplyOptionalPatch 0493-sctp-don-t-free-the-ASCONF-s-own-transport-in-DEL-IP.patch
 ApplyOptionalPatch 0494-RDMA-rxe-Fix-OOB-in-free_rd_atomic_resources.patch
+ApplyOptionalPatch 0495-netfilter-flowtable-really-fix-NAT-IPv6-offload.patch
+ApplyOptionalPatch 0496-netfilter-flowtable-strictly-check-for-maximum-numbe.patch
+ApplyOptionalPatch 0497-net-bridge-mcast-re-implement-br_multicast_-enable-d.patch
+ApplyOptionalPatch 0498-net-bridge-mcast-update-multicast-contex-when-vlan-s.patch
+ApplyOptionalPatch 0499-bridge-mcast-Fix-use-after-free-during-router-port-c.patch
+ApplyOptionalPatch 0500-net-bridge-Flush-multicast-groups-when-snooping-is-d.patch
+ApplyOptionalPatch 0501-bridge-mcast-Fix-a-possible-use-after-free-when-remo.patch
+ApplyOptionalPatch 0502-xfrm-policy-fix-use-after-free-on-inexact-bin-in-xfr.patch
+ApplyOptionalPatch 0503-net-qrtr-restrict-socket-creation-to-the-initial-net.patch
+ApplyOptionalPatch 0504-scsi-libiscsi_tcp-Bound-SCSI-Response-data-segment-t.patch
+ApplyOptionalPatch 0505-udp-fix-potential-use-after-free-in-tunnel-segmentat.patch
+ApplyOptionalPatch 0506-netfilter-flowtable-publish-GC-visible-tuple-last.patch
+ApplyOptionalPatch 0507-xfrm-espintcp-do-not-reuse-an-in-progress-partial-se.patch
+ApplyOptionalPatch 0508-xfrm-espintcp-fix-UAF-during-close.patch
+ApplyOptionalPatch 0509-espintcp-remove-encap-socket-caching-to-avoid-refere.patch
+ApplyOptionalPatch 0510-espintcp-fix-skb-leaks.patch
+ApplyOptionalPatch 0511-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
+ApplyOptionalPatch 0512-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
+ApplyOptionalPatch 0513-ipv4-validate-checksum_start-before-completing-check.patch
 
 
 # CIQ LTS patches:
@@ -4012,6 +4051,27 @@ fi
 #
 #
 %changelog
+* Tue Oct 20 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+39.1.el8_6_ciq
+- ipv4: validate checksum_start before completing checksum (Brett Mastbergen) [ciqres] {CVE-2026-99999}
+- netfilter: nfnetlink_queue: unbreak SCTP traffic (Brett Mastbergen) [ciqres] {CVE-2026-99999}
+- vhost: reset the vring metadata cache on vring reconfiguration (Jonathan Maple) [ciqres] {CVE-2026-74580}
+- espintcp: fix skb leaks (Hailey Mothershead) [ciqres] {CVE-2025-38057}
+- espintcp: remove encap socket caching to avoid reference leak (Hailey Mothershead) [ciqres] {CVE-2025-38097}
+- xfrm: espintcp: fix UAF during close (Hailey Mothershead) [ciqres] {CVE-2026-80848}
+- xfrm: espintcp: do not reuse an in-progress partial send (Hailey Mothershead) [ciqres] {CVE-2026-52935}
+- netfilter: flowtable: publish GC-visible tuple last (CIQ Kernel Automation) [ciqres] {CVE-2026-74746}
+- udp: fix potential use-after-free in tunnel segmentation (CIQ Kernel Automation) [ciqres] {CVE-2026-74705}
+- scsi: libiscsi_tcp: Bound SCSI Response data segment to the connection buffer (CIQ Kernel Automation) [ciqres] {CVE-2026-74556}
+- net: qrtr: restrict socket creation to the initial network namespace (CIQ Kernel Automation) [ciqres] {CVE-2026-68294}
+- xfrm: policy: fix use-after-free on inexact bin in xfrm_policy_bysel_ctx() (CIQ Kernel Automation) [ciqres] {CVE-2026-53239}
+- bridge: mcast: Fix a possible use-after-free when removing a bridge port (Marcin Wcisło) [ciqres] {CVE-2026-64032}
+- net: bridge: Flush multicast groups when snooping is disabled (Marcin Wcisło) [ciqres] {CVE-2026-64032}
+- bridge: mcast: Fix use-after-free during router port configuration (Marcin Wcisło) [ciqres] {CVE-2025-38248}
+- net: bridge: mcast: update multicast contex when vlan state is changed (Marcin Wcisło) [ciqres] {CVE-2025-38248}
+- net: bridge: mcast: re-implement br_multicast_{enable, disable}_port functions (Marcin Wcisło) [ciqres] {CVE-2025-38248}
+- netfilter: flowtable: strictly check for maximum number of actions (Marcin Wcisło) [ciqres] {CVE-2026-43329}
+- netfilter: flowtable: really fix NAT IPv6 offload (Marcin Wcisło) [ciqres] {CVE-2026-43329}
+
 * Tue Sep 29 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+38.1.el8_6_ciq
 - RDMA/rxe: Fix OOB in free_rd_atomic_resources() (Hailey Mothershead) [ciqres] {CVE-2026-80863}
 - sctp: don't free the ASCONF's own transport in DEL-IP processing (CIQ Kernel Automation) [ciqres] {CVE-2026-64564}

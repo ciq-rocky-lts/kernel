@@ -1,0 +1,55 @@
+From 7bac741d3b01eb58bd1e2c5629bc9215281c7f31 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marcin=20Wcis=C5=82o?= <marcin.wcislo@conclusive.pl>
+Date: Wed, 30 Sep 2026 23:12:41 +0200
+Subject: [PATCH] netfilter: flowtable: really fix NAT IPv6 offload
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+jira VULN-185472
+cve-pre CVE-2026-43329
+commit-author Qingfang DENG <dqfext@gmail.com>
+commit 5fb45f95eec682621748b7cb012c6a8f0f981e6a
+
+The for-loop was broken from the start. It translates to:
+
+	for (i = 0; i < 4; i += 4)
+
+which means the loop statement is run only once, so only the highest
+32-bit of the IPv6 address gets mangled.
+
+Fix the loop increment.
+
+Fixes: 0e07e25b481a ("netfilter: flowtable: fix NAT IPv6 offload mangling")
+Fixes: 5c27d8d76ce8 ("netfilter: nf_flow_table_offload: add IPv6 support")
+	Signed-off-by: Qingfang DENG <dqfext@gmail.com>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit 5fb45f95eec682621748b7cb012c6a8f0f981e6a)
+	Signed-off-by: Marcin Wcisło <marcin.wcislo@conclusive.pl>
+---
+ net/netfilter/nf_flow_table_offload.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/net/netfilter/nf_flow_table_offload.c b/net/netfilter/nf_flow_table_offload.c
+index 83d52a0a2578..e117d455d277 100644
+--- a/net/netfilter/nf_flow_table_offload.c
++++ b/net/netfilter/nf_flow_table_offload.c
+@@ -305,12 +305,12 @@ static void flow_offload_ipv6_mangle(struct nf_flow_rule *flow_rule,
+ 				     const __be32 *addr, const __be32 *mask)
+ {
+ 	struct flow_action_entry *entry;
+-	int i, j;
++	int i;
+ 
+-	for (i = 0, j = 0; i < sizeof(struct in6_addr) / sizeof(u32); i += sizeof(u32), j++) {
++	for (i = 0; i < sizeof(struct in6_addr) / sizeof(u32); i++) {
+ 		entry = flow_action_entry_next(flow_rule);
+ 		flow_offload_mangle(entry, FLOW_ACT_MANGLE_HDR_TYPE_IP6,
+-				    offset + i, &addr[j], mask);
++				    offset + i * sizeof(u32), &addr[i], mask);
+ 	}
+ }
+ 
+-- 
+2.52.0
+
