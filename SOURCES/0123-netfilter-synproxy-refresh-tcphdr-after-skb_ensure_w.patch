@@ -1,0 +1,70 @@
+From bf1247c2382ab9affbeb28212339f4fd1eb4af36 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Wed, 14 Oct 2026 06:40:45 +0000
+Subject: [PATCH] netfilter: synproxy: refresh tcphdr after skb_ensure_writable
+
+jira VULN-195868
+cve CVE-2026-64007
+commit-author Chris Mason <clm@meta.com>
+commit 92170e6afe927ab2792a3f71902845789c8e31b1
+
+synproxy_tstamp_adjust() rewrites the TCP timestamp option in place
+and then patches the TCP checksum via inet_proto_csum_replace4() on
+the caller-supplied tcphdr pointer.  Both ipv4_synproxy_hook() and
+ipv6_synproxy_hook() obtain that pointer with skb_header_pointer()
+before calling in, so it may either alias skb->head directly or
+point at the caller's on-stack _tcph buffer.
+
+Between obtaining the pointer and using it, the function calls
+skb_ensure_writable(skb, optend), which on a cloned or non-linear
+skb invokes pskb_expand_head() and frees the old skb->head.  After
+that point the cached th is stale:
+
+    caller (ipv[46]_synproxy_hook)
+      th = skb_header_pointer(skb, ..., &_tcph)
+      synproxy_tstamp_adjust(skb, protoff, th, ...)
+        skb_ensure_writable(skb, optend)
+          pskb_expand_head()        /* kfree(old skb->head) */
+        ...
+        inet_proto_csum_replace4(&th->check, ...)
+                                    /* writes into freed head, or
+                                       into the caller's stack copy
+                                       leaving the on-wire checksum
+                                       stale */
+
+The option bytes are written through skb->data and are fine; only
+the checksum update goes through th and so lands in the wrong
+place.  The result is either a write into freed slab memory or a
+packet leaving with a checksum that does not match its payload.
+
+Fix by re-deriving th from skb->data + protoff immediately after
+skb_ensure_writable() succeeds, so the subsequent checksum update
+targets the linear, writable header.
+
+Fixes: 48b1de4c110a ("netfilter: add SYNPROXY core/target")
+Assisted-by: kres (claude-opus-4-7)
+	Signed-off-by: Chris Mason <clm@meta.com>
+	Reviewed-by: Fernando Fernandez Mancera <fmancera@suse.de>
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+(cherry picked from commit 92170e6afe927ab2792a3f71902845789c8e31b1)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/netfilter/nf_synproxy_core.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/net/netfilter/nf_synproxy_core.c b/net/netfilter/nf_synproxy_core.c
+index 8d69dddcef1f..3aa47e36e8b9 100644
+--- a/net/netfilter/nf_synproxy_core.c
++++ b/net/netfilter/nf_synproxy_core.c
+@@ -198,6 +198,8 @@ unsigned int synproxy_tstamp_adjust(struct sk_buff *skb,
+ 	if (!skb_make_writable(skb, optend))
+ 		return 0;
+ 
++	th = (struct tcphdr *)(skb->data + protoff);
++
+ 	while (optoff < optend) {
+ 		unsigned char *op = skb->data + optoff;
+ 
+-- 
+2.52.0
+

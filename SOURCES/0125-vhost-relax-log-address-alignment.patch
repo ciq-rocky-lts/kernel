@@ -1,0 +1,41 @@
+From d2a6f65e4f5e461c01ac33db196119b75a4164b9 Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Thu, 15 Oct 2026 18:47:35 -0400
+Subject: [PATCH] vhost: relax log address alignment
+
+jira VULN-204212
+cve-pre CVE-2026-74580
+commit-author Michael S. Tsirkin <mst@redhat.com>
+commit d542483876f6ed720f573de3fbb1d8e60ccd0d6e
+
+commit 5d9a07b0de512b77bf28d2401e5fe3351f00a240 ("vhost: relax used
+address alignment") fixed the alignment for the used virtual address,
+but not for the physical address used for logging.
+
+That's a mistake: alignment should clearly be the same for virtual and
+physical addresses,
+
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+(cherry picked from commit d542483876f6ed720f573de3fbb1d8e60ccd0d6e)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ drivers/vhost/vhost.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/vhost/vhost.c b/drivers/vhost/vhost.c
+index f6217b6f41ef..2dd5724ef48c 100644
+--- a/drivers/vhost/vhost.c
++++ b/drivers/vhost/vhost.c
+@@ -1437,7 +1437,7 @@ long vhost_vring_ioctl(struct vhost_dev *d, unsigned int ioctl, void __user *arg
+ 		BUILD_BUG_ON(__alignof__ *vq->used > VRING_USED_ALIGN_SIZE);
+ 		if ((a.avail_user_addr & (VRING_AVAIL_ALIGN_SIZE - 1)) ||
+ 		    (a.used_user_addr & (VRING_USED_ALIGN_SIZE - 1)) ||
+-		    (a.log_guest_addr & (sizeof(u64) - 1))) {
++		    (a.log_guest_addr & (VRING_USED_ALIGN_SIZE - 1))) {
+ 			r = -EINVAL;
+ 			break;
+ 		}
+-- 
+2.52.0
+

@@ -1,0 +1,186 @@
+From b150cdd3500663fe60a797c86a674ac5bfe9ad65 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Mon, 19 Oct 2026 11:08:16 -0400
+Subject: [PATCH] ipv4: validate checksum_start before completing checksum
+
+jira VULN-221091
+cve CVE-2026-99999
+commit-author Michael S. Tsirkin <mst@redhat.com>
+commit 6785011f8b16abf40b1e9d8b2e332232b3e68822
+commit-source-sha a464d950f31c89565cbaae038cc60db04fe01956
+commit-source linux-5.10.y
+upstream-diff |
+    context diff: net/bridge/netfilter/nf_conntrack_bridge.c does not
+    exist in this kernel (added in 4.19) and is dropped; bridge
+    fragmentation on this tree goes via net/bridge/br_netfilter_hooks.c
+    -> ip_do_fragment() which is already covered by the central
+    ip_do_fragment fix above, so no standalone bridge helper needs
+    patching. nfnetlink_queue is nfnetlink_queue_core.c here;
+    nf_queue_checksum_help() was added by the cve-pre 26a77d02891ab
+    backport earlier in this branch, so the ip validation hunk lands
+    at the top of that function exactly as upstream. xt_CHECKSUM keeps
+    this kernel's existing condition (the skb_is_gso skip upstream
+    gained is a separate commit, not part of this fix) and adds only
+    the NFPROTO_IPV4 guard. xfrm_output keeps this kernel's 2-arg
+    xfrm_output2(sk, skb) signature; the error path is a new error:
+    label without upstream's out: label, and upstream's trailing
+    xfrm4_tunnel_check_size context does not exist in this kernel.
+
+commit 6785011f8b16abf40b1e9d8b2e332232b3e68822 upstream.
+
+If a packet with bad checksum metadata gets into the ipv4 stack,
+skb_checksum_help can corrupt the network header and cause a bunch of
+mischief.
+
+This was discovered and reported by Paulos, and has been reporoduced
+by others independently since.
+
+We really shouldn't allow such packets in, but as a defence
+in depth measure, let's also check before we complete the checksum.
+
+A more complete validation at input is forthcoming, but needs more work.
+
+	Cc: stable@vger.kernel.org
+Fixes: f43798c27684 ("tun: Allow GSO using virtio_net_hdr")
+Fixes: bfd5f4a3d605 ("packet: Add GSO/csum offload support.")
+	Reported-by: Paulos Yibelo <habte.yibelo@gmail.com>
+Closes: https://lore.kernel.org/netdev/20260922030310.8684-2-habte.yibelo@gmail.com/
+	Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+	Reviewed-by: Willem de Bruijn <willemb@google.com>
+Link: https://patch.msgid.link/0a012b4923e189c4c593ef4f471e5ff0edbe9030.1791412497.git.mst@redhat.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+	Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+(cherry picked from commit a464d950f31c89565cbaae038cc60db04fe01956)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ include/net/ip.h                     |  7 +++++++
+ net/ipv4/ip_output.c                 | 10 +++++++---
+ net/netfilter/nfnetlink_queue_core.c |  7 +++++++
+ net/netfilter/xt_CHECKSUM.c          |  6 +++++-
+ net/xfrm/xfrm_output.c               | 16 +++++++++++-----
+ 5 files changed, 37 insertions(+), 9 deletions(-)
+
+diff --git a/include/net/ip.h b/include/net/ip.h
+index 9e6e1752a871..02ee7aacc79f 100644
+--- a/include/net/ip.h
++++ b/include/net/ip.h
+@@ -57,6 +57,13 @@ static inline unsigned int ip_hdrlen(const struct sk_buff *skb)
+ 	return ip_hdr(skb)->ihl * 4;
+ }
+ 
++static inline int ip_check_csum_start(const struct sk_buff *skb)
++{
++	if (unlikely(skb->csum_start < skb->network_header + ip_hdrlen(skb)))
++		return -EINVAL;
++	return 0;
++}
++
+ struct ipcm_cookie {
+ 	__be32			addr;
+ 	int			oif;
+diff --git a/net/ipv4/ip_output.c b/net/ipv4/ip_output.c
+index 48e1040b15dc..bd87c1a0768c 100644
+--- a/net/ipv4/ip_output.c
++++ b/net/ipv4/ip_output.c
+@@ -538,9 +538,13 @@ int ip_do_fragment(struct sock *sk, struct sk_buff *skb,
+ 	dev = rt->dst.dev;
+ 
+ 	/* for offloaded checksums cleanup checksum before fragmentation */
+-	if (skb->ip_summed == CHECKSUM_PARTIAL &&
+-	    (err = skb_checksum_help(skb)))
+-		goto fail;
++	if (skb->ip_summed == CHECKSUM_PARTIAL) {
++		err = ip_check_csum_start(skb);
++		if (!err)
++			err = skb_checksum_help(skb);
++		if (err)
++			goto fail;
++	}
+ 
+ 	/*
+ 	 *	Point into the IP datagram header.
+diff --git a/net/netfilter/nfnetlink_queue_core.c b/net/netfilter/nfnetlink_queue_core.c
+index 2f042babd9c0..37a6be7bc213 100644
+--- a/net/netfilter/nfnetlink_queue_core.c
++++ b/net/netfilter/nfnetlink_queue_core.c
+@@ -29,6 +29,7 @@
+ #include <linux/netfilter/nfnetlink.h>
+ #include <linux/netfilter/nfnetlink_queue.h>
+ #include <linux/list.h>
++#include <net/ip.h>
+ #include <net/sock.h>
+ #include <net/netfilter/nf_queue.h>
+ #include <net/netns/generic.h>
+@@ -247,6 +248,12 @@ nfqnl_put_packet_info(struct sk_buff *nlskb, struct sk_buff *packet,
+ 
+ static int nf_queue_checksum_help(struct sk_buff *entskb)
+ {
++	if (entskb->protocol == htons(ETH_P_IP)) {
++		if (!pskb_network_may_pull(entskb, sizeof(struct iphdr)) ||
++		    ip_check_csum_start(entskb))
++			return -EINVAL;
++	}
++
+ 	if (skb_csum_is_sctp(entskb))
+ 		return skb_crc32c_csum_help(entskb);
+ 
+diff --git a/net/netfilter/xt_CHECKSUM.c b/net/netfilter/xt_CHECKSUM.c
+index 0f642ef8cd26..8a1e2a152861 100644
+--- a/net/netfilter/xt_CHECKSUM.c
++++ b/net/netfilter/xt_CHECKSUM.c
+@@ -15,6 +15,7 @@
+ 
+ #include <linux/netfilter/x_tables.h>
+ #include <linux/netfilter/xt_CHECKSUM.h>
++#include <net/ip.h>
+ 
+ MODULE_LICENSE("GPL");
+ MODULE_AUTHOR("Michael S. Tsirkin <mst@redhat.com>");
+@@ -25,8 +26,11 @@ MODULE_ALIAS("ip6t_CHECKSUM");
+ static unsigned int
+ checksum_tg(struct sk_buff *skb, const struct xt_action_param *par)
+ {
+-	if (skb->ip_summed == CHECKSUM_PARTIAL)
++	if (skb->ip_summed == CHECKSUM_PARTIAL) {
++		if (xt_family(par) == NFPROTO_IPV4 && ip_check_csum_start(skb))
++			return NF_DROP;
+ 		skb_checksum_help(skb);
++	}
+ 
+ 	return XT_CONTINUE;
+ }
+diff --git a/net/xfrm/xfrm_output.c b/net/xfrm/xfrm_output.c
+index 65a0e1a9ac98..a1d6c922f43e 100644
+--- a/net/xfrm/xfrm_output.c
++++ b/net/xfrm/xfrm_output.c
+@@ -197,15 +197,21 @@ int xfrm_output(struct sock *sk, struct sk_buff *skb)
+ 		return xfrm_output_gso(sk, skb);
+ 
+ 	if (skb->ip_summed == CHECKSUM_PARTIAL) {
+-		err = skb_checksum_help(skb);
+-		if (err) {
+-			XFRM_INC_STATS(net, LINUX_MIB_XFRMOUTERROR);
+-			kfree_skb(skb);
+-			return err;
++		if (skb->protocol == htons(ETH_P_IP)) {
++			err = ip_check_csum_start(skb);
++			if (err)
++				goto error;
+ 		}
++		err = skb_checksum_help(skb);
++		if (err)
++			goto error;
+ 	}
+ 
+ 	return xfrm_output2(sk, skb);
++error:
++	XFRM_INC_STATS(net, LINUX_MIB_XFRMOUTERROR);
++	kfree_skb(skb);
++	return err;
+ }
+ 
+ int xfrm_inner_extract_output(struct xfrm_state *x, struct sk_buff *skb)
+-- 
+2.52.0
+

@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %define pkgrelease 1160.119.1.el7
 
 #CIQ Versionsing for the kernel
-%define ciq_patch_version 21
+%define ciq_patch_version 22
 %define ciq_build_id 1
 %define ciq_patch_build_str .%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el7_9.ciqcbr
@@ -673,6 +673,15 @@ Patch1145: 0119-net-tun-bound-receive-headroom.patch
 Patch1146: 0120-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
 Patch1147: 0121-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
 Patch1148: 0122-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
+#CIQ Patch Version: 1160.119.1.el7_9.ciqcbr.22.1
+Patch1149: 0123-netfilter-synproxy-refresh-tcphdr-after-skb_ensure_w.patch
+Patch1150: 0124-udp-fix-potential-use-after-free-in-tunnel-segmentat.patch
+Patch1151: 0125-vhost-relax-log-address-alignment.patch
+Patch1152: 0126-vhost-reset-metadata-cache-when-initializing-new-IOT.patch
+Patch1153: 0127-vhost-factor-out-setting-vring-addr-and-num.patch
+Patch1154: 0128-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
+Patch1155: 0129-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
+Patch1156: 0130-ipv4-validate-checksum_start-before-completing-check.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -1164,6 +1173,14 @@ ApplyOptionalPatch 0119-net-tun-bound-receive-headroom.patch
 ApplyOptionalPatch 0120-crypto-af_alg-Disallow-concurrent-writes-in-af_alg_s.patch
 ApplyOptionalPatch 0121-netfilter-bridge-make-ebt_snat-ARP-rewrite-writable.patch
 ApplyOptionalPatch 0122-USB-serial-io_ti-fix-heap-overflow-in-get_manuf_info.patch
+ApplyOptionalPatch 0123-netfilter-synproxy-refresh-tcphdr-after-skb_ensure_w.patch
+ApplyOptionalPatch 0124-udp-fix-potential-use-after-free-in-tunnel-segmentat.patch
+ApplyOptionalPatch 0125-vhost-relax-log-address-alignment.patch
+ApplyOptionalPatch 0126-vhost-reset-metadata-cache-when-initializing-new-IOT.patch
+ApplyOptionalPatch 0127-vhost-factor-out-setting-vring-addr-and-num.patch
+ApplyOptionalPatch 0128-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
+ApplyOptionalPatch 0129-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
+ApplyOptionalPatch 0130-ipv4-validate-checksum_start-before-completing-check.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2167,6 +2184,16 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
+* Tue Oct 20 2026 Brett Mastbergen <bmastbergen@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.22.1
+- ipv4: validate checksum_start before completing checksum (Brett Mastbergen) [ciqres] {CVE-2026-99999}
+- netfilter: nfnetlink_queue: unbreak SCTP traffic (Brett Mastbergen) [ciqres] {CVE-2026-99999}
+- vhost: reset the vring metadata cache on vring reconfiguration (Jonathan Maple) [ciqres] {CVE-2026-74580}
+- vhost: factor out setting vring addr and num (Jonathan Maple) [ciqres] {CVE-2026-74580}
+- vhost: reset metadata cache when initializing new IOTLB (Jonathan Maple) [ciqres] {CVE-2026-74580}
+- vhost: relax log address alignment (Jonathan Maple) [ciqres] {CVE-2026-74580}
+- udp: fix potential use-after-free in tunnel segmentation (CIQ Kernel Automation) [ciqres] {CVE-2026-74705}
+- netfilter: synproxy: refresh tcphdr after skb_ensure_writable (CIQ Kernel Automation) [ciqres] {CVE-2026-64007}
+
 * Wed Sep 30 2026 Shreeya Patel <spatel@ciq.com> - 3.10.0-1160.119.1.el7_9.ciqcbr.21.1
 - USB: serial: io_ti: fix heap overflow in get_manuf_info() (CIQ Kernel Automation) [ciqres] {CVE-2026-53196}
 - netfilter: bridge: make ebt_snat ARP rewrite writable (Brett Mastbergen) [ciqres] {CVE-2026-53266}

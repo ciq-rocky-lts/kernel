@@ -1,0 +1,55 @@
+From 9f1717d95203cd034d8394d8056ae1a7723bb49d Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Wed, 14 Oct 2026 06:41:19 +0000
+Subject: [PATCH] udp: fix potential use-after-free in tunnel segmentation
+
+jira VULN-205108
+cve CVE-2026-74705
+commit-author Xuanqiang Luo <luoxuanqiang@kylinos.cn>
+commit d0f86fb36eb260abd10007b62c9dcc1028e03e61
+
+__skb_udp_tunnel_segment() gets the UDP header before ensuring the
+tunnel header is in the skb head. If the pull reallocates skb->head,
+the saved UDP header pointer is no longer valid.
+
+Get the UDP header after the pull to avoid a potential use-after-free.
+
+Fixes: dbef491ebe7f ("udp: Use uh->len instead of skb->len to compute checksum in segmentation")
+	Signed-off-by: Xuanqiang Luo <luoxuanqiang@kylinos.cn>
+	Reviewed-by: Antoine Tenart <atenart@kernel.org>
+Link: https://patch.msgid.link/20260730093554.68127-1-xuanqiang.luo@linux.dev
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit d0f86fb36eb260abd10007b62c9dcc1028e03e61)
+	Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/ipv4/udp_offload.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/net/ipv4/udp_offload.c b/net/ipv4/udp_offload.c
+index 83d8fd10c24a..c0e11235a80a 100644
+--- a/net/ipv4/udp_offload.c
++++ b/net/ipv4/udp_offload.c
+@@ -23,17 +23,19 @@ static struct sk_buff *__skb_udp_tunnel_segment(struct sk_buff *skb,
+ 	int tnl_hlen = skb_inner_mac_header(skb) - skb_transport_header(skb);
+ 	bool remcsum, need_csum, offload_csum, ufo, gso_partial;
+ 	struct sk_buff *segs = ERR_PTR(-EINVAL);
+-	struct udphdr *uh = udp_hdr(skb);
+ 	u16 mac_offset = skb->mac_header;
+ 	__be16 protocol = skb->protocol;
+ 	u16 mac_len = skb->mac_len;
+ 	int udp_offset, outer_hlen;
++	struct udphdr *uh;
+ 	__wsum partial;
+ 	bool need_ipsec;
+ 
+ 	if (unlikely(!pskb_may_pull(skb, tnl_hlen)))
+ 		goto out;
+ 
++	uh = udp_hdr(skb);
++
+ 	/* Adjust partial header checksum to negate old length.
+ 	 * We cannot rely on the value contained in uh->len as it is
+ 	 * possible that the actual value exceeds the boundaries of the
+-- 
+2.52.0
+

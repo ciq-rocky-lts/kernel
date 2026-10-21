@@ -1,0 +1,47 @@
+From 3326f34c0df10bd8c2853a241431b63a9efa5eb8 Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Fri, 16 Oct 2026 10:05:43 -0400
+Subject: [PATCH] vhost: reset metadata cache when initializing new IOTLB
+
+jira VULN-204212
+cve-pre CVE-2026-74580
+commit-author Jason Wang <jasowang@redhat.com>
+commit b13f9c6364373a1b9f71e9846dc4fb199296f926
+
+We need to reset metadata cache during new IOTLB initialization,
+otherwise the stale pointers to previous IOTLB may be still accessed
+which will lead a use after free.
+
+	Reported-by: syzbot+c51e6736a1bf614b3272@syzkaller.appspotmail.com
+Fixes: f88949138058 ("vhost: introduce O(1) vq metadata cache")
+	Signed-off-by: Jason Wang <jasowang@redhat.com>
+	Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit b13f9c6364373a1b9f71e9846dc4fb199296f926)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ drivers/vhost/vhost.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/vhost/vhost.c b/drivers/vhost/vhost.c
+index 2dd5724ef48c..6bbfbbb4a10e 100644
+--- a/drivers/vhost/vhost.c
++++ b/drivers/vhost/vhost.c
+@@ -1579,9 +1579,12 @@ int vhost_init_device_iotlb(struct vhost_dev *d, bool enabled)
+ 	d->iotlb = niotlb;
+ 
+ 	for (i = 0; i < d->nvqs; ++i) {
+-		mutex_lock(&d->vqs[i]->mutex);
+-		d->vqs[i]->iotlb = niotlb;
+-		mutex_unlock(&d->vqs[i]->mutex);
++		struct vhost_virtqueue *vq = d->vqs[i];
++
++		mutex_lock(&vq->mutex);
++		vq->iotlb = niotlb;
++		__vhost_vq_meta_reset(vq);
++		mutex_unlock(&vq->mutex);
+ 	}
+ 
+ 	vhost_umem_clean(oiotlb);
+-- 
+2.52.0
+
