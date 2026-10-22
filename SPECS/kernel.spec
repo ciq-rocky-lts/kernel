@@ -171,7 +171,7 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 25
+%define ciq_patch_version 26
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
@@ -1359,6 +1359,26 @@ Patch1000350: 1350-scsi-target-iscsi-Validate-CHAP_R-length-before-base.patch
 Patch1000351: 1351-scsi-target-Fix-hexadecimal-CHAP_I-handling.patch
 Patch1000352: 1352-scsi-target-iscsi-Fix-CRC-overread-and-double-free-i.patch
 Patch1000353: 1353-exec-Cleanup-POSIX-timers-right-after-de_thread.patch
+#CIQ Patch Version: 570.60.1+26.1.el9_6_ciq
+Patch1000354: 1354-RDMA-rxe-Fix-race-condition-in-QP-timer-handlers.patch
+Patch1000355: 1355-ipv6-add-NULL-checks-for-idev-in-SRv6-paths.patch
+Patch1000356: 1356-RDMA-rxe-Validate-pad-and-ICRC-before-payload_size-i.patch
+Patch1000357: 1357-RDMA-rxe-Reject-unknown-opcodes-before-ICRC-processi.patch
+Patch1000358: 1358-RDMA-rxe-Reject-non-8-byte-ATOMIC_WRITE-payloads.patch
+Patch1000359: 1359-ipv6-validate-extension-header-length-before-copying.patch
+Patch1000360: 1360-ipv6-rpl-fix-hdrlen-overflow-in-ipv6_rpl_srh_decompr.patch
+Patch1000361: 1361-smb-client-fix-double-free-in-SMB2_flush-replay.patch
+Patch1000362: 1362-smb-client-fix-double-free-in-SMB2_ioctl-replay.patch
+Patch1000363: 1363-smb-client-fix-query_info-replay-double-free.patch
+Patch1000364: 1364-udp-fix-potential-use-after-free-in-tunnel-segmentat.patch
+Patch1000365: 1365-ipv6-fix-use-after-free-in-ip6_finish_output2.patch
+Patch1000366: 1366-espintcp-remove-encap-socket-caching-to-avoid-refere.patch
+Patch1000367: 1367-espintcp-fix-skb-leaks.patch
+Patch1000368: 1368-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
+Patch1000369: 1369-ipv4-validate-checksum_start-before-completing-check.patch
+Patch1000370: 1370-ipv6-exthdrs-get-rid-of-indirect-calls-in-ip6_parse_.patch
+Patch1000371: 1371-ipv6-exthdrs-refresh-nh-after-handling-HAO-option.patch
+Patch1000372: 1372-ipv6-exthdrs-refresh-nh-pointer-after-ipv6_hop_jumbo.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2474,6 +2494,25 @@ ApplyOptionalPatch 1350-scsi-target-iscsi-Validate-CHAP_R-length-before-base.pat
 ApplyOptionalPatch 1351-scsi-target-Fix-hexadecimal-CHAP_I-handling.patch
 ApplyOptionalPatch 1352-scsi-target-iscsi-Fix-CRC-overread-and-double-free-i.patch
 ApplyOptionalPatch 1353-exec-Cleanup-POSIX-timers-right-after-de_thread.patch
+ApplyOptionalPatch 1354-RDMA-rxe-Fix-race-condition-in-QP-timer-handlers.patch
+ApplyOptionalPatch 1355-ipv6-add-NULL-checks-for-idev-in-SRv6-paths.patch
+ApplyOptionalPatch 1356-RDMA-rxe-Validate-pad-and-ICRC-before-payload_size-i.patch
+ApplyOptionalPatch 1357-RDMA-rxe-Reject-unknown-opcodes-before-ICRC-processi.patch
+ApplyOptionalPatch 1358-RDMA-rxe-Reject-non-8-byte-ATOMIC_WRITE-payloads.patch
+ApplyOptionalPatch 1359-ipv6-validate-extension-header-length-before-copying.patch
+ApplyOptionalPatch 1360-ipv6-rpl-fix-hdrlen-overflow-in-ipv6_rpl_srh_decompr.patch
+ApplyOptionalPatch 1361-smb-client-fix-double-free-in-SMB2_flush-replay.patch
+ApplyOptionalPatch 1362-smb-client-fix-double-free-in-SMB2_ioctl-replay.patch
+ApplyOptionalPatch 1363-smb-client-fix-query_info-replay-double-free.patch
+ApplyOptionalPatch 1364-udp-fix-potential-use-after-free-in-tunnel-segmentat.patch
+ApplyOptionalPatch 1365-ipv6-fix-use-after-free-in-ip6_finish_output2.patch
+ApplyOptionalPatch 1366-espintcp-remove-encap-socket-caching-to-avoid-refere.patch
+ApplyOptionalPatch 1367-espintcp-fix-skb-leaks.patch
+ApplyOptionalPatch 1368-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
+ApplyOptionalPatch 1369-ipv4-validate-checksum_start-before-completing-check.patch
+ApplyOptionalPatch 1370-ipv6-exthdrs-get-rid-of-indirect-calls-in-ip6_parse_.patch
+ApplyOptionalPatch 1371-ipv6-exthdrs-refresh-nh-after-handling-HAO-option.patch
+ApplyOptionalPatch 1372-ipv6-exthdrs-refresh-nh-pointer-after-ipv6_hop_jumbo.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4590,6 +4629,27 @@ fi
 #
 #
 %changelog
+* Wed Oct 21 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+26.1.el9_6_ciq
+- ipv6: exthdrs: refresh nh pointer after ipv6_hop_jumbo() (Brett Mastbergen) [ciqres] {CVE-2026-63924}
+- ipv6: exthdrs: refresh nh after handling HAO option (Brett Mastbergen) [ciqres] {CVE-2026-63922}
+- ipv6: exthdrs: get rid of indirect calls in ip6_parse_tlv() (Brett Mastbergen) [ciqres] {CVE-2026-63922}
+- ipv4: validate checksum_start before completing checksum (Brett Mastbergen) [ciqres] {CVE-2026-99999}
+- netfilter: nfnetlink_queue: unbreak SCTP traffic (Brett Mastbergen) [ciqres] {CVE-2026-99999}
+- espintcp: fix skb leaks (Hailey Mothershead) [ciqres] {CVE-2025-38057}
+- espintcp: remove encap socket caching to avoid reference leak (Hailey Mothershead) [ciqres] {CVE-2025-38097}
+- ipv6: fix use-after-free in ip6_finish_output2() (CIQ Kernel Automation) [ciqres] {CVE-2026-80792}
+- udp: fix potential use-after-free in tunnel segmentation (CIQ Kernel Automation) [ciqres] {CVE-2026-74705}
+- smb: client: fix query_info() replay double-free (CIQ Kernel Automation) [ciqres] {CVE-2026-64386}
+- smb: client: fix double-free in SMB2_ioctl() replay (CIQ Kernel Automation) [ciqres] {CVE-2026-64385}
+- smb: client: fix double-free in SMB2_flush() replay (CIQ Kernel Automation) [ciqres] {CVE-2026-64383}
+- ipv6: rpl: fix hdrlen overflow in ipv6_rpl_srh_decompress() (CIQ Kernel Automation) [ciqres] {CVE-2026-63984}
+- ipv6: validate extension header length before copying to cmsg (CIQ Kernel Automation) [ciqres] {CVE-2026-63920}
+- RDMA/rxe: Reject non-8-byte ATOMIC_WRITE payloads (CIQ Kernel Automation) [ciqres] {CVE-2026-46114}
+- RDMA/rxe: Reject unknown opcodes before ICRC processing (CIQ Kernel Automation) [ciqres] {CVE-2026-46133}
+- RDMA/rxe: Validate pad and ICRC before payload_size() in rxe_rcv (CIQ Kernel Automation) [ciqres] {CVE-2026-46043}
+- ipv6: add NULL checks for idev in SRv6 paths (CIQ Kernel Automation) [ciqres] {CVE-2026-23442}
+- RDMA/rxe: Fix race condition in QP timer handlers (CIQ Kernel Automation) [ciqres] {CVE-2026-45910}
+
 * Wed Oct 14 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+25.1.el9_6_ciq
 - exec: Cleanup POSIX timers right after de_thread() (Jonathan Maple) [ciqres] {CVE-2026-98260}
 - scsi: target: iscsi: Fix CRC overread and double-free in iscsit_handle_text_cmd() (Jonathan Maple) [ciqres] {CVE-2026-63888}
