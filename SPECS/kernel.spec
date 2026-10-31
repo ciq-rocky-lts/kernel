@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 39
+%define ciq_patch_version 40
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1257,6 +1257,19 @@ Patch0665: 0510-espintcp-fix-skb-leaks.patch
 Patch0666: 0511-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
 Patch0667: 0512-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
 Patch0668: 0513-ipv4-validate-checksum_start-before-completing-check.patch
+#CIQ Patch Version: 372.32.1+40.1.el8_6_ciq
+Patch0669: 0514-netfilter-nf_tables-do-not-allow-RULE_ID-to-refer-to.patch
+Patch0670: 0515-ALSA-usb-audio-Fix-potential-out-of-bound-accesses-f.patch
+Patch0671: 0516-ALSA-usb-audio-Fix-a-DMA-to-stack-memory-bug.patch
+Patch0672: 0517-netfilter-nfnetlink_cthelper-fix-OOB-read-in-nfnl_ct.patch
+Patch0673: 0518-ipv6-validate-extension-header-length-before-copying.patch
+Patch0674: 0519-netfilter-ipset-drop-logically-empty-buckets-in-mtyp.patch
+Patch0675: 0520-netfilter-nf_tables-unconditionally-bump-set-nelems-.patch
+Patch0676: 0521-tls-fix-race-between-async-notify-and-socket-close.patch
+Patch0677: 0522-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
+Patch0678: 0523-net-macvlan-fix-memory-leaks-of-macvlan_common_newli.patch
+Patch0679: 0524-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
+Patch0680: 0525-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2492,6 +2505,18 @@ ApplyOptionalPatch 0510-espintcp-fix-skb-leaks.patch
 ApplyOptionalPatch 0511-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
 ApplyOptionalPatch 0512-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
 ApplyOptionalPatch 0513-ipv4-validate-checksum_start-before-completing-check.patch
+ApplyOptionalPatch 0514-netfilter-nf_tables-do-not-allow-RULE_ID-to-refer-to.patch
+ApplyOptionalPatch 0515-ALSA-usb-audio-Fix-potential-out-of-bound-accesses-f.patch
+ApplyOptionalPatch 0516-ALSA-usb-audio-Fix-a-DMA-to-stack-memory-bug.patch
+ApplyOptionalPatch 0517-netfilter-nfnetlink_cthelper-fix-OOB-read-in-nfnl_ct.patch
+ApplyOptionalPatch 0518-ipv6-validate-extension-header-length-before-copying.patch
+ApplyOptionalPatch 0519-netfilter-ipset-drop-logically-empty-buckets-in-mtyp.patch
+ApplyOptionalPatch 0520-netfilter-nf_tables-unconditionally-bump-set-nelems-.patch
+ApplyOptionalPatch 0521-tls-fix-race-between-async-notify-and-socket-close.patch
+ApplyOptionalPatch 0522-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
+ApplyOptionalPatch 0523-net-macvlan-fix-memory-leaks-of-macvlan_common_newli.patch
+ApplyOptionalPatch 0524-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
+ApplyOptionalPatch 0525-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
 
 
 # CIQ LTS patches:
@@ -4051,6 +4076,20 @@ fi
 #
 #
 %changelog
+* Fri Oct 30 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+40.1.el8_6_ciq
+- macvlan: observe an RCU grace period in macvlan_common_newlink() error path (Brett Mastbergen) [ciqres] {CVE-2026-23273}
+- macvlan: fix error recovery in macvlan_common_newlink() (Jonathan Maple) [ciqres] {CVE-2026-23209}
+- net: macvlan: fix memory leaks of macvlan_common_newlink (Jonathan Maple) [ciqres] {CVE-2022-49853}
+- ipv4: free inet_opt and ireq_opt after an RCU grace period (Brett Mastbergen) [ciqres] {CVE-2026-98432}
+- tls: fix race between async notify and socket close (Brett Mastbergen) [ciqres] {CVE-2024-26583}
+- netfilter: nf_tables: unconditionally bump set->nelems before insertion (Brett Mastbergen) [ciqres] {CVE-2026-23272}
+- netfilter: ipset: drop logically empty buckets in mtype_del (Brett Mastbergen) [ciqres] {CVE-2026-31418}
+- ipv6: validate extension header length before copying to cmsg (CIQ Kernel Automation) [ciqres] {CVE-2026-63920}
+- netfilter: nfnetlink_cthelper: fix OOB read in nfnl_cthelper_dump_table() (CIQ Kernel Automation) [ciqres] {CVE-2026-43450}
+- ALSA: usb-audio: Fix a DMA to stack memory bug (Brett Mastbergen) [ciqres] {CVE-2024-53197}
+- ALSA: usb-audio: Fix potential out-of-bound accesses for Extigy and Mbox devices (Brett Mastbergen) [ciqres] {CVE-2024-53197}
+- netfilter: nf_tables: do not allow RULE_ID to refer to another chain (Jonathan Maple) [ciqres] {CVE-2022-2586}
+
 * Tue Oct 20 2026 Brett Mastbergen <bmastbergen@ciq.com> - 4.18.0-372.32.1+39.1.el8_6_ciq
 - ipv4: validate checksum_start before completing checksum (Brett Mastbergen) [ciqres] {CVE-2026-99999}
 - netfilter: nfnetlink_queue: unbreak SCTP traffic (Brett Mastbergen) [ciqres] {CVE-2026-99999}

@@ -1,0 +1,107 @@
+From e19ddb41eafdd180e34828a5effb7d7b499ebf07 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Thu, 29 Oct 2026 15:52:54 -0400
+Subject: [PATCH] netfilter: nf_tables: unconditionally bump set->nelems before
+ insertion
+
+jira VULN-178719
+cve CVE-2026-23272
+commit-author Pablo Neira Ayuso <pablo@netfilter.org>
+commit def602e498a4f951da95c95b1b8ce8ae68aa733a
+upstream-diff | adapted to this kernel's pre-catchall nftables:
+	the bump keeps this kernel's limit expression (set->size +
+	set->ndeact guarded by set->size, no NFT_SET_ELEM_CATCHALL or
+	nft_set_maxsize here), the element is stored via
+	nft_trans_elem(trans) and queued with list_add_tail(), and the
+	v6.13 element timeout-update reroute (NFT_TRANS_UPD_*,
+	nft_trans_container_elem) was dropped as absent.  The err unwind
+	keeps this kernel's err_elem_expr chain with obj->use--.
+
+In case that the set is full, a new element gets published then removed
+without waiting for the RCU grace period, while RCU reader can be
+walking over it already.
+
+To address this issue, add the element transaction even if set is full,
+but toggle the set_full flag to report -ENFILE so the abort path safely
+unwinds the set to its previous state.
+
+As for element updates, decrement set->nelems to restore it.
+
+A simpler fix is to call synchronize_rcu() in the error path.
+However, with a large batch adding elements to already maxed-out set,
+this could cause noticeable slowdown of such batches.
+
+Fixes: 35d0ac9070ef ("netfilter: nf_tables: fix set->nelems counting with no NLM_F_EXCL")
+	Reported-by: Inseo An <y0un9sa@gmail.com>
+	Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+(cherry picked from commit def602e498a4f951da95c95b1b8ce8ae68aa733a)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+
+# Conflicts:
+#	net/netfilter/nf_tables_api.c
+---
+ net/netfilter/nf_tables_api.c | 25 +++++++++++++++----------
+ 1 file changed, 15 insertions(+), 10 deletions(-)
+
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 7f574ba0208a..191f7f2cd254 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -5238,6 +5238,7 @@ static int nft_add_set_elem(struct nft_ctx *ctx, struct nft_set *set,
+ 	struct nft_data data;
+ 	enum nft_registers dreg;
+ 	struct nft_trans *trans;
++	bool set_full = false;
+ 	u64 timeout;
+ 	u64 expiration;
+ 	int err, i;
+@@ -5479,10 +5480,18 @@ static int nft_add_set_elem(struct nft_ctx *ctx, struct nft_set *set,
+ 	if (err < 0)
+ 		goto err_elem_expr;
+ 
++	if (set->size) {
++		unsigned int max = set->size + set->ndeact, nelems;
++
++		nelems = atomic_inc_return(&set->nelems);
++		if (nelems > max)
++			set_full = true;
++	}
++
+ 	trans = nft_trans_elem_alloc(ctx, NFT_MSG_NEWSETELEM, set);
+ 	if (trans == NULL) {
+ 		err = -ENOMEM;
+-		goto err_elem_expr;
++		goto err_set_size;
+ 	}
+ 
+ 	ext->genmask = nft_genmask_cur(ctx->net) | NFT_SET_ELEM_BUSY_MASK;
+@@ -5510,20 +5519,16 @@ static int nft_add_set_elem(struct nft_ctx *ctx, struct nft_set *set,
+ 		goto err_element_clash;
+ 	}
+ 
+-	if (set->size &&
+-	    !atomic_add_unless(&set->nelems, 1, set->size + set->ndeact)) {
+-		err = -ENFILE;
+-		goto err_set_full;
+-	}
+-
+ 	nft_trans_elem(trans) = elem;
+ 	list_add_tail(&trans->list, &ctx->net->nft.commit_list);
+-	return 0;
+ 
+-err_set_full:
+-	set->ops->remove(ctx->net, set, &elem);
++	return set_full ? -ENFILE : 0;
++
+ err_element_clash:
+ 	kfree(trans);
++err_set_size:
++	if (set->size)
++		atomic_dec(&set->nelems);
+ err_elem_expr:
+ 	if (obj)
+ 		obj->use--;
+-- 
+2.52.0
+
