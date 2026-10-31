@@ -1,0 +1,47 @@
+From daedc4a2be672a5903f1ede38c6405ef193c2635 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Thu, 22 Oct 2026 14:22:30 -0400
+Subject: [PATCH] nvmet-auth: zero the AUTH_RECEIVE response buffer
+
+jira VULN-223592
+cve CVE-2026-80791
+commit-author Bryam Vargas <hexlabsecurity@proton.me>
+commit 3ddcfb013322aa37eaa7a0d344b73079c38dfa21
+
+nvmet_execute_auth_receive() allocates the response buffer with kmalloc()
+sized by the host-supplied AUTH_RECEIVE allocation length, but the
+DH-HMAC-CHAP builders write only a fixed-size message into it. The full
+allocation length is then copied to the wire by nvmet_copy_to_sgl(), so a
+remote initiator receives the bytes past the built message -- up to nearly
+a page of uninitialized slab -- during the pre-authentication handshake.
+
+Allocate the buffer with kzalloc() so the unwritten tail is zeroed before
+it is sent; conforming responses are unaffected.
+
+Fixes: db1312dd9548 ("nvmet: implement basic In-Band Authentication")
+	Cc: stable@vger.kernel.org
+	Signed-off-by: Bryam Vargas <hexlabsecurity@proton.me>
+	Reviewed-by: Christoph Hellwig <hch@lst.de>
+	Signed-off-by: Keith Busch <kbusch@kernel.org>
+(cherry picked from commit 3ddcfb013322aa37eaa7a0d344b73079c38dfa21)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ drivers/nvme/target/fabrics-cmd-auth.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/nvme/target/fabrics-cmd-auth.c b/drivers/nvme/target/fabrics-cmd-auth.c
+index 47947318c1dc5..51d684c0fcd94 100644
+--- a/drivers/nvme/target/fabrics-cmd-auth.c
++++ b/drivers/nvme/target/fabrics-cmd-auth.c
+@@ -514,7 +514,7 @@ void nvmet_execute_auth_receive(struct nvmet_req *req)
+ 		return;
+ 	}
+ 
+-	d = kmalloc(al, GFP_KERNEL);
++	d = kzalloc(al, GFP_KERNEL);
+ 	if (!d) {
+ 		status = NVME_SC_INTERNAL;
+ 		goto done;
+-- 
+2.52.0
+

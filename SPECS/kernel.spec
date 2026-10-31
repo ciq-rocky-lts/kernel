@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 44
+%define ciq_patch_version 45
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1717,6 +1717,17 @@ Patch1000751: 0706-vhost-reset-the-vring-metadata-cache-on-vring-reconf.patch
 Patch1000752: 0707-ALSA-usb-audio-Fix-potential-out-of-bound-accesses-f.patch
 Patch1000753: 0708-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
 Patch1000754: 0709-ipv4-validate-checksum_start-before-completing-check.patch
+#CIQ Patch Version: 284.30.1+45.1.el9_2_ciq
+Patch1000755: 0710-nvmet-Introduce-nvmet_req_transfer_len.patch
+Patch1000756: 0711-nvme-Add-the-DHCHAP-maximum-HD-IDs.patch
+Patch1000757: 0712-nvmet-auth-validate-reply-message-payload-bounds-aga.patch
+Patch1000758: 0713-nvmet-auth-reject-short-AUTH_RECEIVE-buffers.patch
+Patch1000759: 0714-nvme-auth-use-crypto_memneq-for-DH-HMAC-CHAP-respons.patch
+Patch1000760: 0715-nvmet-auth-zero-the-AUTH_RECEIVE-response-buffer.patch
+Patch1000761: 0716-nvmet-fix-heap-out-of-bounds-read-in-nvmet_auth_nego.patch
+Patch1000762: 0717-nvmet-auth-fix-out-of-bounds-write-in-nvmet_auth_cha.patch
+Patch1000763: 0718-net-sched-cls_api-Handle-TC_ACT_CONSUMED-in-tcf_qeve.patch
+Patch1000764: 0719-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3150,6 +3161,16 @@ ApplyOptionalPatch 0706-vhost-reset-the-vring-metadata-cache-on-vring-reconf.pat
 ApplyOptionalPatch 0707-ALSA-usb-audio-Fix-potential-out-of-bound-accesses-f.patch
 ApplyOptionalPatch 0708-netfilter-nfnetlink_queue-unbreak-SCTP-traffic.patch
 ApplyOptionalPatch 0709-ipv4-validate-checksum_start-before-completing-check.patch
+ApplyOptionalPatch 0710-nvmet-Introduce-nvmet_req_transfer_len.patch
+ApplyOptionalPatch 0711-nvme-Add-the-DHCHAP-maximum-HD-IDs.patch
+ApplyOptionalPatch 0712-nvmet-auth-validate-reply-message-payload-bounds-aga.patch
+ApplyOptionalPatch 0713-nvmet-auth-reject-short-AUTH_RECEIVE-buffers.patch
+ApplyOptionalPatch 0714-nvme-auth-use-crypto_memneq-for-DH-HMAC-CHAP-respons.patch
+ApplyOptionalPatch 0715-nvmet-auth-zero-the-AUTH_RECEIVE-response-buffer.patch
+ApplyOptionalPatch 0716-nvmet-fix-heap-out-of-bounds-read-in-nvmet_auth_nego.patch
+ApplyOptionalPatch 0717-nvmet-auth-fix-out-of-bounds-write-in-nvmet_auth_cha.patch
+ApplyOptionalPatch 0718-net-sched-cls_api-Handle-TC_ACT_CONSUMED-in-tcf_qeve.patch
+ApplyOptionalPatch 0719-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -5033,6 +5054,18 @@ fi
 #
 #
 %changelog
+* Fri Oct 30 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+45.1.el9_2_ciq
+- ipv4: free inet_opt and ireq_opt after an RCU grace period (Brett Mastbergen) [ciqres] {CVE-2026-98432}
+- net/sched: cls_api: Handle TC_ACT_CONSUMED in tcf_qevent_handle (Brett Mastbergen) [ciqres] {CVE-2026-64530}
+- nvmet-auth: fix out-of-bounds write in nvmet_auth_challenge() (Brett Mastbergen) [ciqres] {CVE-2026-98725}
+- nvmet: fix heap out-of-bounds read in nvmet_auth_negotiate() (Brett Mastbergen) [ciqres] {CVE-2026-90230}
+- nvmet-auth: zero the AUTH_RECEIVE response buffer (Brett Mastbergen) [ciqres] {CVE-2026-80791}
+- nvme-auth: use crypto_memneq for DH-HMAC-CHAP response comparison (Brett Mastbergen) [ciqres]
+- nvmet-auth: reject short AUTH_RECEIVE buffers (Brett Mastbergen) [ciqres] {CVE-2026-72130}
+- nvmet-auth: validate reply message payload bounds against transfer length (Brett Mastbergen) [ciqres] {CVE-2026-64319}
+- nvme: Add the DHCHAP maximum HD IDs (Brett Mastbergen) [ciqres] {CVE-2026-90230}
+- nvmet: Introduce nvmet_req_transfer_len() (Brett Mastbergen) [ciqres] {CVE-2026-72130}
+
 * Mon Oct 19 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-284.30.1+44.1.el9_2_ciq
 - ipv4: validate checksum_start before completing checksum (Brett Mastbergen) [ciqres] {CVE-2026-99999}
 - netfilter: nfnetlink_queue: unbreak SCTP traffic (Brett Mastbergen) [ciqres] {CVE-2026-99999}
