@@ -1,0 +1,234 @@
+From 4d42558d19e0bd7084dada70cf6ec81b058ce737 Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Wed, 7 Oct 2026 12:41:51 -0400
+Subject: [PATCH] crypto/krb5: Add an API to alloc and prepare a crypto object
+
+jira VULN-203242
+cve-pre CVE-2025-30156
+commit-author David Howells <dhowells@redhat.com>
+commit a9c27d2d87a388433db100889262841afe771f7a
+
+Add an API by which users of the krb5 crypto library can get an allocated
+and keyed crypto object.
+
+For encryption-mode operation, an AEAD object is returned; for
+checksum-mode operation, a synchronous hash object is returned.
+
+	Signed-off-by: David Howells <dhowells@redhat.com>
+cc: Herbert Xu <herbert@gondor.apana.org.au>
+cc: "David S. Miller" <davem@davemloft.net>
+cc: Chuck Lever <chuck.lever@oracle.com>
+cc: Marc Dionne <marc.dionne@auristor.com>
+cc: Eric Dumazet <edumazet@google.com>
+cc: Jakub Kicinski <kuba@kernel.org>
+cc: Paolo Abeni <pabeni@redhat.com>
+cc: Simon Horman <horms@kernel.org>
+cc: linux-afs@lists.infradead.org
+cc: linux-nfs@vger.kernel.org
+cc: linux-crypto@vger.kernel.org
+cc: netdev@vger.kernel.org
+(cherry picked from commit a9c27d2d87a388433db100889262841afe771f7a)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ crypto/krb5/internal.h |  10 +++
+ crypto/krb5/krb5_api.c | 144 +++++++++++++++++++++++++++++++++++++++++
+ include/crypto/krb5.h  |   7 ++
+ 3 files changed, 161 insertions(+)
+
+diff --git a/crypto/krb5/internal.h b/crypto/krb5/internal.h
+index 3ede858be4f74..b542d24e5fa53 100644
+--- a/crypto/krb5/internal.h
++++ b/crypto/krb5/internal.h
+@@ -110,3 +110,13 @@ struct krb5_crypto_profile {
+ #define krb5_digest_size(TFM) \
+ 	crypto_roundup(crypto_shash_digestsize(TFM))
+ #define round16(x) (((x) + 15) & ~15)
++
++/*
++ * krb5_api.c
++ */
++struct crypto_aead *krb5_prepare_encryption(const struct krb5_enctype *krb5,
++					    const struct krb5_buffer *keys,
++					    gfp_t gfp);
++struct crypto_shash *krb5_prepare_checksum(const struct krb5_enctype *krb5,
++					   const struct krb5_buffer *Kc,
++					   gfp_t gfp);
+diff --git a/crypto/krb5/krb5_api.c b/crypto/krb5/krb5_api.c
+index f6d1bc813daa0..f7f2528b3895b 100644
+--- a/crypto/krb5/krb5_api.c
++++ b/crypto/krb5/krb5_api.c
+@@ -148,3 +148,147 @@ void crypto_krb5_where_is_the_data(const struct krb5_enctype *krb5,
+ 	}
+ }
+ EXPORT_SYMBOL(crypto_krb5_where_is_the_data);
++
++/*
++ * Prepare the encryption with derived key data.
++ */
++struct crypto_aead *krb5_prepare_encryption(const struct krb5_enctype *krb5,
++					    const struct krb5_buffer *keys,
++					    gfp_t gfp)
++{
++	struct crypto_aead *ci = NULL;
++	int ret = -ENOMEM;
++
++	ci = crypto_alloc_aead(krb5->encrypt_name, 0, 0);
++	if (IS_ERR(ci)) {
++		ret = PTR_ERR(ci);
++		if (ret == -ENOENT)
++			ret = -ENOPKG;
++		goto err;
++	}
++
++	ret = crypto_aead_setkey(ci, keys->data, keys->len);
++	if (ret < 0) {
++		pr_err("Couldn't set AEAD key %s: %d\n", krb5->encrypt_name, ret);
++		goto err_ci;
++	}
++
++	ret = crypto_aead_setauthsize(ci, krb5->cksum_len);
++	if (ret < 0) {
++		pr_err("Couldn't set AEAD authsize %s: %d\n", krb5->encrypt_name, ret);
++		goto err_ci;
++	}
++
++	return ci;
++err_ci:
++	crypto_free_aead(ci);
++err:
++	return ERR_PTR(ret);
++}
++
++/**
++ * crypto_krb5_prepare_encryption - Prepare AEAD crypto object for encryption-mode
++ * @krb5: The encoding to use.
++ * @TK: The transport key to use.
++ * @usage: The usage constant for key derivation.
++ * @gfp: Allocation flags.
++ *
++ * Allocate a crypto object that does all the necessary crypto, key it and set
++ * its parameters and return the crypto handle to it.  This can then be used to
++ * dispatch encrypt and decrypt operations.
++ */
++struct crypto_aead *crypto_krb5_prepare_encryption(const struct krb5_enctype *krb5,
++						   const struct krb5_buffer *TK,
++						   u32 usage, gfp_t gfp)
++{
++	struct crypto_aead *ci = NULL;
++	struct krb5_buffer keys = {};
++	int ret;
++
++	ret = krb5->profile->derive_encrypt_keys(krb5, TK, usage, &keys, gfp);
++	if (ret < 0)
++		goto err;
++
++	ci = krb5_prepare_encryption(krb5, &keys, gfp);
++	if (IS_ERR(ci)) {
++		ret = PTR_ERR(ci);
++		goto err;
++	}
++
++	kfree(keys.data);
++	return ci;
++err:
++	kfree(keys.data);
++	return ERR_PTR(ret);
++}
++EXPORT_SYMBOL(crypto_krb5_prepare_encryption);
++
++/*
++ * Prepare the checksum with derived key data.
++ */
++struct crypto_shash *krb5_prepare_checksum(const struct krb5_enctype *krb5,
++					   const struct krb5_buffer *Kc,
++					   gfp_t gfp)
++{
++	struct crypto_shash *ci = NULL;
++	int ret = -ENOMEM;
++
++	ci = crypto_alloc_shash(krb5->cksum_name, 0, 0);
++	if (IS_ERR(ci)) {
++		ret = PTR_ERR(ci);
++		if (ret == -ENOENT)
++			ret = -ENOPKG;
++		goto err;
++	}
++
++	ret = crypto_shash_setkey(ci, Kc->data, Kc->len);
++	if (ret < 0) {
++		pr_err("Couldn't set shash key %s: %d\n", krb5->cksum_name, ret);
++		goto err_ci;
++	}
++
++	return ci;
++err_ci:
++	crypto_free_shash(ci);
++err:
++	return ERR_PTR(ret);
++}
++
++/**
++ * crypto_krb5_prepare_checksum - Prepare AEAD crypto object for checksum-mode
++ * @krb5: The encoding to use.
++ * @TK: The transport key to use.
++ * @usage: The usage constant for key derivation.
++ * @gfp: Allocation flags.
++ *
++ * Allocate a crypto object that does all the necessary crypto, key it and set
++ * its parameters and return the crypto handle to it.  This can then be used to
++ * dispatch get_mic and verify_mic operations.
++ */
++struct crypto_shash *crypto_krb5_prepare_checksum(const struct krb5_enctype *krb5,
++						  const struct krb5_buffer *TK,
++						  u32 usage, gfp_t gfp)
++{
++	struct crypto_shash *ci = NULL;
++	struct krb5_buffer keys = {};
++	int ret;
++
++	ret = krb5->profile->derive_checksum_key(krb5, TK, usage, &keys, gfp);
++	if (ret < 0) {
++		pr_err("get_Kc failed %d\n", ret);
++		goto err;
++	}
++
++	ci = krb5_prepare_checksum(krb5, &keys, gfp);
++	if (IS_ERR(ci)) {
++		ret = PTR_ERR(ci);
++		goto err;
++	}
++
++	kfree(keys.data);
++	return ci;
++err:
++	kfree(keys.data);
++	return ERR_PTR(ret);
++}
++EXPORT_SYMBOL(crypto_krb5_prepare_checksum);
+diff --git a/include/crypto/krb5.h b/include/crypto/krb5.h
+index b414141b8b420..94af2c558fa15 100644
+--- a/include/crypto/krb5.h
++++ b/include/crypto/krb5.h
+@@ -10,6 +10,7 @@
+ 
+ #include <linux/crypto.h>
+ #include <crypto/aead.h>
++#include <crypto/hash.h>
+ 
+ struct crypto_shash;
+ struct scatterlist;
+@@ -110,5 +111,11 @@ size_t crypto_krb5_how_much_data(const struct krb5_enctype *krb5,
+ void crypto_krb5_where_is_the_data(const struct krb5_enctype *krb5,
+ 				   enum krb5_crypto_mode mode,
+ 				   size_t *_offset, size_t *_len);
++struct crypto_aead *crypto_krb5_prepare_encryption(const struct krb5_enctype *krb5,
++						   const struct krb5_buffer *TK,
++						   u32 usage, gfp_t gfp);
++struct crypto_shash *crypto_krb5_prepare_checksum(const struct krb5_enctype *krb5,
++						  const struct krb5_buffer *TK,
++						  u32 usage, gfp_t gfp);
+ 
+ #endif /* _CRYPTO_KRB5_H */
+-- 
+2.52.0
+

@@ -1,0 +1,65 @@
+From 76b10dbadf7b0aa46be8bc3a5b23abbde2c3880a Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Wed, 7 Oct 2026 13:12:09 -0400
+Subject: [PATCH] libceph: Remove unused ceph_crypto_key_encode
+
+jira VULN-203242
+cve-pre CVE-2025-30156
+commit-author Dr. David Alan Gilbert <linux@treblig.org>
+commit 3e0f59f09e3f319b6652e5b4523fe02d965515a5
+
+ceph_crypto_key_encode() was added in 2010's commit
+8b6e4f2d8b21 ("ceph: aes crypto and base64 encode/decode helpers")
+
+but has remained unused (the decode is used).
+
+Remove it.
+
+	Signed-off-by: Dr. David Alan Gilbert <linux@treblig.org>
+	Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
+	Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+(cherry picked from commit 3e0f59f09e3f319b6652e5b4523fe02d965515a5)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ net/ceph/crypto.c | 12 ------------
+ net/ceph/crypto.h |  1 -
+ 2 files changed, 13 deletions(-)
+
+diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
+index 051d22c0e4ad4..01b2ce1e8fc06 100644
+--- a/net/ceph/crypto.c
++++ b/net/ceph/crypto.c
+@@ -74,18 +74,6 @@ int ceph_crypto_key_clone(struct ceph_crypto_key *dst,
+ 	return set_secret(dst, src->key);
+ }
+ 
+-int ceph_crypto_key_encode(struct ceph_crypto_key *key, void **p, void *end)
+-{
+-	if (*p + sizeof(u16) + sizeof(key->created) +
+-	    sizeof(u16) + key->len > end)
+-		return -ERANGE;
+-	ceph_encode_16(p, key->type);
+-	ceph_encode_copy(p, &key->created, sizeof(key->created));
+-	ceph_encode_16(p, key->len);
+-	ceph_encode_copy(p, key->key, key->len);
+-	return 0;
+-}
+-
+ int ceph_crypto_key_decode(struct ceph_crypto_key *key, void **p, void *end)
+ {
+ 	int ret;
+diff --git a/net/ceph/crypto.h b/net/ceph/crypto.h
+index 13bd526349fa1..23de29fc613cf 100644
+--- a/net/ceph/crypto.h
++++ b/net/ceph/crypto.h
+@@ -21,7 +21,6 @@ struct ceph_crypto_key {
+ 
+ int ceph_crypto_key_clone(struct ceph_crypto_key *dst,
+ 			  const struct ceph_crypto_key *src);
+-int ceph_crypto_key_encode(struct ceph_crypto_key *key, void **p, void *end);
+ int ceph_crypto_key_decode(struct ceph_crypto_key *key, void **p, void *end);
+ int ceph_crypto_key_unarmor(struct ceph_crypto_key *key, const char *in);
+ void ceph_crypto_key_destroy(struct ceph_crypto_key *key);
+-- 
+2.52.0
+

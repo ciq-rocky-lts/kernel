@@ -171,8 +171,8 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 26
-%define ciq_build_id 1
+%define ciq_patch_version 27
+%define ciq_build_id 2
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
 
@@ -1379,6 +1379,53 @@ Patch1000369: 1369-ipv4-validate-checksum_start-before-completing-check.patch
 Patch1000370: 1370-ipv6-exthdrs-get-rid-of-indirect-calls-in-ip6_parse_.patch
 Patch1000371: 1371-ipv6-exthdrs-refresh-nh-after-handling-HAO-option.patch
 Patch1000372: 1372-ipv6-exthdrs-refresh-nh-pointer-after-ipv6_hop_jumbo.patch
+#CIQ Patch Version: 570.60.1+27.1.el9_6_ciq
+Patch1000373: 1373-x86-bugs-Make-Safe-RET-robust-against-interrupt-inje.patch
+Patch1000374: 1374-lib-scatterlist-Add-SG_MITER_LOCAL-and-use-it.patch
+Patch1000375: 1375-crypto-krb5-Add-some-constants-out-of-sunrpc-headers.patch
+Patch1000376: 1376-crypto-Add-krb5enc-hash-and-cipher-AEAD-algorithm.patch
+Patch1000377: 1377-crypto-krb5enc-fix-sleepable-flag-handling-in-encryp.patch
+Patch1000378: 1378-crypto-krb5enc-fix-async-decrypt-skipping-hash-verif.patch
+Patch1000379: 1379-crypto-krb5-Test-manager-data.patch
+Patch1000380: 1380-crypto-krb5-Implement-Kerberos-crypto-core.patch
+Patch1000381: 1381-crypto-krb5-Add-an-API-to-query-the-layout-of-the-cr.patch
+Patch1000382: 1382-crypto-krb5-Add-an-API-to-alloc-and-prepare-a-crypto.patch
+Patch1000383: 1383-crypto-krb5-Add-an-API-to-perform-requests.patch
+Patch1000384: 1384-crypto-krb5-Provide-infrastructure-and-key-derivatio.patch
+Patch1000385: 1385-crypto-krb5-Implement-the-Kerberos5-rfc3961-key-deri.patch
+Patch1000386: 1386-crypto-krb5-Provide-RFC3961-setkey-packaging-functio.patch
+Patch1000387: 1387-crypto-krb5-Implement-the-Kerberos5-rfc3961-encrypt-.patch
+Patch1000388: 1388-crypto-krb5-Implement-the-Kerberos5-rfc3961-get_mic-.patch
+Patch1000389: 1389-crypto-krb5-Use-SG-miter-instead-of-doing-it-by-hand.patch
+Patch1000390: 1390-crypto-krb5-Fix-change-to-use-SG-miter-to-use-offset.patch
+Patch1000391: 1391-crypto-krb5-Implement-the-AES-enctypes-from-rfc3962.patch
+Patch1000392: 1392-crypto-krb5-Implement-the-AES-enctypes-from-rfc8009.patch
+Patch1000393: 1393-crypto-krb5-filter-out-async-aead-implementations-at.patch
+Patch1000394: 1394-crypto-krb5-Implement-the-Camellia-enctypes-from-rfc.patch
+Patch1000395: 1395-crypto-krb5-Implement-crypto-self-testing.patch
+Patch1000396: 1396-crypto-krb5-Fix-memory-leak-in-krb5_test_one_prf.patch
+Patch1000397: 1397-libceph-Remove-unused-ceph_crypto_key_encode.patch
+Patch1000398: 1398-libceph-define-and-enforce-CEPH_MAX_KEY_LEN.patch
+Patch1000399: 1399-libceph-generalize-ceph_x_encrypt_offset-and-ceph_x_.patch
+Patch1000400: 1400-libceph-introduce-ceph_crypto_key_prepare.patch
+Patch1000401: 1401-libceph-add-support-for-CEPH_CRYPTO_AES256KRB5.patch
+Patch1000402: 1402-libceph-adapt-ceph_x_challenge_blob-hashing-and-msgr.patch
+Patch1000403: 1403-crypto-krb5-use-kfree_sensitive-for-derived-key-buff.patch
+Patch1000404: 1404-nvmet-Introduce-nvmet_req_transfer_len.patch
+Patch1000405: 1405-nvme-Add-the-DHCHAP-maximum-HD-IDs.patch
+Patch1000406: 1406-nvmet-auth-validate-reply-message-payload-bounds-aga.patch
+Patch1000407: 1407-nvmet-auth-reject-short-AUTH_RECEIVE-buffers.patch
+Patch1000408: 1408-nvme-auth-use-crypto_memneq-for-DH-HMAC-CHAP-respons.patch
+Patch1000409: 1409-nvmet-auth-zero-the-AUTH_RECEIVE-response-buffer.patch
+Patch1000410: 1410-nvmet-fix-heap-out-of-bounds-read-in-nvmet_auth_nego.patch
+Patch1000411: 1411-nvmet-auth-fix-out-of-bounds-write-in-nvmet_auth_cha.patch
+Patch1000412: 1412-net-sched-cls_api-Handle-TC_ACT_CONSUMED-in-tcf_qeve.patch
+Patch1000413: 1413-netfilter-ipset-drop-logically-empty-buckets-in-mtyp.patch
+Patch1000414: 1414-netfilter-nf_tables-always-walk-all-pending-catchall.patch
+Patch1000415: 1415-ipv6-rpl-reserve-mac_len-headroom-when-recompressed-.patch
+Patch1000416: 1416-netfilter-nf_tables-unconditionally-bump-set-nelems-.patch
+Patch1000417: 1417-netfilter-xt_IDLETIMER-reject-rev0-reuse-of-ALARM-ti.patch
+Patch1000418: 1418-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2513,6 +2560,52 @@ ApplyOptionalPatch 1369-ipv4-validate-checksum_start-before-completing-check.pat
 ApplyOptionalPatch 1370-ipv6-exthdrs-get-rid-of-indirect-calls-in-ip6_parse_.patch
 ApplyOptionalPatch 1371-ipv6-exthdrs-refresh-nh-after-handling-HAO-option.patch
 ApplyOptionalPatch 1372-ipv6-exthdrs-refresh-nh-pointer-after-ipv6_hop_jumbo.patch
+ApplyOptionalPatch 1373-x86-bugs-Make-Safe-RET-robust-against-interrupt-inje.patch
+ApplyOptionalPatch 1374-lib-scatterlist-Add-SG_MITER_LOCAL-and-use-it.patch
+ApplyOptionalPatch 1375-crypto-krb5-Add-some-constants-out-of-sunrpc-headers.patch
+ApplyOptionalPatch 1376-crypto-Add-krb5enc-hash-and-cipher-AEAD-algorithm.patch
+ApplyOptionalPatch 1377-crypto-krb5enc-fix-sleepable-flag-handling-in-encryp.patch
+ApplyOptionalPatch 1378-crypto-krb5enc-fix-async-decrypt-skipping-hash-verif.patch
+ApplyOptionalPatch 1379-crypto-krb5-Test-manager-data.patch
+ApplyOptionalPatch 1380-crypto-krb5-Implement-Kerberos-crypto-core.patch
+ApplyOptionalPatch 1381-crypto-krb5-Add-an-API-to-query-the-layout-of-the-cr.patch
+ApplyOptionalPatch 1382-crypto-krb5-Add-an-API-to-alloc-and-prepare-a-crypto.patch
+ApplyOptionalPatch 1383-crypto-krb5-Add-an-API-to-perform-requests.patch
+ApplyOptionalPatch 1384-crypto-krb5-Provide-infrastructure-and-key-derivatio.patch
+ApplyOptionalPatch 1385-crypto-krb5-Implement-the-Kerberos5-rfc3961-key-deri.patch
+ApplyOptionalPatch 1386-crypto-krb5-Provide-RFC3961-setkey-packaging-functio.patch
+ApplyOptionalPatch 1387-crypto-krb5-Implement-the-Kerberos5-rfc3961-encrypt-.patch
+ApplyOptionalPatch 1388-crypto-krb5-Implement-the-Kerberos5-rfc3961-get_mic-.patch
+ApplyOptionalPatch 1389-crypto-krb5-Use-SG-miter-instead-of-doing-it-by-hand.patch
+ApplyOptionalPatch 1390-crypto-krb5-Fix-change-to-use-SG-miter-to-use-offset.patch
+ApplyOptionalPatch 1391-crypto-krb5-Implement-the-AES-enctypes-from-rfc3962.patch
+ApplyOptionalPatch 1392-crypto-krb5-Implement-the-AES-enctypes-from-rfc8009.patch
+ApplyOptionalPatch 1393-crypto-krb5-filter-out-async-aead-implementations-at.patch
+ApplyOptionalPatch 1394-crypto-krb5-Implement-the-Camellia-enctypes-from-rfc.patch
+ApplyOptionalPatch 1395-crypto-krb5-Implement-crypto-self-testing.patch
+ApplyOptionalPatch 1396-crypto-krb5-Fix-memory-leak-in-krb5_test_one_prf.patch
+ApplyOptionalPatch 1397-libceph-Remove-unused-ceph_crypto_key_encode.patch
+ApplyOptionalPatch 1398-libceph-define-and-enforce-CEPH_MAX_KEY_LEN.patch
+ApplyOptionalPatch 1399-libceph-generalize-ceph_x_encrypt_offset-and-ceph_x_.patch
+ApplyOptionalPatch 1400-libceph-introduce-ceph_crypto_key_prepare.patch
+ApplyOptionalPatch 1401-libceph-add-support-for-CEPH_CRYPTO_AES256KRB5.patch
+ApplyOptionalPatch 1402-libceph-adapt-ceph_x_challenge_blob-hashing-and-msgr.patch
+ApplyOptionalPatch 1403-crypto-krb5-use-kfree_sensitive-for-derived-key-buff.patch
+ApplyOptionalPatch 1404-nvmet-Introduce-nvmet_req_transfer_len.patch
+ApplyOptionalPatch 1405-nvme-Add-the-DHCHAP-maximum-HD-IDs.patch
+ApplyOptionalPatch 1406-nvmet-auth-validate-reply-message-payload-bounds-aga.patch
+ApplyOptionalPatch 1407-nvmet-auth-reject-short-AUTH_RECEIVE-buffers.patch
+ApplyOptionalPatch 1408-nvme-auth-use-crypto_memneq-for-DH-HMAC-CHAP-respons.patch
+ApplyOptionalPatch 1409-nvmet-auth-zero-the-AUTH_RECEIVE-response-buffer.patch
+ApplyOptionalPatch 1410-nvmet-fix-heap-out-of-bounds-read-in-nvmet_auth_nego.patch
+ApplyOptionalPatch 1411-nvmet-auth-fix-out-of-bounds-write-in-nvmet_auth_cha.patch
+ApplyOptionalPatch 1412-net-sched-cls_api-Handle-TC_ACT_CONSUMED-in-tcf_qeve.patch
+ApplyOptionalPatch 1413-netfilter-ipset-drop-logically-empty-buckets-in-mtyp.patch
+ApplyOptionalPatch 1414-netfilter-nf_tables-always-walk-all-pending-catchall.patch
+ApplyOptionalPatch 1415-ipv6-rpl-reserve-mac_len-headroom-when-recompressed-.patch
+ApplyOptionalPatch 1416-netfilter-nf_tables-unconditionally-bump-set-nelems-.patch
+ApplyOptionalPatch 1417-netfilter-xt_IDLETIMER-reject-rev0-reuse-of-ALARM-ti.patch
+ApplyOptionalPatch 1418-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4629,6 +4722,57 @@ fi
 #
 #
 %changelog
+* Sat Oct 31 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+27.2.el9_6_ciq
+- configs: set krb5 and krb5 crypto for RFC3961 simplified profile (Jonathan Maple) [ciqres]
+
+* Fri Oct 30 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+27.1.el9_6_ciq
+- ipv4: free inet_opt and ireq_opt after an RCU grace period (Brett Mastbergen) [ciqres] {CVE-2026-98432}
+- netfilter: xt_IDLETIMER: reject rev0 reuse of ALARM timer labels (Brett Mastbergen) [ciqres] {CVE-2026-23274}
+- netfilter: nf_tables: unconditionally bump set->nelems before insertion (Brett Mastbergen) [ciqres] {CVE-2026-23272}
+- ipv6: rpl: reserve mac_len headroom when recompressed SRH grows (Brett Mastbergen) [ciqres] {CVE-2026-43501}
+- netfilter: nf_tables: always walk all pending catchall elements (Brett Mastbergen) [ciqres] {CVE-2026-23278}
+- netfilter: ipset: drop logically empty buckets in mtype_del (Brett Mastbergen) [ciqres] {CVE-2026-31418}
+- net/sched: cls_api: Handle TC_ACT_CONSUMED in tcf_qevent_handle (Brett Mastbergen) [ciqres] {CVE-2026-64530}
+- nvmet-auth: fix out-of-bounds write in nvmet_auth_challenge() (Brett Mastbergen) [ciqres] {CVE-2026-98725}
+- nvmet: fix heap out-of-bounds read in nvmet_auth_negotiate() (Brett Mastbergen) [ciqres] {CVE-2026-90230}
+- nvmet-auth: zero the AUTH_RECEIVE response buffer (Brett Mastbergen) [ciqres] {CVE-2026-80791}
+- nvme-auth: use crypto_memneq for DH-HMAC-CHAP response comparison (Brett Mastbergen) [ciqres]
+- nvmet-auth: reject short AUTH_RECEIVE buffers (Brett Mastbergen) [ciqres] {CVE-2026-72130}
+- nvmet-auth: validate reply message payload bounds against transfer length (Brett Mastbergen) [ciqres] {CVE-2026-64319}
+- nvme: Add the DHCHAP maximum HD IDs (Brett Mastbergen) [ciqres] {CVE-2026-90230}
+- nvmet: Introduce nvmet_req_transfer_len() (Brett Mastbergen) [ciqres] {CVE-2026-72130}
+- crypto: krb5 - use kfree_sensitive() for derived key buffers (Jonathan Maple) [ciqres] {CVE-2026-80924}
+- libceph: adapt ceph_x_challenge_blob hashing and msgr1 message signing (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- libceph: add support for CEPH_CRYPTO_AES256KRB5 (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- libceph: introduce ceph_crypto_key_prepare() (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- libceph: generalize ceph_x_encrypt_offset() and ceph_x_encrypt_buflen() (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- libceph: define and enforce CEPH_MAX_KEY_LEN (Jonathan Maple) [ciqres] {CVE-2026-43304}
+- libceph: Remove unused ceph_crypto_key_encode (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto: krb5 - Fix memory leak in krb5_test_one_prf() (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Implement crypto self-testing (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Implement the Camellia enctypes from rfc6803 (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto: krb5 - filter out async aead implementations at alloc (Jonathan Maple) [ciqres] {CVE-2026-64439}
+- crypto/krb5: Implement the AES enctypes from rfc8009 (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Implement the AES enctypes from rfc3962 (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Fix change to use SG miter to use offset (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto: krb5 - Use SG miter instead of doing it by hand (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Implement the Kerberos5 rfc3961 get_mic and verify_mic (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Implement the Kerberos5 rfc3961 encrypt and decrypt functions (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Provide RFC3961 setkey packaging functions (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Implement the Kerberos5 rfc3961 key derivation (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Provide infrastructure and key derivation (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Add an API to perform requests (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Add an API to alloc and prepare a crypto object (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Add an API to query the layout of the crypto section (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Implement Kerberos crypto core (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Test manager data (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto: krb5enc - fix async decrypt skipping hash verification (Jonathan Maple) [ciqres] {CVE-2026-31719}
+- crypto: krb5enc - fix sleepable flag handling in encrypt dispatch (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto: Add 'krb5enc' hash and cipher AEAD algorithm (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- crypto/krb5: Add some constants out of sunrpc headers (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- lib/scatterlist: Add SG_MITER_LOCAL and use it (Jonathan Maple) [ciqres] {CVE-2025-30156}
+- x86/bugs: Make Safe-RET robust against interrupt injection (Brett Mastbergen) [ciqres] {CVE-2026-68480}
+
 * Wed Oct 21 2026 Brett Mastbergen <bmastbergen@ciq.com> - 5.14.0-570.60.1+26.1.el9_6_ciq
 - ipv6: exthdrs: refresh nh pointer after ipv6_hop_jumbo() (Brett Mastbergen) [ciqres] {CVE-2026-63924}
 - ipv6: exthdrs: refresh nh after handling HAO option (Brett Mastbergen) [ciqres] {CVE-2026-63922}

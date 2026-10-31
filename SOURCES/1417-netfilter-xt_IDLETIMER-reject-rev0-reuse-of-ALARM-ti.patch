@@ -1,0 +1,57 @@
+From d8c0d6d5e9a87a1a3baecb00867219bd55a5eac4 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Fri, 30 Oct 2026 08:12:38 -0400
+Subject: [PATCH] netfilter: xt_IDLETIMER: reject rev0 reuse of ALARM timer
+ labels
+
+jira VULN-178727
+cve CVE-2026-23274
+commit-author Yuan Tan <tanyuan98@outlook.com>
+commit 329f0b9b48ee6ab59d1ab72fef55fe8c6463a6cf
+
+IDLETIMER revision 0 rules reuse existing timers by label and always call
+mod_timer() on timer->timer.
+
+If the label was created first by revision 1 with XT_IDLETIMER_ALARM,
+the object uses alarm timer semantics and timer->timer is never initialized.
+Reusing that object from revision 0 causes mod_timer() on an uninitialized
+timer_list, triggering debugobjects warnings and possible panic when
+panic_on_warn=1.
+
+Fix this by rejecting revision 0 rule insertion when an existing timer with
+the same label is of ALARM type.
+
+Fixes: 68983a354a65 ("netfilter: xtables: Add snapshot of hardidletimer target")
+Co-developed-by: Yifan Wu <yifanwucs@gmail.com>
+	Signed-off-by: Yifan Wu <yifanwucs@gmail.com>
+Co-developed-by: Juefei Pu <tomapufckgml@gmail.com>
+	Signed-off-by: Juefei Pu <tomapufckgml@gmail.com>
+	Signed-off-by: Yuan Tan <tanyuan98@outlook.com>
+	Signed-off-by: Xin Liu <dstsmallbird@foxmail.com>
+	Signed-off-by: Florian Westphal <fw@strlen.de>
+(cherry picked from commit 329f0b9b48ee6ab59d1ab72fef55fe8c6463a6cf)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/netfilter/xt_IDLETIMER.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/net/netfilter/xt_IDLETIMER.c b/net/netfilter/xt_IDLETIMER.c
+index 8dbf5b1a7d7c6..9c28174271009 100644
+--- a/net/netfilter/xt_IDLETIMER.c
++++ b/net/netfilter/xt_IDLETIMER.c
+@@ -320,6 +320,12 @@ static int idletimer_tg_checkentry(const struct xt_tgchk_param *par)
+ 
+ 	info->timer = __idletimer_tg_find_by_label(info->label);
+ 	if (info->timer) {
++		if (info->timer->timer_type & XT_IDLETIMER_ALARM) {
++			pr_debug("Adding/Replacing rule with same label and different timer type is not allowed\n");
++			mutex_unlock(&list_mutex);
++			return -EINVAL;
++		}
++
+ 		info->timer->refcnt++;
+ 		mod_timer(&info->timer->timer,
+ 			  msecs_to_jiffies(info->timeout * 1000) + jiffies);
+-- 
+2.52.0
+

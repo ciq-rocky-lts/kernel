@@ -1,0 +1,82 @@
+From 8cbc9343c7544275b510ffae530d6a31053fb124 Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Wed, 7 Oct 2026 12:51:00 -0400
+Subject: [PATCH] crypto: krb5 - Use SG miter instead of doing it by hand
+
+jira VULN-203242
+cve-pre CVE-2025-30156
+commit-author Herbert Xu <herbert@gondor.apana.org.au>
+commit da6f9bf40ac267b5c720694a817beea84fa40f77
+
+The function crypto_shash_update_sg iterates through an SG by
+hand.  It fails to handle corner cases such as SG entries longer
+than a page.  Fix this by using the SG iterator.
+
+Fixes: 348f5669d1f6 ("crypto/krb5: Implement the Kerberos5 rfc3961 get_mic and verify_mic")
+	Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+(cherry picked from commit da6f9bf40ac267b5c720694a817beea84fa40f77)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ crypto/krb5/rfc3961_simplified.c | 37 ++++++++++++++------------------
+ 1 file changed, 16 insertions(+), 21 deletions(-)
+
+diff --git a/crypto/krb5/rfc3961_simplified.c b/crypto/krb5/rfc3961_simplified.c
+index c1dcb0dd3a00a..79180d28baa9f 100644
+--- a/crypto/krb5/rfc3961_simplified.c
++++ b/crypto/krb5/rfc3961_simplified.c
+@@ -67,9 +67,9 @@
+ #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+ 
+ #include <linux/random.h>
++#include <linux/scatterlist.h>
+ #include <linux/skbuff.h>
+ #include <linux/slab.h>
+-#include <linux/highmem.h>
+ #include <linux/lcm.h>
+ #include <linux/rtnetlink.h>
+ #include <crypto/authenc.h>
+@@ -83,26 +83,21 @@
+ int crypto_shash_update_sg(struct shash_desc *desc, struct scatterlist *sg,
+ 			   size_t offset, size_t len)
+ {
+-	do {
+-		int ret;
+-
+-		if (offset < sg->length) {
+-			struct page *page = sg_page(sg);
+-			void *p = kmap_local_page(page);
+-			void *q = p + sg->offset + offset;
+-			size_t seg = min_t(size_t, len, sg->length - offset);
+-
+-			ret = crypto_shash_update(desc, q, seg);
+-			kunmap_local(p);
+-			if (ret < 0)
+-				return ret;
+-			len -= seg;
+-			offset = 0;
+-		} else {
+-			offset -= sg->length;
+-		}
+-	} while (len > 0 && (sg = sg_next(sg)));
+-	return 0;
++	struct sg_mapping_iter miter;
++	size_t i, n;
++	int ret = 0;
++
++	sg_miter_start(&miter, sg, sg_nents(sg),
++		       SG_MITER_FROM_SG | SG_MITER_LOCAL);
++	for (i = 0; i < len; i += n) {
++		sg_miter_next(&miter);
++		n = min(miter.length, len - i);
++		ret = crypto_shash_update(desc, miter.addr, n);
++		if (ret < 0)
++			break;
++	}
++	sg_miter_stop(&miter);
++	return ret;
+ }
+ 
+ static int rfc3961_do_encrypt(struct crypto_sync_skcipher *tfm, void *iv,
+-- 
+2.52.0
+

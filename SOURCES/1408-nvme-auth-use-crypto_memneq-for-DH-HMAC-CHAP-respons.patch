@@ -1,0 +1,77 @@
+From bd05a4375c7d073bfb05b78e5664b2a04fc81c77 Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Fri, 23 Oct 2026 11:12:54 -0400
+Subject: [PATCH] nvme-auth: use crypto_memneq for DH-HMAC-CHAP response
+ comparison
+
+commit-author Xixin Liu <liuxixin@kylinos.cn>
+commit 3a6d89836ab09d53f4c32c57588689a378ce4363
+upstream-diff crypto_memneq is in crypto/algapi.h in this kernel
+
+DH-HMAC-CHAP authentication compares HMAC response digests with memcmp().
+Standard memcmp() may stop at the first differing byte, which can leak
+timing information to a remote attacker and allow incremental recovery
+of the expected digest.
+
+Use crypto_memneq() for constant-time comparison on both the host path
+that validates the controller Success1 response and the target path that
+validates the host Reply digest.  Other memcmp() uses in the NVMe auth
+code (e.g. fixed string prefix checks) are not security-sensitive and
+are left unchanged.
+
+	Signed-off-by: Xixin Liu <liuxixin@kylinos.cn>
+	Reviewed-by: Hannes Reinecke <hare@kernel.org>
+	Reviewed-by: Christoph Hellwig <hch@lst.de>
+	Signed-off-by: Keith Busch <kbusch@kernel.org>
+(cherry picked from commit 3a6d89836ab09d53f4c32c57588689a378ce4363)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ drivers/nvme/host/auth.c               | 3 ++-
+ drivers/nvme/target/fabrics-cmd-auth.c | 3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/nvme/host/auth.c b/drivers/nvme/host/auth.c
+index 371e14f0a2039..fa1ac099a144c 100644
+--- a/drivers/nvme/host/auth.c
++++ b/drivers/nvme/host/auth.c
+@@ -9,6 +9,7 @@
+ #include <asm/unaligned.h>
+ #include <crypto/hash.h>
+ #include <crypto/dh.h>
++#include <crypto/algapi.h>
+ #include "nvme.h"
+ #include "fabrics.h"
+ #include <linux/nvme-auth.h>
+@@ -365,7 +366,7 @@ static int nvme_auth_process_dhchap_success1(struct nvme_ctrl *ctrl,
+ 		return 0;
+ 
+ 	/* Validate controller response */
+-	if (memcmp(chap->response, data->rval, data->hl)) {
++	if (crypto_memneq(chap->response, data->rval, data->hl)) {
+ 		dev_dbg(ctrl->device, "%s: qid %d ctrl response %*ph\n",
+ 			__func__, chap->qid, (int)chap->hash_len, data->rval);
+ 		dev_dbg(ctrl->device, "%s: qid %d host response %*ph\n",
+diff --git a/drivers/nvme/target/fabrics-cmd-auth.c b/drivers/nvme/target/fabrics-cmd-auth.c
+index 07f2581529d53..2fab7f59ee704 100644
+--- a/drivers/nvme/target/fabrics-cmd-auth.c
++++ b/drivers/nvme/target/fabrics-cmd-auth.c
+@@ -10,6 +10,7 @@
+ #include <linux/nvme-auth.h>
+ #include <crypto/hash.h>
+ #include <crypto/kpp.h>
++#include <crypto/algapi.h>
+ #include "nvmet.h"
+ 
+ static void nvmet_auth_expired_work(struct work_struct *work)
+@@ -154,7 +155,7 @@ static u8 nvmet_auth_reply(struct nvmet_req *req, void *d, u32 tl)
+ 		return NVME_AUTH_DHCHAP_FAILURE_FAILED;
+ 	}
+ 
+-	if (memcmp(data->rval, response, data->hl)) {
++	if (crypto_memneq(data->rval, response, data->hl)) {
+ 		pr_info("ctrl %d qid %d host response mismatch\n",
+ 			ctrl->cntlid, req->sq->qid);
+ 		kfree(response);
+-- 
+2.52.0
+

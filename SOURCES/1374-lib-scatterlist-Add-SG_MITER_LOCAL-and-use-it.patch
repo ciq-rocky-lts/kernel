@@ -1,0 +1,87 @@
+From 25e54356a73ac8618c440fdb14548c6fa215036d Mon Sep 17 00:00:00 2001
+From: Jonathan Maple <jmaple@ciq.com>
+Date: Wed, 7 Oct 2026 17:32:13 -0400
+Subject: [PATCH] lib/scatterlist: Add SG_MITER_LOCAL and use it
+
+jira VULN-203242
+cve-pre CVE-2025-30156
+commit-author Herbert Xu <herbert@gondor.apana.org.au>
+commit fc8d5bba61ad8087af9a56337a7a297af6b46129
+
+Add kmap_local support to the scatterlist iterator.  Use it for
+all the helper functions in lib/scatterlist.
+
+	Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+(cherry picked from commit fc8d5bba61ad8087af9a56337a7a297af6b46129)
+Signed-off-by: Jonathan Maple <jmaple@ciq.com>
+---
+ include/linux/scatterlist.h |  1 +
+ lib/scatterlist.c           | 12 ++++++++----
+ 2 files changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/include/linux/scatterlist.h b/include/linux/scatterlist.h
+index e61d164622db4..f00c60f4f3b90 100644
+--- a/include/linux/scatterlist.h
++++ b/include/linux/scatterlist.h
+@@ -671,6 +671,7 @@ sg_page_iter_dma_address(struct sg_dma_page_iter *dma_iter)
+ #define SG_MITER_ATOMIC		(1 << 0)	 /* use kmap_atomic */
+ #define SG_MITER_TO_SG		(1 << 1)	/* flush back to phys on unmap */
+ #define SG_MITER_FROM_SG	(1 << 2)	/* nop */
++#define SG_MITER_LOCAL		(1 << 3)	 /* use kmap_local */
+ 
+ struct sg_mapping_iter {
+ 	/* the following three fields can be accessed directly */
+diff --git a/lib/scatterlist.c b/lib/scatterlist.c
+index 419db10190dd0..503fbf641f1ec 100644
+--- a/lib/scatterlist.c
++++ b/lib/scatterlist.c
+@@ -874,7 +874,7 @@ EXPORT_SYMBOL(sg_miter_skip);
+  *   @miter->addr and @miter->length point to the current mapping.
+  *
+  * Context:
+- *   May sleep if !SG_MITER_ATOMIC.
++ *   May sleep if !SG_MITER_ATOMIC && !SG_MITER_LOCAL.
+  *
+  * Returns:
+  *   true if @miter contains the next mapping.  false if end of sg
+@@ -896,6 +896,8 @@ bool sg_miter_next(struct sg_mapping_iter *miter)
+ 
+ 	if (miter->__flags & SG_MITER_ATOMIC)
+ 		miter->addr = kmap_atomic(miter->page) + miter->__offset;
++	else if (miter->__flags & SG_MITER_LOCAL)
++		miter->addr = kmap_local_page(miter->page) + miter->__offset;
+ 	else
+ 		miter->addr = kmap(miter->page) + miter->__offset;
+ 
+@@ -931,7 +933,9 @@ void sg_miter_stop(struct sg_mapping_iter *miter)
+ 		if (miter->__flags & SG_MITER_ATOMIC) {
+ 			WARN_ON_ONCE(!pagefault_disabled());
+ 			kunmap_atomic(miter->addr);
+-		} else
++		} else if (miter->__flags & SG_MITER_LOCAL)
++			kunmap_local(miter->addr);
++		else
+ 			kunmap(miter->page);
+ 
+ 		miter->page = NULL;
+@@ -960,7 +964,7 @@ size_t sg_copy_buffer(struct scatterlist *sgl, unsigned int nents, void *buf,
+ {
+ 	unsigned int offset = 0;
+ 	struct sg_mapping_iter miter;
+-	unsigned int sg_flags = SG_MITER_ATOMIC;
++	unsigned int sg_flags = SG_MITER_LOCAL;
+ 
+ 	if (to_buffer)
+ 		sg_flags |= SG_MITER_FROM_SG;
+@@ -1075,7 +1079,7 @@ size_t sg_zero_buffer(struct scatterlist *sgl, unsigned int nents,
+ {
+ 	unsigned int offset = 0;
+ 	struct sg_mapping_iter miter;
+-	unsigned int sg_flags = SG_MITER_ATOMIC | SG_MITER_TO_SG;
++	unsigned int sg_flags = SG_MITER_LOCAL | SG_MITER_TO_SG;
+ 
+ 	sg_miter_start(&miter, sgl, nents, sg_flags);
+ 
+-- 
+2.52.0
+
