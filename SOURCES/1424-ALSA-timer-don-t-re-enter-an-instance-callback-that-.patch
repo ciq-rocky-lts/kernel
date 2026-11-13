@@ -1,0 +1,72 @@
+From 2b04a50b91a9f057362edb7f5401ffb799bc38a6 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Wed, 4 Nov 2026 06:46:41 +0000
+Subject: [PATCH] ALSA: timer: don't re-enter an instance callback that is
+ still running
+
+jira VULN-199420
+cve CVE-2026-68200
+commit-author Norbert Szetei <norbert@doyensec.com>
+commit 70d28bfcd6224eed75986b3b987b997e59643fa4
+
+The userspace-driven timer (utimer) TRIGGER ioctl calls
+snd_timer_interrupt() directly with no serialization, so two threads
+triggering the same utimer can run snd_timer_interrupt() on one
+snd_timer concurrently.
+
+snd_timer_process_callbacks() drops timer->lock around each instance
+callback and marks the in-flight callback with the single
+SNDRV_TIMER_IFLG_CALLBACK bit; snd_timer_close_locked() waits on that
+bit to drain an in-flight callback before freeing the instance. The bit
+cannot represent two concurrent callbacks: when a second interrupt
+re-queues an instance whose callback is still running, both run at once,
+the first to finish clears the bit, and the close-path drain then frees
+the instance (and its callback_data) while the other callback is still
+live - a use-after-free reachable by any user able to open
+/dev/snd/timer, both via a user timer instance and via a sequencer queue
+timer bound to the utimer.
+
+snd_timer_interrupt() sets IFLG_CALLBACK before dropping timer->lock, so
+a concurrent interrupt already observes it under the lock. Skip
+re-queuing an instance (and its slaves) to the ack/sack list while its
+callback is in flight; the accumulated pticks are delivered on the next
+tick, so no event is lost.
+
+Fixes: 37745918e0e7 ("ALSA: timer: Introduce virtual userspace-driven timers")
+	Cc: stable@vger.kernel.org
+	Suggested-by: Takashi Iwai <tiwai@suse.de>
+Assisted-by: Claude:claude-opus-4-8
+	Signed-off-by: Norbert Szetei <norbert@doyensec.com>
+	Signed-off-by: Takashi Iwai <tiwai@suse.de>
+Link: https://patch.msgid.link/6F9B6501-8E65-4265-B02C-7EFB240D1664@doyensec.com
+(cherry picked from commit 70d28bfcd6224eed75986b3b987b997e59643fa4)
+Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ sound/core/timer.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/sound/core/timer.c b/sound/core/timer.c
+index 668c40bac318d..f4d0bbe7ee295 100644
+--- a/sound/core/timer.c
++++ b/sound/core/timer.c
+@@ -871,12 +871,15 @@ void snd_timer_interrupt(struct snd_timer * timer, unsigned long ticks_left)
+ 			ack_list_head = &timer->ack_list_head;
+ 		else
+ 			ack_list_head = &timer->sack_list_head;
+-		if (list_empty(&ti->ack_list))
++		/* don't requeue an instance whose callback is still running */
++		if (list_empty(&ti->ack_list) &&
++		    !(ti->flags & SNDRV_TIMER_IFLG_CALLBACK))
+ 			list_add_tail(&ti->ack_list, ack_list_head);
+ 		list_for_each_entry(ts, &ti->slave_active_head, active_list) {
+ 			ts->pticks = ti->pticks;
+ 			ts->resolution = resolution;
+-			if (list_empty(&ts->ack_list))
++			if (list_empty(&ts->ack_list) &&
++			    !(ts->flags & SNDRV_TIMER_IFLG_CALLBACK))
+ 				list_add_tail(&ts->ack_list, ack_list_head);
+ 		}
+ 	}
+-- 
+2.52.0
+

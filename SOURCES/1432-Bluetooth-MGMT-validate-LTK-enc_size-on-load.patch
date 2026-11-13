@@ -1,0 +1,45 @@
+From 7df9e67037aaa21f529a1a6903b20e6c95f00973 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 2 Nov 2026 06:23:52 +0000
+Subject: [PATCH] Bluetooth: MGMT: validate LTK enc_size on load
+
+jira VULN-183648
+cve CVE-2026-43020
+commit-author Keenan Dong <keenanat2000@gmail.com>
+commit b8dbe9648d69059cfe3a28917bfbf7e61efd7f15
+
+Load Long Term Keys stores the user-provided enc_size and later uses
+it to size fixed-size stack operations when replying to LE LTK
+requests. An enc_size larger than the 16-byte key buffer can therefore
+overflow the reply stack buffer.
+
+Reject oversized enc_size values while validating the management LTK
+record so invalid keys never reach the stored key state.
+
+Fixes: 346af67b8d11 ("Bluetooth: Add MGMT handlers for dealing with SMP LTK's")
+	Reported-by: Keenan Dong <keenanat2000@gmail.com>
+	Signed-off-by: Keenan Dong <keenanat2000@gmail.com>
+	Signed-off-by: Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+(cherry picked from commit b8dbe9648d69059cfe3a28917bfbf7e61efd7f15)
+Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ net/bluetooth/mgmt.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/net/bluetooth/mgmt.c b/net/bluetooth/mgmt.c
+index c5947ac9db1bf..8255927621f8f 100644
+--- a/net/bluetooth/mgmt.c
++++ b/net/bluetooth/mgmt.c
+@@ -7271,6 +7271,9 @@ static bool ltk_is_valid(struct mgmt_ltk_info *key)
+ 	if (key->initiator != 0x00 && key->initiator != 0x01)
+ 		return false;
+ 
++	if (key->enc_size > sizeof(key->val))
++		return false;
++
+ 	switch (key->addr.type) {
+ 	case BDADDR_LE_PUBLIC:
+ 		return true;
+-- 
+2.52.0
+

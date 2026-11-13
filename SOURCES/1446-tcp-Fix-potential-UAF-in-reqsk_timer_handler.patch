@@ -1,0 +1,51 @@
+From 7b3254a22d4068fa54a3693a0ffc5afc88400af6 Mon Sep 17 00:00:00 2001
+From: Shreeya Patel <spatel@ciq.com>
+Date: Wed, 11 Nov 2026 18:20:09 +0000
+Subject: [PATCH] tcp: Fix potential UAF in reqsk_timer_handler().
+
+jira VULN-227337
+cve CVE-2026-99270
+commit-author Kuniyuki Iwashima <kuniyu@google.com>
+commit 97c8a3c1f73d828de43a5a88e8a9a143efb2b661
+
+When TCP socket migration fails at inet_ehash_insert() in
+reqsk_timer_handler(), we jump to the no_ownership: label
+and free the new reqsk immediately with __reqsk_free().
+
+Thus, we must stop the new reqsk's timer before jumping to the
+label, but the timer might be missed since the cited commit,
+resulting in UAF.
+
+As we are in the original reqsk's timer context, we can safely
+call timer_delete_sync() for the new reqsk.
+
+Let's pass false to __inet_csk_reqsk_queue_drop() to stop
+the new reqsk's timer.
+
+Fixes: 83fccfc3940c ("inet: fix potential deadlock in reqsk_queue_unlink()")
+	Reported-by: Damiano Melotti <melotti@google.com>
+	Signed-off-by: Kuniyuki Iwashima <kuniyu@google.com>
+Link: https://patch.msgid.link/20260506035954.1563147-2-kuniyu@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 97c8a3c1f73d828de43a5a88e8a9a143efb2b661)
+	Signed-off-by: Shreeya Patel <spatel@ciq.com>
+---
+ net/ipv4/inet_connection_sock.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/ipv4/inet_connection_sock.c b/net/ipv4/inet_connection_sock.c
+index cf0ab5f7b2ae8..daa55f9bf19be 100644
+--- a/net/ipv4/inet_connection_sock.c
++++ b/net/ipv4/inet_connection_sock.c
+@@ -912,7 +912,7 @@ static void reqsk_timer_handler(struct timer_list *t)
+ 
+ 		if (!inet_ehash_insert(req_to_sk(nreq), req_to_sk(oreq), NULL)) {
+ 			/* delete timer */
+-			__inet_csk_reqsk_queue_drop(sk_listener, nreq, true);
++			__inet_csk_reqsk_queue_drop(sk_listener, nreq, false);
+ 			goto no_ownership;
+ 		}
+ 
+-- 
+2.52.0
+

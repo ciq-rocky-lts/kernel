@@ -171,8 +171,8 @@ Summary: The Linux kernel
 # This is needed to do merge window version magic
 %define patchlevel 14
 
-%define ciq_patch_version 27
-%define ciq_build_id 2
+%define ciq_patch_version 28
+%define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_6_ciq
 
@@ -1426,6 +1426,36 @@ Patch1000415: 1415-ipv6-rpl-reserve-mac_len-headroom-when-recompressed-.patch
 Patch1000416: 1416-netfilter-nf_tables-unconditionally-bump-set-nelems-.patch
 Patch1000417: 1417-netfilter-xt_IDLETIMER-reject-rev0-reuse-of-ALARM-ti.patch
 Patch1000418: 1418-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
+#CIQ Patch Version: 570.60.1+28.1.el9_6_ciq
+Patch1000419: 1419-vxlan-do-not-reuse-cached-ip_hdr-value-after-skb_tun.patch
+Patch1000420: 1420-nvmet-fix-pre-auth-out-of-bounds-heap-read-in-Discov.patch
+Patch1000421: 1421-mac802154-llsec-add-skb_cow_data-before-in-place-cry.patch
+Patch1000422: 1422-blk-cgroup-fix-UAF-in-__blkcg_rstat_flush.patch
+Patch1000423: 1423-selinux-check-connect-related-permissions-on-TCP-Fas.patch
+Patch1000424: 1424-ALSA-timer-don-t-re-enter-an-instance-callback-that-.patch
+Patch1000425: 1425-scsi-libiscsi_tcp-Bound-SCSI-Response-data-segment-t.patch
+Patch1000426: 1426-crypto-tegra-fix-rctx-cryptlen-calculation-in-tegra_.patch
+Patch1000427: 1427-net-skbuff-propagate-shared-frag-marker-in-skb_zeroc.patch
+Patch1000428: 1428-netfilter-nfnetlink_queue-acquire-rcu_read_lock-in-i.patch
+Patch1000429: 1429-scsi-Revert-scsi-qla2xxx-Perform-lockless-command-co.patch
+Patch1000430: 1430-scsi-qla2xxx-Clear-cmds-after-chip-reset.patch
+Patch1000431: 1431-netfilter-nfnetlink_cthelper-fix-OOB-read-in-nfnl_ct.patch
+Patch1000432: 1432-Bluetooth-MGMT-validate-LTK-enc_size-on-load.patch
+Patch1000433: 1433-ALSA-6fire-fix-use-after-free-on-disconnect.patch
+Patch1000434: 1434-scsi-target-configfs-Bound-snprintf-return-in-tg_pt_.patch
+Patch1000435: 1435-ALSA-virtio-Validate-control-metadata-from-the-devic.patch
+Patch1000436: 1436-crypto-af_alg-Cap-AEAD-AD-length-to-0x80000000.patch
+Patch1000437: 1437-scsi-target-target_core_configfs-Add-length-check-to.patch
+Patch1000438: 1438-pfifo_tail_enqueue-Drop-new-packet-when-sch-limit-0.patch
+Patch1000439: 1439-net-sched-ets-Always-remove-class-from-active-list-b.patch
+Patch1000440: 1440-HID-wacom-fix-out-of-bounds-read-in-wacom_intuos_bt_.patch
+Patch1000441: 1441-KVM-nVMX-Hide-shadow-VMCS-right-after-VMCLEAR.patch
+Patch1000442: 1442-ALSA-usx2y-bound-the-hwdep-mmap-fault-offset.patch
+Patch1000443: 1443-scsi-qla2xxx-Bound-rsp_info_len-to-avoid-OOB-sense-d.patch
+Patch1000444: 1444-workqueue-Add-pool_workqueue-to-pending_pwqs-list-wh.patch
+Patch1000445: 1445-net-lock-the-socket-in-sock_gettstamp.patch
+Patch1000446: 1446-tcp-Fix-potential-UAF-in-reqsk_timer_handler.patch
+Patch1000447: 1447-inet-reject-unhashed-sockets-during-established-look.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2606,6 +2636,35 @@ ApplyOptionalPatch 1415-ipv6-rpl-reserve-mac_len-headroom-when-recompressed-.pat
 ApplyOptionalPatch 1416-netfilter-nf_tables-unconditionally-bump-set-nelems-.patch
 ApplyOptionalPatch 1417-netfilter-xt_IDLETIMER-reject-rev0-reuse-of-ALARM-ti.patch
 ApplyOptionalPatch 1418-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
+ApplyOptionalPatch 1419-vxlan-do-not-reuse-cached-ip_hdr-value-after-skb_tun.patch
+ApplyOptionalPatch 1420-nvmet-fix-pre-auth-out-of-bounds-heap-read-in-Discov.patch
+ApplyOptionalPatch 1421-mac802154-llsec-add-skb_cow_data-before-in-place-cry.patch
+ApplyOptionalPatch 1422-blk-cgroup-fix-UAF-in-__blkcg_rstat_flush.patch
+ApplyOptionalPatch 1423-selinux-check-connect-related-permissions-on-TCP-Fas.patch
+ApplyOptionalPatch 1424-ALSA-timer-don-t-re-enter-an-instance-callback-that-.patch
+ApplyOptionalPatch 1425-scsi-libiscsi_tcp-Bound-SCSI-Response-data-segment-t.patch
+ApplyOptionalPatch 1426-crypto-tegra-fix-rctx-cryptlen-calculation-in-tegra_.patch
+ApplyOptionalPatch 1427-net-skbuff-propagate-shared-frag-marker-in-skb_zeroc.patch
+ApplyOptionalPatch 1428-netfilter-nfnetlink_queue-acquire-rcu_read_lock-in-i.patch
+ApplyOptionalPatch 1429-scsi-Revert-scsi-qla2xxx-Perform-lockless-command-co.patch
+ApplyOptionalPatch 1430-scsi-qla2xxx-Clear-cmds-after-chip-reset.patch
+ApplyOptionalPatch 1431-netfilter-nfnetlink_cthelper-fix-OOB-read-in-nfnl_ct.patch
+ApplyOptionalPatch 1432-Bluetooth-MGMT-validate-LTK-enc_size-on-load.patch
+ApplyOptionalPatch 1433-ALSA-6fire-fix-use-after-free-on-disconnect.patch
+ApplyOptionalPatch 1434-scsi-target-configfs-Bound-snprintf-return-in-tg_pt_.patch
+ApplyOptionalPatch 1435-ALSA-virtio-Validate-control-metadata-from-the-devic.patch
+ApplyOptionalPatch 1436-crypto-af_alg-Cap-AEAD-AD-length-to-0x80000000.patch
+ApplyOptionalPatch 1437-scsi-target-target_core_configfs-Add-length-check-to.patch
+ApplyOptionalPatch 1438-pfifo_tail_enqueue-Drop-new-packet-when-sch-limit-0.patch
+ApplyOptionalPatch 1439-net-sched-ets-Always-remove-class-from-active-list-b.patch
+ApplyOptionalPatch 1440-HID-wacom-fix-out-of-bounds-read-in-wacom_intuos_bt_.patch
+ApplyOptionalPatch 1441-KVM-nVMX-Hide-shadow-VMCS-right-after-VMCLEAR.patch
+ApplyOptionalPatch 1442-ALSA-usx2y-bound-the-hwdep-mmap-fault-offset.patch
+ApplyOptionalPatch 1443-scsi-qla2xxx-Bound-rsp_info_len-to-avoid-OOB-sense-d.patch
+ApplyOptionalPatch 1444-workqueue-Add-pool_workqueue-to-pending_pwqs-list-wh.patch
+ApplyOptionalPatch 1445-net-lock-the-socket-in-sock_gettstamp.patch
+ApplyOptionalPatch 1446-tcp-Fix-potential-UAF-in-reqsk_timer_handler.patch
+ApplyOptionalPatch 1447-inet-reject-unhashed-sockets-during-established-look.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -4722,6 +4781,37 @@ fi
 #
 #
 %changelog
+* Thu Nov 12 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+28.1.el9_6_ciq
+- inet: reject unhashed sockets during established lookups (Jonathan Maple) [ciqres] {CVE-2026-99288}
+- tcp: Fix potential UAF in reqsk_timer_handler(). (Shreeya Patel) [ciqres] {CVE-2026-99270}
+- net: lock the socket in sock_gettstamp() (Brett Mastbergen) [ciqres] {CVE-2026-98276}
+- workqueue: Add pool_workqueue to pending_pwqs list when unplugging multiple inactive works (Shreeya Patel) [ciqres]
+- scsi: qla2xxx: Bound rsp_info_len to avoid OOB sense-data read (CIQ Kernel Automation) [ciqres] {CVE-2026-89846}
+- ALSA: usx2y: bound the hwdep mmap fault offset (CIQ Kernel Automation) [ciqres] {CVE-2026-74641}
+- KVM: nVMX: Hide shadow VMCS right after VMCLEAR (CIQ Kernel Automation) [ciqres] {CVE-2026-64562}
+- HID: wacom: fix out-of-bounds read in wacom_intuos_bt_irq (CIQ Kernel Automation) [ciqres] {CVE-2026-43051}
+- net/sched: ets: Always remove class from active list before deleting in ets_qdisc_change (CIQ Kernel Automation) [ciqres] {CVE-2025-71066}
+- pfifo_tail_enqueue: Drop new packet when sch->limit == 0 (CIQ Kernel Automation) [ciqres] {CVE-2025-21702}
+- scsi: target: target_core_configfs: Add length check to avoid buffer overflow (Hailey Mothershead) [ciqres] {CVE-2025-39998}
+- crypto: af_alg - Cap AEAD AD length to 0x80000000 (CIQ Kernel Automation) [ciqres] {CVE-2026-52972}
+- ALSA: virtio: Validate control metadata from the device (CIQ Kernel Automation) [ciqres] {CVE-2026-64490}
+- scsi: target: configfs: Bound snprintf() return in tg_pt_gp_members_show() (CIQ Kernel Automation) [ciqres] {CVE-2026-46149}
+- ALSA: 6fire: fix use-after-free on disconnect (CIQ Kernel Automation) [ciqres] {CVE-2026-31581}
+- Bluetooth: MGMT: validate LTK enc_size on load (CIQ Kernel Automation) [ciqres] {CVE-2026-43020}
+- netfilter: nfnetlink_cthelper: fix OOB read in nfnl_cthelper_dump_table() (CIQ Kernel Automation) [ciqres] {CVE-2026-43450}
+- scsi: qla2xxx: Clear cmds after chip reset (CIQ Kernel Automation) [ciqres] {CVE-2025-68745}
+- scsi: Revert "scsi: qla2xxx: Perform lockless command completion in abort path" (Hailey Mothershead) [ciqres] {CVE-2025-68818}
+- netfilter: nfnetlink_queue: acquire rcu_read_lock() in instance_destroy_rcu() (CIQ Kernel Automation) [ciqres] {CVE-2024-36286}
+- net: skbuff: propagate shared-frag marker in skb_zerocopy() (Hailey Mothershead) [ciqres] {CVE-2026-99284}
+- crypto: tegra - fix rctx->cryptlen calculation in tegra_gcm_do_one_req() (CIQ Kernel Automation) [ciqres] {CVE-2026-80522}
+- scsi: libiscsi_tcp: Bound SCSI Response data segment to the connection buffer (CIQ Kernel Automation) [ciqres] {CVE-2026-74556}
+- ALSA: timer: don't re-enter an instance callback that is still running (CIQ Kernel Automation) [ciqres] {CVE-2026-68200}
+- selinux: check connect-related permissions on TCP Fast Open (CIQ Kernel Automation) [ciqres] {CVE-2026-72243}
+- blk-cgroup: fix UAF in __blkcg_rstat_flush() (CIQ Kernel Automation) [ciqres] {CVE-2026-63802}
+- mac802154: llsec: add skb_cow_data() before in-place crypto (CIQ Kernel Automation) [ciqres] {CVE-2026-63831}
+- nvmet: fix pre-auth out-of-bounds heap read in Discovery Get Log Page (CIQ Kernel Automation) [ciqres] {CVE-2026-64320}
+- vxlan: do not reuse cached ip_hdr() value after skb_tunnel_check_pmtu() (CIQ Kernel Automation) [ciqres] {CVE-2026-63993}
+
 * Sat Oct 31 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-570.60.1+27.2.el9_6_ciq
 - configs: set krb5 and krb5 crypto for RFC3961 simplified profile (Jonathan Maple) [ciqres]
 
