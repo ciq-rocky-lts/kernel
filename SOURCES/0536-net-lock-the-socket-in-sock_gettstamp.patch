@@ -1,0 +1,249 @@
+From 9b5b9b92de16a1070ba893362790a28d4cda1e5a Mon Sep 17 00:00:00 2001
+From: Brett Mastbergen <bmastbergen@ciq.com>
+Date: Mon, 9 Nov 2026 13:51:33 -0500
+Subject: [PATCH] net: lock the socket in sock_gettstamp()
+
+jira VULN-219555
+cve CVE-2026-98276
+commit-author Eric Dumazet <edumazet@google.com>
+commit 9ed55f3dbef4f4adfe65eb03b0c35c53229a8490
+upstream-diff | upstream locks sock_gettstamp(), added by
+	c7cbdbf29f488 when it consolidated SIOCGSTAMP handling; this
+	tree predates that, so the same guard was applied to the four
+	predecessor getters sock_get_timestamp()/
+	sock_get_timestampns() (net/core/sock.c) and
+	compat_sock_get_timestamp()/compat_sock_get_timestampns()
+	(net/compat.c); nr_ioctl(), ax25_ioctl() and qrtr_ioctl() held
+	the socket lock across the getter and would self-deadlock on the
+	inner lock_sock(), so their SIOCGSTAMP cases were moved out
+	from under the protocol lock, matching upstream's end state;
+	no SIOCGSTAMPNS_NEW ioctl exists in this tree, SIOCGSTAMP/
+	SIOCGSTAMPNS race udp_lib_get_port() the same way.
+
+sk->sk_flags must only be changed while holding the socket lock,
+because sock_set_flag() and sock_reset_flag() use non atomic
+operations (__set_bit() and __clear_bit()).
+
+sock_gettstamp() is one of the last places where a bit of sk->sk_flags
+is changed from a syscall without owning the socket lock, through
+sock_enable_timestamp(sk, SOCK_TIMESTAMP).
+
+sk_set_memalloc() and sk_clear_memalloc() also change sk->sk_flags
+without the socket lock, but their callers (nbd, iscsi_tcp, nvme-tcp,
+sunrpc, wireguard) need a careful audit, this will be addressed in a
+separate patch.
+
+Jungwoo Lee and Wongi Lee reported an UDP socket use-after-free
+caused by this bug: a SIOCGSTAMPNS_NEW ioctl racing with bind()
+can cancel the SOCK_RCU_FREE bit that udp_lib_get_port() just set,
+because both threads perform a read-modify-write on the same word.
+
+  CPU 0 (bind)                        CPU 1 (SIOCGSTAMPNS_NEW)
+  --------------------------------    ----------------------------
+  read sk_flags = F                   read sk_flags = F
+  compute F | BIT(SOCK_RCU_FREE)      compute F | BIT(SOCK_TIMESTAMP)
+  store F | BIT(SOCK_RCU_FREE)
+  sk_add_node_rcu(sk, ...)
+                                      store F | BIT(SOCK_TIMESTAMP)
+
+After the lost update, SOCK_RCU_FREE is clear while the socket is
+visible to lockless UDP receive lookups. sk_destruct() then frees
+the socket immediately instead of waiting for a RCU grace period,
+while the receive path still holds a reference-less pointer to it:
+
+ BUG: KASAN: slab-use-after-free in ipv4_pktinfo_prepare+0x30/0x410
+ Read of size 8 at addr ffff888008806610 by task exploit/207
+ CPU: 0 UID: 1000 PID: 207 Comm: exploit Not tainted 6.12.95+ #1
+  ipv4_pktinfo_prepare+0x30/0x410
+  udp_queue_rcv_one_skb+0x51c/0x1180
+  udp_unicast_rcv_skb+0x109/0x350
+  ip_protocol_deliver_rcu+0x14b/0x310
+  ip_local_deliver_finish+0x29d/0x390
+  ip_local_deliver+0x24d/0x2a0
+
+Only grab the socket lock when SOCK_TIMESTAMP has to be set,
+to keep the common case lockless.
+
+Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
+	Reported-by: Jungwoo Lee <jwlee2217@gmail.com>
+	Reported-by: Wongi Lee <qw3rtyp0@gmail.com>
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+	Reviewed-by: Simon Horman <horms@kernel.org>
+Link: https://patch.msgid.link/20260915043055.3441600-1-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 9ed55f3dbef4f4adfe65eb03b0c35c53229a8490)
+	Signed-off-by: Brett Mastbergen <bmastbergen@ciq.com>
+---
+ net/ax25/af_ax25.c     | 16 ++++++++--------
+ net/compat.c           | 16 ++++++++++++++--
+ net/core/sock.c        | 16 ++++++++++++++--
+ net/netrom/af_netrom.c | 11 ++---------
+ net/qrtr/af_qrtr.c     |  8 +++++---
+ 5 files changed, 43 insertions(+), 24 deletions(-)
+
+diff --git a/net/ax25/af_ax25.c b/net/ax25/af_ax25.c
+index 15eca474ce093..3b34e611e7407 100644
+--- a/net/ax25/af_ax25.c
++++ b/net/ax25/af_ax25.c
+@@ -1685,6 +1685,14 @@ static int ax25_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+ 	void __user *argp = (void __user *)arg;
+ 	int res = 0;
+ 
++	switch (cmd) {
++	case SIOCGSTAMP:
++		return sock_get_timestamp(sk, argp);
++
++	case SIOCGSTAMPNS:
++		return sock_get_timestampns(sk, argp);
++	}
++
+ 	lock_sock(sk);
+ 	switch (cmd) {
+ 	case TIOCOUTQ: {
+@@ -1707,14 +1715,6 @@ static int ax25_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+ 		break;
+ 	}
+ 
+-	case SIOCGSTAMP:
+-		res = sock_get_timestamp(sk, argp);
+-		break;
+-
+-	case SIOCGSTAMPNS:
+-		res = sock_get_timestampns(sk, argp);
+-		break;
+-
+ 	case SIOCAX25ADDUID:	/* Add a uid to the uid/call map table */
+ 	case SIOCAX25DELUID:	/* Delete a uid from the uid/call map table */
+ 	case SIOCAX25GETUID: {
+diff --git a/net/compat.c b/net/compat.c
+index 4b6e052fe204c..df6a498f3b16d 100644
+--- a/net/compat.c
++++ b/net/compat.c
+@@ -377,8 +377,14 @@ int compat_sock_get_timestamp(struct sock *sk, struct timeval __user *userstamp)
+ 
+ 	ctv = (struct compat_timeval __user *) userstamp;
+ 	err = -ENOENT;
+-	if (!sock_flag(sk, SOCK_TIMESTAMP))
++	/* sk->sk_flags must only be changed under the socket lock,
++	 * because sock_set_flag() uses non atomic operations.
++	 */
++	if (!sock_flag(sk, SOCK_TIMESTAMP)) {
++		lock_sock(sk);
+ 		sock_enable_timestamp(sk, SOCK_TIMESTAMP);
++		release_sock(sk);
++	}
+ 	tv = ktime_to_timeval(sk->sk_stamp);
+ 	if (tv.tv_sec == -1)
+ 		return err;
+@@ -405,8 +411,14 @@ int compat_sock_get_timestampns(struct sock *sk, struct timespec __user *usersta
+ 
+ 	ctv = (struct compat_timespec __user *) userstamp;
+ 	err = -ENOENT;
+-	if (!sock_flag(sk, SOCK_TIMESTAMP))
++	/* sk->sk_flags must only be changed under the socket lock,
++	 * because sock_set_flag() uses non atomic operations.
++	 */
++	if (!sock_flag(sk, SOCK_TIMESTAMP)) {
++		lock_sock(sk);
+ 		sock_enable_timestamp(sk, SOCK_TIMESTAMP);
++		release_sock(sk);
++	}
+ 	ts = ktime_to_timespec(sk->sk_stamp);
+ 	if (ts.tv_sec == -1)
+ 		return err;
+diff --git a/net/core/sock.c b/net/core/sock.c
+index 08e0e9679f630..efb34e5032d3f 100644
+--- a/net/core/sock.c
++++ b/net/core/sock.c
+@@ -3113,8 +3113,14 @@ EXPORT_SYMBOL(__lock_sock_fast);
+ int sock_get_timestamp(struct sock *sk, struct timeval __user *userstamp)
+ {
+ 	struct timeval tv;
+-	if (!sock_flag(sk, SOCK_TIMESTAMP))
++	/* sk->sk_flags must only be changed under the socket lock,
++	 * because sock_set_flag() uses non atomic operations.
++	 */
++	if (!sock_flag(sk, SOCK_TIMESTAMP)) {
++		lock_sock(sk);
+ 		sock_enable_timestamp(sk, SOCK_TIMESTAMP);
++		release_sock(sk);
++	}
+ 	tv = ktime_to_timeval(sk->sk_stamp);
+ 	if (tv.tv_sec == -1)
+ 		return -ENOENT;
+@@ -3129,8 +3135,14 @@ EXPORT_SYMBOL(sock_get_timestamp);
+ int sock_get_timestampns(struct sock *sk, struct timespec __user *userstamp)
+ {
+ 	struct timespec ts;
+-	if (!sock_flag(sk, SOCK_TIMESTAMP))
++	/* sk->sk_flags must only be changed under the socket lock,
++	 * because sock_set_flag() uses non atomic operations.
++	 */
++	if (!sock_flag(sk, SOCK_TIMESTAMP)) {
++		lock_sock(sk);
+ 		sock_enable_timestamp(sk, SOCK_TIMESTAMP);
++		release_sock(sk);
++	}
+ 	ts = ktime_to_timespec(sk->sk_stamp);
+ 	if (ts.tv_sec == -1)
+ 		return -ENOENT;
+diff --git a/net/netrom/af_netrom.c b/net/netrom/af_netrom.c
+index 03f37c4e64fe4..1df81490396ac 100644
+--- a/net/netrom/af_netrom.c
++++ b/net/netrom/af_netrom.c
+@@ -1194,7 +1194,6 @@ static int nr_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+ {
+ 	struct sock *sk = sock->sk;
+ 	void __user *argp = (void __user *)arg;
+-	int ret;
+ 
+ 	switch (cmd) {
+ 	case TIOCOUTQ: {
+@@ -1221,16 +1220,10 @@ static int nr_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+ 	}
+ 
+ 	case SIOCGSTAMP:
+-		lock_sock(sk);
+-		ret = sock_get_timestamp(sk, argp);
+-		release_sock(sk);
+-		return ret;
++		return sock_get_timestamp(sk, argp);
+ 
+ 	case SIOCGSTAMPNS:
+-		lock_sock(sk);
+-		ret = sock_get_timestampns(sk, argp);
+-		release_sock(sk);
+-		return ret;
++		return sock_get_timestampns(sk, argp);
+ 
+ 	case SIOCGIFADDR:
+ 	case SIOCSIFADDR:
+diff --git a/net/qrtr/af_qrtr.c b/net/qrtr/af_qrtr.c
+index c0afcb7faa396..998431492e065 100644
+--- a/net/qrtr/af_qrtr.c
++++ b/net/qrtr/af_qrtr.c
+@@ -1145,6 +1145,11 @@ static int qrtr_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+ 	long len = 0;
+ 	int rc = 0;
+ 
++	switch (cmd) {
++	case SIOCGSTAMP:
++		return sock_get_timestamp(sk, argp);
++	}
++
+ 	lock_sock(sk);
+ 
+ 	switch (cmd) {
+@@ -1173,9 +1178,6 @@ static int qrtr_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+ 			break;
+ 		}
+ 		break;
+-	case SIOCGSTAMP:
+-		rc = sock_get_timestamp(sk, argp);
+-		break;
+ 	case SIOCADDRT:
+ 	case SIOCDELRT:
+ 	case SIOCSIFADDR:
+-- 
+2.52.0
+

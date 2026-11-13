@@ -45,7 +45,7 @@
 %define pkgrelease 372.32.1.el8_6
 
 # CIQ Versioning for the kernel
-%define ciq_patch_version 40
+%define ciq_patch_version 41
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el8_6_ciq
@@ -1270,6 +1270,19 @@ Patch0677: 0522-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
 Patch0678: 0523-net-macvlan-fix-memory-leaks-of-macvlan_common_newli.patch
 Patch0679: 0524-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
 Patch0680: 0525-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
+#CIQ Patch Version: 372.32.1+41.1.el8_6_ciq
+Patch0681: 0526-net-skbuff-propagate-shared-frag-marker-in-skb_zeroc.patch
+Patch0682: 0527-net-sched-ets-Always-remove-class-from-active-list-b.patch
+Patch0683: 0528-procfs-fix-missing-RCU-protection-when-reading-real_.patch
+Patch0684: 0529-KVM-nVMX-Hide-shadow-VMCS-right-after-VMCLEAR.patch
+Patch0685: 0530-ipvs-do-not-propagate-one-packet-flag-to-synced-conn.patch
+Patch0686: 0531-libceph-Reject-monmaps-advertising-zero-monitors.patch
+Patch0687: 0532-libceph-refresh-auth-authorizer_buf-_len-after-autho.patch
+Patch0688: 0533-ALSA-usx2y-bound-the-hwdep-mmap-fault-offset.patch
+Patch0689: 0534-nvme-tcp-fix-host-memory-disclosure-on-R2T-for-a-rea.patch
+Patch0690: 0535-RDMA-rxe-Fix-a-use-after-free-problem-in-rxe_mmap.patch
+Patch0691: 0536-net-lock-the-socket-in-sock_gettstamp.patch
+Patch0692: 0537-inet-reject-unhashed-sockets-during-established-look.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2517,6 +2530,18 @@ ApplyOptionalPatch 0522-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.pat
 ApplyOptionalPatch 0523-net-macvlan-fix-memory-leaks-of-macvlan_common_newli.patch
 ApplyOptionalPatch 0524-macvlan-fix-error-recovery-in-macvlan_common_newlink.patch
 ApplyOptionalPatch 0525-macvlan-observe-an-RCU-grace-period-in-macvlan_commo.patch
+ApplyOptionalPatch 0526-net-skbuff-propagate-shared-frag-marker-in-skb_zeroc.patch
+ApplyOptionalPatch 0527-net-sched-ets-Always-remove-class-from-active-list-b.patch
+ApplyOptionalPatch 0528-procfs-fix-missing-RCU-protection-when-reading-real_.patch
+ApplyOptionalPatch 0529-KVM-nVMX-Hide-shadow-VMCS-right-after-VMCLEAR.patch
+ApplyOptionalPatch 0530-ipvs-do-not-propagate-one-packet-flag-to-synced-conn.patch
+ApplyOptionalPatch 0531-libceph-Reject-monmaps-advertising-zero-monitors.patch
+ApplyOptionalPatch 0532-libceph-refresh-auth-authorizer_buf-_len-after-autho.patch
+ApplyOptionalPatch 0533-ALSA-usx2y-bound-the-hwdep-mmap-fault-offset.patch
+ApplyOptionalPatch 0534-nvme-tcp-fix-host-memory-disclosure-on-R2T-for-a-rea.patch
+ApplyOptionalPatch 0535-RDMA-rxe-Fix-a-use-after-free-problem-in-rxe_mmap.patch
+ApplyOptionalPatch 0536-net-lock-the-socket-in-sock_gettstamp.patch
+ApplyOptionalPatch 0537-inet-reject-unhashed-sockets-during-established-look.patch
 
 
 # CIQ LTS patches:
@@ -4076,6 +4101,20 @@ fi
 #
 #
 %changelog
+* Thu Nov 12 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+41.1.el8_6_ciq
+- inet: reject unhashed sockets during established lookups (Jonathan Maple) [ciqres] {CVE-2026-99288}
+- net: lock the socket in sock_gettstamp() (Brett Mastbergen) [ciqres] {CVE-2026-98276}
+- RDMA/rxe: Fix a use-after-free problem in rxe_mmap (Jori Koolstra) [ciqres] {CVE-2026-64582}
+- nvme-tcp: fix host memory disclosure on R2T for a read command (CIQ Kernel Automation) [ciqres] {CVE-2026-89481}
+- ALSA: usx2y: bound the hwdep mmap fault offset (CIQ Kernel Automation) [ciqres] {CVE-2026-74641}
+- libceph: refresh auth->authorizer_buf{,_len} after authorizer update (CIQ Kernel Automation) [ciqres] {CVE-2026-68156}
+- libceph: Reject monmaps advertising zero monitors (CIQ Kernel Automation) [ciqres] {CVE-2026-68155}
+- ipvs: do not propagate one-packet flag to synced conns (CIQ Kernel Automation) [ciqres] {CVE-2026-80714}
+- KVM: nVMX: Hide shadow VMCS right after VMCLEAR (CIQ Kernel Automation) [ciqres] {CVE-2026-64562}
+- procfs: fix missing RCU protection when reading real_parent in do_task_stat() (CIQ Kernel Automation) [ciqres] {CVE-2026-46259}
+- net/sched: ets: Always remove class from active list before deleting in ets_qdisc_change (CIQ Kernel Automation) [ciqres] {CVE-2025-71066}
+- net: skbuff: propagate shared-frag marker in skb_zerocopy() (Hailey Mothershead) [ciqres] {CVE-2026-99284}
+
 * Fri Oct 30 2026 Jonathan Maple <jmaple@ciq.com> - 4.18.0-372.32.1+40.1.el8_6_ciq
 - macvlan: observe an RCU grace period in macvlan_common_newlink() error path (Brett Mastbergen) [ciqres] {CVE-2026-23273}
 - macvlan: fix error recovery in macvlan_common_newlink() (Jonathan Maple) [ciqres] {CVE-2026-23209}
