@@ -1,0 +1,56 @@
+From 5034e4e78767b1dd41b2abf17599e95f861225f4 Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 2 Nov 2026 06:56:45 +0000
+Subject: [PATCH] vxlan: do not reuse cached ip_hdr() value after
+ skb_tunnel_check_pmtu()
+
+jira VULN-193417
+cve CVE-2026-63993
+commit-author Eric Dumazet <edumazet@google.com>
+commit 7d9ef0cb271555d8cf39fefe6c981e1493b25ecf
+
+skb_tunnel_check_pmtu() can change skb->head.
+
+Reusing old_iph afer skb_tunnel_check_pmtu() can cause an UAF.
+
+Use instead ip_hdr(skb) as done in drivers/net/bareudp.c
+and drivers/net/geneve.c.
+
+Found by Sashiko.
+
+Fixes: 4cb47a8644cc ("tunnels: PMTU discovery support for directly bridged IP packets")
+	Signed-off-by: Eric Dumazet <edumazet@google.com>
+	Reviewed-by: Stefano Brivio <sbrivio@redhat.com>
+Link: https://patch.msgid.link/20260525203642.2389723-1-edumazet@google.com
+	Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+(cherry picked from commit 7d9ef0cb271555d8cf39fefe6c981e1493b25ecf)
+Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ drivers/net/vxlan/vxlan_core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/vxlan/vxlan_core.c b/drivers/net/vxlan/vxlan_core.c
+index 8253ace97ee42..a30826c75a972 100644
+--- a/drivers/net/vxlan/vxlan_core.c
++++ b/drivers/net/vxlan/vxlan_core.c
+@@ -2560,7 +2560,7 @@ static void vxlan_xmit_one(struct sk_buff *skb, struct net_device *dev,
+ 			goto out_unlock;
+ 		}
+ 
+-		tos = ip_tunnel_ecn_encap(tos, old_iph, skb);
++		tos = ip_tunnel_ecn_encap(tos, ip_hdr(skb), skb);
+ 		ttl = ttl ? : ip4_dst_hoplimit(&rt->dst);
+ 		err = vxlan_build_skb(skb, ndst, sizeof(struct iphdr),
+ 				      vni, md, flags, udp_sum);
+@@ -2622,7 +2622,7 @@ static void vxlan_xmit_one(struct sk_buff *skb, struct net_device *dev,
+ 			goto out_unlock;
+ 		}
+ 
+-		tos = ip_tunnel_ecn_encap(tos, old_iph, skb);
++		tos = ip_tunnel_ecn_encap(tos, ip_hdr(skb), skb);
+ 		ttl = ttl ? : ip6_dst_hoplimit(ndst);
+ 		skb_scrub_packet(skb, xnet);
+ 		err = vxlan_build_skb(skb, ndst, sizeof(struct ipv6hdr),
+-- 
+2.52.0
+

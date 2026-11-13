@@ -3,7 +3,7 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
-%define ciq_patch_version 45
+%define ciq_patch_version 46
 %define ciq_build_id 1
 %define ciq_patch_build_str +%{ciq_patch_version}.%{ciq_build_id}
 %define ciq_dist_tag .el9_2_ciq
@@ -1728,6 +1728,43 @@ Patch1000761: 0716-nvmet-fix-heap-out-of-bounds-read-in-nvmet_auth_nego.patch
 Patch1000762: 0717-nvmet-auth-fix-out-of-bounds-write-in-nvmet_auth_cha.patch
 Patch1000763: 0718-net-sched-cls_api-Handle-TC_ACT_CONSUMED-in-tcf_qeve.patch
 Patch1000764: 0719-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
+#CIQ Patch Version: 284.30.1+46.1.el9_2_ciq
+Patch1000765: 0720-ata-ahci-Match-EM_MAX_SLOTS-with-SATA_PMP_MAX_PORTS.patch
+Patch1000766: 0721-scsi-qla2xxx-Clear-cmds-after-chip-reset.patch
+Patch1000767: 0722-netfilter-nfnetlink_cthelper-fix-OOB-read-in-nfnl_ct.patch
+Patch1000768: 0723-Bluetooth-MGMT-validate-LTK-enc_size-on-load.patch
+Patch1000769: 0724-scsi-target-configfs-Bound-snprintf-return-in-tg_pt_.patch
+Patch1000770: 0725-crypto-pcrypt-Fix-handling-of-MAY_BACKLOG-requests.patch
+Patch1000771: 0726-crypto-af_alg-Cap-AEAD-AD-length-to-0x80000000.patch
+Patch1000772: 0727-vxlan-do-not-reuse-cached-ip_hdr-value-after-skb_tun.patch
+Patch1000773: 0728-scsi-target-target_core_configfs-Add-length-check-to.patch
+Patch1000774: 0729-ipv6-validate-extension-header-length-before-copying.patch
+Patch1000775: 0730-mac802154-llsec-add-skb_cow_data-before-in-place-cry.patch
+Patch1000776: 0731-selinux-check-connect-related-permissions-on-TCP-Fas.patch
+Patch1000777: 0732-ALSA-usx2y-bound-the-hwdep-mmap-fault-offset.patch
+Patch1000778: 0733-scsi-qla2xxx-Bound-rsp_info_len-to-avoid-OOB-sense-d.patch
+Patch1000779: 0734-ipv6-fix-use-after-free-in-ip6_finish_output2.patch
+Patch1000780: 0735-net-skbuff-propagate-shared-frag-marker-in-skb_zeroc.patch
+Patch1000781: 0736-netfilter-nf_tables-always-walk-all-pending-catchall.patch
+Patch1000782: 0737-netfilter-nf_tables-release-flowtable-after-rcu-grac.patch
+Patch1000783: 0738-netfilter-nf_tables-fix-use-after-free-in-nf_tables_.patch
+Patch1000784: 0739-netfilter-ipset-drop-logically-empty-buckets-in-mtyp.patch
+Patch1000785: 0740-netfilter-xt_IDLETIMER-reject-rev0-reuse-of-ALARM-ti.patch
+Patch1000786: 0741-tls-fix-race-between-async-notify-and-socket-close.patch
+Patch1000787: 0742-netfilter-nf_tables-unconditionally-bump-set-nelems-.patch
+Patch1000788: 0743-ipv6-rpl-Fix-Route-of-Death.patch
+Patch1000789: 0744-ipv6-rpl-reserve-mac_len-headroom-when-recompressed-.patch
+Patch1000790: 0745-net-sched-ets-Always-remove-class-from-active-list-b.patch
+Patch1000791: 0746-procfs-fix-missing-RCU-protection-when-reading-real_.patch
+Patch1000792: 0747-dm-cache-policy-smq-fix-missing-locks-in-invalidatin.patch
+Patch1000793: 0748-dm-cache-policy-smq-check-allocation-under-invalidat.patch
+Patch1000794: 0749-HID-wacom-fix-out-of-bounds-read-in-wacom_intuos_bt_.patch
+Patch1000795: 0750-nvmet-tcp-check-INIT_FAILED-before-nvmet_req_uninit-.patch
+Patch1000796: 0751-netfilter-synproxy-refresh-tcphdr-after-skb_ensure_w.patch
+Patch1000797: 0752-ipv6-rpl-fix-hdrlen-overflow-in-ipv6_rpl_srh_decompr.patch
+Patch1000798: 0753-KVM-nVMX-Hide-shadow-VMCS-right-after-VMCLEAR.patch
+Patch1000799: 0754-net-lock-the-socket-in-sock_gettstamp.patch
+Patch1000800: 0755-inet-reject-unhashed-sockets-during-established-look.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3171,6 +3208,42 @@ ApplyOptionalPatch 0716-nvmet-fix-heap-out-of-bounds-read-in-nvmet_auth_nego.pat
 ApplyOptionalPatch 0717-nvmet-auth-fix-out-of-bounds-write-in-nvmet_auth_cha.patch
 ApplyOptionalPatch 0718-net-sched-cls_api-Handle-TC_ACT_CONSUMED-in-tcf_qeve.patch
 ApplyOptionalPatch 0719-ipv4-free-inet_opt-and-ireq_opt-after-an-RCU-grace-p.patch
+ApplyOptionalPatch 0720-ata-ahci-Match-EM_MAX_SLOTS-with-SATA_PMP_MAX_PORTS.patch
+ApplyOptionalPatch 0721-scsi-qla2xxx-Clear-cmds-after-chip-reset.patch
+ApplyOptionalPatch 0722-netfilter-nfnetlink_cthelper-fix-OOB-read-in-nfnl_ct.patch
+ApplyOptionalPatch 0723-Bluetooth-MGMT-validate-LTK-enc_size-on-load.patch
+ApplyOptionalPatch 0724-scsi-target-configfs-Bound-snprintf-return-in-tg_pt_.patch
+ApplyOptionalPatch 0725-crypto-pcrypt-Fix-handling-of-MAY_BACKLOG-requests.patch
+ApplyOptionalPatch 0726-crypto-af_alg-Cap-AEAD-AD-length-to-0x80000000.patch
+ApplyOptionalPatch 0727-vxlan-do-not-reuse-cached-ip_hdr-value-after-skb_tun.patch
+ApplyOptionalPatch 0728-scsi-target-target_core_configfs-Add-length-check-to.patch
+ApplyOptionalPatch 0729-ipv6-validate-extension-header-length-before-copying.patch
+ApplyOptionalPatch 0730-mac802154-llsec-add-skb_cow_data-before-in-place-cry.patch
+ApplyOptionalPatch 0731-selinux-check-connect-related-permissions-on-TCP-Fas.patch
+ApplyOptionalPatch 0732-ALSA-usx2y-bound-the-hwdep-mmap-fault-offset.patch
+ApplyOptionalPatch 0733-scsi-qla2xxx-Bound-rsp_info_len-to-avoid-OOB-sense-d.patch
+ApplyOptionalPatch 0734-ipv6-fix-use-after-free-in-ip6_finish_output2.patch
+ApplyOptionalPatch 0735-net-skbuff-propagate-shared-frag-marker-in-skb_zeroc.patch
+ApplyOptionalPatch 0736-netfilter-nf_tables-always-walk-all-pending-catchall.patch
+ApplyOptionalPatch 0737-netfilter-nf_tables-release-flowtable-after-rcu-grac.patch
+ApplyOptionalPatch 0738-netfilter-nf_tables-fix-use-after-free-in-nf_tables_.patch
+ApplyOptionalPatch 0739-netfilter-ipset-drop-logically-empty-buckets-in-mtyp.patch
+ApplyOptionalPatch 0740-netfilter-xt_IDLETIMER-reject-rev0-reuse-of-ALARM-ti.patch
+ApplyOptionalPatch 0741-tls-fix-race-between-async-notify-and-socket-close.patch
+ApplyOptionalPatch 0742-netfilter-nf_tables-unconditionally-bump-set-nelems-.patch
+ApplyOptionalPatch 0743-ipv6-rpl-Fix-Route-of-Death.patch
+ApplyOptionalPatch 0744-ipv6-rpl-reserve-mac_len-headroom-when-recompressed-.patch
+ApplyOptionalPatch 0745-net-sched-ets-Always-remove-class-from-active-list-b.patch
+ApplyOptionalPatch 0746-procfs-fix-missing-RCU-protection-when-reading-real_.patch
+ApplyOptionalPatch 0747-dm-cache-policy-smq-fix-missing-locks-in-invalidatin.patch
+ApplyOptionalPatch 0748-dm-cache-policy-smq-check-allocation-under-invalidat.patch
+ApplyOptionalPatch 0749-HID-wacom-fix-out-of-bounds-read-in-wacom_intuos_bt_.patch
+ApplyOptionalPatch 0750-nvmet-tcp-check-INIT_FAILED-before-nvmet_req_uninit-.patch
+ApplyOptionalPatch 0751-netfilter-synproxy-refresh-tcphdr-after-skb_ensure_w.patch
+ApplyOptionalPatch 0752-ipv6-rpl-fix-hdrlen-overflow-in-ipv6_rpl_srh_decompr.patch
+ApplyOptionalPatch 0753-KVM-nVMX-Hide-shadow-VMCS-right-after-VMCLEAR.patch
+ApplyOptionalPatch 0754-net-lock-the-socket-in-sock_gettstamp.patch
+ApplyOptionalPatch 0755-inet-reject-unhashed-sockets-during-established-look.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -5054,6 +5127,44 @@ fi
 #
 #
 %changelog
+* Thu Nov 12 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+46.1.el9_2_ciq
+- inet: reject unhashed sockets during established lookups (Jonathan Maple) [ciqres] {CVE-2026-99288}
+- net: lock the socket in sock_gettstamp() (Brett Mastbergen) [ciqres] {CVE-2026-98276}
+- KVM: nVMX: Hide shadow VMCS right after VMCLEAR (CIQ Kernel Automation) [ciqres] {CVE-2026-64562}
+- ipv6: rpl: fix hdrlen overflow in ipv6_rpl_srh_decompress() (CIQ Kernel Automation) [ciqres] {CVE-2026-63984}
+- netfilter: synproxy: refresh tcphdr after skb_ensure_writable (CIQ Kernel Automation) [ciqres] {CVE-2026-64007}
+- nvmet-tcp: check INIT_FAILED before nvmet_req_uninit in digest error path (CIQ Kernel Automation) [ciqres] {CVE-2026-64534}
+- HID: wacom: fix out-of-bounds read in wacom_intuos_bt_irq (CIQ Kernel Automation) [ciqres] {CVE-2026-43051}
+- dm cache policy smq: check allocation under invalidate lock (CIQ Kernel Automation) [ciqres] {CVE-2026-53265}
+- dm cache policy smq: fix missing locks in invalidating cache blocks (CIQ Kernel Automation) [ciqres] {CVE-2026-53062}
+- procfs: fix missing RCU protection when reading real_parent in do_task_stat() (CIQ Kernel Automation) [ciqres] {CVE-2026-46259}
+- net/sched: ets: Always remove class from active list before deleting in ets_qdisc_change (CIQ Kernel Automation) [ciqres] {CVE-2025-71066}
+- ipv6: rpl: reserve mac_len headroom when recompressed SRH grows (Hailey Mothershead) [ciqres] {CVE-2026-43501}
+- ipv6: rpl: Fix Route of Death. (Hailey Mothershead) [ciqres] {CVE-2023-2156}
+- netfilter: nf_tables: unconditionally bump set->nelems before insertion (Hailey Mothershead) [ciqres] {CVE-2026-23272}
+- tls: fix race between async notify and socket close (Hailey Mothershead) [ciqres] {CVE-2024-26583}
+- netfilter: xt_IDLETIMER: reject rev0 reuse of ALARM timer labels (Hailey Mothershead) [ciqres] {CVE-2026-23274}
+- netfilter: ipset: drop logically empty buckets in mtype_del (Hailey Mothershead) [ciqres] {CVE-2026-31418}
+- netfilter: nf_tables: fix use-after-free in nf_tables_addchain() (Hailey Mothershead) [ciqres] {CVE-2026-23231}
+- netfilter: nf_tables: release flowtable after rcu grace period on error (Hailey Mothershead) [ciqres] {CVE-2026-23392}
+- netfilter: nf_tables: always walk all pending catchall elements (Hailey Mothershead) [ciqres] {CVE-2026-23278}
+- net: skbuff: propagate shared-frag marker in skb_zerocopy() (Hailey Mothershead) [ciqres] {CVE-2026-99284}
+- ipv6: fix use-after-free in ip6_finish_output2() (CIQ Kernel Automation) [ciqres] {CVE-2026-80792}
+- scsi: qla2xxx: Bound rsp_info_len to avoid OOB sense-data read (CIQ Kernel Automation) [ciqres] {CVE-2026-89846}
+- ALSA: usx2y: bound the hwdep mmap fault offset (CIQ Kernel Automation) [ciqres] {CVE-2026-74641}
+- selinux: check connect-related permissions on TCP Fast Open (CIQ Kernel Automation) [ciqres] {CVE-2026-72243}
+- mac802154: llsec: add skb_cow_data() before in-place crypto (CIQ Kernel Automation) [ciqres] {CVE-2026-63831}
+- ipv6: validate extension header length before copying to cmsg (CIQ Kernel Automation) [ciqres] {CVE-2026-63920}
+- scsi: target: target_core_configfs: Add length check to avoid buffer overflow (Hailey Mothershead) [ciqres] {CVE-2025-39998}
+- vxlan: do not reuse cached ip_hdr() value after skb_tunnel_check_pmtu() (CIQ Kernel Automation) [ciqres] {CVE-2026-63993}
+- crypto: af_alg - Cap AEAD AD length to 0x80000000 (CIQ Kernel Automation) [ciqres] {CVE-2026-52972}
+- crypto: pcrypt - Fix handling of MAY_BACKLOG requests (CIQ Kernel Automation) [ciqres] {CVE-2026-43493}
+- scsi: target: configfs: Bound snprintf() return in tg_pt_gp_members_show() (CIQ Kernel Automation) [ciqres] {CVE-2026-46149}
+- Bluetooth: MGMT: validate LTK enc_size on load (CIQ Kernel Automation) [ciqres] {CVE-2026-43020}
+- netfilter: nfnetlink_cthelper: fix OOB read in nfnl_cthelper_dump_table() (CIQ Kernel Automation) [ciqres] {CVE-2026-43450}
+- scsi: qla2xxx: Clear cmds after chip reset (CIQ Kernel Automation) [ciqres] {CVE-2025-68745}
+- ata: ahci: Match EM_MAX_SLOTS with SATA_PMP_MAX_PORTS (CIQ Kernel Automation) [ciqres] {CVE-2022-50315}
+
 * Fri Oct 30 2026 Jonathan Maple <jmaple@ciq.com> - 5.14.0-284.30.1+45.1.el9_2_ciq
 - ipv4: free inet_opt and ireq_opt after an RCU grace period (Brett Mastbergen) [ciqres] {CVE-2026-98432}
 - net/sched: cls_api: Handle TC_ACT_CONSUMED in tcf_qevent_handle (Brett Mastbergen) [ciqres] {CVE-2026-64530}

@@ -1,0 +1,38 @@
+From 1405235bbba8555a142f4796d42d2a5f8abf2d7b Mon Sep 17 00:00:00 2001
+From: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+Date: Mon, 2 Nov 2026 06:54:53 +0000
+Subject: [PATCH] crypto: af_alg - Cap AEAD AD length to 0x80000000
+
+jira VULN-189978
+cve CVE-2026-52972
+commit-author Herbert Xu <herbert@gondor.apana.org.au>
+commit e4c06479d7059888adf2f22bc1ebcf053bf691a2
+
+In order to prevent arithmetic overflows when checking the TX
+buffer size, cap the associated data length to 0x80000000.
+
+	Reported-by: Yiming Qian <yimingqian591@gmail.com>
+Fixes: 400c40cf78da ("crypto: algif - add AEAD support")
+	Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+(cherry picked from commit e4c06479d7059888adf2f22bc1ebcf053bf691a2)
+Signed-off-by: CIQ Kernel Automation <ciq_kernel_automation@ciq.com>
+---
+ crypto/af_alg.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/crypto/af_alg.c b/crypto/af_alg.c
+index 41a180cdce121..a92a92d8b34a3 100644
+--- a/crypto/af_alg.c
++++ b/crypto/af_alg.c
+@@ -475,6 +475,8 @@ static int af_alg_cmsg_send(struct msghdr *msg, struct af_alg_control *con)
+ 			if (cmsg->cmsg_len < CMSG_LEN(sizeof(u32)))
+ 				return -EINVAL;
+ 			con->aead_assoclen = *(u32 *)CMSG_DATA(cmsg);
++			if (con->aead_assoclen >= 0x80000000u)
++				return -EINVAL;
+ 			break;
+ 
+ 		default:
+-- 
+2.52.0
+
